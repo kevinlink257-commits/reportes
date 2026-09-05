@@ -71,6 +71,24 @@
         .btn-ahora:hover {
             background-color: #e67e22;
         }
+        .btn-guardar {
+            background-color: #1abc9c;
+        }
+        .btn-guardar:hover {
+            background-color: #16a085;
+        }
+        .btn-reiniciar {
+            background-color: #e67e22;
+        }
+        .btn-reiniciar:hover {
+            background-color: #d35400;
+        }
+        .btn-eliminar {
+            background-color: #e74c3c;
+        }
+        .btn-eliminar:hover {
+            background-color: #c0392b;
+        }
         .result-box {
             background: #e8f8f5;
             border-left: 4px solid #1abc9c;
@@ -157,6 +175,28 @@
         .intervalo span {
             color: #e74c3c;
         }
+        .informe-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .btn-group button {
+            flex: 1;
+            min-width: 100px;
+        }
+        @media (max-width: 600px) {
+            .informe-grid {
+                grid-template-columns: 1fr;
+            }
+            .btn-group button {
+                min-width: 80px;
+            }
+        }
 
         @media print {
             body { background: white; padding: 0; }
@@ -201,16 +241,23 @@
         </div>
         <label>Estado del paquete:</label>
         <select id="estadoPaquete">
+            <option value="">-- Seleccione un estado --</option>
             <option value="Entregado">Entregado</option>
             <option value="Rechazado">Rechazado</option>
             <option value="Dirección Errónea">Dirección errónea</option>
             <option value="Coordinado con Cliente">Coordinado con el Cliente</option>
             <option value="No está en casa">No está en casa</option>
             <option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
+            <option value="No lo conocen">No lo conocen</option>
+            <option value="Programo para otro día">Programo para otro día</option>
+            <option value="Dejar en oficina principal">Dejar en oficina principal</option>
+            <option value="Pertenece a otra ciudad">Pertenece a otra ciudad</option>
+            <option value="Cerrado local comercial">Cerrado local comercial</option>
         </select>
         <button onclick="registrarVisita()" style="background-color: #2c3e50;">📋 Guardar Visita (manual)</button>
         <p style="font-size:0.85rem; color:#555; margin-top:10px;">
-            💡 Usa <strong>"Llegada ahora"</strong> al llegar al cliente y <strong>"Salida y Registrar"</strong> al irte (se guardará automáticamente).
+            💡 Usa <strong>"Llegada ahora"</strong> al llegar al cliente y <strong>"Salida y Registrar"</strong> al irte (se guardará automáticamente).<br>
+            ⚠️ Debes seleccionar un estado antes de registrar.
         </p>
     </div>
 
@@ -234,8 +281,23 @@
         <button class="no-print btn-imprimir" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
     </div>
 
+    <!-- Sección de control de sesión -->
+    <div class="section no-print">
+        <h2>5. Control de Sesión</h2>
+        <div class="btn-group">
+            <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
+            <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
+            <button class="btn-eliminar" onclick="reiniciarTodo()">🗑️ Reiniciar Todo</button>
+        </div>
+        <p style="font-size:0.85rem; color:#555; margin-top:10px;">
+            💾 Guardar Día: guarda el resumen del día en el historial (sin borrar la sesión actual).<br>
+            🔄 Reiniciar Día: guarda el día actual y comienza una nueva jornada en blanco.<br>
+            🗑️ Reiniciar Todo: elimina TODOS los datos (incluyendo historial) y reinicia la página.
+        </p>
+    </div>
+
     <div class="section">
-        <h2>5. Promedios Históricos de Entregas</h2>
+        <h2>6. Promedios Históricos de Entregas</h2>
         <div class="promedio-card">
             <div>📅 Promedio Diario<br><span id="prom-dia">0</span></div>
             <div>📆 Promedio Semanal<br><span id="prom-semana">0</span></div>
@@ -244,6 +306,23 @@
         <canvas id="graficaPromedios"></canvas>
         <p style="font-size:0.85rem; color:#666; text-align:center; margin-top:5px;">
             Basado en datos guardados automáticamente de días anteriores.
+        </p>
+    </div>
+
+    <div class="section">
+        <h2>7. Informes Semanales y Mensuales</h2>
+        <div class="informe-grid">
+            <div>
+                <h3>Entregas por Semana</h3>
+                <canvas id="graficaSemana"></canvas>
+            </div>
+            <div>
+                <h3>Entregas por Mes</h3>
+                <canvas id="graficaMes"></canvas>
+            </div>
+        </div>
+        <p style="font-size:0.85rem; color:#666; text-align:center; margin-top:5px;">
+            Muestra el total de paquetes entregados por semana y por mes, basado en el historial completo.
         </p>
     </div>
 </div>
@@ -256,14 +335,21 @@
         'Dirección Errónea': 0,
         'Coordinado con Cliente': 0,
         'No está en casa': 0,
-        'Pasa después (Sin dinero)': 0
+        'Pasa después (Sin dinero)': 0,
+        'No lo conocen': 0,
+        'Programo para otro día': 0,
+        'Dejar en oficina principal': 0,
+        'Pertenece a otra ciudad': 0,
+        'Cerrado local comercial': 0
     };
     let totalMinutosVisitas = 0;
     let totalVisitas = 0;
     let numeroVisita = 1;
-    let visitas = []; // Array para guardar todas las visitas
+    let visitas = [];
     let miGrafico = null;
     let miGraficoPromedios = null;
+    let miGraficoSemana = null;
+    let miGraficoMes = null;
 
     // ==================== FUNCIONES AUXILIARES ====================
     function horaActual() {
@@ -301,6 +387,8 @@
             numeroVisita: numeroVisita
         };
         localStorage.setItem('estadoSesion', JSON.stringify(estado));
+        // También guardar el día actual en el historial (resumen diario)
+        guardarDiaActual();
     }
 
     function cargarEstadoCompleto() {
@@ -340,6 +428,25 @@
         }
     }
 
+    // ==================== GUARDAR DÍA ACTUAL (histórico detallado) ====================
+    function guardarDiaActual() {
+        const fecha = new Date().toISOString().split('T')[0];
+        let historial = JSON.parse(localStorage.getItem('entregasDiariasDetallado')) || {};
+        // Guardamos una copia de los contadores y el total de visitas
+        historial[fecha] = {
+            contadores: {...contadores},
+            totalVisitas: totalVisitas,
+            totalMinutos: totalMinutosVisitas
+        };
+        localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historial));
+    }
+
+    function cargarHistorialDetallado() {
+        const raw = localStorage.getItem('entregasDiariasDetallado');
+        if (!raw) return {};
+        try { return JSON.parse(raw); } catch { return {}; }
+    }
+
     // ==================== RESTAURAR SESIÓN ====================
     function restaurarSesion() {
         if (cargarEstadoCompleto()) {
@@ -364,53 +471,41 @@
             }
         }
         cargarTiemposBase();
-    }
-
-    // ==================== GUARDAR DÍA ACTUAL (histórico) ====================
-    function guardarDiaActual() {
-        const fecha = new Date().toISOString().split('T')[0];
-        let historial = JSON.parse(localStorage.getItem('entregasDiarias')) || {};
-        historial[fecha] = {
-            entregas: contadores['Entregado'],
-            totalVisitas: totalVisitas
-        };
-        localStorage.setItem('entregasDiarias', JSON.stringify(historial));
-    }
-
-    function cargarHistorial() {
-        const raw = localStorage.getItem('entregasDiarias');
-        if (!raw) return {};
-        try { return JSON.parse(raw); } catch { return {}; }
+        actualizarInformesSemanalesMensuales();
     }
 
     // ==================== CÁLCULO DE PROMEDIOS ====================
     function calcularPromedios() {
-        const historial = cargarHistorial();
+        const historial = cargarHistorialDetallado();
         const fechas = Object.keys(historial).sort();
         if (fechas.length === 0) {
             return { promedioDia: 0, promedioSemana: 0, promedioMes: 0 };
         }
         let totalEntregas = 0;
-        for (let f of fechas) totalEntregas += historial[f].entregas;
+        for (let f of fechas) {
+            totalEntregas += historial[f].contadores['Entregado'] || 0;
+        }
         const promedioDia = totalEntregas / fechas.length;
 
+        // Agrupar por semana
         const semanas = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
             const semanaKey = fecha.getFullYear() + '-' + String(getWeekNumber(fecha)).padStart(2, '0');
             if (!semanas[semanaKey]) semanas[semanaKey] = 0;
-            semanas[semanaKey] += historial[f].entregas;
+            semanas[semanaKey] += historial[f].contadores['Entregado'] || 0;
         }
         const numSemanas = Object.keys(semanas).length;
         const totalSemana = Object.values(semanas).reduce((a, b) => a + b, 0);
         const promedioSemana = numSemanas > 0 ? totalSemana / numSemanas : 0;
 
+        // Agrupar por mes
         const meses = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
             const mesKey = fecha.getFullYear() + '-' + String(fecha.getMonth() + 1).padStart(2, '0');
             if (!meses[mesKey]) meses[mesKey] = 0;
-            meses[mesKey] += historial[f].entregas;
+            meses[mesKey] += historial[f].contadores['Entregado'] || 0;
         }
         const numMeses = Object.keys(meses).length;
         const totalMes = Object.values(meses).reduce((a, b) => a + b, 0);
@@ -447,9 +542,97 @@
         });
     }
 
+    // ==================== INFORMES SEMANALES Y MENSUALES ====================
+    function actualizarInformesSemanalesMensuales() {
+        const historial = cargarHistorialDetallado();
+        const fechas = Object.keys(historial).sort();
+        if (fechas.length === 0) {
+            // No hay datos, mostrar gráficos vacíos
+            const ctxSemana = document.getElementById('graficaSemana').getContext('2d');
+            if (miGraficoSemana) miGraficoSemana.destroy();
+            miGraficoSemana = new Chart(ctxSemana, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Entregas', data: [] }] },
+                options: { responsive: true }
+            });
+            const ctxMes = document.getElementById('graficaMes').getContext('2d');
+            if (miGraficoMes) miGraficoMes.destroy();
+            miGraficoMes = new Chart(ctxMes, {
+                type: 'bar',
+                data: { labels: [], datasets: [{ label: 'Entregas', data: [] }] },
+                options: { responsive: true }
+            });
+            return;
+        }
+
+        // Agrupar por semana
+        const semanas = {};
+        for (let f of fechas) {
+            const fecha = new Date(f + 'T00:00:00');
+            const semanaKey = fecha.getFullYear() + ' - Sem ' + String(getWeekNumber(fecha)).padStart(2, '0');
+            if (!semanas[semanaKey]) semanas[semanaKey] = 0;
+            semanas[semanaKey] += historial[f].contadores['Entregado'] || 0;
+        }
+        const labelsSemana = Object.keys(semanas);
+        const dataSemana = labelsSemana.map(k => semanas[k]);
+
+        // Agrupar por mes
+        const meses = {};
+        for (let f of fechas) {
+            const fecha = new Date(f + 'T00:00:00');
+            const mesLabel = fecha.toLocaleString('es', { month: 'long', year: 'numeric' });
+            if (!meses[mesLabel]) meses[mesLabel] = 0;
+            meses[mesLabel] += historial[f].contadores['Entregado'] || 0;
+        }
+        const labelsMes = Object.keys(meses);
+        const dataMes = labelsMes.map(k => meses[k]);
+
+        // Gráfica Semana
+        const ctxSemana = document.getElementById('graficaSemana').getContext('2d');
+        if (miGraficoSemana) miGraficoSemana.destroy();
+        miGraficoSemana = new Chart(ctxSemana, {
+            type: 'bar',
+            data: {
+                labels: labelsSemana,
+                datasets: [{
+                    label: 'Entregas por Semana',
+                    data: dataSemana,
+                    backgroundColor: '#3498db',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Gráfica Mes
+        const ctxMes = document.getElementById('graficaMes').getContext('2d');
+        if (miGraficoMes) miGraficoMes.destroy();
+        miGraficoMes = new Chart(ctxMes, {
+            type: 'bar',
+            data: {
+                labels: labelsMes,
+                datasets: [{
+                    label: 'Entregas por Mes',
+                    data: dataMes,
+                    backgroundColor: '#2ecc71',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    }
+
     // ==================== DASHBOARD DEL DÍA ====================
     function actualizarDashboard() {
-        let entregados = contadores['Entregado'];
+        let entregados = contadores['Entregado'] || 0;
         let noEntregados = totalVisitas - entregados;
         let promedio = Math.round(totalMinutosVisitas / totalVisitas) || 0;
         document.getElementById('c-entregados').innerText = entregados;
@@ -457,9 +640,9 @@
         document.getElementById('c-total').innerText = totalVisitas;
         document.getElementById('c-promedio').innerText = promedio + ' min';
         renderizarGrafica();
-        guardarDiaActual();
+        guardarEstadoCompleto();
         actualizarGraficaPromedios();
-        guardarEstadoCompleto(); // Guardar sesión cada vez que se actualiza
+        actualizarInformesSemanalesMensuales();
     }
 
     function renderizarGrafica() {
@@ -474,13 +657,14 @@
                 datasets: [{
                     label: 'Cantidad de Paquetes',
                     data: data,
-                    backgroundColor: ['#2ecc71', '#e74c3c', '#e67e22', '#3498db', '#95a5a6', '#f1c40f'],
+                    backgroundColor: ['#2ecc71', '#e74c3c', '#e67e22', '#3498db', '#95a5a6', '#f1c40f', '#9b59b6', '#1abc9c', '#e84393', '#00b894', '#fdcb6e'],
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
-                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
+                scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } },
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -523,6 +707,11 @@
             alert("Primero debes marcar la llegada ('Llegada ahora').");
             return;
         }
+        const estado = document.getElementById('estadoPaquete').value;
+        if (!estado) {
+            alert("Debes seleccionar un estado del paquete antes de registrar.");
+            return;
+        }
         document.getElementById('salidaCliente').value = horaActual();
         registrarVisita();
     }
@@ -535,12 +724,19 @@
             alert("Por favor ingresa la hora de llegada y salida (o usa los botones rápidos).");
             return;
         }
+        if (!estado) {
+            alert("Debes seleccionar un estado del paquete.");
+            return;
+        }
         let tiempoVisita = calcularMinutos(llegada, salida);
         totalMinutosVisitas += tiempoVisita;
         totalVisitas++;
-        contadores[estado]++;
+        if (contadores[estado] !== undefined) {
+            contadores[estado]++;
+        } else {
+            contadores[estado] = 1;
+        }
 
-        // Guardar en el array de visitas
         visitas.push({ llegada, salida, tiempo: tiempoVisita, estado });
 
         document.getElementById('seccionHistorial').style.display = 'block';
@@ -560,19 +756,90 @@
         document.getElementById('salidaCliente').value = '';
     }
 
+    // ==================== BOTONES DE CONTROL DE SESIÓN ====================
+    function guardarDia() {
+        guardarDiaActual();
+        alert("✅ Día guardado en el historial correctamente.");
+        actualizarGraficaPromedios();
+        actualizarInformesSemanalesMensuales();
+    }
+
+    function reiniciarDia() {
+        if (!confirm("⚠️ ¿Estás seguro de que quieres reiniciar el día?\nSe guardará el resumen actual en el historial y se empezará un nuevo día en blanco.")) {
+            return;
+        }
+        // Guardar el día actual antes de limpiar
+        guardarDiaActual();
+
+        // Limpiar estado actual
+        contadores = {
+            'Entregado': 0,
+            'Rechazado': 0,
+            'Dirección Errónea': 0,
+            'Coordinado con Cliente': 0,
+            'No está en casa': 0,
+            'Pasa después (Sin dinero)': 0,
+            'No lo conocen': 0,
+            'Programo para otro día': 0,
+            'Dejar en oficina principal': 0,
+            'Pertenece a otra ciudad': 0,
+            'Cerrado local comercial': 0
+        };
+        totalMinutosVisitas = 0;
+        totalVisitas = 0;
+        numeroVisita = 1;
+        visitas = [];
+
+        // Limpiar tabla
+        document.getElementById('cuerpoTabla').innerHTML = '';
+        document.getElementById('seccionHistorial').style.display = 'none';
+
+        // Limpiar tiempos base (opcional)
+        const ids = ['inicioCarga', 'finCarga', 'salidaEmpresa', 'primeraEntrega'];
+        ids.forEach(id => {
+            document.getElementById(id).value = '';
+            localStorage.removeItem('tiempoBase_' + id);
+        });
+        document.getElementById('resumenTiempos').style.display = 'none';
+
+        // Eliminar estado de sesión
+        localStorage.removeItem('estadoSesion');
+
+        // Actualizar dashboard y gráficos
+        actualizarDashboard();
+        // Los gráficos de promedios e informes se actualizan dentro de actualizarDashboard()
+        alert("✅ Día reiniciado. Comienza una nueva jornada.");
+    }
+
+    function reiniciarTodo() {
+        if (!confirm("⚠️⚠️⚠️ ¿Estás seguro de que quieres ELIMINAR TODOS LOS DATOS?\nEsta acción borrará todo el historial, las visitas actuales y los tiempos base. ¡No se puede deshacer!")) {
+            return;
+        }
+        // Eliminar todas las claves de localStorage relacionadas
+        const keys = ['estadoSesion', 'entregasDiariasDetallado'];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && (key.startsWith('tiempoBase_') || keys.includes(key))) {
+                localStorage.removeItem(key);
+            }
+        }
+        // Recargar la página para reiniciar completamente
+        location.reload();
+    }
+
     // ==================== INICIALIZACIÓN ====================
     window.onload = function() {
-        // Restaurar tiempos base
         cargarTiemposBase();
-        // Restaurar sesión (visitas)
         restaurarSesion();
-        // Asegurar que los campos de tiempo base guarden automáticamente al cambiar
         const ids = ['inicioCarga', 'finCarga', 'salidaEmpresa', 'primeraEntrega'];
         ids.forEach(id => {
             document.getElementById(id).addEventListener('change', guardarTiemposBase);
         });
-        // Actualizar gráficas siempre
         actualizarGraficaPromedios();
+        actualizarInformesSemanalesMensuales();
+        if (visitas.length === 0) {
+            renderizarGrafica();
+        }
     };
 </script>
 </body>
