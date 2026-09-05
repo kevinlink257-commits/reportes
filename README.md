@@ -2,7 +2,7 @@
 
 Aplicación web progresiva para el registro y seguimiento de entregas diarias de paquetes. Permite capturar tiempos de ruta, estados de cada visita, visualizar estadísticas del día y promedios históricos, todo almacenado localmente en el navegador.
 
-[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-blue)](https://github.com/kevinlink257-commits/reportes.git)
+[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-blue)](https://kevinlink257-commits.github.io/reportes/)
 _Reemplaza el enlace con la URL de tu GitHub Pages._
 
 ---
