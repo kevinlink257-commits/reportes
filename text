@@ -1,0 +1,41 @@
+No se requieren dependencias adicionales (Chart.js se carga desde CDN).
+
+---
+
+## 📊 Ejemplo de uso
+
+| Estado | Cantidad |
+|--------------------|----------|
+| Entregado | 12 |
+| Rechazado | 2 |
+| Dirección errónea | 1 |
+| Coordinado | 3 |
+| No está en casa | 4 |
+| Pasa después | 1 |
+
+**Promedios históricos** (con 5 días registrados):
+- Promedio diario: 10.4 entregas
+- Promedio semanal: 52.0 entregas
+- Promedio mensual: 208.0 entregas
+
+---
+
+## 🤝 Contribuciones
+
+Si deseas mejorar la aplicación, siéntete libre de hacer un fork y enviar un pull request. Reporta problemas o sugerencias en la sección de [Issues](https://github.com/tusuario/reporte-entregas/issues).
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia **MIT**. Puedes usarlo, modificarlo y distribuirlo libremente.
+
+---
+
+## ✨ Autor
+
+Desarrollado por kevin Fabián Obeso monsalve (https://github.com/tusuario) – para la empresa Colserlog.
+
+---
+
+_¡Simplifica tu registro de entregas y obtén estadísticas valiosas con esta herramienta!_ 🚚📈
