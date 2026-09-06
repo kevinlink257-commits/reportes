@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Reporte de Entregas - Colserlog</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
+        /* Estilos previos... */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f7f6;
@@ -88,6 +90,15 @@
         }
         .btn-eliminar:hover {
             background-color: #c0392b;
+        }
+        .btn-escaneo {
+            background-color: #8e44ad;
+            margin-top: 0;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+        .btn-escaneo:hover {
+            background-color: #732d91;
         }
         .result-box {
             background: #e8f8f5;
@@ -189,6 +200,15 @@
             flex: 1;
             min-width: 100px;
         }
+        #lectorQR {
+            width: 100%;
+            max-width: 300px;
+            margin: 10px auto;
+            display: none;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            overflow: hidden;
+        }
         @media (max-width: 600px) {
             .informe-grid {
                 grid-template-columns: 1fr;
@@ -239,6 +259,12 @@
             <input type="time" id="salidaCliente" placeholder="HH:MM">
             <button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button>
         </div>
+        <label>Código de barras:</label>
+        <div class="input-group">
+            <input type="text" id="codigoBarras" placeholder="Código (opcional)">
+            <button class="btn-escaneo" onclick="iniciarEscaneo()">📷 Escanear</button>
+        </div>
+        <div id="lectorQR"></div>
         <label>Estado del paquete:</label>
         <select id="estadoPaquete">
             <option value="">-- Seleccione un estado --</option>
@@ -264,7 +290,7 @@
     <div class="section" id="seccionHistorial" style="display: none;">
         <h2>3. Detalle de Visitas</h2>
         <table>
-            <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Estado</th></tr></thead>
+            <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th></tr></thead>
             <tbody id="cuerpoTabla"></tbody>
         </table>
     </div>
@@ -350,6 +376,7 @@
     let miGraficoPromedios = null;
     let miGraficoSemana = null;
     let miGraficoMes = null;
+    let html5QrCode = null;
 
     // ==================== FUNCIONES AUXILIARES ====================
     function horaActual() {
@@ -387,7 +414,6 @@
             numeroVisita: numeroVisita
         };
         localStorage.setItem('estadoSesion', JSON.stringify(estado));
-        // También guardar el día actual en el historial (resumen diario)
         guardarDiaActual();
     }
 
@@ -421,18 +447,16 @@
             const valor = localStorage.getItem('tiempoBase_' + id);
             if (valor) document.getElementById(id).value = valor;
         });
-        // Si todos los campos tienen valor, mostrar resumen
         const todos = ids.every(id => document.getElementById(id).value !== '');
         if (todos) {
             calcularTiemposBase();
         }
     }
 
-    // ==================== GUARDAR DÍA ACTUAL (histórico detallado) ====================
+    // ==================== GUARDAR DÍA ACTUAL ====================
     function guardarDiaActual() {
         const fecha = new Date().toISOString().split('T')[0];
         let historial = JSON.parse(localStorage.getItem('entregasDiariasDetallado')) || {};
-        // Guardamos una copia de los contadores y el total de visitas
         historial[fecha] = {
             contadores: {...contadores},
             totalVisitas: totalVisitas,
@@ -450,7 +474,6 @@
     // ==================== RESTAURAR SESIÓN ====================
     function restaurarSesion() {
         if (cargarEstadoCompleto()) {
-            // Reconstruir la tabla
             if (visitas.length > 0) {
                 document.getElementById('seccionHistorial').style.display = 'block';
                 const tabla = document.getElementById('cuerpoTabla');
@@ -462,6 +485,7 @@
                         <td>${v.llegada}</td>
                         <td>${v.salida}</td>
                         <td><strong>${v.tiempo} min</strong></td>
+                        <td>${v.codigo || ''}</td>
                         <td>${v.estado}</td>
                     </tr>`;
                     tabla.innerHTML += fila;
@@ -487,7 +511,6 @@
         }
         const promedioDia = totalEntregas / fechas.length;
 
-        // Agrupar por semana
         const semanas = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
@@ -499,7 +522,6 @@
         const totalSemana = Object.values(semanas).reduce((a, b) => a + b, 0);
         const promedioSemana = numSemanas > 0 ? totalSemana / numSemanas : 0;
 
-        // Agrupar por mes
         const meses = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
@@ -547,7 +569,6 @@
         const historial = cargarHistorialDetallado();
         const fechas = Object.keys(historial).sort();
         if (fechas.length === 0) {
-            // No hay datos, mostrar gráficos vacíos
             const ctxSemana = document.getElementById('graficaSemana').getContext('2d');
             if (miGraficoSemana) miGraficoSemana.destroy();
             miGraficoSemana = new Chart(ctxSemana, {
@@ -565,7 +586,6 @@
             return;
         }
 
-        // Agrupar por semana
         const semanas = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
@@ -576,7 +596,6 @@
         const labelsSemana = Object.keys(semanas);
         const dataSemana = labelsSemana.map(k => semanas[k]);
 
-        // Agrupar por mes
         const meses = {};
         for (let f of fechas) {
             const fecha = new Date(f + 'T00:00:00');
@@ -587,7 +606,6 @@
         const labelsMes = Object.keys(meses);
         const dataMes = labelsMes.map(k => meses[k]);
 
-        // Gráfica Semana
         const ctxSemana = document.getElementById('graficaSemana').getContext('2d');
         if (miGraficoSemana) miGraficoSemana.destroy();
         miGraficoSemana = new Chart(ctxSemana, {
@@ -608,7 +626,6 @@
             }
         });
 
-        // Gráfica Mes
         const ctxMes = document.getElementById('graficaMes').getContext('2d');
         if (miGraficoMes) miGraficoMes.destroy();
         miGraficoMes = new Chart(ctxMes, {
@@ -696,6 +713,52 @@
         guardarTiemposBase();
     }
 
+    // ==================== ESCÁNER DE CÓDIGO DE BARRAS ====================
+    function iniciarEscaneo() {
+        const lectorDiv = document.getElementById('lectorQR');
+        lectorDiv.style.display = 'block';
+        
+        if (html5QrCode) {
+            html5QrCode.clear();
+            html5QrCode = null;
+        }
+
+        html5QrCode = new Html5Qrcode("lectorQR");
+        const config = {
+            fps: 10,
+            qrbox: { width: 250, height: 150 },
+            formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13, 
+                               Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_39]
+        };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => {
+            console.log("Error al iniciar cámara:", err);
+            alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+            lectorDiv.style.display = 'none';
+        });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        document.getElementById('codigoBarras').value = decodedText;
+        // Detener la cámara después de escanear
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById('lectorQR').style.display = 'none';
+                html5QrCode.clear();
+                html5QrCode = null;
+            }).catch(err => console.log("Error al detener cámara:", err));
+        }
+    }
+
+    function onScanFailure(error) {
+        // No hacemos nada, solo seguimos intentando
+    }
+
     // ==================== REGISTRO RÁPIDO ====================
     function marcarLlegada() {
         document.getElementById('llegadaCliente').value = horaActual();
@@ -720,6 +783,8 @@
         let llegada = document.getElementById('llegadaCliente').value;
         let salida = document.getElementById('salidaCliente').value;
         let estado = document.getElementById('estadoPaquete').value;
+        let codigo = document.getElementById('codigoBarras').value.trim();
+
         if (!llegada || !salida) {
             alert("Por favor ingresa la hora de llegada y salida (o usa los botones rápidos).");
             return;
@@ -728,6 +793,7 @@
             alert("Debes seleccionar un estado del paquete.");
             return;
         }
+
         let tiempoVisita = calcularMinutos(llegada, salida);
         totalMinutosVisitas += tiempoVisita;
         totalVisitas++;
@@ -737,7 +803,8 @@
             contadores[estado] = 1;
         }
 
-        visitas.push({ llegada, salida, tiempo: tiempoVisita, estado });
+        // Guardar la visita con código
+        visitas.push({ llegada, salida, tiempo: tiempoVisita, estado, codigo });
 
         document.getElementById('seccionHistorial').style.display = 'block';
         let tabla = document.getElementById('cuerpoTabla');
@@ -746,17 +813,30 @@
             <td>${llegada}</td>
             <td>${salida}</td>
             <td><strong>${tiempoVisita} min</strong></td>
+            <td>${codigo || ''}</td>
             <td>${estado}</td>
         </tr>`;
         tabla.innerHTML += fila;
         numeroVisita++;
 
         actualizarDashboard();
+
+        // Limpiar campos y resetear estado a la opción por defecto
         document.getElementById('llegadaCliente').value = '';
         document.getElementById('salidaCliente').value = '';
+        document.getElementById('codigoBarras').value = '';
+        document.getElementById('estadoPaquete').selectedIndex = 0; // Vuelve a "Seleccione un estado"
+        // Si hay cámara activa, detenerla
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById('lectorQR').style.display = 'none';
+                html5QrCode.clear();
+                html5QrCode = null;
+            }).catch(err => console.log(err));
+        }
     }
 
-    // ==================== BOTONES DE CONTROL DE SESIÓN ====================
+    // ==================== BOTONES DE CONTROL ====================
     function guardarDia() {
         guardarDiaActual();
         alert("✅ Día guardado en el historial correctamente.");
@@ -768,10 +848,8 @@
         if (!confirm("⚠️ ¿Estás seguro de que quieres reiniciar el día?\nSe guardará el resumen actual en el historial y se empezará un nuevo día en blanco.")) {
             return;
         }
-        // Guardar el día actual antes de limpiar
         guardarDiaActual();
 
-        // Limpiar estado actual
         contadores = {
             'Entregado': 0,
             'Rechazado': 0,
@@ -790,11 +868,9 @@
         numeroVisita = 1;
         visitas = [];
 
-        // Limpiar tabla
         document.getElementById('cuerpoTabla').innerHTML = '';
         document.getElementById('seccionHistorial').style.display = 'none';
 
-        // Limpiar tiempos base (opcional)
         const ids = ['inicioCarga', 'finCarga', 'salidaEmpresa', 'primeraEntrega'];
         ids.forEach(id => {
             document.getElementById(id).value = '';
@@ -802,12 +878,8 @@
         });
         document.getElementById('resumenTiempos').style.display = 'none';
 
-        // Eliminar estado de sesión
         localStorage.removeItem('estadoSesion');
-
-        // Actualizar dashboard y gráficos
         actualizarDashboard();
-        // Los gráficos de promedios e informes se actualizan dentro de actualizarDashboard()
         alert("✅ Día reiniciado. Comienza una nueva jornada.");
     }
 
@@ -815,7 +887,6 @@
         if (!confirm("⚠️⚠️⚠️ ¿Estás seguro de que quieres ELIMINAR TODOS LOS DATOS?\nEsta acción borrará todo el historial, las visitas actuales y los tiempos base. ¡No se puede deshacer!")) {
             return;
         }
-        // Eliminar todas las claves de localStorage relacionadas
         const keys = ['estadoSesion', 'entregasDiariasDetallado'];
         for (let i = 0; i < localStorage.length; i++) {
             const key = localStorage.key(i);
@@ -823,7 +894,6 @@
                 localStorage.removeItem(key);
             }
         }
-        // Recargar la página para reiniciar completamente
         location.reload();
     }
 
@@ -840,6 +910,8 @@
         if (visitas.length === 0) {
             renderizarGrafica();
         }
+        // Asegurar que el select empiece con la opción vacía
+        document.getElementById('estadoPaquete').selectedIndex = 0;
     };
 </script>
 </body>
