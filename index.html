@@ -7,7 +7,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
-        /* Estilos previos... */
+        /* Estilos generales */
+        * {
+            box-sizing: border-box;
+        }
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f7f6;
@@ -99,6 +102,13 @@
         }
         .btn-escaneo:hover {
             background-color: #732d91;
+        }
+        .btn-cancelar {
+            background-color: #95a5a6;
+            margin-top: 5px;
+        }
+        .btn-cancelar:hover {
+            background-color: #7f8c8d;
         }
         .result-box {
             background: #e8f8f5;
@@ -202,12 +212,25 @@
         }
         #lectorQR {
             width: 100%;
-            max-width: 300px;
+            max-width: 400px;
             margin: 10px auto;
             display: none;
             border: 2px solid #3498db;
             border-radius: 8px;
             overflow: hidden;
+            background: #000;
+        }
+        #lectorQR video {
+            width: 100% !important;
+            height: auto !important;
+        }
+        .escaneo-mensaje {
+            text-align: center;
+            color: #fff;
+            background: rgba(0,0,0,0.7);
+            padding: 5px;
+            font-weight: bold;
+            border-radius: 0 0 8px 8px;
         }
         @media (max-width: 600px) {
             .informe-grid {
@@ -215,6 +238,9 @@
             }
             .btn-group button {
                 min-width: 80px;
+            }
+            #lectorQR {
+                max-width: 100%;
             }
         }
 
@@ -264,7 +290,12 @@
             <input type="text" id="codigoBarras" placeholder="Código (opcional)">
             <button class="btn-escaneo" onclick="iniciarEscaneo()">📷 Escanear</button>
         </div>
-        <div id="lectorQR"></div>
+        <div id="lectorQR">
+            <div class="escaneo-mensaje">🔍 Escaneando... (apunta al código)</div>
+        </div>
+        <div style="text-align:center; margin-top:5px;">
+            <button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar</button>
+        </div>
         <label>Estado del paquete:</label>
         <select id="estadoPaquete">
             <option value="">-- Seleccione un estado --</option>
@@ -377,6 +408,7 @@
     let miGraficoSemana = null;
     let miGraficoMes = null;
     let html5QrCode = null;
+    let escaneoActivo = false;
 
     // ==================== FUNCIONES AUXILIARES ====================
     function horaActual() {
@@ -713,11 +745,14 @@
         guardarTiemposBase();
     }
 
-    // ==================== ESCÁNER DE CÓDIGO DE BARRAS ====================
+    // ==================== ESCÁNER DE CÓDIGO DE BARRAS (OPTIMIZADO PARA iOS) ====================
     function iniciarEscaneo() {
+        if (escaneoActivo) return;
         const lectorDiv = document.getElementById('lectorQR');
         lectorDiv.style.display = 'block';
-        
+        document.getElementById('btnCancelarEscaneo').style.display = 'inline-block';
+        escaneoActivo = true;
+
         if (html5QrCode) {
             html5QrCode.clear();
             html5QrCode = null;
@@ -725,10 +760,15 @@
 
         html5QrCode = new Html5Qrcode("lectorQR");
         const config = {
-            fps: 10,
-            qrbox: { width: 250, height: 150 },
-            formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13, 
-                               Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.CODE_39]
+            fps: 8,
+            qrbox: { width: Math.min(window.innerWidth * 0.8, 300), height: 150 },
+            formatsToSupport: [
+                Html5QrcodeSupportedFormats.CODE_128,
+                Html5QrcodeSupportedFormats.EAN_13,
+                Html5QrcodeSupportedFormats.UPC_A,
+                Html5QrcodeSupportedFormats.CODE_39,
+                Html5QrcodeSupportedFormats.QR_CODE
+            ]
         };
 
         html5QrCode.start(
@@ -738,25 +778,46 @@
             onScanFailure
         ).catch(err => {
             console.log("Error al iniciar cámara:", err);
-            alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+            alert("No se pudo acceder a la cámara. Asegúrate de dar permisos y de estar en un dispositivo con cámara.");
             lectorDiv.style.display = 'none';
+            document.getElementById('btnCancelarEscaneo').style.display = 'none';
+            escaneoActivo = false;
+            html5QrCode = null;
         });
     }
 
     function onScanSuccess(decodedText, decodedResult) {
         document.getElementById('codigoBarras').value = decodedText;
         // Detener la cámara después de escanear
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                document.getElementById('lectorQR').style.display = 'none';
-                html5QrCode.clear();
-                html5QrCode = null;
-            }).catch(err => console.log("Error al detener cámara:", err));
-        }
+        cancelarEscaneo();
+        // Pequeña vibración si está disponible
+        if (navigator.vibrate) navigator.vibrate(50);
     }
 
     function onScanFailure(error) {
         // No hacemos nada, solo seguimos intentando
+    }
+
+    function cancelarEscaneo() {
+        if (html5QrCode) {
+            html5QrCode.stop().then(() => {
+                document.getElementById('lectorQR').style.display = 'none';
+                document.getElementById('btnCancelarEscaneo').style.display = 'none';
+                html5QrCode.clear();
+                html5QrCode = null;
+                escaneoActivo = false;
+            }).catch(err => {
+                console.log("Error al detener cámara:", err);
+                document.getElementById('lectorQR').style.display = 'none';
+                document.getElementById('btnCancelarEscaneo').style.display = 'none';
+                html5QrCode = null;
+                escaneoActivo = false;
+            });
+        } else {
+            document.getElementById('lectorQR').style.display = 'none';
+            document.getElementById('btnCancelarEscaneo').style.display = 'none';
+            escaneoActivo = false;
+        }
     }
 
     // ==================== REGISTRO RÁPIDO ====================
@@ -803,7 +864,6 @@
             contadores[estado] = 1;
         }
 
-        // Guardar la visita con código
         visitas.push({ llegada, salida, tiempo: tiempoVisita, estado, codigo });
 
         document.getElementById('seccionHistorial').style.display = 'block';
@@ -821,19 +881,13 @@
 
         actualizarDashboard();
 
-        // Limpiar campos y resetear estado a la opción por defecto
+        // Limpiar campos
         document.getElementById('llegadaCliente').value = '';
         document.getElementById('salidaCliente').value = '';
         document.getElementById('codigoBarras').value = '';
-        document.getElementById('estadoPaquete').selectedIndex = 0; // Vuelve a "Seleccione un estado"
-        // Si hay cámara activa, detenerla
-        if (html5QrCode) {
-            html5QrCode.stop().then(() => {
-                document.getElementById('lectorQR').style.display = 'none';
-                html5QrCode.clear();
-                html5QrCode = null;
-            }).catch(err => console.log(err));
-        }
+        document.getElementById('estadoPaquete').selectedIndex = 0;
+        // Asegurar que la cámara esté cerrada
+        cancelarEscaneo();
     }
 
     // ==================== BOTONES DE CONTROL ====================
@@ -910,7 +964,6 @@
         if (visitas.length === 0) {
             renderizarGrafica();
         }
-        // Asegurar que el select empiece con la opción vacía
         document.getElementById('estadoPaquete').selectedIndex = 0;
     };
 </script>
