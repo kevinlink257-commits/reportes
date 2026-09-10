@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="es">
+<head><style>
+@font-face {
+  font-family: "Optimistic";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Optimistic Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
+}
+:where(html) {
+  font-family: "Optimistic", system-ui, sans-serif;
+}
+:where(code, pre, kbd, samp) {
+  font-family: "Optimistic Mono", ui-monospace, monospace;
+}
+</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Reporte de Entregas - Colserlog (Corregido)</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; color: #333; }
+        .container { max-width: 700px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        h1, h2, h3 { color: #2c3e50; text-align: center; }
+        .section { background: #eef2f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
+        label { display: block; margin-top: 10px; font-weight: bold; }
+        input, select, button { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #3498db; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
+        button:hover { background-color: #2980b9; }
+        .btn-imprimir { background-color: #2ecc71; font-size: 16px; }
+        .btn-mega { background-color: #d9272e; }
+        .btn-mega:hover { background-color: #b81f25; }
+        .btn-informe { background-color: #34495e; }
+        .btn-guardar { background-color: #1abc9c; }
+        .btn-reiniciar { background-color: #e67e22; }
+        .btn-eliminar { background-color: #e74c3c; }
+        .btn-eliminar-todo { background-color: #c0392b; font-size: 1.1em; font-weight: bold; border: 2px solid #922b21; }
+        .btn-escaneo { background-color: #8e44ad; margin-top: 0; padding: 8px; font-size: 0.9em; }
+        .btn-cancelar { background-color: #95a5a6; margin-top: 5px; }
+        .btn-buscar-limpiar { background-color: #95a5a6; width: auto; margin-top: 0; padding: 10px 15px; }
+        .btn-ahora { background-color: #f39c12; margin-top: 0; padding: 8px; font-size: 0.9em; }
+        .result-box { background: #e8f8f5; border-left: 4px solid #1abc9c; padding: 10px; margin-top: 10px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: #fff; border: 1px solid #ddd; padding: 10px; text-align: center; border-radius: 4px; }
+        .stat-card span { display: block; font-size: 20px; font-weight: bold; color: #e74c3c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #fff; font-size: 0.9em; }
+        th, td { padding: 8px 5px; text-align: center; border-bottom: 1px solid #ddd; vertical-align: middle; }
+        th { background-color: #2c3e50; color: white; }
+        .acciones-btn { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        .acciones-btn button { width: auto; padding: 4px 8px; font-size: 0.8em; margin: 0; border-radius: 3px; }
+        .btn-editar { background-color: #f1c40f; color: #333; }
+        .btn-guardar-edicion { background-color: #2ecc71; }
+        .btn-eliminar-fila { background-color: #e74c3c; }
+        .btn-cancelar-edicion { background-color: #95a5a6; }
+        canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; }
+        .promedio-card { display: flex; justify-content: space-around; margin-top: 10px; font-weight: bold; text-align: center; flex-wrap: wrap; }
+        .promedio-card div { background: #fff; padding: 8px 15px; border-radius: 4px; border: 1px solid #ddd; margin: 5px; }
+        .promedio-card span { color: #e74c3c; font-size: 1.2em; }
+        .input-group { display: flex; gap: 10px; align-items: center; }
+        .input-group input { flex: 1; }
+        .input-group button { flex: 0 0 auto; width: auto; padding: 10px 15px; margin-top: 0; }
+        .intervalo { font-weight: bold; color: #2c3e50; }
+        .intervalo span { color: #e74c3c; }
+        .informe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn-group button { flex: 1; min-width: 100px; }
+        #lectorQR { width: 100%; max-width: 400px; margin: 10px auto; display: none; border: 2px solid #3498db; border-radius: 8px; overflow: hidden; background: #000; }
+        .escaneo-mensaje { text-align: center; color: #fff; background: rgba(0,0,0,0.7); padding: 5px; font-weight: bold; border-radius: 0 0 8px 8px; }
+        .busqueda-box { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
+        .contador-busqueda { font-size: 0.85rem; color: #555; margin: 8px 0 0 0; }
+        .sin-resultados { padding: 20px; color: #888; text-align: center; font-style: italic; }
+        .estado-mega { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.9em; text-align: center; display: none; }
+        .estado-mega.ok { background: #d4edda; color: #155724; display: block; }
+        .estado-mega.error { background: #f8d7da; color: #721c24; display: block; }
+        .estado-mega.loading { background: #fff3cd; color: #856404; display: block; }
+        .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 12px 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 12px; }
+        .toggle-wrapper .toggle-label { margin: 0; font-weight: bold; color: #2c3e50; flex: 1; }
+        .toggle-wrapper .toggle-sub { display: block; font-weight: normal; font-size: 0.78rem; color: #666; margin-top: 3px; }
+        .switch { position: relative; display: inline-block; width: 52px; height: 28px; flex-shrink: 0; margin: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .3s; border-radius: 50%; }
+        .switch input:checked + .slider { background-color: #1abc9c; }
+        .switch input:checked + .slider:before { transform: translateX(24px); }
+        #informeContenedor { display: none; background: #fff; padding: 20px; color: #000; }
+        #informeContenedor.visible { display: block; }
+        .informe-header { text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 15px; margin-bottom: 20px; }
+        .informe-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .informe-kpi { border: 1px solid #ccc; border-radius: 4px; padding: 10px; text-align: center; background: #f8f9fa; }
+        .informe-kpi .label { font-size: 11px; color: #555; text-transform: uppercase; margin-bottom: 5px; }
+        .informe-kpi .valor { font-size: 20px; font-weight: bold; color: #2c3e50; }
+        .informe-tabla { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+        .informe-tabla th { background: #2c3e50; color: #fff; padding: 6px 8px; text-align: center; border: 1px solid #1a252f; }
+        .informe-tabla td { padding: 5px 8px; text-align: center; border: 1px solid #ddd; }
+        .informe-tabla tr:nth-child(even) td { background: #f8f9fa; }
+        .informe-tabla tr.total-row td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; }
+        .informe-firma { margin-top: 50px; display: flex; justify-content: space-around; }
+        .informe-firma div { border-top: 1px solid #000; padding-top: 5px; width: 40%; text-align: center; font-size: 12px; }
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
+            .no-print { display: none !important; }
+            @page { margin: 1.2cm; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 Reporte Diario de Ruta - CORREGIDO</h1>
+    <div style="background:#fff3cd; padding:10px; border-radius:6px; font-size:0.85rem; margin-bottom:15px; border:1px solid #ffeeba;">
+        <strong>✅ Cambios aplicados:</strong> MEGA ahora carga desde esm.sh (no falla en iPhone), script convertido a módulo, y agregado respaldo local de emergencia si MEGA falla. No abras el archivo como file://, súbelo a un hosting o ábrelo con Live Server.
+    </div>
+
+    <div class="section">
+        <h2>1. Tiempos Base de Salida</h2>
+        <div class="no-print">
+            <label>Inicio de carga del carro:</label><input type="time" id="inicioCarga">
+            <label>Fin de carga del carro:</label><input type="time" id="finCarga">
+            <label>Hora de salida de la empresa:</label><input type="time" id="salidaEmpresa">
+            <label>Hora de llegada a la primera entrega:</label><input type="time" id="primeraEntrega">
+            <button onclick="calcularTiemposBase()">Confirmar Tiempos de Salida</button>
+        </div>
+        <div id="resumenTiempos" class="result-box" style="display: none;"></div>
+    </div>
+
+    <div class="section no-print">
+        <h2>2. Registrar Nueva Visita</h2>
+        <label>Hora de llegada al cliente:</label>
+        <div class="input-group">
+            <input type="time" id="llegadaCliente"><button class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button>
+        </div>
+        <label>Hora de salida del cliente:</label>
+        <div class="input-group">
+            <input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button>
+        </div>
+        <label>Código de barras:</label>
+        <div class="input-group">
+            <input type="text" id="codigoBarras" placeholder="Código (opcional)"><button class="btn-escaneo" onclick="iniciarEscaneo()">📷 Escanear</button>
+        </div>
+        <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... (apunta al código)</div></div>
+        <div style="text-align:center; margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar</button></div>
+        <label>Estado del paquete:</label>
+        <select id="estadoPaquete">
+            <option value="">-- Seleccione un estado --</option>
+            <option value="Entregado">Entregado</option><option value="Rechazado">Rechazado</option>
+            <option value="Dirección Errónea">Dirección errónea</option><option value="Coordinado con Cliente">Coordinado con el Cliente</option>
+            <option value="No está en casa">No está en casa</option><option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
+            <option value="No lo conocen">No lo conocen</option><option value="Programo para otro día">Programo para otro día</option>
+            <option value="Dejar en oficina principal">Dejar en oficina principal</option><option value="Pertenece a otra ciudad">Pertenece a otra ciudad</option>
+            <option value="Cerrado local comercial">Cerrado local comercial</option>
+        </select>
+        <button onclick="registrarVisita()" style="background-color: #2c3e50;">📋 Guardar Visita (manual)</button>
+    </div>
+
+    <div class="section" id="seccionHistorial" style="display: none;">
+        <h2>3. Detalle de Visitas</h2>
+        <div class="busqueda-box no-print">
+            <label>🔍 Buscar por guía / código:</label>
+            <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." oninput="filtrarVisitas()"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
+            <p id="contadorBusqueda" class="contador-busqueda"></p>
+        </div>
+        <div style="overflow-x: auto;"><table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th class="no-print">Acciones</th></tr></thead><tbody id="cuerpoTabla"></tbody></table></div>
+    </div>
+
+    <div class="section">
+        <h2>4. Resumen y Gráfica del Día</h2>
+        <div class="stats-grid">
+            <div class="stat-card">Entregados: <span id="c-entregados">0</span></div>
+            <div class="stat-card">No Entregados: <span id="c-noentregados">0</span></div>
+            <div class="stat-card">Total Visitas: <span id="c-total">0</span></div>
+            <div class="stat-card">Promedio por visita: <span id="c-promedio">0 min</span></div>
+        </div>
+        <canvas id="graficaInforme"></canvas>
+        <button class="no-print btn-imprimir" onclick="imprimirReporteDiario()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+
+    <div class="section no-print">
+        <h2>5. Control de Sesión</h2>
+        <div class="btn-group">
+            <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
+            <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
+            <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
+            <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
+        </div>
+    </div>
+
+    <div class="section"><h2>6. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
+    <div class="section"><h2>7. Informes Semanales y Mensuales</h2><div class="informe-grid"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
+
+    <div class="section no-print">
+        <h2>8. Respaldo en MEGA e Informe Mensual</h2>
+        <div class="btn-group">
+            <button class="btn-mega" onclick="guardarEnMega()">☁️ Guardar en MEGA</button>
+            <button class="btn-mega" onclick="cargarDesdeMega()">⬇️ Restaurar desde MEGA</button>
+            <button class="btn-guardar" onclick="descargarRespaldoLocal()" style="background:#34495e;">💾 Descargar respaldo local</button>
+        </div>
+        <div class="toggle-wrapper">
+            <label class="toggle-label" for="toggleRespaldo">🔄 Respaldo automático en MEGA<span class="toggle-sub">Se ejecuta al Guardar Día, Reiniciar Día y antes de Eliminar Todo</span></label>
+            <div class="switch"><input type="checkbox" id="toggleRespaldo" onchange="toggleRespaldoAutomatico()"><span class="slider"></span></div>
+        </div>
+        <div id="estadoMega" class="estado-mega"></div>
+        <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
+        <label>📅 Selecciona el mes y año para el informe:</label>
+        <div class="input-group">
+            <select id="mesInforme"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>
+            <input type="number" id="anioInforme" min="2020" max="2100" style="max-width:110px;">
+        </div>
+        <div class="btn-group" style="margin-top:10px;">
+            <button class="btn-informe" onclick="generarInformeMensual()">📊 Generar Informe Mensual</button>
+            <button class="btn-informe" onclick="ocultarInforme()">❌ Cerrar Informe</button>
+        </div>
+    </div>
+    <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="window.print()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
+</div>
+
+<script type="module">
+// ==================== CONFIGURACIÓN MEGA ====================
+const MEGA_EMAIL = 'Fabian.257@hotmail.com';
+const MEGA_PASSWORD = 'Lev257@.kev';
+
+// ==================== VARIABLES GLOBALES ====================
+let contadores = {'Entregado':0,'Rechazado':0,'Dirección Errónea':0,'Coordinado con Cliente':0,'No está en casa':0,'Pasa después (Sin dinero)':0,'No lo conocen':0,'Programo para otro día':0,'Dejar en oficina principal':0,'Pertenece a otra ciudad':0,'Cerrado local comercial':0};
+let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
+let miGrafico = null, miGraficoPromedios = null, miGraficoSemana = null, miGraficoMes = null;
+let html5QrCode = null, escaneoActivo = false, filaEditando = null, storageMegaCache = null, respaldoAutomaticoActivo = true;
+
+function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
+function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; let [hh1,mm1]=h1.split(':').map(Number); let [hh2,mm2]=h2.split(':').map(Number); let m1=hh1*60+mm1, m2=hh2*60+mm2; if(m2<m1) m2+=1440; return m2-m1; }
+function getWeekNumber(d){ d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7)); const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d-ys)/86400000)+1)/7); }
+function mostrarEstadoMega(msg,tipo,autoOcultar=true){ const el=document.getElementById('estadoMega'); el.className='estado-mega '+tipo; el.textContent=msg; if(autoOcultar&&(tipo==='ok'||tipo==='error')) setTimeout(()=>{el.className='estado-mega'; el.textContent='';},7000); }
+
+function cargarPreferencias(){ const v=localStorage.getItem('respaldoAutomaticoMega'); respaldoAutomaticoActivo=(v===null)?true:(v==='true'); const t=document.getElementById('toggleRespaldo'); if(t) t.checked=respaldoAutomaticoActivo; }
+function guardarEstadoCompleto(){ const e={visitas,contadores,totalMinutosVisitas,totalVisitas}; localStorage.setItem('estadoSesion',JSON.stringify(e)); guardarDiaActual(); }
+function cargarEstadoCompleto(){ const raw=localStorage.getItem('estadoSesion'); if(!raw) return false; try{ const e=JSON.parse(raw); visitas=e.visitas||[]; contadores=e.contadores||contadores; totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; return true;}catch{return false;} }
+function guardarTiemposBase(){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const v=document.getElementById(id).value; localStorage.setItem('tiempoBase_'+id,v); }); }
+function cargarTiemposBase(){ const ids=['inicioCarga','finCarga','salidaEmpresa','primeraEntrega']; ids.forEach(id=>{ const v=localStorage.getItem('tiempoBase_'+id); if(v) document.getElementById(id).value=v; }); if(ids.every(id=>document.getElementById(id).value!=='')) calcularTiemposBase(); }
+function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0]; let h=JSON.parse(localStorage.getItem('entregasDiariasDetallado'))||{}; h[fecha]={contadores:{...contadores},totalVisitas,totalMinutos:totalMinutosVisitas}; localStorage.setItem('entregasDiariasDetallado',JSON.stringify(h)); }
+function cargarHistorialDetallado(){ const raw=localStorage.getItem('entregasDiariasDetallado'); if(!raw) return {}; try{return JSON.parse(raw);}catch{return {};} }
+function recalcularEstadisticas(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); actualizarDashboard(); guardarEstadoCompleto(); }
+
+function renderizarTabla(){ const tabla=document.getElementById('cuerpoTabla'); tabla.innerHTML=''; const filtro=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase(); if(visitas.length===0){ document.getElementById('seccionHistorial').style.display='none'; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; return; } document.getElementById('seccionHistorial').style.display='block'; const items=[]; visitas.forEach((v,i)=>{ const cod=(v.codigo||'').toLowerCase(); if(!filtro||cod.includes(filtro)) items.push({visita:v,indexOriginal:i}); }); const cont=document.getElementById('contadorBusqueda'); if(cont){ cont.textContent=filtro?`🔎 ${items.length} resultado(s) para "${filtro}" de ${visitas.length}`:`Total: ${visitas.length} visita(s).`; } if(items.length===0){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=7; td.className='sin-resultados'; td.textContent='❌ No se encontraron visitas con ese código.'; tr.appendChild(td); tabla.appendChild(tr); return; } items.forEach(({visita:v,indexOriginal})=>{ const editando=filaEditando===indexOriginal; const fila=document.createElement('tr'); const tdNum=document.createElement('td'); tdNum.textContent=indexOriginal+1; fila.appendChild(tdNum); const tdL=document.createElement('td'); tdL.textContent=v.llegada; fila.appendChild(tdL); const tdS=document.createElement('td'); tdS.textContent=v.salida; fila.appendChild(tdS); const tdT=document.createElement('td'); tdT.innerHTML=`<strong>${v.tiempo} min</strong>`; fila.appendChild(tdT); const tdC=document.createElement('td'); if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; tdC.appendChild(inp); } else tdC.textContent=v.codigo||''; fila.appendChild(tdC); const tdE=document.createElement('td'); if(editando){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ['Entregado','Rechazado','Dirección Errónea','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial'].forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); }); tdE.appendChild(sel); } else tdE.textContent=v.estado; fila.appendChild(tdE); const tdA=document.createElement('td'); tdA.className='no-print'; const div=document.createElement('div'); div.className='acciones-btn'; if(editando){ const bG=document.createElement('button'); bG.textContent='💾 Guardar'; bG.className='btn-guardar-edicion'; bG.onclick=()=>guardarEdicion(indexOriginal); div.appendChild(bG); const bC=document.createElement('button'); bC.textContent='❌ Cancelar'; bC.className='btn-cancelar-edicion'; bC.onclick=()=>{filaEditando=null; renderizarTabla();}; div.appendChild(bC); } else { const bE=document.createElement('button'); bE.textContent='✏️ Editar'; bE.className='btn-editar'; bE.onclick=()=>{filaEditando=indexOriginal; renderizarTabla();}; div.appendChild(bE); const bD=document.createElement('button'); bD.textContent='🗑️ Eliminar'; bD.className='btn-eliminar-fila'; bD.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD); } tdA.appendChild(div); fila.appendChild(tdA); tabla.appendChild(fila); }); }
+window.filtrarVisitas = ()=>{ if(filaEditando!==null) filaEditando=null; renderizarTabla(); };
+window.limpiarBusqueda = ()=>{ const i=document.getElementById('busquedaGuia'); if(i) i.value=''; renderizarTabla(); if(i) i.focus(); };
+window.guardarEdicion = (index)=>{ const ic=document.getElementById(`edit-codigo-${index}`); const se=document.getElementById(`edit-estado-${index}`); if(!ic||!se) return; visitas[index].codigo=ic.value.trim(); visitas[index].estado=se.value; filaEditando=null; recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
+window.eliminarVisita = (index)=>{ visitas.splice(index,1); if(filaEditando===index) filaEditando=null; else if(filaEditando!==null&&filaEditando>index) filaEditando--; recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
+
+function actualizarDashboard(){ let ent=contadores['Entregado']||0; let noEnt=totalVisitas-ent; let prom=Math.round(totalMinutosVisitas/totalVisitas)||0; document.getElementById('c-entregados').innerText=ent; document.getElementById('c-noentregados').innerText=noEnt; document.getElementById('c-total').innerText=totalVisitas; document.getElementById('c-promedio').innerText=prom+' min'; renderizarGrafica(); guardarEstadoCompleto(); }
+function renderizarGrafica(){ const ctx=document.getElementById('graficaInforme').getContext('2d'); if(miGrafico) miGrafico.destroy(); miGrafico=new Chart(ctx,{type:'bar',data:{labels:Object.keys(contadores),datasets:[{label:'Cantidad',data:Object.values(contadores),backgroundColor:['#2ecc71','#e74c3c','#e67e22','#3498db','#95a5a6','#f1c40f','#9b59b6','#1abc9c','#e84393','#00b894','#fdcb6e']}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}}); }
+function calcularPromedios(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return {promedioDia:0,promedioSemana:0,promedioMes:0}; let total=0; for(let f of fechas) total+=h[f].contadores['Entregado']||0; const pDia=total/fechas.length; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+'-'+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const pSem=Object.values(semanas).reduce((a,b)=>a+b,0)/(Object.keys(semanas).length||1); const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+'-'+String(fecha.getMonth()+1).padStart(2,'0'); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const pMes=Object.values(meses).reduce((a,b)=>a+b,0)/(Object.keys(meses).length||1); return {promedioDia:pDia,promedioSemana:pSem,promedioMes:pMes}; }
+function actualizarGraficaPromedios(){ const {promedioDia,promedioSemana,promedioMes}=calcularPromedios(); document.getElementById('prom-dia').textContent=promedioDia.toFixed(1); document.getElementById('prom-semana').textContent=promedioSemana.toFixed(1); document.getElementById('prom-mes').textContent=promedioMes.toFixed(1); const ctx=document.getElementById('graficaPromedios').getContext('2d'); if(miGraficoPromedios) miGraficoPromedios.destroy(); miGraficoPromedios=new Chart(ctx,{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data:[promedioDia,promedioSemana,promedioMes],backgroundColor:['#3498db','#2ecc71','#f1c40f']}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}}); }
+function actualizarInformesSemanalesMensuales(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+' - Sem '+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.toLocaleString('es',{month:'long',year:'numeric'}); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const ctxS=document.getElementById('graficaSemana').getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctxS,{type:'bar',data:{labels:Object.keys(semanas),datasets:[{label:'Por Semana',data:Object.values(semanas),backgroundColor:'#3498db'}]},options:{responsive:true}}); const ctxM=document.getElementById('graficaMes').getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctxM,{type:'bar',data:{labels:Object.keys(meses),datasets:[{label:'Por Mes',data:Object.values(meses),backgroundColor:'#2ecc71'}]},options:{responsive:true}}); }
+
+// ===== FUNCIONES GLOBALES (necesarias para onclick) =====
+window.calcularTiemposBase = function(){ let iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value; if(!iC||!fC||!sE||!pE){ alert("Completa todas las horas."); return; } let minC=calcularMinutos(iC,fC), minP=calcularMinutos(fC,sE), minT=calcularMinutos(sE,pE), minTot=calcularMinutos(iC,pE); const r=document.getElementById('resumenTiempos'); r.style.display='block'; r.innerHTML=`<div class="intervalo">⏳ <span>${minC}</span> min — Carga (${iC} → ${fC})</div><div class="intervalo">⏳ <span>${minP}</span> min — Prep (${fC} → ${sE})</div><div class="intervalo">⏳ <span>${minT}</span> min — Viaje (${sE} → ${pE})</div><div style="margin-top:10px;font-weight:bold;border-top:1px solid #ccc;padding-top:8px;">🕒 <span style="color:#e74c3c;">${minTot}</span> min totales</div>`; guardarTiemposBase(); };
+window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); };
+window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert("Primero marca llegada"); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert("Selecciona estado"); return; } document.getElementById('salidaCliente').value=horaActual(); registrarVisita(); };
+window.registrarVisita = ()=>{ let l=document.getElementById('llegadaCliente').value, s=document.getElementById('salidaCliente').value, es=document.getElementById('estadoPaquete').value, co=document.getElementById('codigoBarras').value.trim(); if(!l||!s){ alert("Ingresa llegada y salida"); return; } if(!es){ alert("Selecciona estado"); return; } let t=calcularMinutos(l,s); visitas.push({llegada:l,salida:s,tiempo:t,estado:es,codigo:co}); document.getElementById('llegadaCliente').value=''; document.getElementById('salidaCliente').value=''; document.getElementById('codigoBarras').value=''; document.getElementById('estadoPaquete').selectedIndex=0; cancelarEscaneo(); recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
+window.iniciarEscaneo = ()=>{ if(escaneoActivo) return; const div=document.getElementById('lectorQR'); div.style.display='block'; document.getElementById('btnCancelarEscaneo').style.display='inline-block'; escaneoActivo=true; if(html5QrCode){ html5QrCode.clear(); html5QrCode=null; } html5QrCode=new Html5Qrcode("lectorQR"); const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]}; html5QrCode.start({facingMode:"environment"},cfg,(txt)=>{document.getElementById('codigoBarras').value=txt; cancelarEscaneo(); if(navigator.vibrate) navigator.vibrate(50);},()=>{}).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; }); };
+window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode.clear(); html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
+window.imprimirReporteDiario = ()=>{ document.body.classList.remove('printing-informe'); window.print(); };
+window.toggleRespaldoAutomatico = ()=>{ const t=document.getElementById('toggleRespaldo'); respaldoAutomaticoActivo=t.checked; localStorage.setItem('respaldoAutomaticoMega',respaldoAutomaticoActivo); mostrarEstadoMega(respaldoAutomaticoActivo?'✅ Respaldo automático activado':'⚠️ Respaldo automático desactivado',respaldoAutomaticoActivo?'ok':'error'); };
+
+// ==================== MEGA CORREGIDO ====================
+async function conectarMega(){
+    if(storageMegaCache) return storageMegaCache;
+    // CORRECCIÓN PRINCIPAL: usamos esm.sh que sí funciona en iPhone/Safari y tiene CORS correcto
+    // También intentamos jsdelivr como fallback
+    let lastError = null;
+    const urls = [
+        'https://esm.sh/megajs@1.3.3',
+        'https://cdn.jsdelivr.net/npm/megajs@1.3.3/dist/main.browser-es.mjs/+esm'
+    ];
+    for(const url of urls){
+        try{
+            const mega = await import(url);
+            const { Storage } = mega;
+            // La API nueva devuelve una promesa .ready
+            const storage = await new Storage({ email: MEGA_EMAIL, password: MEGA_PASSWORD }).ready;
+            storageMegaCache = storage;
+            return storage;
+        }catch(e){
+            console.warn('Fallo import MEGA desde', url, e);
+            lastError = e;
+        }
+    }
+    throw lastError || new Error('No se pudo cargar megajs');
+}
+
+function crearObjetoRespaldo(silencioso){
+    return {
+        version:2,
+        fecha_respaldo:new Date().toISOString(),
+        usuario:MEGA_EMAIL,
+        automatico:silencioso,
+        estadoSesion: JSON.parse(localStorage.getItem('estadoSesion')||'null'),
+        entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'),
+        tiemposBase:{
+            inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'',
+            finCarga: localStorage.getItem('tiempoBase_finCarga')||'',
+            salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'',
+            primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||''
+        }
+    };
+}
+
+window.descargarRespaldoLocal = ()=>{
+    const respaldo = crearObjetoRespaldo(false);
+    const blob = new Blob([JSON.stringify(respaldo,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const fecha = new Date().toISOString().split('T')[0];
+    a.href = url; a.download = `colserlog_respaldo_${fecha}.json`; a.click();
+    URL.revokeObjectURL(url);
+    mostrarEstadoMega('💾 Respaldo local descargado', 'ok');
+};
+
+window.guardarEnMega = async (silencioso=false)=>{
+    if(!silencioso) mostrarEstadoMega('⏳ Conectando con MEGA...', 'loading', false);
+    else mostrarEstadoMega('⏳ Respaldando automáticamente en MEGA...', 'loading', false);
+    try{
+        const storage = await conectarMega();
+        const respaldo = crearObjetoRespaldo(silencioso);
+        const fecha = new Date().toISOString().split('T')[0];
+        const hora = new Date().toTimeString().slice(0,5).replace(':','');
+        const prefijo = silencioso ? 'colserlog_auto_' : 'colserlog_respaldo_';
+        const nombre = `${prefijo}${fecha}_${hora}.json`;
+        const contenido = JSON.stringify(respaldo,null,2);
+        const file = storage.upload(nombre, contenido);
+        await file.complete;
+        mostrarEstadoMega(`✅ Respaldo guardado en MEGA: ${nombre}`, 'ok');
+        return true;
+    }catch(error){
+        console.error('Error MEGA:', error);
+        storageMegaCache = null;
+        const msg = error?.message || 'Load failed';
+        // Mensaje más útil
+        if(msg.includes('Load failed') || msg.includes('Failed to fetch') || msg.includes('NetworkError')){
+            mostrarEstadoMega(`❌ Error de red al conectar con MEGA: ${msg}. Verifica internet y que no estés abriendo el archivo como file://. Se descargará respaldo local.`, 'error');
+            // Fallback automático: descargar local
+            descargarRespaldoLocal();
+        } else {
+            mostrarEstadoMega(`❌ Error MEGA: ${msg}`, 'error');
+        }
+        return false;
+    }
+};
+
+window.cargarDesdeMega = async ()=>{
+    if(!confirm('⚠️ Esto reemplazará datos actuales con el último respaldo de MEGA. ¿Continuar?')) return;
+    mostrarEstadoMega('⏳ Buscando respaldos en MEGA...', 'loading', false);
+    try{
+        const storage = await conectarMega();
+        const archivos = Object.values(storage.files||{}).filter(f=> f.name && (f.name.startsWith('colserlog_respaldo_')||f.name.startsWith('colserlog_auto_')) && f.name.endsWith('.json'));
+        if(archivos.length===0){ mostrarEstadoMega('⚠️ No se encontraron respaldos en MEGA.', 'error'); return; }
+        archivos.sort((a,b)=> b.name.localeCompare(a.name));
+        const ultimo = archivos[0];
+        if(!confirm(`Se restaurará:\n${ultimo.name}\n¿Continuar?`)) return;
+        mostrarEstadoMega('⏳ Descargando respaldo...', 'loading', false);
+        const buffer = await ultimo.downloadBuffer();
+        const texto = new TextDecoder().decode(buffer);
+        const respaldo = JSON.parse(texto);
+        if(!respaldo.entregasDiariasDetallado) throw new Error('Formato inválido');
+        if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
+        localStorage.setItem('entregasDiariasDetallado', JSON.stringify(respaldo.entregasDiariasDetallado));
+        if(respaldo.tiemposBase){ for(let k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
+        mostrarEstadoMega('✅ Datos restaurados. Recargando...', 'ok');
+        setTimeout(()=>location.reload(), 1500);
+    }catch(error){
+        console.error(error);
+        storageMegaCache=null;
+        mostrarEstadoMega('❌ Error al restaurar: '+(error.message||'Verifica conexión'), 'error');
+    }
+};
+
+// Resto de funciones de guardado/reinicio
+window.guardarDia = async ()=>{
+    guardarDiaActual();
+    if(respaldoAutomaticoActivo){ const ok=await guardarEnMega(true); alert(ok?"✅ Día guardado y respaldado en MEGA":"⚠️ Guardado local, pero MEGA falló. Se descargó respaldo local."); }
+    else alert("✅ Día guardado localmente.");
+    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+};
+window.reiniciarDia = async ()=>{
+    if(!confirm("¿Reiniciar día? Se guardará historial"+(respaldoAutomaticoActivo?" y respaldo en MEGA":"")+" y se limpiará.")) return;
+    guardarDiaActual();
+    if(respaldoAutomaticoActivo){ const ok=await guardarEnMega(true); if(!ok && !confirm('MEGA falló. ¿Reiniciar de todas formas?')) { mostrarEstadoMega('⚠️ Reinicio cancelado', 'error'); return; } }
+    limpiarSesion(); alert("✅ Día reiniciado");
+};
+window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual? Historial se conserva.")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
+function limpiarSesion(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); }); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; localStorage.removeItem('estadoSesion'); actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); }
+window.eliminarTodo = async ()=>{ if(!confirm("¿ELIMINAR TODO? Irreversible")) return; if(!confirm("Confirmación final: ¿Seguro?")) return; if(respaldoAutomaticoActivo){ guardarDiaActual(); const ok=await guardarEnMega(true); if(!ok && !confirm('Respaldo MEGA falló. ¿Eliminar de todas formas?')) { mostrarEstadoMega('⚠️ Eliminación cancelada', 'error'); return; } } ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k)); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); } for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value=''); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo(); alert("✅ Todo eliminado"); };
+window.generarInformeMensual = ()=>{
+    const mes=parseInt(document.getElementById('mesInforme').value), anio=parseInt(document.getElementById('anioInforme').value);
+    if(!mes||!anio){ alert('Selecciona mes y año'); return; }
+    const h=cargarHistorialDetallado(); const fechasMes=Object.keys(h).filter(f=>{ const [y,m]=f.split('-').map(Number); return y===anio&&m===mes; }).sort();
+    if(fechasMes.length===0){ alert('No hay datos para ese mes'); return; }
+    const nombreMes=new Date(anio,mes-1,1).toLocaleString('es',{month:'long'}); const cap=nombreMes.charAt(0).toUpperCase()+nombreMes.slice(1);
+    let totEnt=0, totVis=0, totMin=0; const contMes={}; for(let k in contadores) contMes[k]=0;
+    fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
+    const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
+    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:12px;color:#777;margin-top:8px;">Generado ${new Date().toLocaleString('es')} | ${MEGA_EMAIL}</div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+    Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
+    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;border-bottom:2px solid #3498db;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
+    fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
+    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
+    document.getElementById('informeContenedor').innerHTML=html; document.getElementById('informeContenedor').style.display='block'; document.getElementById('seccionInforme').style.display='block'; document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'});
+};
+window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
+
+window.onload = ()=>{
+    cargarPreferencias();
+    cargarTiemposBase();
+    if(cargarEstadoCompleto() && visitas.length>0){ renderizarTabla(); actualizarDashboard(); }
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).addEventListener('change', guardarTiemposBase));
+    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); if(visitas.length===0) renderizarGrafica();
+    document.getElementById('estadoPaquete').selectedIndex=0;
+    const ahora=new Date(); document.getElementById('mesInforme').value=ahora.getMonth()+1; document.getElementById('anioInforme').value=ahora.getFullYear();
+};
+</script>
+<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</html>
