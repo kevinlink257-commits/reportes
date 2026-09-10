@@ -119,6 +119,15 @@
         .btn-cancelar:hover {
             background-color: #7f8c8d;
         }
+        .btn-buscar-limpiar {
+            background-color: #95a5a6;
+            width: auto;
+            margin-top: 0;
+            padding: 10px 15px;
+        }
+        .btn-buscar-limpiar:hover {
+            background-color: #7f8c8d;
+        }
         .result-box {
             background: #e8f8f5;
             border-left: 4px solid #1abc9c;
@@ -281,6 +290,28 @@
             font-weight: bold;
             border-radius: 0 0 8px 8px;
         }
+        .busqueda-box {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+        .busqueda-box label {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .contador-busqueda {
+            font-size: 0.85rem;
+            color: #555;
+            margin: 8px 0 0 0;
+        }
+        .sin-resultados {
+            padding: 20px;
+            color: #888;
+            text-align: center;
+            font-style: italic;
+        }
         @media (max-width: 600px) {
             .informe-grid {
                 grid-template-columns: 1fr;
@@ -380,6 +411,17 @@
 
     <div class="section" id="seccionHistorial" style="display: none;">
         <h2>3. Detalle de Visitas</h2>
+
+        <!-- Barra de búsqueda por guía -->
+        <div class="busqueda-box no-print">
+            <label>🔍 Buscar por guía / código:</label>
+            <div class="input-group">
+                <input type="text" id="busquedaGuia" placeholder="Escribe el código de guía..." oninput="filtrarVisitas()">
+                <button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button>
+            </div>
+            <p id="contadorBusqueda" class="contador-busqueda"></p>
+        </div>
+
         <div style="overflow-x: auto;">
             <table>
                 <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th class="no-print">Acciones</th></tr></thead>
@@ -586,22 +628,58 @@
         guardarEstadoCompleto();
     }
 
-    // ==================== RENDERIZAR TABLA DE VISITAS ====================
+    // ==================== RENDERIZAR TABLA DE VISITAS (CON BÚSQUEDA) ====================
     function renderizarTabla() {
         const tabla = document.getElementById('cuerpoTabla');
         tabla.innerHTML = '';
+        const inputBusqueda = document.getElementById('busquedaGuia');
+        const filtro = (inputBusqueda ? inputBusqueda.value : '').trim().toLowerCase();
+
         if (visitas.length === 0) {
             document.getElementById('seccionHistorial').style.display = 'none';
+            const cont = document.getElementById('contadorBusqueda');
+            if (cont) cont.textContent = '';
             return;
         }
         document.getElementById('seccionHistorial').style.display = 'block';
 
-        visitas.forEach((v, index) => {
-            const editando = (filaEditando === index);
+        // Construir lista de items a mostrar (conservando índice original)
+        const items = [];
+        visitas.forEach((v, i) => {
+            const codigo = (v.codigo || '').toLowerCase();
+            if (!filtro || codigo.includes(filtro)) {
+                items.push({ visita: v, indexOriginal: i });
+            }
+        });
+
+        // Contador de resultados
+        const cont = document.getElementById('contadorBusqueda');
+        if (cont) {
+            if (filtro) {
+                cont.textContent = `🔎 ${items.length} resultado(s) para "${filtro}" de ${visitas.length} visita(s).`;
+            } else {
+                cont.textContent = `Total: ${visitas.length} visita(s).`;
+            }
+        }
+
+        // Sin resultados
+        if (items.length === 0) {
+            const fila = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 7;
+            td.className = 'sin-resultados';
+            td.textContent = '❌ No se encontraron visitas con ese código de guía.';
+            fila.appendChild(td);
+            tabla.appendChild(fila);
+            return;
+        }
+
+        items.forEach(({ visita: v, indexOriginal }) => {
+            const editando = (filaEditando === indexOriginal);
             const fila = document.createElement('tr');
 
             const tdNum = document.createElement('td');
-            tdNum.textContent = index + 1;
+            tdNum.textContent = indexOriginal + 1;
             fila.appendChild(tdNum);
 
             const tdLlegada = document.createElement('td');
@@ -621,7 +699,7 @@
                 const inputCodigo = document.createElement('input');
                 inputCodigo.type = 'text';
                 inputCodigo.value = v.codigo || '';
-                inputCodigo.id = `edit-codigo-${index}`;
+                inputCodigo.id = `edit-codigo-${indexOriginal}`;
                 inputCodigo.style.width = '100%';
                 tdCodigo.appendChild(inputCodigo);
             } else {
@@ -632,7 +710,7 @@
             const tdEstado = document.createElement('td');
             if (editando) {
                 const selectEstado = document.createElement('select');
-                selectEstado.id = `edit-estado-${index}`;
+                selectEstado.id = `edit-estado-${indexOriginal}`;
                 const opciones = [
                     'Entregado', 'Rechazado', 'Dirección Errónea', 'Coordinado con Cliente',
                     'No está en casa', 'Pasa después (Sin dinero)', 'No lo conocen',
@@ -662,7 +740,7 @@
                 btnGuardar.textContent = '💾 Guardar';
                 btnGuardar.className = 'btn-guardar-edicion';
                 btnGuardar.onclick = function() {
-                    guardarEdicion(index);
+                    guardarEdicion(indexOriginal);
                 };
                 divAcciones.appendChild(btnGuardar);
 
@@ -679,7 +757,7 @@
                 btnEditar.textContent = '✏️ Editar';
                 btnEditar.className = 'btn-editar';
                 btnEditar.onclick = function() {
-                    filaEditando = index;
+                    filaEditando = indexOriginal;
                     renderizarTabla();
                 };
                 divAcciones.appendChild(btnEditar);
@@ -688,8 +766,8 @@
                 btnEliminar.textContent = '🗑️ Eliminar';
                 btnEliminar.className = 'btn-eliminar-fila';
                 btnEliminar.onclick = function() {
-                    if (confirm(`¿Eliminar la visita #${index+1}?`)) {
-                        eliminarVisita(index);
+                    if (confirm(`¿Eliminar la visita #${indexOriginal + 1}?`)) {
+                        eliminarVisita(indexOriginal);
                     }
                 };
                 divAcciones.appendChild(btnEliminar);
@@ -700,6 +778,22 @@
 
             tabla.appendChild(fila);
         });
+    }
+
+    // ==================== BÚSQUEDA / FILTRO DE VISITAS ====================
+    function filtrarVisitas() {
+        // Si hay una edición en curso, la cancelamos para evitar conflictos con los índices
+        if (filaEditando !== null) {
+            filaEditando = null;
+        }
+        renderizarTabla();
+    }
+
+    function limpiarBusqueda() {
+        const input = document.getElementById('busquedaGuia');
+        if (input) input.value = '';
+        renderizarTabla();
+        if (input) input.focus();
     }
 
     // ==================== EDITAR / ELIMINAR VISITAS ====================
@@ -1109,16 +1203,21 @@
         document.getElementById('cuerpoTabla').innerHTML = '';
         document.getElementById('seccionHistorial').style.display = 'none';
 
+        // Limpiar también la búsqueda
+        const busq = document.getElementById('busquedaGuia');
+        if (busq) busq.value = '';
+        const contBusq = document.getElementById('contadorBusqueda');
+        if (contBusq) contBusq.textContent = '';
+
         localStorage.removeItem('estadoSesion');
 
         actualizarDashboard();
         renderizarTabla();
-        // No reiniciamos los gráficos de promedios ni informes porque se basan en historial (que no se toca)
         actualizarGraficaPromedios();
         actualizarInformesSemanalesMensuales();
     }
 
-    // ==================== ELIMINAR TODO (NUEVO) ====================
+    // ==================== ELIMINAR TODO ====================
     function eliminarTodo() {
         if (!confirm("⚠️⚠️⚠️ ¿Estás seguro de que quieres ELIMINAR TODOS LOS DATOS?\nEsto borrará:\n- Todas las visitas del día.\n- Todo el historial de días anteriores.\n- Los tiempos base.\n- Los promedios e informes quedarán en cero.\n\n¡Esta acción es irreversible!")) {
             return;
@@ -1129,7 +1228,7 @@
 
         // 1. Borrar todas las claves de localStorage relacionadas
         const keysToRemove = ['estadoSesion', 'entregasDiariasDetallado'];
-        for (let i = 0; i < localStorage.length; i++) {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
             const key = localStorage.key(i);
             if (key && (key.startsWith('tiempoBase_') || keysToRemove.includes(key))) {
                 localStorage.removeItem(key);
@@ -1156,14 +1255,20 @@
         document.getElementById('cuerpoTabla').innerHTML = '';
         document.getElementById('seccionHistorial').style.display = 'none';
 
-        // 5. Actualizar dashboard (gráfica del día a cero)
+        // 5. Limpiar búsqueda
+        const busq = document.getElementById('busquedaGuia');
+        if (busq) busq.value = '';
+        const contBusq = document.getElementById('contadorBusqueda');
+        if (contBusq) contBusq.textContent = '';
+
+        // 6. Actualizar dashboard
         actualizarDashboard();
 
-        // 6. Destruir y recrear gráficos de promedios e informes (vacíos)
+        // 7. Destruir y recrear gráficos
         actualizarGraficaPromedios();
         actualizarInformesSemanalesMensuales();
 
-        // 7. Asegurar que la cámara está detenida
+        // 8. Asegurar que la cámara está detenida
         cancelarEscaneo();
 
         alert("✅ Todos los datos han sido eliminados. La aplicación está en blanco.");
