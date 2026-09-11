@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
-<head><style>
+<head>
+<style>
 @font-face {
   font-family: "Optimistic";
   font-style: normal;
@@ -119,7 +120,7 @@
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - CORREGIDO</h1>
     <div style="background:#fff3cd; padding:10px; border-radius:6px; font-size:0.85rem; margin-bottom:15px; border:1px solid #ffeeba;">
-        <strong>✅ Cambios aplicados:</strong> MEGA ahora carga desde esm.sh (no falla en iPhone), script convertido a módulo, y agregado respaldo local de emergencia si MEGA falla. No abras el archivo como file://, súbelo a un hosting o ábrelo con Live Server.
+        <strong>✅ Cambios aplicados:</strong> MEGA con fallback de CDN, impresión robusta (ventana nueva), botones vinculados por addEventListener, diagnóstico automático y respaldo local si MEGA falla. No abras como <code>file://</code>, súbelo a un hosting o usa Live Server.
     </div>
 
     <div class="section">
@@ -182,7 +183,7 @@
             <div class="stat-card">Promedio por visita: <span id="c-promedio">0 min</span></div>
         </div>
         <canvas id="graficaInforme"></canvas>
-        <button class="no-print btn-imprimir" onclick="imprimirReporteDiario()">🖨️ Imprimir / Guardar PDF</button>
+        <button class="no-print btn-imprimir" id="btnImprimirDiario">🖨️ Imprimir / Guardar PDF</button>
     </div>
 
     <div class="section no-print">
@@ -221,7 +222,7 @@
             <button class="btn-informe" onclick="ocultarInforme()">❌ Cerrar Informe</button>
         </div>
     </div>
-    <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="window.print()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
+    <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
 </div>
 
 <script type="module">
@@ -268,24 +269,69 @@ window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCl
 window.registrarVisita = ()=>{ let l=document.getElementById('llegadaCliente').value, s=document.getElementById('salidaCliente').value, es=document.getElementById('estadoPaquete').value, co=document.getElementById('codigoBarras').value.trim(); if(!l||!s){ alert("Ingresa llegada y salida"); return; } if(!es){ alert("Selecciona estado"); return; } let t=calcularMinutos(l,s); visitas.push({llegada:l,salida:s,tiempo:t,estado:es,codigo:co}); document.getElementById('llegadaCliente').value=''; document.getElementById('salidaCliente').value=''; document.getElementById('codigoBarras').value=''; document.getElementById('estadoPaquete').selectedIndex=0; cancelarEscaneo(); recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
 window.iniciarEscaneo = ()=>{ if(escaneoActivo) return; const div=document.getElementById('lectorQR'); div.style.display='block'; document.getElementById('btnCancelarEscaneo').style.display='inline-block'; escaneoActivo=true; if(html5QrCode){ html5QrCode.clear(); html5QrCode=null; } html5QrCode=new Html5Qrcode("lectorQR"); const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]}; html5QrCode.start({facingMode:"environment"},cfg,(txt)=>{document.getElementById('codigoBarras').value=txt; cancelarEscaneo(); if(navigator.vibrate) navigator.vibrate(50);},()=>{}).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; }); };
 window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode.clear(); html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
-window.imprimirReporteDiario = ()=>{ document.body.classList.remove('printing-informe'); window.print(); };
+
+// ==================== IMPRESIÓN ROBUSTA ====================
+// Abre una ventana nueva con el contenido y los estilos para imprimir.
+// Funciona incluso dentro de iframes / artefactos donde window.print() está bloqueado.
+function imprimirContenidoHTML(titulo){
+    try{
+        let estilos = '';
+        document.querySelectorAll('style').forEach(s => estilos += s.textContent + '\n');
+
+        // Elegir qué imprimir
+        const contenedor = document.querySelector('#seccionInforme:not([style*="display: none"])')
+                        || document.querySelector('.container');
+        const clon = contenedor.cloneNode(true);
+        clon.querySelectorAll('.no-print, script').forEach(el => el.remove());
+
+        const win = window.open('', '_blank', 'width=900,height=800');
+        if(!win){
+            // Fallback: si el navegador bloquea pop-ups, intenta con iframe oculto
+            const iframe = document.createElement('iframe');
+            iframe.style.position='fixed';
+            iframe.style.right='0'; iframe.style.bottom='0';
+            iframe.style.width='0'; iframe.style.height='0';
+            iframe.style.border='0';
+            document.body.appendChild(iframe);
+            const doc = iframe.contentWindow.document;
+            doc.open();
+            doc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title><style>'+estilos+'</style></head><body>'+clon.innerHTML+'</body></html>');
+            doc.close();
+            setTimeout(()=>{
+                try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+                catch(e){ alert('No se pudo imprimir automáticamente. Usa Ctrl+P. Detalle: '+e.message); }
+                setTimeout(()=>iframe.remove(), 2000);
+            }, 600);
+            return;
+        }
+        win.document.open();
+        win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title><style>'+estilos+'</style></head><body>'+clon.innerHTML+'</body></html>');
+        win.document.close();
+        win.focus();
+        setTimeout(()=>{ try{ win.print(); }catch(e){ console.error('print err', e); } }, 700);
+    }catch(err){
+        console.error('Error al imprimir:', err);
+        alert('Error al imprimir: ' + err.message + '\nUsa Ctrl+P como alternativa.');
+    }
+}
+window.imprimirReporteDiario = ()=> imprimirContenidoHTML('Reporte Diario Colserlog');
+window.imprimirInformeMensual = ()=> imprimirContenidoHTML('Informe Mensual Colserlog');
+
 window.toggleRespaldoAutomatico = ()=>{ const t=document.getElementById('toggleRespaldo'); respaldoAutomaticoActivo=t.checked; localStorage.setItem('respaldoAutomaticoMega',respaldoAutomaticoActivo); mostrarEstadoMega(respaldoAutomaticoActivo?'✅ Respaldo automático activado':'⚠️ Respaldo automático desactivado',respaldoAutomaticoActivo?'ok':'error'); };
 
-// ==================== MEGA CORREGIDO ====================
+// ==================== MEGA CON FALLBACK DE CDN ====================
 async function conectarMega(){
     if(storageMegaCache) return storageMegaCache;
-    // CORRECCIÓN PRINCIPAL: usamos esm.sh que sí funciona en iPhone/Safari y tiene CORS correcto
-    // También intentamos jsdelivr como fallback
     let lastError = null;
+    // Probamos primero jsdelivr (más estable en redes corporativas), luego esm.sh
     const urls = [
-        'https://esm.sh/megajs@1.3.3',
-        'https://cdn.jsdelivr.net/npm/megajs@1.3.3/dist/main.browser-es.mjs/+esm'
+        'https://cdn.jsdelivr.net/npm/megajs@1.3.3/dist/main.browser-es.mjs/+esm',
+        'https://esm.sh/megajs@1.3.3'
     ];
     for(const url of urls){
         try{
-            const mega = await import(url);
+            const mega = await import(/* @vite-ignore */ url);
             const { Storage } = mega;
-            // La API nueva devuelve una promesa .ready
             const storage = await new Storage({ email: MEGA_EMAIL, password: MEGA_PASSWORD }).ready;
             storageMegaCache = storage;
             return storage;
@@ -316,13 +362,27 @@ function crearObjetoRespaldo(silencioso){
 
 window.descargarRespaldoLocal = ()=>{
     const respaldo = crearObjetoRespaldo(false);
-    const blob = new Blob([JSON.stringify(respaldo,null,2)], {type:'application/json'});
+    const contenido = JSON.stringify(respaldo,null,2);
+    const blob = new Blob([contenido], {type:'application/json'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
     const fecha = new Date().toISOString().split('T')[0];
-    a.href = url; a.download = `colserlog_respaldo_${fecha}.json`; a.click();
-    URL.revokeObjectURL(url);
-    mostrarEstadoMega('💾 Respaldo local descargado', 'ok');
+    const nombre = `colserlog_respaldo_${fecha}.json`;
+    // Intento 1: <a download> (funciona en navegador normal)
+    try{
+        const a = document.createElement('a');
+        a.href = url; a.download = nombre;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(()=>URL.revokeObjectURL(url), 4000);
+        mostrarEstadoMega('💾 Respaldo local descargado', 'ok');
+        return;
+    }catch(e){ console.warn('download falló, probando pestaña', e); }
+    // Fallback: abrir en pestaña nueva (funciona en iframes sandbox)
+    const w = window.open(url, '_blank');
+    if(!w) alert('No se pudo descargar. Permite pop-ups o descarga el archivo desde el enlace generado.');
+    mostrarEstadoMega('💾 Respaldo abierto en pestaña nueva', 'ok');
+    setTimeout(()=>URL.revokeObjectURL(url), 8000);
 };
 
 window.guardarEnMega = async (silencioso=false)=>{
@@ -344,10 +404,8 @@ window.guardarEnMega = async (silencioso=false)=>{
         console.error('Error MEGA:', error);
         storageMegaCache = null;
         const msg = error?.message || 'Load failed';
-        // Mensaje más útil
         if(msg.includes('Load failed') || msg.includes('Failed to fetch') || msg.includes('NetworkError')){
-            mostrarEstadoMega(`❌ Error de red al conectar con MEGA: ${msg}. Verifica internet y que no estés abriendo el archivo como file://. Se descargará respaldo local.`, 'error');
-            // Fallback automático: descargar local
+            mostrarEstadoMega(`❌ Error de red al conectar con MEGA: ${msg}. Se descargará respaldo local.`, 'error');
             descargarRespaldoLocal();
         } else {
             mostrarEstadoMega(`❌ Error MEGA: ${msg}`, 'error');
@@ -417,6 +475,31 @@ window.generarInformeMensual = ()=>{
 };
 window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
 
+// ==================== BINDEOS POR addEventListener (evita CSP) ====================
+function bindClick(id, fn){ const el = document.getElementById(id); if(el) el.addEventListener('click', fn); }
+function bindearBotones(){
+    bindClick('btnImprimirDiario', () => window.imprimirReporteDiario());
+}
+
+// ==================== DIAGNÓSTICO AUTOMÁTICO ====================
+function diagnosticar(){
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','guardarEnMega','cargarDesdeMega',
+                 'descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase',
+                 'registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda'];
+    const faltan = fns.filter(f => typeof window[f] !== 'function');
+    if(faltan.length){
+        console.error('❌ Funciones faltantes en window:', faltan);
+        // No interrumpimos con alert para no molestar, solo aviso por consola
+    } else {
+        console.log('✅ Todas las funciones están listas en window.');
+    }
+    // Verificación de dependencias externas
+    if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó');
+    else console.log('✅ Chart.js OK');
+    if(typeof Html5Qrcode === 'undefined') console.warn('⚠️ html5-qrcode no cargó (el escaneo no funcionará)');
+    else console.log('✅ html5-qrcode OK');
+}
+
 window.onload = ()=>{
     cargarPreferencias();
     cargarTiemposBase();
@@ -425,7 +508,9 @@ window.onload = ()=>{
     actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); if(visitas.length===0) renderizarGrafica();
     document.getElementById('estadoPaquete').selectedIndex=0;
     const ahora=new Date(); document.getElementById('mesInforme').value=ahora.getMonth()+1; document.getElementById('anioInforme').value=ahora.getFullYear();
+    bindearBotones();
+    diagnosticar();
 };
 </script>
-<script>(function(){var loc=location.href.replace(/#.*$/,"");var ATTR_NAMES=["data-product-id","data-productid","data-product_id","product-id","productid","product_id","data-source-entity-id","source-entity-id","source_entity_id","data-product","data-metadata","data-meta"];var DATASET_KEYS=["productId","productid","product_id","sourceEntityId","sourceentityid","source_entity_id","product","metadata","meta"];function readProductId(value){if(typeof value!=="string"||value.length===0)return null;if(/^[0-9]{6,}$/.test(value))return value;var match=value.match(/(?:product(?:_|-)?id|source(?:_|-)?entity(?:_|-)?id)["'=:\s]+([0-9]{6,})/i);return match?match[1]:null}function extractProductId(start){for(var node=start;node&&node!==document.body;node=node.parentElement){for(var i=0;i<ATTR_NAMES.length;i++){var attrValue=node.getAttribute&&node.getAttribute(ATTR_NAMES[i]);var attrProductId=readProductId(attrValue);if(attrProductId)return attrProductId}var dataset=node.dataset||null;if(dataset){for(var j=0;j<DATASET_KEYS.length;j++){var dataValue=dataset[DATASET_KEYS[j]];var dataProductId=readProductId(dataValue);if(dataProductId)return dataProductId}}}return null}function isInlineMediaSlotElement(node){return !!(node&&node.getAttribute&&node.getAttribute("data-clippy-inline-media-slot")!==null)}function findInlineMediaSlot(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(isInlineMediaSlotElement(node))return node}return null}function readInlineMediaUrl(node){if(!node)return null;return node.getAttribute&&((node.getAttribute("data-clippy-inline-media-url")||node.getAttribute("data-url")||node.getAttribute("data_url")))||node.href||null}function stripHash(url){return String(url).replace(/#.*$/,"")}function urlsMatch(a,b){if(!a||!b)return false;try{return stripHash(new URL(a,loc).href)===stripHash(new URL(b,loc).href)}catch(_){return stripHash(a)===stripHash(b)}}function isFirstPartyReelUrl(value){try{var url=new URL(value,loc);if(url.protocol!=="https:")return false;var host=url.hostname.toLowerCase();var supported=host==="instagram.com"||host.endsWith(".instagram.com")||host==="facebook.com"||host.endsWith(".facebook.com");return supported&&/\/reels?\//i.test(url.pathname)}catch(_){return false}}function isInlineMediaUrlClick(node,href){var slot=findInlineMediaSlot(node);if(!slot)return false;var slotUrl=readInlineMediaUrl(slot);if(slotUrl)return urlsMatch(href,slotUrl);return isFirstPartyReelUrl(href)}function findDataHref(start){for(var node=start;node&&node!==document.body;node=node.parentElement){if(node.getAttribute){var href=node.getAttribute("data-href")||node.getAttribute("data-url");if(href)return{href:href,node:node}}}return null}var nativeOpen=window.open;window.open=function(url){if(parent!==window&&typeof url==="string"&&/^https?:\/\//.test(url)){parent.postMessage({type:"ecto:usercontent-link-click",href:url},"*");return null}return nativeOpen?nativeOpen.apply(window,arguments):null};document.addEventListener("click",function(e){var target=e.target instanceof Element?e.target:null;if(!target)return;if(parent===window)return;var a=target.closest?target.closest("a[href]"):null;if(a&&a.href&&/^https?:\/\//.test(a.href)&&a.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(a,a.href))return;var productId=extractProductId(target)||extractProductId(a);if(productId){e.preventDefault();parent.postMessage({type:"ecto-artifact-link-click",productId:productId},"*");return}e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:a.href},"*");return}var dataHref=findDataHref(target);if(dataHref&&/^https?:\/\//.test(dataHref.href)&&dataHref.href.replace(/#.*$/,"")!==loc){if(isInlineMediaUrlClick(dataHref.node,dataHref.href))return;e.preventDefault();parent.postMessage({type:"ecto:usercontent-link-click",href:dataHref.href},"*")}},true)})();</script><script>(function(){var FOCUS_TYPE="ecto:artifact-focus-request";var CLOSE_TYPE="ecto:artifact-close-request";function focusArtifactDocument(){var body=document.body;if(!body)return;try{window.focus();}catch(e){}if(!body.hasAttribute("tabindex"))body.setAttribute("tabindex","-1");try{body.focus({preventScroll:true});}catch(e){try{body.focus();}catch(e2){}}}window.addEventListener("message",function(event){if(event.source!==window.parent)return;var data=event.data;if(!data||typeof data!=="object"||data.type!==FOCUS_TYPE)return;if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",focusArtifactDocument,{once:true});return;}focusArtifactDocument();});window.addEventListener("keydown",function(event){if(event.key!=="Escape")return;window.setTimeout(function(){if(event.defaultPrevented)return;window.parent.postMessage({type:CLOSE_TYPE},"*");},0);});})();</script></body>
+</body>
 </html>
