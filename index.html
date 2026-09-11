@@ -107,11 +107,26 @@
         .informe-tabla tr.total-row td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; }
         .informe-firma { margin-top: 50px; display: flex; justify-content: space-around; }
         .informe-firma div { border-top: 1px solid #000; padding-top: 5px; width: 40%; text-align: center; font-size: 12px; }
+
+        /* ====== ÁREA DE IMPRESIÓN (oculta en pantalla) ====== */
+        #areaImpresion { display: none; }
+
         @media print {
             body { background: white; padding: 0; margin: 0; }
             .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
             .no-print { display: none !important; }
             @page { margin: 1.2cm; }
+
+            /* Modo impresión programática: solo se ve el área preparada */
+            body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
+            body.modo-impresion #areaImpresion {
+                display: block !important;
+                position: static !important;
+                width: 100% !important;
+            }
+            #areaImpresion img { max-width: 100%; height: auto; page-break-inside: avoid; }
+            #areaImpresion table { page-break-inside: auto; }
+            #areaImpresion tr { page-break-inside: avoid; page-break-after: auto; }
         }
     </style>
 </head>
@@ -120,7 +135,7 @@
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - CORREGIDO</h1>
     <div style="background:#fff3cd; padding:10px; border-radius:6px; font-size:0.85rem; margin-bottom:15px; border:1px solid #ffeeba;">
-        <strong>✅ Cambios aplicados:</strong> MEGA con fallback de CDN, impresión robusta (ventana nueva), botones vinculados por addEventListener, diagnóstico automático y respaldo local si MEGA falla. No abras como <code>file://</code>, súbelo a un hosting o usa Live Server.
+        <strong>✅ Cambios aplicados:</strong> Impresión robusta en la misma página (sin pop-ups), conversión de gráficas a imágenes antes de imprimir, detección correcta del informe mensual visible, y fallback local si MEGA falla.
     </div>
 
     <div class="section">
@@ -257,10 +272,10 @@ window.guardarEdicion = (index)=>{ const ic=document.getElementById(`edit-codigo
 window.eliminarVisita = (index)=>{ visitas.splice(index,1); if(filaEditando===index) filaEditando=null; else if(filaEditando!==null&&filaEditando>index) filaEditando--; recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
 
 function actualizarDashboard(){ let ent=contadores['Entregado']||0; let noEnt=totalVisitas-ent; let prom=Math.round(totalMinutosVisitas/totalVisitas)||0; document.getElementById('c-entregados').innerText=ent; document.getElementById('c-noentregados').innerText=noEnt; document.getElementById('c-total').innerText=totalVisitas; document.getElementById('c-promedio').innerText=prom+' min'; renderizarGrafica(); guardarEstadoCompleto(); }
-function renderizarGrafica(){ const ctx=document.getElementById('graficaInforme').getContext('2d'); if(miGrafico) miGrafico.destroy(); miGrafico=new Chart(ctx,{type:'bar',data:{labels:Object.keys(contadores),datasets:[{label:'Cantidad',data:Object.values(contadores),backgroundColor:['#2ecc71','#e74c3c','#e67e22','#3498db','#95a5a6','#f1c40f','#9b59b6','#1abc9c','#e84393','#00b894','#fdcb6e']}]},options:{responsive:true,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}}); }
+function renderizarGrafica(){ const ctx=document.getElementById('graficaInforme').getContext('2d'); if(miGrafico) miGrafico.destroy(); miGrafico=new Chart(ctx,{type:'bar',data:{labels:Object.keys(contadores),datasets:[{label:'Cantidad',data:Object.values(contadores),backgroundColor:['#2ecc71','#e74c3c','#e67e22','#3498db','#95a5a6','#f1c40f','#9b59b6','#1abc9c','#e84393','#00b894','#fdcb6e']}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1}}},plugins:{legend:{display:false}}}}); }
 function calcularPromedios(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return {promedioDia:0,promedioSemana:0,promedioMes:0}; let total=0; for(let f of fechas) total+=h[f].contadores['Entregado']||0; const pDia=total/fechas.length; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+'-'+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const pSem=Object.values(semanas).reduce((a,b)=>a+b,0)/(Object.keys(semanas).length||1); const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+'-'+String(fecha.getMonth()+1).padStart(2,'0'); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const pMes=Object.values(meses).reduce((a,b)=>a+b,0)/(Object.keys(meses).length||1); return {promedioDia:pDia,promedioSemana:pSem,promedioMes:pMes}; }
-function actualizarGraficaPromedios(){ const {promedioDia,promedioSemana,promedioMes}=calcularPromedios(); document.getElementById('prom-dia').textContent=promedioDia.toFixed(1); document.getElementById('prom-semana').textContent=promedioSemana.toFixed(1); document.getElementById('prom-mes').textContent=promedioMes.toFixed(1); const ctx=document.getElementById('graficaPromedios').getContext('2d'); if(miGraficoPromedios) miGraficoPromedios.destroy(); miGraficoPromedios=new Chart(ctx,{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data:[promedioDia,promedioSemana,promedioMes],backgroundColor:['#3498db','#2ecc71','#f1c40f']}]},options:{responsive:true,scales:{y:{beginAtZero:true}}}}); }
-function actualizarInformesSemanalesMensuales(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+' - Sem '+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.toLocaleString('es',{month:'long',year:'numeric'}); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const ctxS=document.getElementById('graficaSemana').getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctxS,{type:'bar',data:{labels:Object.keys(semanas),datasets:[{label:'Por Semana',data:Object.values(semanas),backgroundColor:'#3498db'}]},options:{responsive:true}}); const ctxM=document.getElementById('graficaMes').getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctxM,{type:'bar',data:{labels:Object.keys(meses),datasets:[{label:'Por Mes',data:Object.values(meses),backgroundColor:'#2ecc71'}]},options:{responsive:true}}); }
+function actualizarGraficaPromedios(){ const {promedioDia,promedioSemana,promedioMes}=calcularPromedios(); document.getElementById('prom-dia').textContent=promedioDia.toFixed(1); document.getElementById('prom-semana').textContent=promedioSemana.toFixed(1); document.getElementById('prom-mes').textContent=promedioMes.toFixed(1); const ctx=document.getElementById('graficaPromedios').getContext('2d'); if(miGraficoPromedios) miGraficoPromedios.destroy(); miGraficoPromedios=new Chart(ctx,{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data:[promedioDia,promedioSemana,promedioMes],backgroundColor:['#3498db','#2ecc71','#f1c40f']}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true}}}}); }
+function actualizarInformesSemanalesMensuales(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+' - Sem '+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.toLocaleString('es',{month:'long',year:'numeric'}); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const ctxS=document.getElementById('graficaSemana').getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctxS,{type:'bar',data:{labels:Object.keys(semanas),datasets:[{label:'Por Semana',data:Object.values(semanas),backgroundColor:'#3498db'}]},options:{responsive:true,animation:false}}); const ctxM=document.getElementById('graficaMes').getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctxM,{type:'bar',data:{labels:Object.keys(meses),datasets:[{label:'Por Mes',data:Object.values(meses),backgroundColor:'#2ecc71'}]},options:{responsive:true,animation:false}}); }
 
 // ===== FUNCIONES GLOBALES (necesarias para onclick) =====
 window.calcularTiemposBase = function(){ let iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value; if(!iC||!fC||!sE||!pE){ alert("Completa todas las horas."); return; } let minC=calcularMinutos(iC,fC), minP=calcularMinutos(fC,sE), minT=calcularMinutos(sE,pE), minTot=calcularMinutos(iC,pE); const r=document.getElementById('resumenTiempos'); r.style.display='block'; r.innerHTML=`<div class="intervalo">⏳ <span>${minC}</span> min — Carga (${iC} → ${fC})</div><div class="intervalo">⏳ <span>${minP}</span> min — Prep (${fC} → ${sE})</div><div class="intervalo">⏳ <span>${minT}</span> min — Viaje (${sE} → ${pE})</div><div style="margin-top:10px;font-weight:bold;border-top:1px solid #ccc;padding-top:8px;">🕒 <span style="color:#e74c3c;">${minTot}</span> min totales</div>`; guardarTiemposBase(); };
@@ -270,52 +285,92 @@ window.registrarVisita = ()=>{ let l=document.getElementById('llegadaCliente').v
 window.iniciarEscaneo = ()=>{ if(escaneoActivo) return; const div=document.getElementById('lectorQR'); div.style.display='block'; document.getElementById('btnCancelarEscaneo').style.display='inline-block'; escaneoActivo=true; if(html5QrCode){ html5QrCode.clear(); html5QrCode=null; } html5QrCode=new Html5Qrcode("lectorQR"); const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]}; html5QrCode.start({facingMode:"environment"},cfg,(txt)=>{document.getElementById('codigoBarras').value=txt; cancelarEscaneo(); if(navigator.vibrate) navigator.vibrate(50);},()=>{}).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; }); };
 window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode.clear(); html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
 
-// ==================== IMPRESIÓN ROBUSTA ====================
-// Abre una ventana nueva con el contenido y los estilos para imprimir.
-// Funciona incluso dentro de iframes / artefactos donde window.print() está bloqueado.
+// ==================== IMPRESIÓN ROBUSTA (CORREGIDA) ====================
+// Imprime en la MISMA página (sin pop-ups), convierte canvases a imágenes
+// y detecta correctamente si el informe mensual está visible.
 function imprimirContenidoHTML(titulo){
     try{
-        let estilos = '';
-        document.querySelectorAll('style').forEach(s => estilos += s.textContent + '\n');
+        // 1) Convertir todos los canvas a imágenes (los clones de canvas salen vacíos)
+        const canvasData = [];
+        document.querySelectorAll('canvas').forEach((c, i) => {
+            try { canvasData[i] = c.toDataURL('image/png'); }
+            catch(e){ canvasData[i] = null; }
+        });
 
-        // Elegir qué imprimir
-        const contenedor = document.querySelector('#seccionInforme:not([style*="display: none"])')
-                        || document.querySelector('.container');
-        const clon = contenedor.cloneNode(true);
-        clon.querySelectorAll('.no-print, script').forEach(el => el.remove());
+        // 2) Detectar correctamente si el informe mensual está visible
+        const secInforme = document.getElementById('seccionInforme');
+        const informeVisible = secInforme &&
+            secInforme.style.display !== 'none' &&
+            secInforme.style.display !== '' &&
+            getComputedStyle(secInforme).display !== 'none';
 
-        const win = window.open('', '_blank', 'width=900,height=800');
-        if(!win){
-            // Fallback: si el navegador bloquea pop-ups, intenta con iframe oculto
-            const iframe = document.createElement('iframe');
-            iframe.style.position='fixed';
-            iframe.style.right='0'; iframe.style.bottom='0';
-            iframe.style.width='0'; iframe.style.height='0';
-            iframe.style.border='0';
-            document.body.appendChild(iframe);
-            const doc = iframe.contentWindow.document;
-            doc.open();
-            doc.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title><style>'+estilos+'</style></head><body>'+clon.innerHTML+'</body></html>');
-            doc.close();
-            setTimeout(()=>{
-                try{ iframe.contentWindow.focus(); iframe.contentWindow.print(); }
-                catch(e){ alert('No se pudo imprimir automáticamente. Usa Ctrl+P. Detalle: '+e.message); }
-                setTimeout(()=>iframe.remove(), 2000);
-            }, 600);
-            return;
+        const fuente = informeVisible
+            ? document.getElementById('informeContenedor')
+            : document.querySelector('.container');
+
+        if(!fuente){ alert('No hay contenido para imprimir.'); return; }
+
+        // 3) Crear (o reutilizar) el área de impresión
+        let area = document.getElementById('areaImpresion');
+        if(!area){
+            area = document.createElement('div');
+            area.id = 'areaImpresion';
+            document.body.appendChild(area);
         }
-        win.document.open();
-        win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+titulo+'</title><style>'+estilos+'</style></head><body>'+clon.innerHTML+'</body></html>');
-        win.document.close();
-        win.focus();
-        setTimeout(()=>{ try{ win.print(); }catch(e){ console.error('print err', e); } }, 700);
+
+        // 4) Clonar y quitar elementos no imprimibles
+        const clon = fuente.cloneNode(true);
+        clon.querySelectorAll('.no-print, script, button, #lectorQR').forEach(el => el.remove());
+        if(clon.style && clon.style.display === 'none') clon.style.display = '';
+        // Forzar visibilidad de subsecciones que tengan display:none inline
+        clon.querySelectorAll('[style*="display: none"], [style*="display:none"]').forEach(el => {
+            el.style.display = '';
+        });
+
+        // 5) Reemplazar canvases del clon por imágenes reales
+        const canvasClones = clon.querySelectorAll('canvas');
+        canvasClones.forEach((cc, i) => {
+            const data = canvasData[i];
+            if(data){
+                const img = document.createElement('img');
+                img.src = data;
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.display = 'block';
+                img.style.margin = '10px auto';
+                cc.parentNode.replaceChild(img, cc);
+            } else {
+                cc.remove();
+            }
+        });
+
+        // 6) Inyectar en el área de impresión
+        area.innerHTML = '';
+        area.appendChild(clon);
+
+        // 7) Activar modo impresión y lanzar el diálogo
+        document.body.classList.add('modo-impresion');
+
+        // Pequeña espera para que el navegador pinte antes de imprimir
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                try{ window.print(); }
+                catch(e){ console.error('print err', e); }
+                // Restaurar después de cerrar el diálogo
+                setTimeout(() => {
+                    document.body.classList.remove('modo-impresion');
+                    area.innerHTML = '';
+                }, 800);
+            }, 250);
+        });
     }catch(err){
         console.error('Error al imprimir:', err);
+        document.body.classList.remove('modo-impresion');
         alert('Error al imprimir: ' + err.message + '\nUsa Ctrl+P como alternativa.');
     }
 }
-window.imprimirReporteDiario = ()=> imprimirContenidoHTML('Reporte Diario Colserlog');
-window.imprimirInformeMensual = ()=> imprimirContenidoHTML('Informe Mensual Colserlog');
+window.imprimirReporteDiario = () => imprimirContenidoHTML('Reporte Diario Colserlog');
+window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Colserlog');
 
 window.toggleRespaldoAutomatico = ()=>{ const t=document.getElementById('toggleRespaldo'); respaldoAutomaticoActivo=t.checked; localStorage.setItem('respaldoAutomaticoMega',respaldoAutomaticoActivo); mostrarEstadoMega(respaldoAutomaticoActivo?'✅ Respaldo automático activado':'⚠️ Respaldo automático desactivado',respaldoAutomaticoActivo?'ok':'error'); };
 
@@ -323,7 +378,6 @@ window.toggleRespaldoAutomatico = ()=>{ const t=document.getElementById('toggleR
 async function conectarMega(){
     if(storageMegaCache) return storageMegaCache;
     let lastError = null;
-    // Probamos primero jsdelivr (más estable en redes corporativas), luego esm.sh
     const urls = [
         'https://cdn.jsdelivr.net/npm/megajs@1.3.3/dist/main.browser-es.mjs/+esm',
         'https://esm.sh/megajs@1.3.3'
@@ -367,7 +421,6 @@ window.descargarRespaldoLocal = ()=>{
     const url = URL.createObjectURL(blob);
     const fecha = new Date().toISOString().split('T')[0];
     const nombre = `colserlog_respaldo_${fecha}.json`;
-    // Intento 1: <a download> (funciona en navegador normal)
     try{
         const a = document.createElement('a');
         a.href = url; a.download = nombre;
@@ -378,7 +431,6 @@ window.descargarRespaldoLocal = ()=>{
         mostrarEstadoMega('💾 Respaldo local descargado', 'ok');
         return;
     }catch(e){ console.warn('download falló, probando pestaña', e); }
-    // Fallback: abrir en pestaña nueva (funciona en iframes sandbox)
     const w = window.open(url, '_blank');
     if(!w) alert('No se pudo descargar. Permite pop-ups o descarga el archivo desde el enlace generado.');
     mostrarEstadoMega('💾 Respaldo abierto en pestaña nueva', 'ok');
@@ -475,7 +527,7 @@ window.generarInformeMensual = ()=>{
 };
 window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
 
-// ==================== BINDEOS POR addEventListener (evita CSP) ====================
+// ==================== BINDEOS POR addEventListener ====================
 function bindClick(id, fn){ const el = document.getElementById(id); if(el) el.addEventListener('click', fn); }
 function bindearBotones(){
     bindClick('btnImprimirDiario', () => window.imprimirReporteDiario());
@@ -489,11 +541,9 @@ function diagnosticar(){
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length){
         console.error('❌ Funciones faltantes en window:', faltan);
-        // No interrumpimos con alert para no molestar, solo aviso por consola
     } else {
         console.log('✅ Todas las funciones están listas en window.');
     }
-    // Verificación de dependencias externas
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó');
     else console.log('✅ Chart.js OK');
     if(typeof Html5Qrcode === 'undefined') console.warn('⚠️ html5-qrcode no cargó (el escaneo no funcionará)');
