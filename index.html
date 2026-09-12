@@ -94,9 +94,27 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .chip-codigo button:hover { background: #c0392b; }
 .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 .descripcion-cell { font-size: 0.75em; color: #555; max-width: 150px; }
-.descripcion-cell small { display: block; color: #888; font-style: italic; }
 
-/* ====== ÁREA DE IMPRESIÓN ====== */
+/* 🆕 Banner de avisos de duplicado */
+#avisoDuplicado {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: #e74c3c; color: #fff; padding: 12px 20px; border-radius: 8px;
+    font-weight: bold; font-size: 0.95em; z-index: 99999;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;
+    max-width: 90%; text-align: center;
+    animation: shake 0.4s;
+}
+#avisoDuplicado.visible { display: block; }
+#avisoDuplicado.ok { background: #1abc9c; animation: none; }
+@keyframes shake {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    25% { transform: translateX(-50%) translateY(-4px); }
+    75% { transform: translateX(-50%) translateY(4px); }
+}
+
+#contadorUnicos { font-size: 0.85rem; color: #2c3e50; margin-top: 6px; text-align: center; font-weight: bold; }
+#contadorUnicos span { color: #e74c3c; }
+
 #areaImpresion { display: none; }
 
 @media print {
@@ -104,10 +122,8 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
     .no-print { display: none !important; }
     @page { size: A4 portrait; margin: 0.7cm; }
-
     body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
     body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
-
     #areaImpresion { font-size: 9pt !important; color: #000; }
     #areaImpresion h1 { font-size: 14pt !important; margin: 3px 0 !important; }
     #areaImpresion h2 { font-size: 12pt !important; margin: 5px 0 !important; padding-bottom: 3px !important; }
@@ -128,18 +144,16 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     #areaImpresion .informe-kpi { padding: 4px !important; }
     #areaImpresion .informe-kpi .label { font-size: 7pt !important; }
     #areaImpresion .informe-kpi .valor { font-size: 11pt !important; }
-    #areaImpresion .informe-tabla th,
-    #areaImpresion .informe-tabla td { padding: 2px 3px !important; font-size: 7.5pt !important; }
-    #areaImpresion .no-print,
-    #areaImpresion button { display: none !important; }
+    #areaImpresion .informe-tabla th, #areaImpresion .informe-tabla td { padding: 2px 3px !important; font-size: 7.5pt !important; }
+    #areaImpresion .no-print, #areaImpresion button { display: none !important; }
     #areaImpresion .descripcion-cell { font-size: 7pt !important; }
-    .page-break { page-break-before: always; }
-    .page-break-after { page-break-after: always; }
-    .evitar-corte { page-break-inside: avoid; }
 }
 </style>
 </head>
 <body>
+
+<!-- 🆕 Banner de aviso de duplicado -->
+<div id="avisoDuplicado"></div>
 
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
@@ -176,6 +190,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div style="text-align:center; margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
         <div id="listaCodigosPendientes" class="lista-codigos"></div>
         <div id="contadorCodigos" class="contador-codigos"></div>
+        <div id="contadorUnicos">✅ Códigos únicos registrados hoy: <span>0</span></div>
 
         <label>Estado del paquete:</label>
         <select id="estadoPaquete" onchange="actualizarPlaceholderDescripcion()">
@@ -197,7 +212,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         </select>
 
         <label>📝 Descripción detallada (opcional):</label>
-        <textarea id="descripcionVisita" placeholder="Escribe detalles adicionales aquí (ej: cliente pidió reprogramar para mañana, se dejó con portero, etc.)"></textarea>
+        <textarea id="descripcionVisita" placeholder="Escribe detalles adicionales aquí..."></textarea>
 
         <button onclick="registrarVisita()" style="background-color: #2c3e50;">📋 Guardar Visita (manual)</button>
     </div>
@@ -309,10 +324,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
   try {
     const app = initializeApp(firebaseConfig);
-    db = initializeFirestore(app, {
-      experimentalForceLongPolling: true,
-      useFetchStreams: false
-    });
+    db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
     console.log('✅ Firebase inicializado (long-polling)');
   } catch (e) {
     console.error('❌ Error inicializando Firebase:', e);
@@ -359,10 +371,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         actualizarEstadoNube('☁️ Sincronizado ' + new Date().toLocaleTimeString(), 'ok');
       } catch (e) {
         console.error('Error al sincronizar:', e.code, e.message);
-        let msg = e.message;
-        if (e.code === 'permission-denied') msg = 'Reglas de Firestore bloquean la escritura';
-        else if (e.message.includes('TIMEOUT')) msg = 'Sin conexión a Firestore';
-        actualizarEstadoNube('❌ ' + msg, 'error');
+        actualizarEstadoNube('❌ ' + e.message, 'error');
       }
     }, 800);
   };
@@ -371,16 +380,11 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     if (!db) return;
     const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
     onSnapshot(ref, (snap) => {
-      if (!snap.exists()) {
-        actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún', 'ok');
-        return;
-      }
+      if (!snap.exists()) { actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún', 'ok'); return; }
       const d = snap.data();
       if (d.version && d.version === ultimaVersionLocal) return;
-
       aplicandoRemoto = true;
       let huboCambios = false;
-
       const localEstado = localStorage.getItem('estadoSesion');
       const remotoEstado = d.estadoSesion ? JSON.stringify(d.estadoSesion) : null;
       if (localEstado !== remotoEstado) {
@@ -388,25 +392,16 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         else localStorage.removeItem('estadoSesion');
         huboCambios = true;
       }
-
       const localHist = localStorage.getItem('entregasDiariasDetallado');
       const remotoHist = JSON.stringify(d.entregasDiariasDetallado || {});
-      if (localHist !== remotoHist) {
-        localStorage.setItem('entregasDiariasDetallado', remotoHist);
-      }
-
+      if (localHist !== remotoHist) localStorage.setItem('entregasDiariasDetallado', remotoHist);
       if (d.tiemposBase) {
         ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(k => {
           if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
         });
       }
-
       actualizarEstadoNube('🔄 Actualizado desde otro dispositivo ' + new Date().toLocaleTimeString(), 'ok');
-
-      if (huboCambios && typeof window.recargarUIDesdeStorage === 'function') {
-        window.recargarUIDesdeStorage();
-      }
-
+      if (huboCambios && typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
       setTimeout(() => { aplicandoRemoto = false; }, 500);
     }, (err) => {
       console.warn('Error escuchando Firestore:', err);
@@ -427,11 +422,8 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
       ]);
       actualizarEstadoNube('✅ Datos subidos correctamente', 'ok');
     } catch (e) {
-      console.error('Error al subir:', e.code, e.message);
-      let msg = e.message;
-      if (e.code === 'permission-denied') msg = 'Reglas de Firestore bloquean la escritura';
-      else if (e.message.includes('TIMEOUT')) msg = 'Sin conexión (timeout)';
-      actualizarEstadoNube('❌ ' + msg, 'error');
+      console.error('Error al subir:', e);
+      actualizarEstadoNube('❌ Error: ' + e.message, 'error');
     }
   };
 
@@ -445,18 +437,11 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         getDoc(ref),
         new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
       ]);
-      if (!snap.exists()) {
-        actualizarEstadoNube('⚠️ No hay datos en la nube todavía', 'error');
-        return;
-      }
+      if (!snap.exists()) { actualizarEstadoNube('⚠️ No hay datos en la nube todavía', 'error'); return; }
       const d = snap.data();
       if (d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
       if (d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
-      if (d.tiemposBase) {
-        for (const k in d.tiemposBase) {
-          if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
-        }
-      }
+      if (d.tiemposBase) for (const k in d.tiemposBase) { if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]); }
       actualizarEstadoNube('✅ Datos descargados. Recargando...', 'ok');
       setTimeout(() => location.reload(), 1200);
     } catch (e) {
@@ -477,7 +462,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     syncAutomaticoActivo = (pref === null) ? true : (pref === 'true');
     const tgl = document.getElementById('toggleSync');
     if (tgl) tgl.checked = syncAutomaticoActivo;
-
     window.addEventListener('online', () => {
       actualizarEstadoNube('🌐 Conexión restaurada. Sincronizando...', 'loading');
       setTimeout(() => window.sincronizarConNube && window.sincronizarConNube(), 1000);
@@ -485,7 +469,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     window.addEventListener('offline', () => {
       actualizarEstadoNube('📴 Sin conexión (guardado local)', 'loading');
     });
-
     setTimeout(() => {
       if (!db) { actualizarEstadoNube('❌ Firebase no configurado', 'error'); return; }
       syncActivo = true;
@@ -504,11 +487,81 @@ ESTADOS.forEach(e => contadores[e] = 0);
 let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
 let miGrafico = null, miGraficoPromedios = null, miGraficoSemana = null, miGraficoMes = null;
 let html5QrCode = null, escaneoActivo = false, filaEditando = null;
-let codigosPendientes = [], ultimoCodigoEscaneado = '', ultimoTiempoEscaneo = 0;
+let codigosPendientes = [];
+
+// 🆕 ANTI-DUPLICADOS
+let codigosRegistradosHoy = new Set();   // Códigos ya registrados en visitas del día
+let codesScannedRecently = new Map();     // Código -> timestamp (anti-lectura repetida)
+const TIEMPO_BLOQUEO_MS = 5000;           // 5 segundos para bloquear relectura del mismo código
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; let [hh1,mm1]=h1.split(':').map(Number); let [hh2,mm2]=h2.split(':').map(Number); let m1=hh1*60+mm1, m2=hh2*60+mm2; if(m2<m1) m2+=1440; return m2-m1; }
 function getWeekNumber(d){ d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7)); const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d-ys)/86400000)+1)/7); }
+
+// 🆕 Reconstruir el set de códigos registrados hoy
+function cargarCodigosRegistradosHoy(){
+    codigosRegistradosHoy.clear();
+    visitas.forEach(v => {
+        if (v.codigo && v.codigo.trim()) codigosRegistradosHoy.add(v.codigo.trim());
+    });
+    actualizarContadorUnicos();
+}
+
+// 🆕 Actualizar contador visual de códigos únicos
+function actualizarContadorUnicos(){
+    const el = document.querySelector('#contadorUnicos span');
+    if (el) el.textContent = codigosRegistradosHoy.size;
+}
+
+// 🆕 Mostrar banner de duplicado
+function mostrarAviso(texto, tipo='error'){
+    const el = document.getElementById('avisoDuplicado');
+    if (!el) return;
+    el.textContent = texto;
+    el.className = tipo === 'ok' ? 'visible ok' : 'visible';
+    clearTimeout(el._timeout);
+    el._timeout = setTimeout(() => { el.className = ''; }, 2800);
+}
+
+// 🆕 Beep de error con Web Audio API
+function beepError(){
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 220;
+        osc.type = 'square';
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+        setTimeout(() => ctx.close(), 500);
+    } catch(e){ /* silencioso */ }
+}
+
+// 🆕 Beep de éxito
+function beepOk(){
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = 880;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.start(); osc.stop(ctx.currentTime + 0.15);
+        setTimeout(() => ctx.close(), 400);
+    } catch(e){ /* silencioso */ }
+}
+
+// 🆕 Verifica si un código es duplicado. Devuelve null si es válido, o un string con el motivo.
+function motivoDuplicado(cod){
+    if (!cod) return null;
+    if (codigosPendientes.includes(cod)) return 'Ya está en la lista de pendientes';
+    if (codigosRegistradosHoy.has(cod)) return 'Ya fue registrado hoy en otra visita';
+    return null;
+}
 
 window.actualizarPlaceholderDescripcion = function(){
     const est = document.getElementById('estadoPaquete').value;
@@ -538,29 +591,48 @@ function guardarEstadoCompleto(){
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 }
-function cargarEstadoCompleto(){ const raw=localStorage.getItem('estadoSesion'); if(!raw) return false; try{ const e=JSON.parse(raw); visitas=e.visitas||[]; const savedCont=e.contadores||{}; ESTADOS.forEach(k=>{ contadores[k] = savedCont[k] || 0; }); Object.keys(savedCont).forEach(k=>{ if(!(k in contadores)) contadores[k]=savedCont[k]; }); totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; return true;}catch{return false;} }
+function cargarEstadoCompleto(){ const raw=localStorage.getItem('estadoSesion'); if(!raw) return false; try{ const e=JSON.parse(raw); visitas=e.visitas||[]; const savedCont=e.contadores||{}; ESTADOS.forEach(k=>{ contadores[k] = savedCont[k] || 0; }); Object.keys(savedCont).forEach(k=>{ if(!(k in contadores)) contadores[k]=savedCont[k]; }); totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; cargarCodigosRegistradosHoy(); return true;}catch{return false;} }
 function guardarTiemposBase(){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const v=document.getElementById(id).value; localStorage.setItem('tiempoBase_'+id,v); }); if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube(); }
 function cargarTiemposBase(){ const ids=['inicioCarga','finCarga','salidaEmpresa','primeraEntrega']; ids.forEach(id=>{ const v=localStorage.getItem('tiempoBase_'+id); if(v) document.getElementById(id).value=v; }); if(ids.every(id=>document.getElementById(id).value!=='')) calcularTiemposBase(true); }
 function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0]; let h=JSON.parse(localStorage.getItem('entregasDiariasDetallado'))||{}; h[fecha]={contadores:{...contadores},totalVisitas,totalMinutos:totalMinutosVisitas}; localStorage.setItem('entregasDiariasDetallado',JSON.stringify(h)); }
 function cargarHistorialDetallado(){ const raw=localStorage.getItem('entregasDiariasDetallado'); if(!raw) return {}; try{return JSON.parse(raw);}catch{return {};} }
-function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); actualizarDashboard(); guardarEstadoCompleto(); }
+function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); cargarCodigosRegistradosHoy(); actualizarDashboard(); guardarEstadoCompleto(); }
 
-// ==================== MULTI-PEDIDO ====================
+// ==================== MULTI-PEDIDO CON ANTI-DUPLICADOS ====================
 window.agregarCodigo = function(){
     const inp = document.getElementById('codigoBarras');
     const cod = (inp.value||'').trim();
     if(!cod){ inp.focus(); return; }
+    const motivo = motivoDuplicado(cod);
+    if (motivo){
+        mostrarAviso('⚠️ ' + motivo, 'error');
+        beepError();
+        if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        inp.value = '';
+        return;
+    }
     agregarCodigoPendiente(cod);
     inp.value = ''; inp.focus();
 };
+
 function agregarCodigoPendiente(cod){
     if(!cod) return;
-    if(codigosPendientes.includes(cod)){ if(navigator.vibrate) navigator.vibrate([30,40,30]); return; }
+    cod = cod.trim();
+    const motivo = motivoDuplicado(cod);
+    if (motivo){
+        mostrarAviso('⚠️ ' + motivo, 'error');
+        beepError();
+        if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        return;
+    }
     codigosPendientes.push(cod);
     renderizarCodigosPendientes();
+    beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
 }
+
 window.eliminarCodigoPendiente = function(i){ codigosPendientes.splice(i,1); renderizarCodigosPendientes(); };
+
 function renderizarCodigosPendientes(){
     const cont = document.getElementById('listaCodigosPendientes');
     const contador = document.getElementById('contadorCodigos');
@@ -605,29 +677,20 @@ function renderizarTabla(){
         if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; tdC.appendChild(inp); } else tdC.textContent=v.codigo||'';
         fila.appendChild(tdC);
         const tdE=document.createElement('td');
-        if(editando){
-            const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`;
-            ESTADOS.forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); });
-            tdE.appendChild(sel);
-        } else tdE.textContent=v.estado;
+        if(editando){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ESTADOS.forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); }); tdE.appendChild(sel); } else tdE.textContent=v.estado;
         fila.appendChild(tdE);
         const tdD=document.createElement('td'); tdD.className='descripcion-cell';
-        if(editando){
-            const ta=document.createElement('textarea'); ta.id=`edit-desc-${indexOriginal}`;
-            ta.value=v.descripcion||''; ta.style.width='100%'; ta.style.minHeight='40px'; ta.style.fontSize='0.85em';
-            tdD.appendChild(ta);
-        } else {
-            tdD.textContent = v.descripcion ? v.descripcion : '—';
-        }
+        if(editando){ const ta=document.createElement('textarea'); ta.id=`edit-desc-${indexOriginal}`; ta.value=v.descripcion||''; ta.style.width='100%'; ta.style.minHeight='40px'; ta.style.fontSize='0.85em'; tdD.appendChild(ta); }
+        else { tdD.textContent = v.descripcion ? v.descripcion : '—'; }
         fila.appendChild(tdD);
         const tdA=document.createElement('td'); tdA.className='no-print';
         const div=document.createElement('div'); div.className='acciones-btn';
         if(editando){
-            const bG=document.createElement('button'); bG.textContent='💾'; bG.className='btn-guardar-edicion'; bG.title='Guardar'; bG.onclick=()=>guardarEdicion(indexOriginal); div.appendChild(bG);
-            const bC=document.createElement('button'); bC.textContent='❌'; bC.className='btn-cancelar-edicion'; bC.title='Cancelar'; bC.onclick=()=>{filaEditando=null; renderizarTabla();}; div.appendChild(bC);
+            const bG=document.createElement('button'); bG.textContent='💾'; bG.className='btn-guardar-edicion'; bG.onclick=()=>guardarEdicion(indexOriginal); div.appendChild(bG);
+            const bC=document.createElement('button'); bC.textContent='❌'; bC.className='btn-cancelar-edicion'; bC.onclick=()=>{filaEditando=null; renderizarTabla();}; div.appendChild(bC);
         } else {
-            const bE=document.createElement('button'); bE.textContent='✏️'; bE.className='btn-editar'; bE.title='Editar'; bE.onclick=()=>{filaEditando=indexOriginal; renderizarTabla();}; div.appendChild(bE);
-            const bD=document.createElement('button'); bD.textContent='🗑️'; bD.className='btn-eliminar-fila'; bD.title='Eliminar'; bD.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD);
+            const bE=document.createElement('button'); bE.textContent='✏️'; bE.className='btn-editar'; bE.onclick=()=>{filaEditando=indexOriginal; renderizarTabla();}; div.appendChild(bE);
+            const bD=document.createElement('button'); bD.textContent='🗑️'; bD.className='btn-eliminar-fila'; bD.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD);
         }
         tdA.appendChild(div); fila.appendChild(tdA); tabla.appendChild(fila);
     });
@@ -639,7 +702,17 @@ window.guardarEdicion = (index)=>{
     const se=document.getElementById(`edit-estado-${index}`);
     const de=document.getElementById(`edit-desc-${index}`);
     if(!ic||!se) return;
-    visitas[index].codigo=ic.value.trim();
+    const nuevoCod = ic.value.trim();
+    // 🆕 Verificar duplicado si cambió el código
+    if (nuevoCod && nuevoCod !== (visitas[index].codigo||'')){
+        const existeEnOtra = visitas.some((v,i) => i !== index && (v.codigo||'').trim() === nuevoCod);
+        if (existeEnOtra){
+            mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error');
+            beepError();
+            return;
+        }
+    }
+    visitas[index].codigo=nuevoCod;
     visitas[index].estado=se.value;
     visitas[index].descripcion = de ? de.value.trim() : (visitas[index].descripcion||'');
     filaEditando=null;
@@ -676,7 +749,15 @@ window.registrarVisita = ()=>{
     if(!l||!s){ alert("Ingresa llegada y salida"); return; }
     if(!es){ alert("Selecciona estado"); return; }
     const inputCod = (document.getElementById('codigoBarras').value||'').trim();
-    if(inputCod && !codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
+    if(inputCod){
+        const motivo = motivoDuplicado(inputCod);
+        if (motivo){
+            mostrarAviso('⚠️ ' + motivo, 'error');
+            beepError();
+            return;
+        }
+        if(!codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
+    }
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
     const t = calcularMinutos(l,s);
     const horaRegistro = new Date().toISOString();
@@ -699,7 +780,7 @@ window.registrarVisita = ()=>{
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 };
 
-// ==================== ESCÁNER ====================
+// ==================== ESCÁNER CON ANTI-DUPLICADOS FUERTE ====================
 window.iniciarEscaneo = ()=>{
     if(escaneoActivo) return;
     const div=document.getElementById('lectorQR');
@@ -711,10 +792,38 @@ window.iniciarEscaneo = ()=>{
     const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]};
     html5QrCode.start({facingMode:"environment"},cfg,
         (txt)=>{
+            const cod = (txt || '').trim();
+            if (!cod) return;
+
+            // 🆕 CAPA 1: Anti-lectura repetida del mismo código en corto tiempo
             const ahora = Date.now();
-            if(txt === ultimoCodigoEscaneado && (ahora - ultimoTiempoEscaneo) < 2000) return;
-            ultimoCodigoEscaneado = txt; ultimoTiempoEscaneo = ahora;
-            agregarCodigoPendiente(txt);
+            const ultimaVez = codesScannedRecently.get(cod) || 0;
+            if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) {
+                // Mismo código detectado hace <5s. Ignorar silenciosamente (evita spam).
+                return;
+            }
+            codesScannedRecently.set(cod, ahora);
+
+            // Limpiar entradas viejas cada vez (evitar crecer infinito)
+            if (codesScannedRecently.size > 100) {
+                const cutoff = ahora - 60000;
+                for (const [k, t] of codesScannedRecently) {
+                    if (t < cutoff) codesScannedRecently.delete(k);
+                }
+            }
+
+            // 🆕 CAPA 2 y 3: Verificar duplicado en pendientes o registrados hoy
+            const motivo = motivoDuplicado(cod);
+            if (motivo) {
+                mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
+                beepError();
+                if (navigator.vibrate) navigator.vibrate([100,50,100]);
+                return;
+            }
+
+            // ✅ Código único y nuevo → agregar
+            agregarCodigoPendiente(cod);
+            mostrarAviso('✅ Código agregado: ' + cod, 'ok');
         }, ()=>{}
     ).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; });
 };
@@ -723,7 +832,6 @@ window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ do
 // ==================== IMPRESIÓN OPTIMIZADA ====================
 function imprimirContenidoHTML(titulo){
     try{
-        // 1) Capturar todos los canvas como imágenes (con fondo blanco)
         const canvasData = [];
         document.querySelectorAll('canvas').forEach((c, i) => {
             try {
@@ -735,55 +843,31 @@ function imprimirContenidoHTML(titulo){
                 canvasData[i] = tmp.toDataURL('image/png');
             } catch(e){ canvasData[i] = null; }
         });
-
-        // 2) Elegir fuente: informe mensual visible o página completa
         const secInforme = document.getElementById('seccionInforme');
         const informeVisible = secInforme && secInforme.style.display !== 'none' && secInforme.style.display !== '' && getComputedStyle(secInforme).display !== 'none';
         const fuente = informeVisible ? document.getElementById('informeContenedor') : document.querySelector('.container');
         if(!fuente){ alert('No hay contenido para imprimir.'); return; }
-
-        // 3) Crear área de impresión
         let area = document.getElementById('areaImpresion');
         if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
-
-        // 4) Clonar y limpiar
         const clon = fuente.cloneNode(true);
-        clon.querySelectorAll('.no-print, script, button, #lectorQR, #seccionHistorial .busqueda-box').forEach(el => el.remove());
+        clon.querySelectorAll('.no-print, script, button, #lectorQR, #seccionHistorial .busqueda-box, #avisoDuplicado').forEach(el => el.remove());
         if(clon.style && clon.style.display === 'none') clon.style.display = '';
         clon.querySelectorAll('[style*="display: none"], [style*="display:none"]').forEach(el => { el.style.display = ''; });
-
-        // 5) Reemplazar canvases por imágenes
         const canvasClones = clon.querySelectorAll('canvas');
         canvasClones.forEach((cc, i) => {
             const data = canvasData[i];
-            if(data){
-                const img = document.createElement('img');
-                img.src = data;
-                img.style.maxWidth = '80%';
-                img.style.height = 'auto';
-                img.style.display = 'block';
-                img.style.margin = '8px auto';
-                img.style.pageBreakInside = 'avoid';
-                cc.parentNode.replaceChild(img, cc);
-            } else { cc.remove(); }
+            if(data){ const img = document.createElement('img'); img.src = data; img.style.maxWidth = '80%'; img.style.height = 'auto'; img.style.display = 'block'; img.style.margin = '8px auto'; cc.parentNode.replaceChild(img, cc); }
+            else { cc.remove(); }
         });
-
-        // 6) Inyectar y activar modo impresión
-        area.innerHTML = '';
-        area.appendChild(clon);
+        area.innerHTML = ''; area.appendChild(clon);
         document.body.classList.add('modo-impresion');
-
         requestAnimationFrame(() => {
             setTimeout(() => {
                 try{ window.print(); }catch(e){ console.error('print err', e); }
                 setTimeout(() => { document.body.classList.remove('modo-impresion'); area.innerHTML = ''; }, 800);
             }, 300);
         });
-    }catch(err){
-        console.error('Error al imprimir:', err);
-        document.body.classList.remove('modo-impresion');
-        alert('Error al imprimir: ' + err.message + '\nUsa Ctrl+P como alternativa.');
-    }
+    }catch(err){ console.error('Error al imprimir:', err); document.body.classList.remove('modo-impresion'); alert('Error al imprimir: ' + err.message); }
 }
 window.imprimirReporteDiario = () => imprimirContenidoHTML('Reporte Diario Colserlog');
 window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Colserlog');
@@ -815,7 +899,7 @@ window.cargarRespaldoDesdeArchivo = async function(event){
         const texto = await file.text();
         const respaldo = JSON.parse(texto);
         if(!respaldo.entregasDiariasDetallado && !respaldo.estadoSesion){ alert('❌ El archivo no tiene formato de respaldo.'); return; }
-        const opcion = confirm('¿Qué quieres hacer con este respaldo?\n\nAceptar = REEMPLAZAR los datos actuales\nCancelar = FUSIONAR con los datos actuales');
+        const opcion = confirm('¿Qué quieres hacer con este respaldo?\n\nAceptar = REEMPLAZAR\nCancelar = FUSIONAR');
         let historialFinal;
         if(opcion){ historialFinal = respaldo.entregasDiariasDetallado || {}; }
         else {
@@ -835,9 +919,9 @@ window.cargarRespaldoDesdeArchivo = async function(event){
         if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
         if(respaldo.tiemposBase){ for(const k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
         if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-        alert('✅ Respaldo cargado correctamente. Recargando...');
+        alert('✅ Respaldo cargado. Recargando...');
         setTimeout(()=>location.reload(), 800);
-    }catch(e){ console.error(e); alert('❌ Error al leer el archivo: ' + e.message); }
+    }catch(e){ console.error(e); alert('❌ Error al leer: ' + e.message); }
     finally{ event.target.value = ''; }
 };
 
@@ -852,7 +936,7 @@ function descargarWord(nombreArchivo, contenidoHTML){
   table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 8pt; page-break-inside: auto; }
   th { background: #2c3e50; color: #fff; padding: 4px 5px; border: 1px solid #1a252f; text-align: center; font-size: 8pt; }
   td { padding: 3px 5px; border: 1px solid #bbb; text-align: center; font-size: 8pt; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
+  tr { page-break-inside: avoid; }
   thead { display: table-header-group; }
   tr:nth-child(even) td { background: #f8f9fa; }
   .total-row td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; }
@@ -860,7 +944,7 @@ function descargarWord(nombreArchivo, contenidoHTML){
   .kpis td { border: 1px solid #ccc; background: #f8f9fa; padding: 6px; text-align: center; width: 25%; }
   .kpi-label { font-size: 7pt; color: #666; text-transform: uppercase; }
   .kpi-valor { font-size: 12pt; font-weight: bold; color: #2c3e50; }
-  .firma { margin-top: 40px; page-break-inside: avoid; }
+  .firma { margin-top: 40px; }
   .firma table td { border: none; border-top: 1px solid #000; padding-top: 5px; width: 40%; font-size: 9pt; text-align: center; }
   .header-info { text-align: center; font-size: 8pt; color: #777; margin-bottom: 10px; }
   .descripcion-col { text-align: left; font-size: 7.5pt; max-width: 150px; }
@@ -887,9 +971,7 @@ window.exportarDiaAWord = function(){
     </tr></table>
     <h3>📋 Visitas Registradas</h3>
     <table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
-    visitas.forEach((v, i) => {
-        html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`;
-    });
+    visitas.forEach((v, i) => { html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
     html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="3"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>
     <h3>📈 Distribución por Estado</h3>
     <table><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>`;
@@ -904,7 +986,7 @@ window.exportarMesAWord = function(){
     if(!mes || !anio){ alert('Selecciona mes y año primero.'); return; }
     const h = cargarHistorialDetallado();
     const fechasMes = Object.keys(h).filter(f => { const [y,m] = f.split('-').map(Number); return y===anio && m===mes; }).sort();
-    if(fechasMes.length === 0){ alert(`No hay datos guardados para ${mes}/${anio}.`); return; }
+    if(fechasMes.length === 0){ alert(`No hay datos para ${mes}/${anio}.`); return; }
     const nombreMes = new Date(anio, mes-1, 1).toLocaleString('es', { month:'long' });
     const cap = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
     let totEnt=0, totVis=0, totMin=0; const contMes = {};
@@ -978,7 +1060,7 @@ window.exportarHistorialCompletoAWord = function(){
 window.guardarDia = ()=>{
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-    alert("✅ Día guardado. Se sincronizará automáticamente con la nube.");
+    alert("✅ Día guardado.");
     actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
 window.reiniciarDia = ()=>{
@@ -987,11 +1069,13 @@ window.reiniciarDia = ()=>{
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
     limpiarSesion(); alert("✅ Día reiniciado");
 };
-window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual? Historial se conserva.")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
+window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual?")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
 function limpiarSesion(){
     ESTADOS.forEach(k=>contadores[k]=0);
     totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
+    codigosRegistradosHoy.clear();
     renderizarCodigosPendientes();
+    actualizarContadorUnicos();
     ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); });
     document.getElementById('resumenTiempos').style.display='none';
     document.getElementById('cuerpoTabla').innerHTML='';
@@ -1009,7 +1093,9 @@ window.eliminarTodo = ()=>{
     for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); }
     ESTADOS.forEach(k=>contadores[k]=0);
     totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
+    codigosRegistradosHoy.clear();
     renderizarCodigosPendientes();
+    actualizarContadorUnicos();
     ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('resumenTiempos').style.display='none';
     document.getElementById('cuerpoTabla').innerHTML='';
@@ -1053,6 +1139,7 @@ window.recargarUIDesdeStorage = function(){
             ESTADOS.forEach(k=>{ contadores[k] = (e.contadores && e.contadores[k]) || 0; });
             totalMinutosVisitas = e.totalMinutosVisitas || 0;
             totalVisitas = e.totalVisitas || 0;
+            cargarCodigosRegistradosHoy();
         }
         cargarTiemposBase();
         renderizarTabla();
@@ -1078,6 +1165,7 @@ window.onload = ()=>{
     if(visitas.length===0) renderizarGrafica();
     document.getElementById('estadoPaquete').selectedIndex=0;
     renderizarCodigosPendientes();
+    actualizarContadorUnicos();
     window.actualizarPlaceholderDescripcion();
     const ahora=new Date();
     document.getElementById('mesInforme').value=ahora.getMonth()+1;
