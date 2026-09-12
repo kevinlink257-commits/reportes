@@ -2,22 +2,10 @@
 <html lang="es">
 <head>
 <style>
-@font-face {
-  font-family: "Optimistic";
-  font-style: normal;
-  font-weight: 400 600;
-  font-display: swap;
-  src: url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");
-}
-@font-face {
-  font-family: "Optimistic Mono";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");
-}
-:where(html) { font-family: "Optimistic", system-ui, sans-serif; }
-:where(code, pre, kbd, samp) { font-family: "Optimistic Mono", ui-monospace, monospace; }
+@font-face{font-family:"Optimistic";font-style:normal;font-weight:400 600;font-display:swap;src:url("/fonts/OptimisticAI_VF_Optimized.woff2") format("woff2");}
+@font-face{font-family:"Optimistic Mono";font-style:normal;font-weight:400;font-display:swap;src:url("/fonts/OptimisticMono_W_TextRegular.woff2") format("woff2");}
+:where(html){font-family:"Optimistic",system-ui,sans-serif;}
+:where(code,pre,kbd,samp){font-family:"Optimistic Mono",ui-monospace,monospace;}
 </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -35,8 +23,8 @@
         button { background-color: #3498db; color: white; font-weight: bold; border: none; cursor: pointer; margin-top: 15px; }
         button:hover { background-color: #2980b9; }
         .btn-imprimir { background-color: #2ecc71; font-size: 16px; }
-        .btn-mega { background-color: #d9272e; }
-        .btn-mega:hover { background-color: #b81f25; }
+        .btn-nube { background-color: #1abc9c; }
+        .btn-nube:hover { background-color: #16a085; }
         .btn-informe { background-color: #34495e; }
         .btn-guardar { background-color: #1abc9c; }
         .btn-reiniciar { background-color: #e67e22; }
@@ -78,10 +66,10 @@
         .busqueda-box { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
         .contador-busqueda { font-size: 0.85rem; color: #555; margin: 8px 0 0 0; }
         .sin-resultados { padding: 20px; color: #888; text-align: center; font-style: italic; }
-        .estado-mega { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.9em; text-align: center; display: none; }
-        .estado-mega.ok { background: #d4edda; color: #155724; display: block; }
-        .estado-mega.error { background: #f8d7da; color: #721c24; display: block; }
-        .estado-mega.loading { background: #fff3cd; color: #856404; display: block; }
+        .estado-nube { margin-top: 10px; padding: 8px; border-radius: 4px; font-size: 0.9em; text-align: center; display: block; }
+        .estado-nube.ok { background: #d4edda; color: #155724; }
+        .estado-nube.error { background: #f8d7da; color: #721c24; }
+        .estado-nube.loading { background: #fff3cd; color: #856404; }
         .toggle-wrapper { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 12px 15px; border-radius: 6px; border: 1px solid #ddd; margin-top: 12px; }
         .toggle-wrapper .toggle-label { margin: 0; font-weight: bold; color: #2c3e50; flex: 1; }
         .toggle-wrapper .toggle-sub { display: block; font-weight: normal; font-size: 0.78rem; color: #666; margin-top: 3px; }
@@ -106,7 +94,6 @@
         .informe-firma { margin-top: 50px; display: flex; justify-content: space-around; }
         .informe-firma div { border-top: 1px solid #000; padding-top: 5px; width: 40%; text-align: center; font-size: 12px; }
 
-        /* ====== Lista de códigos pendientes (multi-pedido) ====== */
         .lista-codigos { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 8px 10px; margin-top: 10px; min-height: 42px; }
         .lista-codigos .lista-vacia { color: #999; font-style: italic; font-size: 0.82rem; }
         .chip-codigo { display: inline-flex; align-items: center; gap: 6px; background: #e8f4fc; color: #2c3e50; padding: 4px 4px 4px 10px; border-radius: 16px; margin: 3px; font-size: 0.82rem; border: 1px solid #bee0f4; font-weight: bold; max-width: 100%; word-break: break-all; }
@@ -114,7 +101,6 @@
         .chip-codigo button:hover { background: #c0392b; }
         .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 
-        /* ====== ÁREA DE IMPRESIÓN ====== */
         #areaImpresion { display: none; }
 
         @media print {
@@ -123,11 +109,7 @@
             .no-print { display: none !important; }
             @page { margin: 1.2cm; }
             body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
-            body.modo-impresion #areaImpresion {
-                display: block !important;
-                position: static !important;
-                width: 100% !important;
-            }
+            body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
             #areaImpresion img { max-width: 100%; height: auto; page-break-inside: avoid; }
             #areaImpresion table { page-break-inside: auto; }
             #areaImpresion tr { page-break-inside: avoid; page-break-after: auto; }
@@ -139,7 +121,7 @@
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
     <div style="background:#e8f8f5; padding:10px; border-radius:6px; font-size:0.85rem; margin-bottom:15px; border:1px solid #b9e6dc;">
-        <strong>✨ Novedades:</strong> Multi-pedido por cliente · Impresión robusta · Exportar a Word · Descarga fragmentada con verificación.
+        <strong>☁️ Sincronización en la nube (Firebase):</strong> Los datos se sincronizan automáticamente entre todos tus dispositivos. Multi-pedido · Impresión robusta · Exportar a Word · Respaldo local JSON.
     </div>
 
     <div class="section">
@@ -164,7 +146,6 @@
         <div class="input-group">
             <input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button>
         </div>
-
         <label>Códigos de barras (uno por paquete):</label>
         <div class="input-group">
             <input type="text" id="codigoBarras" placeholder="Escribe o escanea un código" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
@@ -173,10 +154,8 @@
         </div>
         <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
         <div style="text-align:center; margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
-
         <div id="listaCodigosPendientes" class="lista-codigos"></div>
         <div id="contadorCodigos" class="contador-codigos"></div>
-
         <label>Estado del paquete:</label>
         <select id="estadoPaquete">
             <option value="">-- Seleccione un estado --</option>
@@ -226,24 +205,30 @@
     <div class="section"><h2>7. Informes Semanales y Mensuales</h2><div class="informe-grid"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
 
     <div class="section no-print">
-        <h2>8. Respaldo en MEGA e Informe Mensual</h2>
-        <div class="btn-group">
-            <button class="btn-mega" onclick="guardarEnMega()">☁️ Guardar en MEGA</button>
-            <button class="btn-mega" onclick="cargarDesdeMega()">⬇️ Restaurar desde MEGA</button>
-            <button class="btn-guardar" onclick="descargarRespaldoLocal()" style="background:#34495e;">💾 Descargar respaldo local</button>
+        <h2>8. ☁️ Sincronización en la Nube (Firebase)</h2>
+        <div id="estadoNube" class="estado-nube loading">⏳ Conectando con la nube...</div>
+        <div class="toggle-wrapper">
+            <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
+            <div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div>
+        </div>
+        <div class="btn-group" style="margin-top:10px;">
+            <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
+            <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
+            <button class="btn-informe" onclick="descargarRespaldoLocal()">💾 Descargar respaldo local</button>
         </div>
         <div class="btn-group" style="margin-top:10px;">
             <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Cargar respaldo JSON</button>
-            <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Exportar día a Word</button>
-            <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Exportar mes a Word</button>
-            <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Exportar todo a Word</button>
         </div>
         <input type="file" id="inputCargarJSON" accept=".json,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
-        <div class="toggle-wrapper">
-            <label class="toggle-label" for="toggleRespaldo">🔄 Respaldo automático en MEGA<span class="toggle-sub">Se ejecuta al Guardar Día, Reiniciar Día y antes de Eliminar Todo</span></label>
-            <div class="switch"><input type="checkbox" id="toggleRespaldo" onchange="toggleRespaldoAutomatico()"><span class="slider"></span></div>
+
+        <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
+        <h3>📄 Exportar a Word</h3>
+        <div class="btn-group">
+            <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día actual</button>
+            <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
+            <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Historial completo</button>
         </div>
-        <div id="estadoMega" class="estado-mega"></div>
+
         <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
         <label>📅 Selecciona el mes y año para el informe:</label>
         <div class="input-group">
@@ -258,35 +243,224 @@
     <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
 </div>
 
+<!-- ==================== FIREBASE SYNC ==================== -->
 <script type="module">
-// ==================== CONFIGURACIÓN MEGA ====================
-const MEGA_EMAIL = 'Fabian.257@hotmail.com';
-const MEGA_PASSWORD = 'Lev257@.kev';
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-// ==================== VARIABLES GLOBALES ====================
+  // ✅ TU CONFIGURACIÓN REAL
+  const firebaseConfig = {
+    apiKey: "AIzaSyCINy28c8Ga2V1VWPzPXfvcOaEpbrnKnyk",
+    authDomain: "colserlog-65de5.firebaseapp.com",
+    projectId: "colserlog-65de5",
+    storageBucket: "colserlog-65de5.firebasestorage.app",
+    messagingSenderId: "593319427038",
+    appId: "1:593319427038:web:dddae0742e979b5640bb4f"
+  };
+
+  // 🔐 CÓDIGO SECRETO (así lo pediste)
+  const CODIGO_USUARIO = "data-archi";
+
+  let db, syncActivo = false, guardadoPendiente = null;
+  let aplicandoRemoto = false, ultimaVersionLocal = 0;
+  let syncAutomaticoActivo = true;
+
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    window.__firebaseDB = db;
+    window.__firebaseCodigo = CODIGO_USUARIO;
+    console.log('✅ Firebase inicializado con proyecto: colserlog-65de5');
+  } catch (e) {
+    console.error('❌ Error inicializando Firebase:', e);
+    actualizarEstadoNube('❌ Error de configuración de Firebase', 'error');
+  }
+
+  function actualizarEstadoNube(texto, tipo='ok') {
+    const el = document.getElementById('estadoNube');
+    if (!el) return;
+    el.textContent = texto;
+    el.className = 'estado-nube ' + tipo;
+  }
+  window.actualizarEstadoNube = actualizarEstadoNube;
+
+  window.sincronizarConNube = function() {
+    if (!syncActivo || !syncAutomaticoActivo || !db) return;
+    clearTimeout(guardadoPendiente);
+    guardadoPendiente = setTimeout(async () => {
+      try {
+        const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
+        const payload = {
+          estadoSesion: JSON.parse(localStorage.getItem('estadoSesion') || 'null'),
+          entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'),
+          tiemposBase: {
+            inicioCarga:    localStorage.getItem('tiempoBase_inicioCarga') || '',
+            finCarga:       localStorage.getItem('tiempoBase_finCarga') || '',
+            salidaEmpresa:  localStorage.getItem('tiempoBase_salidaEmpresa') || '',
+            primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega') || ''
+          },
+          ultimaActualizacion: serverTimestamp(),
+          dispositivo: navigator.userAgent.slice(0, 80),
+          version: Date.now()
+        };
+        ultimaVersionLocal = payload.version;
+        await setDoc(ref, payload, { merge: true });
+        actualizarEstadoNube('☁️ Sincronizado ' + new Date().toLocaleTimeString(), 'ok');
+      } catch (e) {
+        console.warn('Error guardando en Firestore:', e);
+        actualizarEstadoNube('⚠️ Sin conexión (guardado local)', 'loading');
+      }
+    }, 1000);
+  };
+
+  function iniciarEscucha() {
+    if (!db) return;
+    const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
+    onSnapshot(ref, (snap) => {
+      if (!snap.exists()) {
+        actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún', 'ok');
+        return;
+      }
+      const d = snap.data();
+      if (d.version && d.version === ultimaVersionLocal) return;
+
+      aplicandoRemoto = true;
+      let huboCambios = false;
+
+      const localEstado = localStorage.getItem('estadoSesion');
+      const remotoEstado = d.estadoSesion ? JSON.stringify(d.estadoSesion) : null;
+      if (localEstado !== remotoEstado) {
+        if (d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
+        else localStorage.removeItem('estadoSesion');
+        huboCambios = true;
+      }
+
+      const localHist = localStorage.getItem('entregasDiariasDetallado');
+      const remotoHist = JSON.stringify(d.entregasDiariasDetallado || {});
+      if (localHist !== remotoHist) {
+        localStorage.setItem('entregasDiariasDetallado', remotoHist);
+      }
+
+      if (d.tiemposBase) {
+        ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(k => {
+          if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
+        });
+      }
+
+      actualizarEstadoNube('🔄 Actualizado desde otro dispositivo ' + new Date().toLocaleTimeString(), 'ok');
+
+      if (huboCambios && typeof window.recargarUIDesdeStorage === 'function') {
+        window.recargarUIDesdeStorage();
+      }
+
+      setTimeout(() => { aplicandoRemoto = false; }, 500);
+    }, (err) => {
+      console.warn('Error escuchando Firestore:', err);
+      actualizarEstadoNube('❌ Sin conexión a la nube: ' + err.message, 'error');
+    });
+  }
+
+  window.forzarSincronizacion = async function() {
+    if (!db) { alert('Firebase no está configurado.'); return; }
+    actualizarEstadoNube('⏳ Subiendo datos a la nube...', 'loading');
+    try {
+      const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
+      const payload = {
+        estadoSesion: JSON.parse(localStorage.getItem('estadoSesion') || 'null'),
+        entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'),
+        tiemposBase: {
+          inicioCarga:    localStorage.getItem('tiempoBase_inicioCarga') || '',
+          finCarga:       localStorage.getItem('tiempoBase_finCarga') || '',
+          salidaEmpresa:  localStorage.getItem('tiempoBase_salidaEmpresa') || '',
+          primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega') || ''
+        },
+        ultimaActualizacion: serverTimestamp(),
+        dispositivo: navigator.userAgent.slice(0, 80),
+        version: Date.now()
+      };
+      ultimaVersionLocal = payload.version;
+      await setDoc(ref, payload, { merge: true });
+      actualizarEstadoNube('✅ Datos subidos correctamente', 'ok');
+    } catch (e) {
+      actualizarEstadoNube('❌ Error al subir: ' + e.message, 'error');
+    }
+  };
+
+  window.cargarDeNube = async function() {
+    if (!db) { alert('Firebase no está configurado.'); return; }
+    if (!confirm('⚠️ Esto reemplazará los datos locales con los de la nube. ¿Continuar?')) return;
+    actualizarEstadoNube('⏳ Descargando datos de la nube...', 'loading');
+    try {
+      const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        actualizarEstadoNube('⚠️ No hay datos en la nube todavía', 'error');
+        return;
+      }
+      const d = snap.data();
+      if (d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
+      if (d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
+      if (d.tiemposBase) {
+        for (const k in d.tiemposBase) {
+          if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
+        }
+      }
+      actualizarEstadoNube('✅ Datos descargados. Recargando...', 'ok');
+      setTimeout(() => location.reload(), 1200);
+    } catch (e) {
+      actualizarEstadoNube('❌ Error al descargar: ' + e.message, 'error');
+    }
+  };
+
+  window.toggleSyncAutomatico = function() {
+    const t = document.getElementById('toggleSync');
+    syncAutomaticoActivo = t.checked;
+    localStorage.setItem('syncAutomaticoFirebase', syncAutomaticoActivo);
+    actualizarEstadoNube(syncAutomaticoActivo ? '✅ Sincronización activada' : '⚠️ Sincronización pausada', syncAutomaticoActivo ? 'ok' : 'error');
+  };
+
+  window.addEventListener('load', () => {
+    const pref = localStorage.getItem('syncAutomaticoFirebase');
+    syncAutomaticoActivo = (pref === null) ? true : (pref === 'true');
+    const tgl = document.getElementById('toggleSync');
+    if (tgl) tgl.checked = syncAutomaticoActivo;
+
+    setTimeout(() => {
+      if (!db) { actualizarEstadoNube('❌ Firebase no configurado', 'error'); return; }
+      syncActivo = true;
+      actualizarEstadoNube('☁️ Conectando...', 'loading');
+      iniciarEscucha();
+    }, 600);
+  });
+</script>
+
+<!-- ==================== APP PRINCIPAL ==================== -->
+<script type="module">
 let contadores = {'Entregado':0,'Rechazado':0,'Dirección Errónea':0,'Coordinado con Cliente':0,'No está en casa':0,'Pasa después (Sin dinero)':0,'No lo conocen':0,'Programo para otro día':0,'Dejar en oficina principal':0,'Pertenece a otra ciudad':0,'Cerrado local comercial':0};
 let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
 let miGrafico = null, miGraficoPromedios = null, miGraficoSemana = null, miGraficoMes = null;
-let html5QrCode = null, escaneoActivo = false, filaEditando = null, storageMegaCache = null, respaldoAutomaticoActivo = true;
-let codigosPendientes = [];
-let ultimoCodigoEscaneado = '';
-let ultimoTiempoEscaneo = 0;
+let html5QrCode = null, escaneoActivo = false, filaEditando = null;
+let codigosPendientes = [], ultimoCodigoEscaneado = '', ultimoTiempoEscaneo = 0;
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; let [hh1,mm1]=h1.split(':').map(Number); let [hh2,mm2]=h2.split(':').map(Number); let m1=hh1*60+mm1, m2=hh2*60+mm2; if(m2<m1) m2+=1440; return m2-m1; }
 function getWeekNumber(d){ d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7)); const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d-ys)/86400000)+1)/7); }
-function mostrarEstadoMega(msg,tipo,autoOcultar=true){ const el=document.getElementById('estadoMega'); el.className='estado-mega '+tipo; el.textContent=msg; if(autoOcultar&&(tipo==='ok'||tipo==='error')) setTimeout(()=>{el.className='estado-mega'; el.textContent='';},7000); }
 
-function cargarPreferencias(){ const v=localStorage.getItem('respaldoAutomaticoMega'); respaldoAutomaticoActivo=(v===null)?true:(v==='true'); const t=document.getElementById('toggleRespaldo'); if(t) t.checked=respaldoAutomaticoActivo; }
-function guardarEstadoCompleto(){ const e={visitas,contadores,totalMinutosVisitas,totalVisitas}; localStorage.setItem('estadoSesion',JSON.stringify(e)); guardarDiaActual(); }
+function guardarEstadoCompleto(){
+    const e={visitas,contadores,totalMinutosVisitas,totalVisitas};
+    localStorage.setItem('estadoSesion',JSON.stringify(e));
+    guardarDiaActual();
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+}
 function cargarEstadoCompleto(){ const raw=localStorage.getItem('estadoSesion'); if(!raw) return false; try{ const e=JSON.parse(raw); visitas=e.visitas||[]; contadores=e.contadores||contadores; totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; return true;}catch{return false;} }
-function guardarTiemposBase(){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const v=document.getElementById(id).value; localStorage.setItem('tiempoBase_'+id,v); }); }
-function cargarTiemposBase(){ const ids=['inicioCarga','finCarga','salidaEmpresa','primeraEntrega']; ids.forEach(id=>{ const v=localStorage.getItem('tiempoBase_'+id); if(v) document.getElementById(id).value=v; }); if(ids.every(id=>document.getElementById(id).value!=='')) calcularTiemposBase(); }
+function guardarTiemposBase(){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const v=document.getElementById(id).value; localStorage.setItem('tiempoBase_'+id,v); }); if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube(); }
+function cargarTiemposBase(){ const ids=['inicioCarga','finCarga','salidaEmpresa','primeraEntrega']; ids.forEach(id=>{ const v=localStorage.getItem('tiempoBase_'+id); if(v) document.getElementById(id).value=v; }); if(ids.every(id=>document.getElementById(id).value!=='')) calcularTiemposBase(true); }
 function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0]; let h=JSON.parse(localStorage.getItem('entregasDiariasDetallado'))||{}; h[fecha]={contadores:{...contadores},totalVisitas,totalMinutos:totalMinutosVisitas}; localStorage.setItem('entregasDiariasDetallado',JSON.stringify(h)); }
 function cargarHistorialDetallado(){ const raw=localStorage.getItem('entregasDiariasDetallado'); if(!raw) return {}; try{return JSON.parse(raw);}catch{return {};} }
 function recalcularEstadisticas(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); actualizarDashboard(); guardarEstadoCompleto(); }
 
-// ==================== MULTI-PEDIDO ====================
+// MULTI-PEDIDO
 window.agregarCodigo = function(){
     const inp = document.getElementById('codigoBarras');
     const cod = (inp.value||'').trim();
@@ -297,18 +471,12 @@ window.agregarCodigo = function(){
 };
 function agregarCodigoPendiente(cod){
     if(!cod) return;
-    if(codigosPendientes.includes(cod)){
-        if(navigator.vibrate) navigator.vibrate([30,40,30]);
-        return;
-    }
+    if(codigosPendientes.includes(cod)){ if(navigator.vibrate) navigator.vibrate([30,40,30]); return; }
     codigosPendientes.push(cod);
     renderizarCodigosPendientes();
     if(navigator.vibrate) navigator.vibrate(60);
 }
-window.eliminarCodigoPendiente = function(i){
-    codigosPendientes.splice(i,1);
-    renderizarCodigosPendientes();
-};
+window.eliminarCodigoPendiente = function(i){ codigosPendientes.splice(i,1); renderizarCodigosPendientes(); };
 function renderizarCodigosPendientes(){
     const cont = document.getElementById('listaCodigosPendientes');
     const contador = document.getElementById('contadorCodigos');
@@ -329,20 +497,44 @@ function renderizarCodigosPendientes(){
         span.textContent = cod;
         chip.appendChild(span);
         const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.textContent = '✕';
-        btn.title = 'Quitar código';
+        btn.type = 'button'; btn.textContent = '✕';
         btn.onclick = ()=>window.eliminarCodigoPendiente(i);
         chip.appendChild(btn);
         cont.appendChild(chip);
     });
-    if(contador){
-        contador.textContent = `📦 ${codigosPendientes.length} pedido(s) pendiente(s) de registrar`;
-    }
+    if(contador) contador.textContent = `📦 ${codigosPendientes.length} pedido(s) pendiente(s) de registrar`;
 }
 
-// ==================== TABLA ====================
-function renderizarTabla(){ const tabla=document.getElementById('cuerpoTabla'); tabla.innerHTML=''; const filtro=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase(); if(visitas.length===0){ document.getElementById('seccionHistorial').style.display='none'; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; return; } document.getElementById('seccionHistorial').style.display='block'; const items=[]; visitas.forEach((v,i)=>{ const cod=(v.codigo||'').toLowerCase(); if(!filtro||cod.includes(filtro)) items.push({visita:v,indexOriginal:i}); }); const cont=document.getElementById('contadorBusqueda'); if(cont){ cont.textContent=filtro?`🔎 ${items.length} resultado(s) para "${filtro}" de ${visitas.length}`:`Total: ${visitas.length} visita(s).`; } if(items.length===0){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=7; td.className='sin-resultados'; td.textContent='❌ No se encontraron visitas con ese código.'; tr.appendChild(td); tabla.appendChild(tr); return; } items.forEach(({visita:v,indexOriginal})=>{ const editando=filaEditando===indexOriginal; const fila=document.createElement('tr'); const tdNum=document.createElement('td'); tdNum.textContent=indexOriginal+1; fila.appendChild(tdNum); const tdL=document.createElement('td'); tdL.textContent=v.llegada; fila.appendChild(tdL); const tdS=document.createElement('td'); tdS.textContent=v.salida; fila.appendChild(tdS); const tdT=document.createElement('td'); tdT.innerHTML=`<strong>${v.tiempo} min</strong>`; fila.appendChild(tdT); const tdC=document.createElement('td'); if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; tdC.appendChild(inp); } else tdC.textContent=v.codigo||''; fila.appendChild(tdC); const tdE=document.createElement('td'); if(editando){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ['Entregado','Rechazado','Dirección Errónea','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial'].forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); }); tdE.appendChild(sel); } else tdE.textContent=v.estado; fila.appendChild(tdE); const tdA=document.createElement('td'); tdA.className='no-print'; const div=document.createElement('div'); div.className='acciones-btn'; if(editando){ const bG=document.createElement('button'); bG.textContent='💾 Guardar'; bG.className='btn-guardar-edicion'; bG.onclick=()=>guardarEdicion(indexOriginal); div.appendChild(bG); const bC=document.createElement('button'); bC.textContent='❌ Cancelar'; bC.className='btn-cancelar-edicion'; bC.onclick=()=>{filaEditando=null; renderizarTabla();}; div.appendChild(bC); } else { const bE=document.createElement('button'); bE.textContent='✏️ Editar'; bE.className='btn-editar'; bE.onclick=()=>{filaEditando=indexOriginal; renderizarTabla();}; div.appendChild(bE); const bD=document.createElement('button'); bD.textContent='🗑️ Eliminar'; bD.className='btn-eliminar-fila'; bD.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD); } tdA.appendChild(div); fila.appendChild(tdA); tabla.appendChild(fila); }); }
+// TABLA
+function renderizarTabla(){
+    const tabla=document.getElementById('cuerpoTabla'); tabla.innerHTML='';
+    const filtro=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase();
+    if(visitas.length===0){ document.getElementById('seccionHistorial').style.display='none'; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; return; }
+    document.getElementById('seccionHistorial').style.display='block';
+    const items=[]; visitas.forEach((v,i)=>{ const cod=(v.codigo||'').toLowerCase(); if(!filtro||cod.includes(filtro)) items.push({visita:v,indexOriginal:i}); });
+    const cont=document.getElementById('contadorBusqueda');
+    if(cont) cont.textContent=filtro?`🔎 ${items.length} resultado(s) para "${filtro}" de ${visitas.length}`:`Total: ${visitas.length} visita(s).`;
+    if(items.length===0){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=7; td.className='sin-resultados'; td.textContent='❌ No se encontraron visitas con ese código.'; tr.appendChild(td); tabla.appendChild(tr); return; }
+    items.forEach(({visita:v,indexOriginal})=>{
+        const editando=filaEditando===indexOriginal;
+        const fila=document.createElement('tr');
+        const tdNum=document.createElement('td'); tdNum.textContent=indexOriginal+1; fila.appendChild(tdNum);
+        const tdL=document.createElement('td'); tdL.textContent=v.llegada; fila.appendChild(tdL);
+        const tdS=document.createElement('td'); tdS.textContent=v.salida; fila.appendChild(tdS);
+        const tdT=document.createElement('td'); tdT.innerHTML=`<strong>${v.tiempo} min</strong>`; fila.appendChild(tdT);
+        const tdC=document.createElement('td');
+        if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; tdC.appendChild(inp); } else tdC.textContent=v.codigo||'';
+        fila.appendChild(tdC);
+        const tdE=document.createElement('td');
+        if(editando){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ['Entregado','Rechazado','Dirección Errónea','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial'].forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); }); tdE.appendChild(sel); } else tdE.textContent=v.estado;
+        fila.appendChild(tdE);
+        const tdA=document.createElement('td'); tdA.className='no-print';
+        const div=document.createElement('div'); div.className='acciones-btn';
+        if(editando){ const bG=document.createElement('button'); bG.textContent='💾 Guardar'; bG.className='btn-guardar-edicion'; bG.onclick=()=>guardarEdicion(indexOriginal); div.appendChild(bG); const bC=document.createElement('button'); bC.textContent='❌ Cancelar'; bC.className='btn-cancelar-edicion'; bC.onclick=()=>{filaEditando=null; renderizarTabla();}; div.appendChild(bC); }
+        else { const bE=document.createElement('button'); bE.textContent='✏️ Editar'; bE.className='btn-editar'; bE.onclick=()=>{filaEditando=indexOriginal; renderizarTabla();}; div.appendChild(bE); const bD=document.createElement('button'); bD.textContent='🗑️ Eliminar'; bD.className='btn-eliminar-fila'; bD.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD); }
+        tdA.appendChild(div); fila.appendChild(tdA); tabla.appendChild(fila);
+    });
+}
 window.filtrarVisitas = ()=>{ if(filaEditando!==null) filaEditando=null; renderizarTabla(); };
 window.limpiarBusqueda = ()=>{ const i=document.getElementById('busquedaGuia'); if(i) i.value=''; renderizarTabla(); if(i) i.focus(); };
 window.guardarEdicion = (index)=>{ const ic=document.getElementById(`edit-codigo-${index}`); const se=document.getElementById(`edit-estado-${index}`); if(!ic||!se) return; visitas[index].codigo=ic.value.trim(); visitas[index].estado=se.value; filaEditando=null; recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
@@ -354,8 +546,15 @@ function calcularPromedios(){ const h=cargarHistorialDetallado(); const fechas=O
 function actualizarGraficaPromedios(){ const {promedioDia,promedioSemana,promedioMes}=calcularPromedios(); document.getElementById('prom-dia').textContent=promedioDia.toFixed(1); document.getElementById('prom-semana').textContent=promedioSemana.toFixed(1); document.getElementById('prom-mes').textContent=promedioMes.toFixed(1); const ctx=document.getElementById('graficaPromedios').getContext('2d'); if(miGraficoPromedios) miGraficoPromedios.destroy(); miGraficoPromedios=new Chart(ctx,{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data:[promedioDia,promedioSemana,promedioMes],backgroundColor:['#3498db','#2ecc71','#f1c40f']}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true}}}}); }
 function actualizarInformesSemanalesMensuales(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+' - Sem '+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.toLocaleString('es',{month:'long',year:'numeric'}); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const ctxS=document.getElementById('graficaSemana').getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctxS,{type:'bar',data:{labels:Object.keys(semanas),datasets:[{label:'Por Semana',data:Object.values(semanas),backgroundColor:'#3498db'}]},options:{responsive:true,animation:false}}); const ctxM=document.getElementById('graficaMes').getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctxM,{type:'bar',data:{labels:Object.keys(meses),datasets:[{label:'Por Mes',data:Object.values(meses),backgroundColor:'#2ecc71'}]},options:{responsive:true,animation:false}}); }
 
-// ===== FUNCIONES GLOBALES =====
-window.calcularTiemposBase = function(){ let iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value; if(!iC||!fC||!sE||!pE){ alert("Completa todas las horas."); return; } let minC=calcularMinutos(iC,fC), minP=calcularMinutos(fC,sE), minT=calcularMinutos(sE,pE), minTot=calcularMinutos(iC,pE); const r=document.getElementById('resumenTiempos'); r.style.display='block'; r.innerHTML=`<div class="intervalo">⏳ <span>${minC}</span> min — Carga (${iC} → ${fC})</div><div class="intervalo">⏳ <span>${minP}</span> min — Prep (${fC} → ${sE})</div><div class="intervalo">⏳ <span>${minT}</span> min — Viaje (${sE} → ${pE})</div><div style="margin-top:10px;font-weight:bold;border-top:1px solid #ccc;padding-top:8px;">🕒 <span style="color:#e74c3c;">${minTot}</span> min totales</div>`; guardarTiemposBase(); };
+// FUNCIONES GLOBALES
+window.calcularTiemposBase = function(silencioso){
+    let iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value;
+    if(!iC||!fC||!sE||!pE){ if(!silencioso) alert("Completa todas las horas."); return; }
+    let minC=calcularMinutos(iC,fC), minP=calcularMinutos(fC,sE), minT=calcularMinutos(sE,pE), minTot=calcularMinutos(iC,pE);
+    const r=document.getElementById('resumenTiempos'); r.style.display='block';
+    r.innerHTML=`<div class="intervalo">⏳ <span>${minC}</span> min — Carga (${iC} → ${fC})</div><div class="intervalo">⏳ <span>${minP}</span> min — Prep (${fC} → ${sE})</div><div class="intervalo">⏳ <span>${minT}</span> min — Viaje (${sE} → ${pE})</div><div style="margin-top:10px;font-weight:bold;border-top:1px solid #ccc;padding-top:8px;">🕒 <span style="color:#e74c3c;">${minTot}</span> min totales</div>`;
+    guardarTiemposBase();
+};
 window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); };
 window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert("Primero marca llegada"); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert("Selecciona estado"); return; } document.getElementById('salidaCliente').value=horaActual(); registrarVisita(); };
 
@@ -365,25 +564,14 @@ window.registrarVisita = ()=>{
     let es=document.getElementById('estadoPaquete').value;
     if(!l||!s){ alert("Ingresa llegada y salida"); return; }
     if(!es){ alert("Selecciona estado"); return; }
-
     const inputCod = (document.getElementById('codigoBarras').value||'').trim();
-    if(inputCod && !codigosPendientes.includes(inputCod)){
-        codigosPendientes.push(inputCod);
-    }
-
+    if(inputCod && !codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
-
     const t = calcularMinutos(l,s);
     const horaRegistro = new Date().toISOString();
-
     codigos.forEach(co=>{
-        visitas.push({
-            llegada:l, salida:s, tiempo:t, estado:es, codigo:co,
-            horaRegistro: horaRegistro,
-            grupo: codigos.length > 1 ? horaRegistro : null
-        });
+        visitas.push({ llegada:l, salida:s, tiempo:t, estado:es, codigo:co, horaRegistro, grupo: codigos.length > 1 ? horaRegistro : null });
     });
-
     document.getElementById('llegadaCliente').value='';
     document.getElementById('salidaCliente').value='';
     document.getElementById('codigoBarras').value='';
@@ -395,13 +583,10 @@ window.registrarVisita = ()=>{
     renderizarTabla();
     actualizarGraficaPromedios();
     actualizarInformesSemanalesMensuales();
-
-    if(codigos.length > 1){
-        console.log(`✅ ${codigos.length} pedidos registrados para la misma visita`);
-    }
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 };
 
-// ===== ESCÁNER =====
+// ESCÁNER
 window.iniciarEscaneo = ()=>{
     if(escaneoActivo) return;
     const div=document.getElementById('lectorQR');
@@ -415,43 +600,24 @@ window.iniciarEscaneo = ()=>{
         (txt)=>{
             const ahora = Date.now();
             if(txt === ultimoCodigoEscaneado && (ahora - ultimoTiempoEscaneo) < 2000) return;
-            ultimoCodigoEscaneado = txt;
-            ultimoTiempoEscaneo = ahora;
+            ultimoCodigoEscaneado = txt; ultimoTiempoEscaneo = ahora;
             agregarCodigoPendiente(txt);
-        },
-        ()=>{}
-    ).catch(err=>{
-        alert("No se pudo acceder a cámara: "+err);
-        div.style.display='none';
-        document.getElementById('btnCancelarEscaneo').style.display='none';
-        escaneoActivo=false; html5QrCode=null;
-    });
+        }, ()=>{}
+    ).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; });
 };
 window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; try{html5QrCode.clear();}catch(e){} html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
 
-// ==================== IMPRESIÓN ROBUSTA ====================
+// IMPRESIÓN
 function imprimirContenidoHTML(titulo){
     try{
         const canvasData = [];
-        document.querySelectorAll('canvas').forEach((c, i) => {
-            try { canvasData[i] = c.toDataURL('image/png'); }
-            catch(e){ canvasData[i] = null; }
-        });
+        document.querySelectorAll('canvas').forEach((c, i) => { try { canvasData[i] = c.toDataURL('image/png'); } catch(e){ canvasData[i] = null; } });
         const secInforme = document.getElementById('seccionInforme');
-        const informeVisible = secInforme &&
-            secInforme.style.display !== 'none' &&
-            secInforme.style.display !== '' &&
-            getComputedStyle(secInforme).display !== 'none';
-        const fuente = informeVisible
-            ? document.getElementById('informeContenedor')
-            : document.querySelector('.container');
+        const informeVisible = secInforme && secInforme.style.display !== 'none' && secInforme.style.display !== '' && getComputedStyle(secInforme).display !== 'none';
+        const fuente = informeVisible ? document.getElementById('informeContenedor') : document.querySelector('.container');
         if(!fuente){ alert('No hay contenido para imprimir.'); return; }
         let area = document.getElementById('areaImpresion');
-        if(!area){
-            area = document.createElement('div');
-            area.id = 'areaImpresion';
-            document.body.appendChild(area);
-        }
+        if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
         const clon = fuente.cloneNode(true);
         clon.querySelectorAll('.no-print, script, button, #lectorQR').forEach(el => el.remove());
         if(clon.style && clon.style.display === 'none') clon.style.display = '';
@@ -459,307 +625,79 @@ function imprimirContenidoHTML(titulo){
         const canvasClones = clon.querySelectorAll('canvas');
         canvasClones.forEach((cc, i) => {
             const data = canvasData[i];
-            if(data){
-                const img = document.createElement('img');
-                img.src = data;
-                img.style.maxWidth = '100%';
-                img.style.height = 'auto';
-                img.style.display = 'block';
-                img.style.margin = '10px auto';
-                cc.parentNode.replaceChild(img, cc);
-            } else { cc.remove(); }
+            if(data){ const img = document.createElement('img'); img.src = data; img.style.maxWidth = '100%'; img.style.height = 'auto'; img.style.display = 'block'; img.style.margin = '10px auto'; cc.parentNode.replaceChild(img, cc); }
+            else { cc.remove(); }
         });
-        area.innerHTML = '';
-        area.appendChild(clon);
+        area.innerHTML = ''; area.appendChild(clon);
         document.body.classList.add('modo-impresion');
         requestAnimationFrame(() => {
             setTimeout(() => {
                 try{ window.print(); }catch(e){ console.error('print err', e); }
-                setTimeout(() => {
-                    document.body.classList.remove('modo-impresion');
-                    area.innerHTML = '';
-                }, 800);
+                setTimeout(() => { document.body.classList.remove('modo-impresion'); area.innerHTML = ''; }, 800);
             }, 250);
         });
-    }catch(err){
-        console.error('Error al imprimir:', err);
-        document.body.classList.remove('modo-impresion');
-        alert('Error al imprimir: ' + err.message + '\nUsa Ctrl+P como alternativa.');
-    }
+    }catch(err){ console.error('Error al imprimir:', err); document.body.classList.remove('modo-impresion'); alert('Error al imprimir: ' + err.message + '\nUsa Ctrl+P como alternativa.'); }
 }
 window.imprimirReporteDiario = () => imprimirContenidoHTML('Reporte Diario Colserlog');
 window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Colserlog');
 
-window.toggleRespaldoAutomatico = ()=>{ const t=document.getElementById('toggleRespaldo'); respaldoAutomaticoActivo=t.checked; localStorage.setItem('respaldoAutomaticoMega',respaldoAutomaticoActivo); mostrarEstadoMega(respaldoAutomaticoActivo?'✅ Respaldo automático activado':'⚠️ Respaldo automático desactivado',respaldoAutomaticoActivo?'ok':'error'); };
-
-// ==================== MEGA ====================
-async function conectarMega(){
-    if(storageMegaCache) return storageMegaCache;
-    let lastError = null;
-    const urls = [
-        'https://cdn.jsdelivr.net/npm/megajs@1.3.3/dist/main.browser-es.mjs/+esm',
-        'https://esm.sh/megajs@1.3.3'
-    ];
-    for(const url of urls){
-        try{
-            const mega = await import(/* @vite-ignore */ url);
-            const { Storage } = mega;
-            const storage = await new Storage({ email: MEGA_EMAIL, password: MEGA_PASSWORD }).ready;
-            storageMegaCache = storage;
-            return storage;
-        }catch(e){ console.warn('Fallo import MEGA desde', url, e); lastError = e; }
-    }
-    throw lastError || new Error('No se pudo cargar megajs');
-}
-
-// ============ 🆕 DESCARGA FRAGMENTADA CON VERIFICACIÓN ============
-async function descargarFragmentado(file) {
-    const TAMANO_FRAGMENTO = 512 * 1024; // 512 KB por fragmento (más estable en móvil)
-    const maxReintentos = 4;
-
-    let ultimoError = null;
-
-    for (let intento = 1; intento <= maxReintentos; intento++) {
-        try {
-            mostrarEstadoMega(`⏳ Descargando... (intento ${intento}/${maxReintentos})`, 'loading', false);
-
-            // Descargar con parámetros conservadores
-            const buffer = await file.downloadBuffer({
-                maxChunkSize: TAMANO_FRAGMENTO,
-                maxConnections: 1, // 1 sola conexión = más estable en móvil
-                start: 0
-            });
-
-            // Verificar que no esté vacío
-            if (!buffer || buffer.length === 0) {
-                throw new Error('El archivo descargado está vacío');
-            }
-
-            // Verificar tamaño contra el esperado en MEGA (si está disponible)
-            if (file.size && buffer.length !== file.size) {
-                console.warn(`⚠️ Tamaño recibido (${buffer.length}) ≠ esperado (${file.size})`);
-                throw new Error(`Descarga incompleta: recibidos ${buffer.length} de ${file.size} bytes`);
-            }
-
-            // Decodificar y validar JSON
-            const texto = new TextDecoder().decode(buffer);
-            let parsed;
-            try {
-                parsed = JSON.parse(texto);
-            } catch (e) {
-                // Intento de recuperación de JSON truncado
-                console.warn('JSON inválido, intentando recuperar...');
-                const ultimoCierre = texto.lastIndexOf('}');
-                if (ultimoCierre > 0) {
-                    try {
-                        const recortado = texto.substring(0, ultimoCierre + 1);
-                        parsed = JSON.parse(recortado);
-                        console.warn('⚠️ JSON recuperado con datos truncados. Puede faltar información.');
-                    } catch (e2) {
-                        throw new Error('El archivo está corrupto y no se pudo recuperar');
-                    }
-                } else {
-                    throw new Error('El archivo está corrupto y no se pudo recuperar');
-                }
-            }
-
-            // Validar estructura mínima del respaldo
-            if (!parsed.entregasDiariasDetallado && !parsed.estadoSesion) {
-                throw new Error('El archivo no tiene el formato de respaldo esperado');
-            }
-
-            console.log(`✅ Descarga OK en intento ${intento}: ${buffer.length} bytes`);
-            return parsed;
-
-        } catch (error) {
-            ultimoError = error;
-            console.warn(`❌ Intento ${intento} falló:`, error.message);
-
-            if (intento < maxReintentos) {
-                const espera = 1500 * intento; // backoff exponencial
-                mostrarEstadoMega(`⚠️ Reintentando en ${espera/1000}s... (${error.message})`, 'loading', false);
-                await new Promise(r => setTimeout(r, espera));
-                // Limpiar caché para forzar reconexión en el siguiente intento
-                if (intento === 2) storageMegaCache = null;
-            }
-        }
-    }
-
-    throw new Error(`Descarga fallida tras ${maxReintentos} intentos: ${ultimoError?.message || 'Error desconocido'}`);
-}
-
-function crearObjetoRespaldo(silencioso){
+// RESPALDO LOCAL
+function crearObjetoRespaldo(){
     return {
-        version:2, fecha_respaldo:new Date().toISOString(), usuario:MEGA_EMAIL, automatico:silencioso,
+        version:3, fecha_respaldo:new Date().toISOString(),
         estadoSesion: JSON.parse(localStorage.getItem('estadoSesion')||'null'),
         entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'),
         tiemposBase:{ inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga: localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||'' }
     };
 }
 window.descargarRespaldoLocal = ()=>{
-    const respaldo = crearObjetoRespaldo(false);
+    const respaldo = crearObjetoRespaldo();
     const contenido = JSON.stringify(respaldo,null,2);
     const blob = new Blob([contenido], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const fecha = new Date().toISOString().split('T')[0];
     const nombre = `colserlog_respaldo_${fecha}.json`;
-    try{
-        const a = document.createElement('a'); a.href = url; a.download = nombre;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(()=>URL.revokeObjectURL(url), 4000);
-        mostrarEstadoMega('💾 Respaldo local descargado', 'ok'); return;
-    }catch(e){ console.warn('download falló, probando pestaña', e); }
+    try{ const a = document.createElement('a'); a.href = url; a.download = nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url), 4000); return; }catch(e){ console.warn('download falló', e); }
     const w = window.open(url, '_blank');
-    if(!w) alert('No se pudo descargar. Permite pop-ups o descarga el archivo desde el enlace generado.');
-    mostrarEstadoMega('💾 Respaldo abierto en pestaña nueva', 'ok');
+    if(!w) alert('No se pudo descargar. Permite pop-ups.');
     setTimeout(()=>URL.revokeObjectURL(url), 8000);
 };
-window.guardarEnMega = async (silencioso=false)=>{
-    if(!silencioso) mostrarEstadoMega('⏳ Conectando con MEGA...', 'loading', false);
-    else mostrarEstadoMega('⏳ Respaldando automáticamente en MEGA...', 'loading', false);
-    try{
-        const storage = await conectarMega();
-        const respaldo = crearObjetoRespaldo(silencioso);
-        const fecha = new Date().toISOString().split('T')[0];
-        const hora = new Date().toTimeString().slice(0,5).replace(':','');
-        const prefijo = silencioso ? 'colserlog_auto_' : 'colserlog_respaldo_';
-        const nombre = `${prefijo}${fecha}_${hora}.json`;
-        const contenido = JSON.stringify(respaldo,null,2);
-        const file = storage.upload(nombre, contenido);
-        await file.complete;
-        mostrarEstadoMega(`✅ Respaldo guardado en MEGA: ${nombre}`, 'ok');
-        return true;
-    }catch(error){
-        console.error('Error MEGA:', error);
-        storageMegaCache = null;
-        const msg = error?.message || 'Load failed';
-        if(msg.includes('Load failed') || msg.includes('Failed to fetch') || msg.includes('NetworkError')){
-            mostrarEstadoMega(`❌ Error de red al conectar con MEGA: ${msg}. Se descargará respaldo local.`, 'error');
-            descargarRespaldoLocal();
-        } else { mostrarEstadoMega(`❌ Error MEGA: ${msg}`, 'error'); }
-        return false;
-    }
-};
 
-// ============ 🆕 CARGAR DESDE MEGA (con descarga fragmentada) ============
-window.cargarDesdeMega = async ()=>{
-    if(!confirm('⚠️ Esto reemplazará datos actuales con el último respaldo de MEGA. ¿Continuar?')) return;
-    mostrarEstadoMega('⏳ Buscando respaldos en MEGA...', 'loading', false);
-    try{
-        const storage = await conectarMega();
-        const archivos = Object.values(storage.files||{}).filter(f=> f.name && (f.name.startsWith('colserlog_respaldo_')||f.name.startsWith('colserlog_auto_')) && f.name.endsWith('.json'));
-        if(archivos.length===0){ mostrarEstadoMega('⚠️ No se encontraron respaldos en MEGA.', 'error'); return; }
-
-        // Ordenar de más reciente a más antiguo
-        archivos.sort((a,b)=> b.name.localeCompare(a.name));
-
-        // Mostrar los 5 más recientes para elegir
-        const top5 = archivos.slice(0, 5);
-        let lista = 'Elige el respaldo a restaurar:\n\n';
-        top5.forEach((f, i) => {
-            lista += `${i+1}. ${f.name}\n`;
-        });
-        lista += `\n(0 o Cancelar = usar el más reciente)`;
-
-        const eleccion = prompt(lista, '1');
-        if(eleccion === null) return;
-
-        const idx = parseInt(eleccion) - 1;
-        const ultimo = (idx >= 0 && idx < top5.length) ? top5[idx] : top5[0];
-
-        if(!confirm(`Se restaurará:\n${ultimo.name}\n\n¿Continuar?`)) return;
-
-        // 🆕 Descarga fragmentada con verificación
-        const respaldo = await descargarFragmentado(ultimo);
-
-        // Aplicar datos restaurados
-        if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
-        if(respaldo.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(respaldo.entregasDiariasDetallado));
-        if(respaldo.tiemposBase){ for(let k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
-
-        mostrarEstadoMega('✅ Datos restaurados correctamente. Recargando...', 'ok');
-        setTimeout(()=>location.reload(), 1500);
-    }catch(error){
-        console.error('Error al restaurar:', error);
-        storageMegaCache = null;
-        const msg = error.message || 'Error desconocido';
-        if(msg.includes('MAC verification')){
-            mostrarEstadoMega(`❌ El archivo se corrompió al descargar. Se recomienda:\n1. Verificar conexión a internet\n2. Intentar desde Wi-Fi\n3. Descargar manualmente desde mega.nz y usar "Cargar respaldo JSON"`, 'error', false);
-        } else {
-            mostrarEstadoMega(`❌ Error al restaurar: ${msg}`, 'error');
-        }
-    }
-};
-
-// ==================== 📂 CARGAR JSON DESDE ARCHIVO ====================
 window.cargarRespaldoDesdeArchivo = async function(event){
-    const file = event.target.files[0];
-    if(!file) return;
+    const file = event.target.files[0]; if(!file) return;
     try{
         const texto = await file.text();
         const respaldo = JSON.parse(texto);
-        if(!respaldo.entregasDiariasDetallado){
-            alert('❌ El archivo no tiene formato de respaldo Colserlog.');
-            return;
-        }
-        const opcion = confirm(
-            '¿Qué quieres hacer con este respaldo?\n\n' +
-            'Aceptar = REEMPLAZAR los datos actuales\n' +
-            'Cancelar = FUSIONAR con los datos actuales'
-        );
-
+        if(!respaldo.entregasDiariasDetallado && !respaldo.estadoSesion){ alert('❌ El archivo no tiene formato de respaldo.'); return; }
+        const opcion = confirm('¿Qué quieres hacer con este respaldo?\n\nAceptar = REEMPLAZAR los datos actuales\nCancelar = FUSIONAR con los datos actuales');
         let historialFinal;
-        if(opcion){
-            historialFinal = respaldo.entregasDiariasDetallado;
-        } else {
+        if(opcion){ historialFinal = respaldo.entregasDiariasDetallado || {}; }
+        else {
             const actuales = JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}');
-            historialFinal = { ...actuales, ...respaldo.entregasDiariasDetallado };
-            for(const fecha in respaldo.entregasDiariasDetallado){
+            const nuevos = respaldo.entregasDiariasDetallado || {};
+            historialFinal = { ...actuales, ...nuevos };
+            for(const fecha in nuevos){
                 if(actuales[fecha]){
-                    const a = actuales[fecha];
-                    const b = respaldo.entregasDiariasDetallado[fecha];
+                    const a = actuales[fecha], b = nuevos[fecha];
                     const cont = { ...a.contadores };
-                    for(const k in b.contadores){
-                        cont[k] = (cont[k]||0) + (b.contadores[k]||0);
-                    }
-                    historialFinal[fecha] = {
-                        contadores: cont,
-                        totalVisitas: (a.totalVisitas||0) + (b.totalVisitas||0),
-                        totalMinutos: (a.totalMinutos||0) + (b.totalMinutos||0)
-                    };
+                    for(const k in b.contadores){ cont[k] = (cont[k]||0) + (b.contadores[k]||0); }
+                    historialFinal[fecha] = { contadores: cont, totalVisitas: (a.totalVisitas||0)+(b.totalVisitas||0), totalMinutos: (a.totalMinutos||0)+(b.totalMinutos||0) };
                 }
             }
         }
         localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historialFinal));
-
         if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
-        if(respaldo.tiemposBase){
-            for(const k in respaldo.tiemposBase){
-                if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]);
-            }
-        }
-
+        if(respaldo.tiemposBase){ for(const k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
+        if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
         alert('✅ Respaldo cargado correctamente. Recargando...');
         setTimeout(()=>location.reload(), 800);
-    }catch(e){
-        console.error(e);
-        alert('❌ Error al leer el archivo: ' + e.message);
-    } finally {
-        event.target.value = '';
-    }
+    }catch(e){ console.error(e); alert('❌ Error al leer el archivo: ' + e.message); }
+    finally{ event.target.value = ''; }
 };
 
-// ==================== 📄 EXPORTAR A WORD (.doc) ====================
+// EXPORTAR A WORD
 function descargarWord(nombreArchivo, contenidoHTML){
-    const htmlCompleto = `
-<!DOCTYPE html>
-<html xmlns:o="urn:schemas-microsoft-com:office:office"
-      xmlns:w="urn:schemas-microsoft-com:office:word"
-      xmlns="http://www.w3.org/TR/REC-html40">
-<head>
-<meta charset="utf-8">
-<title>${nombreArchivo}</title>
-<style>
+    const htmlCompleto = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${nombreArchivo}</title><style>
   @page { size: A4; margin: 1.5cm; }
   body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #333; }
   h1 { color: #2c3e50; font-size: 20pt; text-align: center; margin-bottom: 4px; }
@@ -777,34 +715,20 @@ function descargarWord(nombreArchivo, contenidoHTML){
   .firma { margin-top: 60px; }
   .firma table td { border: none; border-top: 1px solid #000; padding-top: 6px; width: 40%; font-size: 10pt; text-align: center; }
   .header-info { text-align: center; font-size: 9pt; color: #777; margin-bottom: 20px; }
-</style>
-</head>
-<body>
-${contenidoHTML}
-</body>
-</html>`;
-
+</style></head><body>${contenidoHTML}</body></html>`;
     const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = nombreArchivo.endsWith('.doc') ? nombreArchivo : nombreArchivo + '.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const a = document.createElement('a'); a.href = url; a.download = nombreArchivo.endsWith('.doc') ? nombreArchivo : nombreArchivo + '.doc';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
     setTimeout(()=>URL.revokeObjectURL(url), 5000);
 }
 
 window.exportarDiaAWord = function(){
     if(visitas.length === 0){ alert('No hay visitas registradas hoy todavía.'); return; }
     const fecha = new Date().toLocaleDateString('es', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-    const ent = contadores['Entregado']||0;
-    const noEnt = totalVisitas - ent;
+    const ent = contadores['Entregado']||0, noEnt = totalVisitas - ent;
     const prom = totalVisitas>0 ? Math.round(totalMinutosVisitas/totalVisitas) : 0;
-
-    let html = `<h1>📦 COLSERLOG - Reporte Diario</h1>
-    <h2>${fecha}</h2>
-    <div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
+    let html = `<h1>📦 COLSERLOG - Reporte Diario</h1><h2>${fecha}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
     <h3>📊 Resumen del Día</h3>
     <table class="kpis"><tr>
       <td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td>
@@ -814,50 +738,28 @@ window.exportarDiaAWord = function(){
     </tr></table>
     <h3>📋 Visitas Registradas</h3>
     <table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th></tr></thead><tbody>`;
-    visitas.forEach((v, i) => {
-        html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td></tr>`;
-    });
-    html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="2"><strong>${totalVisitas} visitas</strong></td></tr>
-    </tbody></table>
+    visitas.forEach((v, i) => { html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td></tr>`; });
+    html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="2"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>
     <h3>📈 Distribución por Estado</h3>
     <table><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>`;
-    for(const k in contadores){
-        const c = contadores[k];
-        if(c === 0) continue;
-        const p = totalVisitas>0 ? ((c/totalVisitas)*100).toFixed(1) : 0;
-        html += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
-    }
+    for(const k in contadores){ const c = contadores[k]; if(c === 0) continue; const p = totalVisitas>0 ? ((c/totalVisitas)*100).toFixed(1) : 0; html += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`; }
     html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>
     <div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
-    const hoy = new Date().toISOString().split('T')[0];
-    descargarWord(`Colserlog_Reporte_${hoy}.doc`, html);
+    descargarWord(`Colserlog_Reporte_${new Date().toISOString().split('T')[0]}.doc`, html);
 };
 
 window.exportarMesAWord = function(){
-    const mes = parseInt(document.getElementById('mesInforme').value);
-    const anio = parseInt(document.getElementById('anioInforme').value);
+    const mes = parseInt(document.getElementById('mesInforme').value), anio = parseInt(document.getElementById('anioInforme').value);
     if(!mes || !anio){ alert('Selecciona mes y año primero.'); return; }
     const h = cargarHistorialDetallado();
     const fechasMes = Object.keys(h).filter(f => { const [y,m] = f.split('-').map(Number); return y===anio && m===mes; }).sort();
     if(fechasMes.length === 0){ alert(`No hay datos guardados para ${mes}/${anio}.`); return; }
     const nombreMes = new Date(anio, mes-1, 1).toLocaleString('es', { month:'long' });
     const cap = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
-    let totEnt=0, totVis=0, totMin=0;
-    const contMes = {};
-    fechasMes.forEach(f => {
-        const d = h[f];
-        totEnt += d.contadores['Entregado']||0;
-        totVis += d.totalVisitas||0;
-        totMin += d.totalMinutos||0;
-        for(const k in d.contadores){ contMes[k] = (contMes[k]||0) + (d.contadores[k]||0); }
-    });
-    const promDi = (totEnt/fechasMes.length).toFixed(1);
-    const promVi = totVis>0 ? Math.round(totMin/totVis) : 0;
-    const efec = totVis>0 ? ((totEnt/totVis)*100).toFixed(1) : 0;
-
-    let html = `<h1>📦 COLSERLOG - Informe Mensual</h1>
-    <h2>${cap} ${anio}</h2>
-    <div class="header-info">Generado ${new Date().toLocaleString('es')} · ${MEGA_EMAIL}</div>
+    let totEnt=0, totVis=0, totMin=0; const contMes = {};
+    fechasMes.forEach(f => { const d = h[f]; totEnt += d.contadores['Entregado']||0; totVis += d.totalVisitas||0; totMin += d.totalMinutos||0; for(const k in d.contadores){ contMes[k] = (contMes[k]||0) + (d.contadores[k]||0); } });
+    const promDi = (totEnt/fechasMes.length).toFixed(1), promVi = totVis>0 ? Math.round(totMin/totVis) : 0, efec = totVis>0 ? ((totEnt/totVis)*100).toFixed(1) : 0;
+    let html = `<h1>📦 COLSERLOG - Informe Mensual</h1><h2>${cap} ${anio}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
     <h3>📊 Resumen del Mes</h3>
     <table class="kpis"><tr>
       <td><div class="kpi-label">Entregados</div><div class="kpi-valor">${totEnt}</div></td>
@@ -872,20 +774,11 @@ window.exportarMesAWord = function(){
     </tr></table>
     <h3>📋 Por Estado</h3>
     <table><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>`;
-    for(const est in contMes){
-        const c = contMes[est];
-        if(c === 0) continue;
-        const p = totVis>0 ? ((c/totVis)*100).toFixed(1) : 0;
-        html += `<tr><td style="text-align:left;">${est}</td><td>${c}</td><td>${p}%</td></tr>`;
-    }
+    for(const est in contMes){ const c = contMes[est]; if(c === 0) continue; const p = totVis>0 ? ((c/totVis)*100).toFixed(1) : 0; html += `<tr><td style="text-align:left;">${est}</td><td>${c}</td><td>${p}%</td></tr>`; }
     html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table>
     <h3>📆 Día a Día</h3>
     <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
-    fechasMes.forEach(f => {
-        const d = h[f];
-        const e = d.contadores['Entregado']||0;
-        html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
-    });
+    fechasMes.forEach(f => { const d = h[f]; const e = d.contadores['Entregado']||0; html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
     html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table>
     <div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
     descargarWord(`Colserlog_Informe_${cap}_${anio}.doc`, html);
@@ -895,24 +788,17 @@ window.exportarHistorialCompletoAWord = function(){
     const h = cargarHistorialDetallado();
     const fechas = Object.keys(h).sort();
     if(fechas.length === 0){ alert('No hay historial guardado.'); return; }
-    let totEnt=0, totVis=0, totMin=0;
-    const porMes = {};
+    let totEnt=0, totVis=0, totMin=0; const porMes = {};
     fechas.forEach(f => {
         const d = h[f];
-        totEnt += d.contadores['Entregado']||0;
-        totVis += d.totalVisitas||0;
-        totMin += d.totalMinutos||0;
-        const [y,m] = f.split('-');
-        const key = `${y}-${m}`;
+        totEnt += d.contadores['Entregado']||0; totVis += d.totalVisitas||0; totMin += d.totalMinutos||0;
+        const [y,m] = f.split('-'); const key = `${y}-${m}`;
         if(!porMes[key]) porMes[key] = { vis:0, ent:0, min:0, dias:0 };
-        porMes[key].vis += d.totalVisitas||0;
-        porMes[key].ent += d.contadores['Entregado']||0;
-        porMes[key].min += d.totalMinutos||0;
-        porMes[key].dias += 1;
+        porMes[key].vis += d.totalVisitas||0; porMes[key].ent += d.contadores['Entregado']||0; porMes[key].min += d.totalMinutos||0; porMes[key].dias += 1;
     });
     let html = `<h1>📦 COLSERLOG - Historial Completo</h1>
     <h2>Desde ${fechas[0].split('-').reverse().join('/')} hasta ${fechas[fechas.length-1].split('-').reverse().join('/')}</h2>
-    <div class="header-info">Generado ${new Date().toLocaleString('es')} · ${MEGA_EMAIL}</div>
+    <div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
     <h3>📊 Totales Generales</h3>
     <table class="kpis"><tr>
       <td><div class="kpi-label">Total Entregados</div><div class="kpi-valor">${totEnt}</div></td>
@@ -923,8 +809,7 @@ window.exportarHistorialCompletoAWord = function(){
     <h3>📅 Resumen por Mes</h3>
     <table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
     Object.keys(porMes).sort().forEach(k => {
-        const d = porMes[k];
-        const [y,m] = k.split('-');
+        const d = porMes[k]; const [y,m] = k.split('-');
         const nombreMes = new Date(y, m-1, 1).toLocaleString('es', { month:'long', year:'numeric' });
         const prom = d.dias>0 ? (d.ent/d.dias).toFixed(1) : 0;
         html += `<tr><td style="text-align:left;">${nombreMes}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${prom}</td></tr>`;
@@ -932,31 +817,53 @@ window.exportarHistorialCompletoAWord = function(){
     html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fechas.length}</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${(totEnt/fechas.length).toFixed(1)}</strong></td></tr></tbody></table>
     <h3>📆 Detalle Día a Día</h3>
     <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
-    fechas.forEach(f => {
-        const d = h[f];
-        const e = d.contadores['Entregado']||0;
-        html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
-    });
+    fechas.forEach(f => { const d = h[f]; const e = d.contadores['Entregado']||0; html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
     html += `</tbody></table>`;
     descargarWord(`Colserlog_Historial_Completo.doc`, html);
 };
 
-// ==================== CONTROL DE SESIÓN ====================
-window.guardarDia = async ()=>{
+// CONTROL DE SESIÓN
+window.guardarDia = ()=>{
     guardarDiaActual();
-    if(respaldoAutomaticoActivo){ const ok=await guardarEnMega(true); alert(ok?"✅ Día guardado y respaldado en MEGA":"⚠️ Guardado local, pero MEGA falló. Se descargó respaldo local."); }
-    else alert("✅ Día guardado localmente.");
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    alert("✅ Día guardado. Se sincronizará automáticamente con la nube.");
     actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
-window.reiniciarDia = async ()=>{
-    if(!confirm("¿Reiniciar día? Se guardará historial"+(respaldoAutomaticoActivo?" y respaldo en MEGA":"")+" y se limpiará.")) return;
+window.reiniciarDia = ()=>{
+    if(!confirm("¿Reiniciar día? Se guardará historial y se limpiará.")) return;
     guardarDiaActual();
-    if(respaldoAutomaticoActivo){ const ok=await guardarEnMega(true); if(!ok && !confirm('MEGA falló. ¿Reiniciar de todas formas?')) { mostrarEstadoMega('⚠️ Reinicio cancelado', 'error'); return; } }
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
     limpiarSesion(); alert("✅ Día reiniciado");
 };
 window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual? Historial se conserva.")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
-function limpiarSesion(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; renderizarCodigosPendientes(); ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); }); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; localStorage.removeItem('estadoSesion'); actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); }
-window.eliminarTodo = async ()=>{ if(!confirm("¿ELIMINAR TODO? Irreversible")) return; if(!confirm("Confirmación final: ¿Seguro?")) return; if(respaldoAutomaticoActivo){ guardarDiaActual(); const ok=await guardarEnMega(true); if(!ok && !confirm('Respaldo MEGA falló. ¿Eliminar de todas formas?')) { mostrarEstadoMega('⚠️ Eliminación cancelada', 'error'); return; } } ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k)); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); } for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; renderizarCodigosPendientes(); ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value=''); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo(); alert("✅ Todo eliminado"); };
+function limpiarSesion(){
+    for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
+    renderizarCodigosPendientes();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); });
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
+    localStorage.removeItem('estadoSesion');
+    actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+}
+window.eliminarTodo = ()=>{
+    if(!confirm("¿ELIMINAR TODO? Irreversible")) return;
+    if(!confirm("Confirmación final: ¿Seguro?")) return;
+    ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k));
+    for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); }
+    for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
+    renderizarCodigosPendientes();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo();
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    alert("✅ Todo eliminado");
+};
 
 window.generarInformeMensual = ()=>{
     const mes=parseInt(document.getElementById('mesInforme').value), anio=parseInt(document.getElementById('anioInforme').value);
@@ -967,7 +874,7 @@ window.generarInformeMensual = ()=>{
     let totEnt=0, totVis=0, totMin=0; const contMes={}; for(let k in contadores) contMes[k]=0;
     fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
     const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
-    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:12px;color:#777;margin-top:8px;">Generado ${new Date().toLocaleString('es')} | ${MEGA_EMAIL}</div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:12px;color:#777;margin-top:8px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:20px;"><h3 style="text-align:left;border-bottom:2px solid #3498db;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
     Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
     html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;border-bottom:2px solid #3498db;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
     fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
@@ -976,24 +883,40 @@ window.generarInformeMensual = ()=>{
 };
 window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
 
-// ==================== BINDEOS Y DIAGNÓSTICO ====================
-function bindClick(id, fn){ const el = document.getElementById(id); if(el) el.addEventListener('click', fn); }
-function bindearBotones(){ bindClick('btnImprimirDiario', () => window.imprimirReporteDiario()); }
+// RECARGA DESDE NUBE
+window.recargarUIDesdeStorage = function(){
+    try{
+        const raw = localStorage.getItem('estadoSesion');
+        if(raw){
+            const e = JSON.parse(raw);
+            visitas = e.visitas || [];
+            contadores = e.contadores || contadores;
+            totalMinutosVisitas = e.totalMinutosVisitas || 0;
+            totalVisitas = e.totalVisitas || 0;
+        }
+        cargarTiemposBase();
+        renderizarTabla();
+        actualizarDashboard();
+        actualizarGraficaPromedios();
+        actualizarInformesSemanalesMensuales();
+        console.log('🔄 UI recargada desde la nube');
+    }catch(e){ console.warn('Error recargando UI:', e); }
+};
+
+// DIAGNÓSTICO
 function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','guardarEnMega','cargarDesdeMega',
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube',
                  'descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase',
                  'registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda',
                  'agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo',
                  'exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord'];
     const faltan = fns.filter(f => typeof window[f] !== 'function');
-    if(faltan.length) console.error('❌ Funciones faltantes en window:', faltan);
-    else console.log('✅ Todas las funciones están listas en window.');
+    if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
-    if(typeof Html5Qrcode === 'undefined') console.warn('⚠️ html5-qrcode no cargó'); else console.log('✅ html5-qrcode OK');
 }
 
+// INICIO
 window.onload = ()=>{
-    cargarPreferencias();
     cargarTiemposBase();
     if(cargarEstadoCompleto() && visitas.length>0){ renderizarTabla(); actualizarDashboard(); }
     ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).addEventListener('change', guardarTiemposBase));
@@ -1001,7 +924,7 @@ window.onload = ()=>{
     document.getElementById('estadoPaquete').selectedIndex=0;
     renderizarCodigosPendientes();
     const ahora=new Date(); document.getElementById('mesInforme').value=ahora.getMonth()+1; document.getElementById('anioInforme').value=ahora.getFullYear();
-    bindearBotones();
+    document.getElementById('btnImprimirDiario').addEventListener('click', ()=>window.imprimirReporteDiario());
     diagnosticar();
 };
 </script>
