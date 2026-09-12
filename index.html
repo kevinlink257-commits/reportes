@@ -21,7 +21,7 @@
 </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Reporte de Entregas - Colserlog (Multi-pedido)</title>
+    <title>Reporte de Entregas - Colserlog</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
@@ -114,7 +114,7 @@
         .chip-codigo button:hover { background: #c0392b; }
         .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 
-        /* ====== ÁREA DE IMPRESIÓN (oculta en pantalla) ====== */
+        /* ====== ÁREA DE IMPRESIÓN ====== */
         #areaImpresion { display: none; }
 
         @media print {
@@ -139,7 +139,7 @@
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
     <div style="background:#e8f8f5; padding:10px; border-radius:6px; font-size:0.85rem; margin-bottom:15px; border:1px solid #b9e6dc;">
-        <strong>🆕 Novedad:</strong> Un cliente con varios pedidos → escanea o escribe cada código y pulsa <strong>➕</strong> para agregarlo. Al registrar la visita se creará <strong>una fila por cada pedido</strong> compartiendo los mismos tiempos y estado.
+        <strong>✨ Novedades:</strong> Multi-pedido por cliente · Impresión robusta · Exportar a Word · Descarga fragmentada con verificación.
     </div>
 
     <div class="section">
@@ -179,7 +179,7 @@
 
         <label>Estado del paquete:</label>
         <select id="estadoPaquete">
-            <option value="">-- Seleccione un estado --</option><option value="Entregado">Tiempo</option>
+            <option value="">-- Seleccione un estado --</option>
             <option value="Entregado">Entregado</option><option value="Rechazado">Rechazado</option>
             <option value="Dirección Errónea">Dirección errónea</option><option value="Coordinado con Cliente">Coordinado con el Cliente</option>
             <option value="No está en casa">No está en casa</option><option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
@@ -232,6 +232,13 @@
             <button class="btn-mega" onclick="cargarDesdeMega()">⬇️ Restaurar desde MEGA</button>
             <button class="btn-guardar" onclick="descargarRespaldoLocal()" style="background:#34495e;">💾 Descargar respaldo local</button>
         </div>
+        <div class="btn-group" style="margin-top:10px;">
+            <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Cargar respaldo JSON</button>
+            <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Exportar día a Word</button>
+            <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Exportar mes a Word</button>
+            <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Exportar todo a Word</button>
+        </div>
+        <input type="file" id="inputCargarJSON" accept=".json,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
         <div class="toggle-wrapper">
             <label class="toggle-label" for="toggleRespaldo">🔄 Respaldo automático en MEGA<span class="toggle-sub">Se ejecuta al Guardar Día, Reiniciar Día y antes de Eliminar Todo</span></label>
             <div class="switch"><input type="checkbox" id="toggleRespaldo" onchange="toggleRespaldoAutomatico()"><span class="slider"></span></div>
@@ -261,8 +268,6 @@ let contadores = {'Entregado':0,'Rechazado':0,'Dirección Errónea':0,'Coordinad
 let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
 let miGrafico = null, miGraficoPromedios = null, miGraficoSemana = null, miGraficoMes = null;
 let html5QrCode = null, escaneoActivo = false, filaEditando = null, storageMegaCache = null, respaldoAutomaticoActivo = true;
-
-// 🆕 Lista de códigos pendientes para la visita en curso
 let codigosPendientes = [];
 let ultimoCodigoEscaneado = '';
 let ultimoTiempoEscaneo = 0;
@@ -281,7 +286,7 @@ function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0];
 function cargarHistorialDetallado(){ const raw=localStorage.getItem('entregasDiariasDetallado'); if(!raw) return {}; try{return JSON.parse(raw);}catch{return {};} }
 function recalcularEstadisticas(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); actualizarDashboard(); guardarEstadoCompleto(); }
 
-// ==================== 🆕 MULTI-PEDIDO ====================
+// ==================== MULTI-PEDIDO ====================
 window.agregarCodigo = function(){
     const inp = document.getElementById('codigoBarras');
     const cod = (inp.value||'').trim();
@@ -293,7 +298,7 @@ window.agregarCodigo = function(){
 function agregarCodigoPendiente(cod){
     if(!cod) return;
     if(codigosPendientes.includes(cod)){
-        if(navigator.vibrate) navigator.vibrate([30,40,30]); // patrón de aviso
+        if(navigator.vibrate) navigator.vibrate([30,40,30]);
         return;
     }
     codigosPendientes.push(cod);
@@ -361,28 +366,24 @@ window.registrarVisita = ()=>{
     if(!l||!s){ alert("Ingresa llegada y salida"); return; }
     if(!es){ alert("Selecciona estado"); return; }
 
-    // Si hay un código escrito en el input que aún no se agregó, lo incluimos
     const inputCod = (document.getElementById('codigoBarras').value||'').trim();
     if(inputCod && !codigosPendientes.includes(inputCod)){
         codigosPendientes.push(inputCod);
     }
 
-    // Determinar la lista de códigos a registrar
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
 
     const t = calcularMinutos(l,s);
     const horaRegistro = new Date().toISOString();
 
-    // 🆕 Crear una visita por cada código (comparten tiempos y estado)
     codigos.forEach(co=>{
         visitas.push({
             llegada:l, salida:s, tiempo:t, estado:es, codigo:co,
             horaRegistro: horaRegistro,
-            grupo: codigos.length > 1 ? horaRegistro : null // marca de grupo
+            grupo: codigos.length > 1 ? horaRegistro : null
         });
     });
 
-    // Limpiar todo
     document.getElementById('llegadaCliente').value='';
     document.getElementById('salidaCliente').value='';
     document.getElementById('codigoBarras').value='';
@@ -396,12 +397,11 @@ window.registrarVisita = ()=>{
     actualizarInformesSemanalesMensuales();
 
     if(codigos.length > 1){
-        // Aviso no bloqueante
         console.log(`✅ ${codigos.length} pedidos registrados para la misma visita`);
     }
 };
 
-// ===== ESCÁNER (ahora agrega a la lista de pendientes) =====
+// ===== ESCÁNER =====
 window.iniciarEscaneo = ()=>{
     if(escaneoActivo) return;
     const div=document.getElementById('lectorQR');
@@ -413,12 +413,10 @@ window.iniciarEscaneo = ()=>{
     const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]};
     html5QrCode.start({facingMode:"environment"},cfg,
         (txt)=>{
-            // Anti-duplicado: mismo código en menos de 2s → ignorar
             const ahora = Date.now();
             if(txt === ultimoCodigoEscaneado && (ahora - ultimoTiempoEscaneo) < 2000) return;
             ultimoCodigoEscaneado = txt;
             ultimoTiempoEscaneo = ahora;
-            // Agregar al listado de pendientes (el escáner sigue activo)
             agregarCodigoPendiente(txt);
         },
         ()=>{}
@@ -513,6 +511,83 @@ async function conectarMega(){
     }
     throw lastError || new Error('No se pudo cargar megajs');
 }
+
+// ============ 🆕 DESCARGA FRAGMENTADA CON VERIFICACIÓN ============
+async function descargarFragmentado(file) {
+    const TAMANO_FRAGMENTO = 512 * 1024; // 512 KB por fragmento (más estable en móvil)
+    const maxReintentos = 4;
+
+    let ultimoError = null;
+
+    for (let intento = 1; intento <= maxReintentos; intento++) {
+        try {
+            mostrarEstadoMega(`⏳ Descargando... (intento ${intento}/${maxReintentos})`, 'loading', false);
+
+            // Descargar con parámetros conservadores
+            const buffer = await file.downloadBuffer({
+                maxChunkSize: TAMANO_FRAGMENTO,
+                maxConnections: 1, // 1 sola conexión = más estable en móvil
+                start: 0
+            });
+
+            // Verificar que no esté vacío
+            if (!buffer || buffer.length === 0) {
+                throw new Error('El archivo descargado está vacío');
+            }
+
+            // Verificar tamaño contra el esperado en MEGA (si está disponible)
+            if (file.size && buffer.length !== file.size) {
+                console.warn(`⚠️ Tamaño recibido (${buffer.length}) ≠ esperado (${file.size})`);
+                throw new Error(`Descarga incompleta: recibidos ${buffer.length} de ${file.size} bytes`);
+            }
+
+            // Decodificar y validar JSON
+            const texto = new TextDecoder().decode(buffer);
+            let parsed;
+            try {
+                parsed = JSON.parse(texto);
+            } catch (e) {
+                // Intento de recuperación de JSON truncado
+                console.warn('JSON inválido, intentando recuperar...');
+                const ultimoCierre = texto.lastIndexOf('}');
+                if (ultimoCierre > 0) {
+                    try {
+                        const recortado = texto.substring(0, ultimoCierre + 1);
+                        parsed = JSON.parse(recortado);
+                        console.warn('⚠️ JSON recuperado con datos truncados. Puede faltar información.');
+                    } catch (e2) {
+                        throw new Error('El archivo está corrupto y no se pudo recuperar');
+                    }
+                } else {
+                    throw new Error('El archivo está corrupto y no se pudo recuperar');
+                }
+            }
+
+            // Validar estructura mínima del respaldo
+            if (!parsed.entregasDiariasDetallado && !parsed.estadoSesion) {
+                throw new Error('El archivo no tiene el formato de respaldo esperado');
+            }
+
+            console.log(`✅ Descarga OK en intento ${intento}: ${buffer.length} bytes`);
+            return parsed;
+
+        } catch (error) {
+            ultimoError = error;
+            console.warn(`❌ Intento ${intento} falló:`, error.message);
+
+            if (intento < maxReintentos) {
+                const espera = 1500 * intento; // backoff exponencial
+                mostrarEstadoMega(`⚠️ Reintentando en ${espera/1000}s... (${error.message})`, 'loading', false);
+                await new Promise(r => setTimeout(r, espera));
+                // Limpiar caché para forzar reconexión en el siguiente intento
+                if (intento === 2) storageMegaCache = null;
+            }
+        }
+    }
+
+    throw new Error(`Descarga fallida tras ${maxReintentos} intentos: ${ultimoError?.message || 'Error desconocido'}`);
+}
+
 function crearObjetoRespaldo(silencioso){
     return {
         version:2, fecha_respaldo:new Date().toISOString(), usuario:MEGA_EMAIL, automatico:silencioso,
@@ -565,6 +640,8 @@ window.guardarEnMega = async (silencioso=false)=>{
         return false;
     }
 };
+
+// ============ 🆕 CARGAR DESDE MEGA (con descarga fragmentada) ============
 window.cargarDesdeMega = async ()=>{
     if(!confirm('⚠️ Esto reemplazará datos actuales con el último respaldo de MEGA. ¿Continuar?')) return;
     mostrarEstadoMega('⏳ Buscando respaldos en MEGA...', 'loading', false);
@@ -572,25 +649,299 @@ window.cargarDesdeMega = async ()=>{
         const storage = await conectarMega();
         const archivos = Object.values(storage.files||{}).filter(f=> f.name && (f.name.startsWith('colserlog_respaldo_')||f.name.startsWith('colserlog_auto_')) && f.name.endsWith('.json'));
         if(archivos.length===0){ mostrarEstadoMega('⚠️ No se encontraron respaldos en MEGA.', 'error'); return; }
+
+        // Ordenar de más reciente a más antiguo
         archivos.sort((a,b)=> b.name.localeCompare(a.name));
-        const ultimo = archivos[0];
-        if(!confirm(`Se restaurará:\n${ultimo.name}\n¿Continuar?`)) return;
-        mostrarEstadoMega('⏳ Descargando respaldo...', 'loading', false);
-        const buffer = await ultimo.downloadBuffer();
-        const texto = new TextDecoder().decode(buffer);
-        const respaldo = JSON.parse(texto);
-        if(!respaldo.entregasDiariasDetallado) throw new Error('Formato inválido');
+
+        // Mostrar los 5 más recientes para elegir
+        const top5 = archivos.slice(0, 5);
+        let lista = 'Elige el respaldo a restaurar:\n\n';
+        top5.forEach((f, i) => {
+            lista += `${i+1}. ${f.name}\n`;
+        });
+        lista += `\n(0 o Cancelar = usar el más reciente)`;
+
+        const eleccion = prompt(lista, '1');
+        if(eleccion === null) return;
+
+        const idx = parseInt(eleccion) - 1;
+        const ultimo = (idx >= 0 && idx < top5.length) ? top5[idx] : top5[0];
+
+        if(!confirm(`Se restaurará:\n${ultimo.name}\n\n¿Continuar?`)) return;
+
+        // 🆕 Descarga fragmentada con verificación
+        const respaldo = await descargarFragmentado(ultimo);
+
+        // Aplicar datos restaurados
         if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
-        localStorage.setItem('entregasDiariasDetallado', JSON.stringify(respaldo.entregasDiariasDetallado));
+        if(respaldo.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(respaldo.entregasDiariasDetallado));
         if(respaldo.tiemposBase){ for(let k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
-        mostrarEstadoMega('✅ Datos restaurados. Recargando...', 'ok');
+
+        mostrarEstadoMega('✅ Datos restaurados correctamente. Recargando...', 'ok');
         setTimeout(()=>location.reload(), 1500);
     }catch(error){
-        console.error(error); storageMegaCache=null;
-        mostrarEstadoMega('❌ Error al restaurar: '+(error.message||'Verifica conexión'), 'error');
+        console.error('Error al restaurar:', error);
+        storageMegaCache = null;
+        const msg = error.message || 'Error desconocido';
+        if(msg.includes('MAC verification')){
+            mostrarEstadoMega(`❌ El archivo se corrompió al descargar. Se recomienda:\n1. Verificar conexión a internet\n2. Intentar desde Wi-Fi\n3. Descargar manualmente desde mega.nz y usar "Cargar respaldo JSON"`, 'error', false);
+        } else {
+            mostrarEstadoMega(`❌ Error al restaurar: ${msg}`, 'error');
+        }
     }
 };
 
+// ==================== 📂 CARGAR JSON DESDE ARCHIVO ====================
+window.cargarRespaldoDesdeArchivo = async function(event){
+    const file = event.target.files[0];
+    if(!file) return;
+    try{
+        const texto = await file.text();
+        const respaldo = JSON.parse(texto);
+        if(!respaldo.entregasDiariasDetallado){
+            alert('❌ El archivo no tiene formato de respaldo Colserlog.');
+            return;
+        }
+        const opcion = confirm(
+            '¿Qué quieres hacer con este respaldo?\n\n' +
+            'Aceptar = REEMPLAZAR los datos actuales\n' +
+            'Cancelar = FUSIONAR con los datos actuales'
+        );
+
+        let historialFinal;
+        if(opcion){
+            historialFinal = respaldo.entregasDiariasDetallado;
+        } else {
+            const actuales = JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}');
+            historialFinal = { ...actuales, ...respaldo.entregasDiariasDetallado };
+            for(const fecha in respaldo.entregasDiariasDetallado){
+                if(actuales[fecha]){
+                    const a = actuales[fecha];
+                    const b = respaldo.entregasDiariasDetallado[fecha];
+                    const cont = { ...a.contadores };
+                    for(const k in b.contadores){
+                        cont[k] = (cont[k]||0) + (b.contadores[k]||0);
+                    }
+                    historialFinal[fecha] = {
+                        contadores: cont,
+                        totalVisitas: (a.totalVisitas||0) + (b.totalVisitas||0),
+                        totalMinutos: (a.totalMinutos||0) + (b.totalMinutos||0)
+                    };
+                }
+            }
+        }
+        localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historialFinal));
+
+        if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
+        if(respaldo.tiemposBase){
+            for(const k in respaldo.tiemposBase){
+                if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]);
+            }
+        }
+
+        alert('✅ Respaldo cargado correctamente. Recargando...');
+        setTimeout(()=>location.reload(), 800);
+    }catch(e){
+        console.error(e);
+        alert('❌ Error al leer el archivo: ' + e.message);
+    } finally {
+        event.target.value = '';
+    }
+};
+
+// ==================== 📄 EXPORTAR A WORD (.doc) ====================
+function descargarWord(nombreArchivo, contenidoHTML){
+    const htmlCompleto = `
+<!DOCTYPE html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:w="urn:schemas-microsoft-com:office:word"
+      xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta charset="utf-8">
+<title>${nombreArchivo}</title>
+<style>
+  @page { size: A4; margin: 1.5cm; }
+  body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; color: #333; }
+  h1 { color: #2c3e50; font-size: 20pt; text-align: center; margin-bottom: 4px; }
+  h2 { color: #2c3e50; font-size: 14pt; text-align: center; margin-top: 4px; border-bottom: 2px solid #2c3e50; padding-bottom: 6px; }
+  h3 { color: #2c3e50; font-size: 12pt; margin-top: 18px; border-bottom: 1px solid #3498db; padding-bottom: 3px; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 10pt; }
+  th { background: #2c3e50; color: #fff; padding: 6px 8px; border: 1px solid #1a252f; text-align: center; }
+  td { padding: 5px 8px; border: 1px solid #bbb; text-align: center; }
+  tr:nth-child(even) td { background: #f8f9fa; }
+  .total-row td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; }
+  .kpis { width: 100%; margin: 15px 0; border-collapse: separate; border-spacing: 6px; }
+  .kpis td { border: 1px solid #ccc; background: #f8f9fa; padding: 10px; text-align: center; width: 25%; }
+  .kpi-label { font-size: 9pt; color: #666; text-transform: uppercase; }
+  .kpi-valor { font-size: 16pt; font-weight: bold; color: #2c3e50; }
+  .firma { margin-top: 60px; }
+  .firma table td { border: none; border-top: 1px solid #000; padding-top: 6px; width: 40%; font-size: 10pt; text-align: center; }
+  .header-info { text-align: center; font-size: 9pt; color: #777; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+${contenidoHTML}
+</body>
+</html>`;
+
+    const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = nombreArchivo.endsWith('.doc') ? nombreArchivo : nombreArchivo + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+window.exportarDiaAWord = function(){
+    if(visitas.length === 0){ alert('No hay visitas registradas hoy todavía.'); return; }
+    const fecha = new Date().toLocaleDateString('es', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+    const ent = contadores['Entregado']||0;
+    const noEnt = totalVisitas - ent;
+    const prom = totalVisitas>0 ? Math.round(totalMinutosVisitas/totalVisitas) : 0;
+
+    let html = `<h1>📦 COLSERLOG - Reporte Diario</h1>
+    <h2>${fecha}</h2>
+    <div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
+    <h3>📊 Resumen del Día</h3>
+    <table class="kpis"><tr>
+      <td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td>
+      <td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${noEnt}</div></td>
+      <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totalVisitas}</div></td>
+      <td><div class="kpi-label">Prom. por Visita</div><div class="kpi-valor">${prom} min</div></td>
+    </tr></table>
+    <h3>📋 Visitas Registradas</h3>
+    <table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th></tr></thead><tbody>`;
+    visitas.forEach((v, i) => {
+        html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td></tr>`;
+    });
+    html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="2"><strong>${totalVisitas} visitas</strong></td></tr>
+    </tbody></table>
+    <h3>📈 Distribución por Estado</h3>
+    <table><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>`;
+    for(const k in contadores){
+        const c = contadores[k];
+        if(c === 0) continue;
+        const p = totalVisitas>0 ? ((c/totalVisitas)*100).toFixed(1) : 0;
+        html += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
+    }
+    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>
+    <div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
+    const hoy = new Date().toISOString().split('T')[0];
+    descargarWord(`Colserlog_Reporte_${hoy}.doc`, html);
+};
+
+window.exportarMesAWord = function(){
+    const mes = parseInt(document.getElementById('mesInforme').value);
+    const anio = parseInt(document.getElementById('anioInforme').value);
+    if(!mes || !anio){ alert('Selecciona mes y año primero.'); return; }
+    const h = cargarHistorialDetallado();
+    const fechasMes = Object.keys(h).filter(f => { const [y,m] = f.split('-').map(Number); return y===anio && m===mes; }).sort();
+    if(fechasMes.length === 0){ alert(`No hay datos guardados para ${mes}/${anio}.`); return; }
+    const nombreMes = new Date(anio, mes-1, 1).toLocaleString('es', { month:'long' });
+    const cap = nombreMes.charAt(0).toUpperCase() + nombreMes.slice(1);
+    let totEnt=0, totVis=0, totMin=0;
+    const contMes = {};
+    fechasMes.forEach(f => {
+        const d = h[f];
+        totEnt += d.contadores['Entregado']||0;
+        totVis += d.totalVisitas||0;
+        totMin += d.totalMinutos||0;
+        for(const k in d.contadores){ contMes[k] = (contMes[k]||0) + (d.contadores[k]||0); }
+    });
+    const promDi = (totEnt/fechasMes.length).toFixed(1);
+    const promVi = totVis>0 ? Math.round(totMin/totVis) : 0;
+    const efec = totVis>0 ? ((totEnt/totVis)*100).toFixed(1) : 0;
+
+    let html = `<h1>📦 COLSERLOG - Informe Mensual</h1>
+    <h2>${cap} ${anio}</h2>
+    <div class="header-info">Generado ${new Date().toLocaleString('es')} · ${MEGA_EMAIL}</div>
+    <h3>📊 Resumen del Mes</h3>
+    <table class="kpis"><tr>
+      <td><div class="kpi-label">Entregados</div><div class="kpi-valor">${totEnt}</div></td>
+      <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totVis}</div></td>
+      <td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${efec}%</div></td>
+      <td><div class="kpi-label">Días Trabajados</div><div class="kpi-valor">${fechasMes.length}</div></td>
+    </tr><tr>
+      <td><div class="kpi-label">Promedio Diario</div><div class="kpi-valor">${promDi}</div></td>
+      <td><div class="kpi-label">Promedio Visita</div><div class="kpi-valor">${promVi} min</div></td>
+      <td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${totVis-totEnt}</div></td>
+      <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></td>
+    </tr></table>
+    <h3>📋 Por Estado</h3>
+    <table><thead><tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr></thead><tbody>`;
+    for(const est in contMes){
+        const c = contMes[est];
+        if(c === 0) continue;
+        const p = totVis>0 ? ((c/totVis)*100).toFixed(1) : 0;
+        html += `<tr><td style="text-align:left;">${est}</td><td>${c}</td><td>${p}%</td></tr>`;
+    }
+    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table>
+    <h3>📆 Día a Día</h3>
+    <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
+    fechasMes.forEach(f => {
+        const d = h[f];
+        const e = d.contadores['Entregado']||0;
+        html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
+    });
+    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table>
+    <div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
+    descargarWord(`Colserlog_Informe_${cap}_${anio}.doc`, html);
+};
+
+window.exportarHistorialCompletoAWord = function(){
+    const h = cargarHistorialDetallado();
+    const fechas = Object.keys(h).sort();
+    if(fechas.length === 0){ alert('No hay historial guardado.'); return; }
+    let totEnt=0, totVis=0, totMin=0;
+    const porMes = {};
+    fechas.forEach(f => {
+        const d = h[f];
+        totEnt += d.contadores['Entregado']||0;
+        totVis += d.totalVisitas||0;
+        totMin += d.totalMinutos||0;
+        const [y,m] = f.split('-');
+        const key = `${y}-${m}`;
+        if(!porMes[key]) porMes[key] = { vis:0, ent:0, min:0, dias:0 };
+        porMes[key].vis += d.totalVisitas||0;
+        porMes[key].ent += d.contadores['Entregado']||0;
+        porMes[key].min += d.totalMinutos||0;
+        porMes[key].dias += 1;
+    });
+    let html = `<h1>📦 COLSERLOG - Historial Completo</h1>
+    <h2>Desde ${fechas[0].split('-').reverse().join('/')} hasta ${fechas[fechas.length-1].split('-').reverse().join('/')}</h2>
+    <div class="header-info">Generado ${new Date().toLocaleString('es')} · ${MEGA_EMAIL}</div>
+    <h3>📊 Totales Generales</h3>
+    <table class="kpis"><tr>
+      <td><div class="kpi-label">Total Entregados</div><div class="kpi-valor">${totEnt}</div></td>
+      <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totVis}</div></td>
+      <td><div class="kpi-label">Días Registrados</div><div class="kpi-valor">${fechas.length}</div></td>
+      <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></td>
+    </tr></table>
+    <h3>📅 Resumen por Mes</h3>
+    <table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
+    Object.keys(porMes).sort().forEach(k => {
+        const d = porMes[k];
+        const [y,m] = k.split('-');
+        const nombreMes = new Date(y, m-1, 1).toLocaleString('es', { month:'long', year:'numeric' });
+        const prom = d.dias>0 ? (d.ent/d.dias).toFixed(1) : 0;
+        html += `<tr><td style="text-align:left;">${nombreMes}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${prom}</td></tr>`;
+    });
+    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fechas.length}</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${(totEnt/fechas.length).toFixed(1)}</strong></td></tr></tbody></table>
+    <h3>📆 Detalle Día a Día</h3>
+    <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
+    fechas.forEach(f => {
+        const d = h[f];
+        const e = d.contadores['Entregado']||0;
+        html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
+    });
+    html += `</tbody></table>`;
+    descargarWord(`Colserlog_Historial_Completo.doc`, html);
+};
+
+// ==================== CONTROL DE SESIÓN ====================
 window.guardarDia = async ()=>{
     guardarDiaActual();
     if(respaldoAutomaticoActivo){ const ok=await guardarEnMega(true); alert(ok?"✅ Día guardado y respaldado en MEGA":"⚠️ Guardado local, pero MEGA falló. Se descargó respaldo local."); }
@@ -606,6 +957,7 @@ window.reiniciarDia = async ()=>{
 window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual? Historial se conserva.")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
 function limpiarSesion(){ for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; renderizarCodigosPendientes(); ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); }); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; localStorage.removeItem('estadoSesion'); actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); }
 window.eliminarTodo = async ()=>{ if(!confirm("¿ELIMINAR TODO? Irreversible")) return; if(!confirm("Confirmación final: ¿Seguro?")) return; if(respaldoAutomaticoActivo){ guardarDiaActual(); const ok=await guardarEnMega(true); if(!ok && !confirm('Respaldo MEGA falló. ¿Eliminar de todas formas?')) { mostrarEstadoMega('⚠️ Eliminación cancelada', 'error'); return; } } ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k)); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); } for(let k in contadores) contadores[k]=0; totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; renderizarCodigosPendientes(); ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value=''); document.getElementById('resumenTiempos').style.display='none'; document.getElementById('cuerpoTabla').innerHTML=''; document.getElementById('seccionHistorial').style.display='none'; const b=document.getElementById('busquedaGuia'); if(b) b.value=''; actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo(); alert("✅ Todo eliminado"); };
+
 window.generarInformeMensual = ()=>{
     const mes=parseInt(document.getElementById('mesInforme').value), anio=parseInt(document.getElementById('anioInforme').value);
     if(!mes||!anio){ alert('Selecciona mes y año'); return; }
@@ -631,7 +983,8 @@ function diagnosticar(){
     const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','guardarEnMega','cargarDesdeMega',
                  'descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase',
                  'registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda',
-                 'agregarCodigo','eliminarCodigoPendiente'];
+                 'agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo',
+                 'exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord'];
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length) console.error('❌ Funciones faltantes en window:', faltan);
     else console.log('✅ Todas las funciones están listas en window.');
