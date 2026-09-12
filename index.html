@@ -8,7 +8,7 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <style>
 * { box-sizing: border-box; }
-body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; color: #333; }
+body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; padding-top: 60px; color: #333; }
 .container { max-width: 750px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
 h1, h2, h3 { color: #2c3e50; text-align: center; }
 .section { background: #eef2f5; padding: 15px; border-radius: 6px; margin-bottom: 20px; }
@@ -95,64 +95,105 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 .descripcion-cell { font-size: 0.75em; color: #555; max-width: 150px; }
 
-/* 🆕 Banner de avisos de duplicado */
-#avisoDuplicado {
-    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-    background: #e74c3c; color: #fff; padding: 12px 20px; border-radius: 8px;
-    font-weight: bold; font-size: 0.95em; z-index: 99999;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;
-    max-width: 90%; text-align: center;
-    animation: shake 0.4s;
-}
+#avisoDuplicado { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 0.95em; z-index: 99999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; max-width: 90%; text-align: center; animation: shake 0.4s; }
 #avisoDuplicado.visible { display: block; }
 #avisoDuplicado.ok { background: #1abc9c; animation: none; }
-@keyframes shake {
-    0%, 100% { transform: translateX(-50%) translateY(0); }
-    25% { transform: translateX(-50%) translateY(-4px); }
-    75% { transform: translateX(-50%) translateY(4px); }
-}
+@keyframes shake { 0%, 100% { transform: translateX(-50%) translateY(0); } 25% { transform: translateX(-50%) translateY(-4px); } 75% { transform: translateX(-50%) translateY(4px); } }
 
 #contadorUnicos { font-size: 0.85rem; color: #2c3e50; margin-top: 6px; text-align: center; font-weight: bold; }
 #contadorUnicos span { color: #e74c3c; }
 
-#areaImpresion { display: none; }
+/* ====== BARRA DE USUARIO ====== */
+#barraUsuario {
+    position: fixed; top: 0; left: 0; right: 0;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    color: #fff; padding: 10px 15px;
+    display: flex; justify-content: space-between; align-items: center;
+    z-index: 9998; font-size: 0.9em;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+#barraUsuario .info-usuario { display: flex; align-items: center; gap: 8px; font-weight: bold; }
+#barraUsuario .avatar { width: 28px; height: 28px; background: #1abc9c; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+#barraUsuario button {
+    background: #1abc9c; color: #fff; border: none;
+    padding: 6px 12px; border-radius: 4px; font-size: 0.85em;
+    cursor: pointer; width: auto; margin: 0; font-weight: bold;
+}
+#barraUsuario button:hover { background: #16a085; }
+
+/* ====== MODAL DE USUARIO ====== */
+#modalUsuario {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100000; padding: 20px;
+}
+#modalUsuario.visible { display: flex; }
+.modal-content {
+    background: #fff; border-radius: 12px; padding: 25px;
+    max-width: 380px; width: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    animation: aparecer 0.3s ease;
+}
+@keyframes aparecer { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-content h2 { color: #2c3e50; margin: 0 0 10px 0; text-align: center; font-size: 1.4em; }
+.modal-content p { color: #666; font-size: 0.9em; text-align: center; margin: 0 0 15px 0; }
+.modal-content input { font-size: 16px; padding: 12px; margin-top: 8px; }
+.modal-content button { margin-top: 15px; padding: 12px; font-size: 1em; background: #1abc9c; }
+.modal-content button:hover { background: #16a085; }
+.modal-content button.secundario { background: #95a5a6; font-size: 0.9em; }
+#listaUsuariosGuardados { margin-top: 10px; }
+#listaUsuariosGuardados button {
+    background: #ecf0f1; color: #2c3e50;
+    margin-top: 5px; padding: 10px; font-size: 0.9em;
+    text-align: left; border: 1px solid #bdc3c7;
+}
+#listaUsuariosGuardados button:hover { background: #dfe6e9; }
 
 @media print {
     body { background: white; padding: 0; margin: 0; font-size: 10pt; }
     .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
-    .no-print { display: none !important; }
+    .no-print, #barraUsuario, #modalUsuario, #avisoDuplicado { display: none !important; }
     @page { size: A4 portrait; margin: 0.7cm; }
     body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
     body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
     #areaImpresion { font-size: 9pt !important; color: #000; }
     #areaImpresion h1 { font-size: 14pt !important; margin: 3px 0 !important; }
-    #areaImpresion h2 { font-size: 12pt !important; margin: 5px 0 !important; padding-bottom: 3px !important; }
+    #areaImpresion h2 { font-size: 12pt !important; margin: 5px 0 !important; }
     #areaImpresion h3 { font-size: 11pt !important; margin: 8px 0 4px 0 !important; }
     #areaImpresion .section { background: none !important; padding: 0 !important; margin-bottom: 8px !important; border: none !important; }
     #areaImpresion table { font-size: 8pt !important; page-break-inside: auto; }
     #areaImpresion th, #areaImpresion td { padding: 3px 2px !important; font-size: 8pt !important; }
     #areaImpresion th { background: #2c3e50 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    #areaImpresion tr { page-break-inside: avoid !important; page-break-after: auto; }
+    #areaImpresion tr { page-break-inside: avoid !important; }
     #areaImpresion thead { display: table-header-group; }
-    #areaImpresion tfoot { display: table-footer-group; }
-    #areaImpresion img { max-width: 100% !important; height: auto !important; page-break-inside: avoid; }
-    #areaImpresion canvas { max-width: 100% !important; height: auto !important; }
-    #areaImpresion .stats-grid { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 4px !important; page-break-inside: avoid; }
-    #areaImpresion .stat-card { padding: 4px !important; font-size: 8pt !important; }
-    #areaImpresion .stat-card span { font-size: 12pt !important; }
-    #areaImpresion .informe-kpis { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; }
-    #areaImpresion .informe-kpi { padding: 4px !important; }
-    #areaImpresion .informe-kpi .label { font-size: 7pt !important; }
-    #areaImpresion .informe-kpi .valor { font-size: 11pt !important; }
-    #areaImpresion .informe-tabla th, #areaImpresion .informe-tabla td { padding: 2px 3px !important; font-size: 7.5pt !important; }
-    #areaImpresion .no-print, #areaImpresion button { display: none !important; }
-    #areaImpresion .descripcion-cell { font-size: 7pt !important; }
+    #areaImpresion img { max-width: 100% !important; height: auto !important; }
+    #areaImpresion button { display: none !important; }
 }
 </style>
 </head>
 <body>
 
-<!-- 🆕 Banner de aviso de duplicado -->
+<!-- 🆕 BARRA DE USUARIO (siempre visible) -->
+<div id="barraUsuario">
+    <div class="info-usuario">
+        <div class="avatar" id="avatarUsuario">👤</div>
+        <span id="infoUsuario">Cargando...</span>
+    </div>
+    <button onclick="cambiarUsuario()">🔄 Cambiar</button>
+</div>
+
+<!-- 🆕 MODAL PARA INGRESAR NOMBRE -->
+<div id="modalUsuario">
+    <div class="modal-content">
+        <h2>👤 ¿Quién eres?</h2>
+        <p>Ingresa tu nombre para que tus visitas se guarden por separado.</p>
+        <input type="text" id="inputNombreUsuario" placeholder="Ej: Juan Pérez" maxlength="40" autocomplete="off">
+        <button onclick="confirmarUsuario()">✅ Continuar</button>
+        <div id="listaUsuariosGuardados"></div>
+    </div>
+</div>
+
 <div id="avisoDuplicado"></div>
 
 <div class="container">
@@ -183,8 +224,8 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <label>Códigos de barras (uno por paquete):</label>
         <div class="input-group">
             <input type="text" id="codigoBarras" placeholder="Escribe o escanea un código" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
-            <button class="btn-escaneo" onclick="iniciarEscaneo()" title="Escanear con cámara">📷</button>
-            <button class="btn-agregar-codigo" onclick="agregarCodigo()" title="Agregar este código a la lista">➕</button>
+            <button class="btn-escaneo" onclick="iniciarEscaneo()">📷</button>
+            <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
         </div>
         <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
         <div style="text-align:center; margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
@@ -218,7 +259,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     </div>
 
     <div class="section" id="seccionHistorial" style="display: none;">
-        <h2>3. Detalle de Visitas</h2>
+        <h2>3. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size: 0.7em; color: #7f8c8d;"></span></h2>
         <div class="busqueda-box no-print">
             <label>🔍 Buscar por guía / código:</label>
             <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." oninput="filtrarVisitas()"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
@@ -227,10 +268,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div style="overflow-x: auto;">
             <table>
                 <thead>
-                    <tr>
-                        <th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th>
-                        <th>Código</th><th>Estado</th><th>Descripción</th><th class="no-print">Acciones</th>
-                    </tr>
+                    <tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th><th class="no-print">Acciones</th></tr>
                 </thead>
                 <tbody id="cuerpoTabla"></tbody>
             </table>
@@ -264,7 +302,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
     <div class="section no-print">
         <h2>8. ☁️ Sincronización en la Nube (Firebase)</h2>
-        <div id="estadoNube" class="estado-nube loading">⏳ Conectando con la nube...</div>
+        <div id="estadoNube" class="estado-nube loading">⏳ Esperando usuario...</div>
         <div class="toggle-wrapper">
             <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
             <div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div>
@@ -301,7 +339,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
 </div>
 
-<!-- ==================== FIREBASE SYNC ==================== -->
+<!-- ==================== FIREBASE SYNC (MULTIUSUARIO) ==================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp }
@@ -316,18 +354,20 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     appId: "1:593319427038:web:dddae0742e979b5640bb4f"
   };
 
-  const CODIGO_USUARIO = "data-archi";
+  // 🆕 CÓDIGO DE GRUPO (empresa). Todos los mensajeros lo comparten.
+  const CODIGO_GRUPO = "data-archi";
+  const CLAVE_USUARIO_LOCAL = "colserlog_usuario_actual";
 
   let db, syncActivo = false, guardadoPendiente = null;
-  let aplicandoRemoto = false, ultimaVersionLocal = 0;
-  let syncAutomaticoActivo = true;
+  let ultimaVersionLocal = 0, syncAutomaticoActivo = true;
+  let unsubscribeEscucha = null;
 
   try {
     const app = initializeApp(firebaseConfig);
     db = initializeFirestore(app, { experimentalForceLongPolling: true, useFetchStreams: false });
-    console.log('✅ Firebase inicializado (long-polling)');
+    console.log('✅ Firebase listo (grupo: ' + CODIGO_GRUPO + ')');
   } catch (e) {
-    console.error('❌ Error inicializando Firebase:', e);
+    console.error('❌ Error Firebase:', e);
     actualizarEstadoNube('❌ Error de configuración', 'error');
   }
 
@@ -339,8 +379,51 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
   }
   window.actualizarEstadoNube = actualizarEstadoNube;
 
+  // 🆕 Utilidades de usuario
+  function slugify(txt) {
+    return (txt || '').toString().toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+  function getUsuarioActual() {
+    const n = localStorage.getItem(CLAVE_USUARIO_LOCAL);
+    return n ? n.trim() : null;
+  }
+  function setUsuarioActual(nombre) {
+    localStorage.setItem(CLAVE_USUARIO_LOCAL, nombre.trim());
+  }
+  function refUsuario() {
+    const usuario = getUsuarioActual();
+    if (!usuario) return null;
+    const slug = slugify(usuario) || 'sin-nombre';
+    return doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'mensajeros', slug);
+  }
+  window.refUsuario = refUsuario;
+  window.getUsuarioActual = getUsuarioActual;
+
+  // 🆕 Actualizar barra superior
+  function actualizarBarraUsuario() {
+    const usuario = getUsuarioActual();
+    const span = document.getElementById('infoUsuario');
+    const avatar = document.getElementById('avatarUsuario');
+    const titulo = document.getElementById('tituloUsuarioHistorial');
+    if (usuario) {
+      span.textContent = usuario;
+      avatar.textContent = usuario.charAt(0).toUpperCase();
+      if (titulo) titulo.textContent = '— ' + usuario;
+    } else {
+      span.textContent = 'Sin usuario';
+      avatar.textContent = '👤';
+      if (titulo) titulo.textContent = '';
+    }
+  }
+
+  // 🆕 Construir payload con datos del usuario
   function construirPayload() {
+    const usuario = getUsuarioActual() || 'sin-nombre';
     return {
+      nombre: usuario,
+      grupo: CODIGO_GRUPO,
       estadoSesion: JSON.parse(localStorage.getItem('estadoSesion') || 'null'),
       entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'),
       tiemposBase: {
@@ -355,13 +438,15 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     };
   }
 
+  // 🆕 Sincronizar (usa la ruta del usuario actual)
   window.sincronizarConNube = function() {
     if (!syncActivo || !syncAutomaticoActivo || !db) return;
+    const ref = refUsuario();
+    if (!ref) return; // Sin usuario, no sincroniza
     clearTimeout(guardadoPendiente);
     guardadoPendiente = setTimeout(async () => {
       try {
         actualizarEstadoNube('⏳ Subiendo a la nube...', 'loading');
-        const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
         const payload = construirPayload();
         ultimaVersionLocal = payload.version;
         await Promise.race([
@@ -376,14 +461,21 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }, 800);
   };
 
+  // 🆕 Escuchar cambios del usuario actual
   function iniciarEscucha() {
     if (!db) return;
-    const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
-    onSnapshot(ref, (snap) => {
-      if (!snap.exists()) { actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún', 'ok'); return; }
+    if (unsubscribeEscucha) { try { unsubscribeEscucha(); } catch(e){} unsubscribeEscucha = null; }
+    const ref = refUsuario();
+    if (!ref) { actualizarEstadoNube('⚠️ Esperando selección de usuario', 'loading'); return; }
+
+    unsubscribeEscucha = onSnapshot(ref, (snap) => {
+      if (!snap.exists()) {
+        actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún', 'ok');
+        return;
+      }
       const d = snap.data();
       if (d.version && d.version === ultimaVersionLocal) return;
-      aplicandoRemoto = true;
+
       let huboCambios = false;
       const localEstado = localStorage.getItem('estadoSesion');
       const remotoEstado = d.estadoSesion ? JSON.stringify(d.estadoSesion) : null;
@@ -400,44 +492,48 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
           if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
         });
       }
-      actualizarEstadoNube('🔄 Actualizado desde otro dispositivo ' + new Date().toLocaleTimeString(), 'ok');
+      actualizarEstadoNube('🔄 Actualizado ' + new Date().toLocaleTimeString(), 'ok');
       if (huboCambios && typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
-      setTimeout(() => { aplicandoRemoto = false; }, 500);
     }, (err) => {
-      console.warn('Error escuchando Firestore:', err);
+      console.warn('Error escuchando:', err);
       actualizarEstadoNube('❌ Sin conexión: ' + err.message, 'error');
     });
   }
 
+  // 🆕 Forzar sincronización
   window.forzarSincronizacion = async function() {
-    if (!db) { alert('Firebase no está configurado.'); return; }
-    actualizarEstadoNube('⏳ Subiendo datos a la nube...', 'loading');
+    if (!db) { alert('Firebase no está configurado.'); return false; }
+    const ref = refUsuario();
+    if (!ref) { alert('Primero selecciona tu nombre.'); return false; }
+    actualizarEstadoNube('⏳ Subiendo datos...', 'loading');
     try {
-      const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
       const payload = construirPayload();
       ultimaVersionLocal = payload.version;
       await Promise.race([
         setDoc(ref, payload, { merge: true }),
         new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
       ]);
-      actualizarEstadoNube('✅ Datos subidos correctamente', 'ok');
+      actualizarEstadoNube('✅ Datos subidos', 'ok');
+      return true;
     } catch (e) {
-      console.error('Error al subir:', e);
-      actualizarEstadoNube('❌ Error: ' + e.message, 'error');
+      actualizarEstadoNube('❌ ' + e.message, 'error');
+      return false;
     }
   };
 
+  // 🆕 Cargar de la nube
   window.cargarDeNube = async function() {
     if (!db) { alert('Firebase no está configurado.'); return; }
+    const ref = refUsuario();
+    if (!ref) { alert('Primero selecciona tu nombre.'); return; }
     if (!confirm('⚠️ Esto reemplazará los datos locales con los de la nube. ¿Continuar?')) return;
-    actualizarEstadoNube('⏳ Descargando datos de la nube...', 'loading');
+    actualizarEstadoNube('⏳ Descargando datos...', 'loading');
     try {
-      const ref = doc(db, 'colserlog_usuarios', CODIGO_USUARIO);
       const snap = await Promise.race([
         getDoc(ref),
         new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
       ]);
-      if (!snap.exists()) { actualizarEstadoNube('⚠️ No hay datos en la nube todavía', 'error'); return; }
+      if (!snap.exists()) { actualizarEstadoNube('⚠️ No hay datos en la nube', 'error'); return; }
       const d = snap.data();
       if (d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
       if (d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
@@ -445,8 +541,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
       actualizarEstadoNube('✅ Datos descargados. Recargando...', 'ok');
       setTimeout(() => location.reload(), 1200);
     } catch (e) {
-      console.error('Error al descargar:', e);
-      actualizarEstadoNube('❌ Error: ' + e.message, 'error');
+      actualizarEstadoNube('❌ ' + e.message, 'error');
     }
   };
 
@@ -454,27 +549,216 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     const t = document.getElementById('toggleSync');
     syncAutomaticoActivo = t.checked;
     localStorage.setItem('syncAutomaticoFirebase', syncAutomaticoActivo);
-    actualizarEstadoNube(syncAutomaticoActivo ? '✅ Sincronización activada' : '⚠️ Sincronización pausada', syncAutomaticoActivo ? 'ok' : 'error');
+    actualizarEstadoNube(syncAutomaticoActivo ? '✅ Sync activada' : '⚠️ Sync pausada', syncAutomaticoActivo ? 'ok' : 'error');
   };
 
+  // 🆕 MIGRACIÓN: si existe el doc antiguo (sin subcolección), preguntar al usuario
+  async function migrarDatosAntiguosSiExisten(nombreUsuario) {
+    if (!db) return false;
+    try {
+      const refViejo = doc(db, 'colserlog_usuarios', CODIGO_GRUPO);
+      const snapViejo = await getDoc(refViejo);
+      if (!snapViejo.exists()) return false;
+
+      // ¿Ya migrado a algún usuario?
+      if (snapViejo.data()._migrado) return false;
+
+      const quiere = confirm(
+        '📦 Se encontraron datos de la versión anterior.\n\n' +
+        '¿Quieres importarlos a tu usuario "' + nombreUsuario + '"?\n\n' +
+        'Aceptar = Sí, importar\n' +
+        'Cancelar = No, empezar de cero'
+      );
+      if (!quiere) {
+        // Marcar como migrado para no preguntar de nuevo
+        await setDoc(refViejo, { _migrado: true, _migradoPor: nombreUsuario, _fechaMigracion: new Date().toISOString() }, { merge: true });
+        return false;
+      }
+
+      const datosViejos = snapViejo.data();
+      const refNuevo = refUsuario();
+      await setDoc(refNuevo, {
+        nombre: nombreUsuario,
+        grupo: CODIGO_GRUPO,
+        estadoSesion: datosViejos.estadoSesion || null,
+        entregasDiariasDetallado: datosViejos.entregasDiariasDetallado || {},
+        tiemposBase: datosViejos.tiemposBase || {},
+        migradoDe: CODIGO_GRUPO,
+        fechaMigracion: new Date().toISOString(),
+        version: Date.now()
+      }, { merge: true });
+
+      await setDoc(refViejo, { _migrado: true, _migradoPor: nombreUsuario, _fechaMigracion: new Date().toISOString() }, { merge: true });
+
+      // Cargar localmente
+      if (datosViejos.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(datosViejos.estadoSesion));
+      if (datosViejos.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(datosViejos.entregasDiariasDetallado));
+      if (datosViejos.tiemposBase) for (const k in datosViejos.tiemposBase) { if (datosViejos.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, datosViejos.tiemposBase[k]); }
+
+      alert('✅ Datos antiguos importados a tu usuario.');
+      return true;
+    } catch (e) {
+      console.warn('Error migrando datos antiguos:', e);
+      return false;
+    }
+  }
+
+  // 🆕 Lista de usuarios guardados en este dispositivo
+  function usuariosGuardadosEnDispositivo() {
+    try { return JSON.parse(localStorage.getItem('colserlog_usuarios_guardados') || '[]'); }
+    catch { return []; }
+  }
+  function agregarUsuarioGuardado(nombre) {
+    const lista = usuariosGuardadosEnDispositivo();
+    if (!lista.includes(nombre)) {
+      lista.push(nombre);
+      if (lista.length > 10) lista.shift();
+      localStorage.setItem('colserlog_usuarios_guardados', JSON.stringify(lista));
+    }
+  }
+
+  // 🆕 Mostrar modal
+  function mostrarModalUsuario() {
+    const modal = document.getElementById('modalUsuario');
+    const input = document.getElementById('inputNombreUsuario');
+    const lista = document.getElementById('listaUsuariosGuardados');
+    const usuarioActual = getUsuarioActual();
+
+    input.value = usuarioActual || '';
+    lista.innerHTML = '';
+
+    const guardados = usuariosGuardadosEnDispositivo().filter(u => u !== usuarioActual);
+    if (guardados.length > 0) {
+      const p = document.createElement('p');
+      p.style.marginTop = '15px'; p.style.fontSize = '0.8em'; p.style.color = '#888'; p.style.textAlign = 'left';
+      p.textContent = 'Usuarios recientes en este dispositivo:';
+      lista.appendChild(p);
+      guardados.reverse().forEach(u => {
+        const btn = document.createElement('button');
+        btn.textContent = '👤 ' + u;
+        btn.style.width = '100%';
+        btn.onclick = () => { input.value = u; confirmarUsuario(); };
+        lista.appendChild(btn);
+      });
+    }
+
+    modal.classList.add('visible');
+    setTimeout(() => input.focus(), 200);
+  }
+  window.mostrarModalUsuario = mostrarModalUsuario;
+
+  // 🆕 Confirmar usuario
+  window.confirmarUsuario = async function() {
+    const input = document.getElementById('inputNombreUsuario');
+    const nombre = (input.value || '').trim();
+    if (nombre.length < 2) { alert('Ingresa un nombre válido (mínimo 2 caracteres).'); input.focus(); return; }
+    if (nombre.length > 40) { alert('Nombre demasiado largo (máximo 40 caracteres).'); return; }
+
+    const usuarioAnterior = getUsuarioActual();
+
+    // Si cambió de usuario, limpiar todo lo local y cargar lo del nuevo
+    if (usuarioAnterior && usuarioAnterior !== nombre) {
+      // Guardar el anterior (por si acaso)
+      try { await window.forzarSincronizacion(); } catch(e){}
+      limpiarTodoLocalStorage();
+    }
+
+    setUsuarioActual(nombre);
+    agregarUsuarioGuardado(nombre);
+    actualizarBarraUsuario();
+    document.getElementById('modalUsuario').classList.remove('visible');
+
+    // ¿Migrar datos antiguos?
+    const migro = await migrarDatosAntiguosSiExisten(nombre);
+    if (!migro) {
+      // Intentar cargar datos existentes del usuario
+      const ref = refUsuario();
+      if (ref) {
+        try {
+          const snap = await getDoc(ref);
+          if (snap.exists()) {
+            const d = snap.data();
+            if (d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
+            if (d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
+            if (d.tiemposBase) for (const k in d.tiemposBase) { if (d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]); }
+            console.log('✅ Datos cargados de Firestore para', nombre);
+          }
+        } catch(e){ console.warn('No se pudieron cargar datos remotos:', e); }
+      }
+    }
+
+    // Activar sync y recargar UI
+    syncActivo = true;
+    iniciarEscucha();
+    if (typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
+    if (typeof window.reiniciarUIOffline === 'function') window.reiniciarUIOffline();
+    actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
+  };
+
+  function limpiarTodoLocalStorage() {
+    localStorage.removeItem('estadoSesion');
+    localStorage.removeItem('entregasDiariasDetallado');
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('tiempoBase_')) localStorage.removeItem(k);
+    }
+  }
+  window.limpiarTodoLocalStorage = limpiarTodoLocalStorage;
+
+  // 🆕 Cambiar de usuario
+  window.cambiarUsuario = async function() {
+    const usuario = getUsuarioActual();
+    if (usuario) {
+      const ok = confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos actuales de "' + usuario + '" y podrás elegir otro.');
+      if (!ok) return;
+      // Forzar sincronización antes de limpiar
+      actualizarEstadoNube('⏳ Guardando antes de cambiar...', 'loading');
+      try { await window.forzarSincronizacion(); } catch(e){}
+    }
+    // Desconectar escucha anterior
+    if (unsubscribeEscucha) { try { unsubscribeEscucha(); } catch(e){} unsubscribeEscucha = null; }
+    syncActivo = false;
+
+    // Limpiar local
+    limpiarTodoLocalStorage();
+    localStorage.removeItem(CLAVE_USUARIO_LOCAL);
+    actualizarBarraUsuario();
+
+    // Recargar UI al estado "vacío"
+    if (typeof window.reiniciarUIOffline === 'function') window.reiniciarUIOffline();
+
+    // Mostrar modal
+    actualizarEstadoNube('⏳ Esperando selección de usuario', 'loading');
+    mostrarModalUsuario();
+  };
+
+  // 🆕 Inicialización
   window.addEventListener('load', () => {
     const pref = localStorage.getItem('syncAutomaticoFirebase');
     syncAutomaticoActivo = (pref === null) ? true : (pref === 'true');
     const tgl = document.getElementById('toggleSync');
     if (tgl) tgl.checked = syncAutomaticoActivo;
+
     window.addEventListener('online', () => {
-      actualizarEstadoNube('🌐 Conexión restaurada. Sincronizando...', 'loading');
+      actualizarEstadoNube('🌐 Conexión restaurada...', 'loading');
       setTimeout(() => window.sincronizarConNube && window.sincronizarConNube(), 1000);
     });
     window.addEventListener('offline', () => {
       actualizarEstadoNube('📴 Sin conexión (guardado local)', 'loading');
     });
+
     setTimeout(() => {
-      if (!db) { actualizarEstadoNube('❌ Firebase no configurado', 'error'); return; }
-      syncActivo = true;
-      actualizarEstadoNube('☁️ Conectando...', 'loading');
-      iniciarEscucha();
-    }, 600);
+      actualizarBarraUsuario();
+      const usuario = getUsuarioActual();
+      if (!usuario) {
+        actualizarEstadoNube('⚠️ Esperando selección de usuario', 'loading');
+        mostrarModalUsuario();
+      } else {
+        syncActivo = true;
+        actualizarEstadoNube('☁️ Conectando como ' + usuario + '...', 'loading');
+        iniciarEscucha();
+      }
+    }, 500);
   });
 </script>
 
@@ -488,32 +772,23 @@ let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
 let miGrafico = null, miGraficoPromedios = null, miGraficoSemana = null, miGraficoMes = null;
 let html5QrCode = null, escaneoActivo = false, filaEditando = null;
 let codigosPendientes = [];
-
-// 🆕 ANTI-DUPLICADOS
-let codigosRegistradosHoy = new Set();   // Códigos ya registrados en visitas del día
-let codesScannedRecently = new Map();     // Código -> timestamp (anti-lectura repetida)
-const TIEMPO_BLOQUEO_MS = 5000;           // 5 segundos para bloquear relectura del mismo código
+let codigosRegistradosHoy = new Set();
+let codesScannedRecently = new Map();
+const TIEMPO_BLOQUEO_MS = 5000;
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; let [hh1,mm1]=h1.split(':').map(Number); let [hh2,mm2]=h2.split(':').map(Number); let m1=hh1*60+mm1, m2=hh2*60+mm2; if(m2<m1) m2+=1440; return m2-m1; }
 function getWeekNumber(d){ d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7)); const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d-ys)/86400000)+1)/7); }
 
-// 🆕 Reconstruir el set de códigos registrados hoy
 function cargarCodigosRegistradosHoy(){
     codigosRegistradosHoy.clear();
-    visitas.forEach(v => {
-        if (v.codigo && v.codigo.trim()) codigosRegistradosHoy.add(v.codigo.trim());
-    });
+    visitas.forEach(v => { if (v.codigo && v.codigo.trim()) codigosRegistradosHoy.add(v.codigo.trim()); });
     actualizarContadorUnicos();
 }
-
-// 🆕 Actualizar contador visual de códigos únicos
 function actualizarContadorUnicos(){
     const el = document.querySelector('#contadorUnicos span');
     if (el) el.textContent = codigosRegistradosHoy.size;
 }
-
-// 🆕 Mostrar banner de duplicado
 function mostrarAviso(texto, tipo='error'){
     const el = document.getElementById('avisoDuplicado');
     if (!el) return;
@@ -522,40 +797,30 @@ function mostrarAviso(texto, tipo='error'){
     clearTimeout(el._timeout);
     el._timeout = setTimeout(() => { el.className = ''; }, 2800);
 }
-
-// 🆕 Beep de error con Web Audio API
 function beepError(){
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.value = 220;
-        osc.type = 'square';
+        osc.frequency.value = 220; osc.type = 'square';
         gain.gain.setValueAtTime(0.15, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
         osc.start(); osc.stop(ctx.currentTime + 0.3);
         setTimeout(() => ctx.close(), 500);
-    } catch(e){ /* silencioso */ }
+    } catch(e){}
 }
-
-// 🆕 Beep de éxito
 function beepOk(){
     try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
         osc.connect(gain); gain.connect(ctx.destination);
-        osc.frequency.value = 880;
-        osc.type = 'sine';
+        osc.frequency.value = 880; osc.type = 'sine';
         gain.gain.setValueAtTime(0.15, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
         osc.start(); osc.stop(ctx.currentTime + 0.15);
         setTimeout(() => ctx.close(), 400);
-    } catch(e){ /* silencioso */ }
+    } catch(e){}
 }
-
-// 🆕 Verifica si un código es duplicado. Devuelve null si es válido, o un string con el motivo.
 function motivoDuplicado(cod){
     if (!cod) return null;
     if (codigosPendientes.includes(cod)) return 'Ya está en la lista de pendientes';
@@ -598,7 +863,6 @@ function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0];
 function cargarHistorialDetallado(){ const raw=localStorage.getItem('entregasDiariasDetallado'); if(!raw) return {}; try{return JSON.parse(raw);}catch{return {};} }
 function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo; }); cargarCodigosRegistradosHoy(); actualizarDashboard(); guardarEstadoCompleto(); }
 
-// ==================== MULTI-PEDIDO CON ANTI-DUPLICADOS ====================
 window.agregarCodigo = function(){
     const inp = document.getElementById('codigoBarras');
     const cod = (inp.value||'').trim();
@@ -606,23 +870,19 @@ window.agregarCodigo = function(){
     const motivo = motivoDuplicado(cod);
     if (motivo){
         mostrarAviso('⚠️ ' + motivo, 'error');
-        beepError();
-        if (navigator.vibrate) navigator.vibrate([100,50,100]);
-        inp.value = '';
-        return;
+        beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        inp.value = ''; return;
     }
     agregarCodigoPendiente(cod);
     inp.value = ''; inp.focus();
 };
-
 function agregarCodigoPendiente(cod){
     if(!cod) return;
     cod = cod.trim();
     const motivo = motivoDuplicado(cod);
     if (motivo){
         mostrarAviso('⚠️ ' + motivo, 'error');
-        beepError();
-        if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
         return;
     }
     codigosPendientes.push(cod);
@@ -630,9 +890,7 @@ function agregarCodigoPendiente(cod){
     beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
 }
-
 window.eliminarCodigoPendiente = function(i){ codigosPendientes.splice(i,1); renderizarCodigosPendientes(); };
-
 function renderizarCodigosPendientes(){
     const cont = document.getElementById('listaCodigosPendientes');
     const contador = document.getElementById('contadorCodigos');
@@ -641,7 +899,7 @@ function renderizarCodigosPendientes(){
     if(codigosPendientes.length === 0){
         const vac = document.createElement('div');
         vac.className = 'lista-vacia';
-        vac.textContent = 'Sin códigos agregados (se puede registrar con 1 código vacío o agregar varios).';
+        vac.textContent = 'Sin códigos agregados.';
         cont.appendChild(vac);
         if(contador) contador.textContent = '';
         return;
@@ -653,10 +911,9 @@ function renderizarCodigosPendientes(){
         btn.onclick = ()=>window.eliminarCodigoPendiente(i); chip.appendChild(btn);
         cont.appendChild(chip);
     });
-    if(contador) contador.textContent = `📦 ${codigosPendientes.length} pedido(s) pendiente(s) de registrar`;
+    if(contador) contador.textContent = `📦 ${codigosPendientes.length} pedido(s) pendiente(s)`;
 }
 
-// ==================== TABLA ====================
 function renderizarTabla(){
     const tabla=document.getElementById('cuerpoTabla'); tabla.innerHTML='';
     const filtro=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase();
@@ -665,7 +922,7 @@ function renderizarTabla(){
     const items=[]; visitas.forEach((v,i)=>{ const cod=(v.codigo||'').toLowerCase(); if(!filtro||cod.includes(filtro)) items.push({visita:v,indexOriginal:i}); });
     const cont=document.getElementById('contadorBusqueda');
     if(cont) cont.textContent=filtro?`🔎 ${items.length} resultado(s) para "${filtro}" de ${visitas.length}`:`Total: ${visitas.length} visita(s).`;
-    if(items.length===0){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=8; td.className='sin-resultados'; td.textContent='❌ No se encontraron visitas con ese código.'; tr.appendChild(td); tabla.appendChild(tr); return; }
+    if(items.length===0){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=8; td.className='sin-resultados'; td.textContent='❌ No se encontraron visitas.'; tr.appendChild(td); tabla.appendChild(tr); return; }
     items.forEach(({visita:v,indexOriginal})=>{
         const editando=filaEditando===indexOriginal;
         const fila=document.createElement('tr');
@@ -703,23 +960,15 @@ window.guardarEdicion = (index)=>{
     const de=document.getElementById(`edit-desc-${index}`);
     if(!ic||!se) return;
     const nuevoCod = ic.value.trim();
-    // 🆕 Verificar duplicado si cambió el código
     if (nuevoCod && nuevoCod !== (visitas[index].codigo||'')){
         const existeEnOtra = visitas.some((v,i) => i !== index && (v.codigo||'').trim() === nuevoCod);
-        if (existeEnOtra){
-            mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error');
-            beepError();
-            return;
-        }
+        if (existeEnOtra){ mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error'); beepError(); return; }
     }
     visitas[index].codigo=nuevoCod;
     visitas[index].estado=se.value;
     visitas[index].descripcion = de ? de.value.trim() : (visitas[index].descripcion||'');
     filaEditando=null;
-    recalcularEstadisticas();
-    renderizarTabla();
-    actualizarGraficaPromedios();
-    actualizarInformesSemanalesMensuales();
+    recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
 window.eliminarVisita = (index)=>{ visitas.splice(index,1); if(filaEditando===index) filaEditando=null; else if(filaEditando!==null&&filaEditando>index) filaEditando--; recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
 
@@ -729,7 +978,6 @@ function calcularPromedios(){ const h=cargarHistorialDetallado(); const fechas=O
 function actualizarGraficaPromedios(){ const {promedioDia,promedioSemana,promedioMes}=calcularPromedios(); document.getElementById('prom-dia').textContent=promedioDia.toFixed(1); document.getElementById('prom-semana').textContent=promedioSemana.toFixed(1); document.getElementById('prom-mes').textContent=promedioMes.toFixed(1); const ctx=document.getElementById('graficaPromedios').getContext('2d'); if(miGraficoPromedios) miGraficoPromedios.destroy(); miGraficoPromedios=new Chart(ctx,{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data:[promedioDia,promedioSemana,promedioMes],backgroundColor:['#3498db','#2ecc71','#f1c40f']}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true}}}}); }
 function actualizarInformesSemanalesMensuales(){ const h=cargarHistorialDetallado(); const fechas=Object.keys(h).sort(); if(fechas.length===0) return; const semanas={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.getFullYear()+' - Sem '+String(getWeekNumber(fecha)).padStart(2,'0'); semanas[k]=(semanas[k]||0)+(h[f].contadores['Entregado']||0); } const meses={}; for(let f of fechas){ const fecha=new Date(f+'T00:00:00'); const k=fecha.toLocaleString('es',{month:'long',year:'numeric'}); meses[k]=(meses[k]||0)+(h[f].contadores['Entregado']||0); } const ctxS=document.getElementById('graficaSemana').getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctxS,{type:'bar',data:{labels:Object.keys(semanas),datasets:[{label:'Por Semana',data:Object.values(semanas),backgroundColor:'#3498db'}]},options:{responsive:true,animation:false}}); const ctxM=document.getElementById('graficaMes').getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctxM,{type:'bar',data:{labels:Object.keys(meses),datasets:[{label:'Por Mes',data:Object.values(meses),backgroundColor:'#2ecc71'}]},options:{responsive:true,animation:false}}); }
 
-// ==================== FUNCIONES GLOBALES ====================
 window.calcularTiemposBase = function(silencioso){
     let iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value;
     if(!iC||!fC||!sE||!pE){ if(!silencioso) alert("Completa todas las horas."); return; }
@@ -751,11 +999,7 @@ window.registrarVisita = ()=>{
     const inputCod = (document.getElementById('codigoBarras').value||'').trim();
     if(inputCod){
         const motivo = motivoDuplicado(inputCod);
-        if (motivo){
-            mostrarAviso('⚠️ ' + motivo, 'error');
-            beepError();
-            return;
-        }
+        if (motivo){ mostrarAviso('⚠️ ' + motivo, 'error'); beepError(); return; }
         if(!codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
     }
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
@@ -780,7 +1024,6 @@ window.registrarVisita = ()=>{
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 };
 
-// ==================== ESCÁNER CON ANTI-DUPLICADOS FUERTE ====================
 window.iniciarEscaneo = ()=>{
     if(escaneoActivo) return;
     const div=document.getElementById('lectorQR');
@@ -794,34 +1037,20 @@ window.iniciarEscaneo = ()=>{
         (txt)=>{
             const cod = (txt || '').trim();
             if (!cod) return;
-
-            // 🆕 CAPA 1: Anti-lectura repetida del mismo código en corto tiempo
             const ahora = Date.now();
             const ultimaVez = codesScannedRecently.get(cod) || 0;
-            if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) {
-                // Mismo código detectado hace <5s. Ignorar silenciosamente (evita spam).
-                return;
-            }
+            if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) return;
             codesScannedRecently.set(cod, ahora);
-
-            // Limpiar entradas viejas cada vez (evitar crecer infinito)
             if (codesScannedRecently.size > 100) {
                 const cutoff = ahora - 60000;
-                for (const [k, t] of codesScannedRecently) {
-                    if (t < cutoff) codesScannedRecently.delete(k);
-                }
+                for (const [k, t] of codesScannedRecently) { if (t < cutoff) codesScannedRecently.delete(k); }
             }
-
-            // 🆕 CAPA 2 y 3: Verificar duplicado en pendientes o registrados hoy
             const motivo = motivoDuplicado(cod);
-            if (motivo) {
+            if (motivo){
                 mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
-                beepError();
-                if (navigator.vibrate) navigator.vibrate([100,50,100]);
+                beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
                 return;
             }
-
-            // ✅ Código único y nuevo → agregar
             agregarCodigoPendiente(cod);
             mostrarAviso('✅ Código agregado: ' + cod, 'ok');
         }, ()=>{}
@@ -829,7 +1058,6 @@ window.iniciarEscaneo = ()=>{
 };
 window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; try{html5QrCode.clear();}catch(e){} html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
 
-// ==================== IMPRESIÓN OPTIMIZADA ====================
 function imprimirContenidoHTML(titulo){
     try{
         const canvasData = [];
@@ -850,9 +1078,19 @@ function imprimirContenidoHTML(titulo){
         let area = document.getElementById('areaImpresion');
         if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
         const clon = fuente.cloneNode(true);
-        clon.querySelectorAll('.no-print, script, button, #lectorQR, #seccionHistorial .busqueda-box, #avisoDuplicado').forEach(el => el.remove());
+        clon.querySelectorAll('.no-print, script, button, #lectorQR, .busqueda-box, #avisoDuplicado, #barraUsuario, #modalUsuario').forEach(el => el.remove());
         if(clon.style && clon.style.display === 'none') clon.style.display = '';
         clon.querySelectorAll('[style*="display: none"], [style*="display:none"]').forEach(el => { el.style.display = ''; });
+        // 🆕 Insertar nombre del usuario en el header del clon
+        const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'Sin usuario';
+        const h1 = clon.querySelector('h1');
+        if (h1 && !informeVisible) {
+            const p = document.createElement('div');
+            p.style.textAlign = 'center'; p.style.fontSize = '11pt'; p.style.color = '#555';
+            p.style.marginBottom = '8px'; p.style.fontWeight = 'bold';
+            p.textContent = '👤 Mensajero: ' + usuario;
+            h1.parentNode.insertBefore(p, h1.nextSibling);
+        }
         const canvasClones = clon.querySelectorAll('canvas');
         canvasClones.forEach((cc, i) => {
             const data = canvasData[i];
@@ -872,10 +1110,10 @@ function imprimirContenidoHTML(titulo){
 window.imprimirReporteDiario = () => imprimirContenidoHTML('Reporte Diario Colserlog');
 window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Colserlog');
 
-// ==================== RESPALDO LOCAL ====================
 function crearObjetoRespaldo(){
+    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
     return {
-        version:3, fecha_respaldo:new Date().toISOString(),
+        version:4, usuario, fecha_respaldo:new Date().toISOString(),
         estadoSesion: JSON.parse(localStorage.getItem('estadoSesion')||'null'),
         entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'),
         tiemposBase:{ inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga: localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||'' }
@@ -886,7 +1124,8 @@ window.descargarRespaldoLocal = ()=>{
     const blob = new Blob([JSON.stringify(respaldo,null,2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
     const fecha = new Date().toISOString().split('T')[0];
-    const nombre = `colserlog_respaldo_${fecha}.json`;
+    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : 'usuario').replace(/\s+/g,'-').toLowerCase();
+    const nombre = `colserlog_${usuario}_${fecha}.json`;
     try{ const a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),4000); return; }catch(e){ console.warn('download falló', e); }
     const w = window.open(url, '_blank');
     if(!w) alert('No se pudo descargar. Permite pop-ups.');
@@ -898,8 +1137,13 @@ window.cargarRespaldoDesdeArchivo = async function(event){
     try{
         const texto = await file.text();
         const respaldo = JSON.parse(texto);
-        if(!respaldo.entregasDiariasDetallado && !respaldo.estadoSesion){ alert('❌ El archivo no tiene formato de respaldo.'); return; }
-        const opcion = confirm('¿Qué quieres hacer con este respaldo?\n\nAceptar = REEMPLAZAR\nCancelar = FUSIONAR');
+        if(!respaldo.entregasDiariasDetallado && !respaldo.estadoSesion){ alert('❌ El archivo no tiene formato.'); return; }
+        const usuarioActual = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
+        if (respaldo.usuario && respaldo.usuario !== usuarioActual){
+            const ok = confirm(`⚠️ Este respaldo es de "${respaldo.usuario}" pero estás como "${usuarioActual}".\n\n¿Continuar de todas formas?`);
+            if (!ok) return;
+        }
+        const opcion = confirm('¿Qué quieres hacer?\n\nAceptar = REEMPLAZAR\nCancelar = FUSIONAR');
         let historialFinal;
         if(opcion){ historialFinal = respaldo.entregasDiariasDetallado || {}; }
         else {
@@ -921,18 +1165,19 @@ window.cargarRespaldoDesdeArchivo = async function(event){
         if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
         alert('✅ Respaldo cargado. Recargando...');
         setTimeout(()=>location.reload(), 800);
-    }catch(e){ console.error(e); alert('❌ Error al leer: ' + e.message); }
+    }catch(e){ console.error(e); alert('❌ Error: ' + e.message); }
     finally{ event.target.value = ''; }
 };
 
-// ==================== EXPORTAR A WORD ====================
 function descargarWord(nombreArchivo, contenidoHTML){
+    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || '';
     const htmlCompleto = `<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${nombreArchivo}</title><style>
   @page { size: A4 portrait; margin: 1cm; }
   body { font-family: Calibri, Arial, sans-serif; font-size: 10pt; color: #333; }
   h1 { color: #2c3e50; font-size: 16pt; text-align: center; margin: 3px 0; }
   h2 { color: #2c3e50; font-size: 12pt; text-align: center; margin: 3px 0; border-bottom: 2px solid #2c3e50; padding-bottom: 4px; }
   h3 { color: #2c3e50; font-size: 11pt; margin: 10px 0 4px 0; border-bottom: 1px solid #3498db; padding-bottom: 2px; }
+  .usuario-header { text-align: center; font-size: 10pt; font-weight: bold; color: #2c3e50; margin-bottom: 6px; }
   table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 8pt; page-break-inside: auto; }
   th { background: #2c3e50; color: #fff; padding: 4px 5px; border: 1px solid #1a252f; text-align: center; font-size: 8pt; }
   td { padding: 3px 5px; border: 1px solid #bbb; text-align: center; font-size: 8pt; }
@@ -948,7 +1193,7 @@ function descargarWord(nombreArchivo, contenidoHTML){
   .firma table td { border: none; border-top: 1px solid #000; padding-top: 5px; width: 40%; font-size: 9pt; text-align: center; }
   .header-info { text-align: center; font-size: 8pt; color: #777; margin-bottom: 10px; }
   .descripcion-col { text-align: left; font-size: 7.5pt; max-width: 150px; }
-</style></head><body>${contenidoHTML}</body></html>`;
+</style></head><body><div class="usuario-header">👤 Mensajero: ${usuario}</div>${contenidoHTML}</body></html>`;
     const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href = url; a.download = nombreArchivo.endsWith('.doc') ? nombreArchivo : nombreArchivo + '.doc';
@@ -957,7 +1202,7 @@ function descargarWord(nombreArchivo, contenidoHTML){
 }
 
 window.exportarDiaAWord = function(){
-    if(visitas.length === 0){ alert('No hay visitas registradas hoy todavía.'); return; }
+    if(visitas.length === 0){ alert('No hay visitas registradas hoy.'); return; }
     const fecha = new Date().toLocaleDateString('es', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
     const ent = contadores['Entregado']||0, noEnt = totalVisitas - ent;
     const prom = totalVisitas>0 ? Math.round(totalMinutosVisitas/totalVisitas) : 0;
@@ -983,7 +1228,7 @@ window.exportarDiaAWord = function(){
 
 window.exportarMesAWord = function(){
     const mes = parseInt(document.getElementById('mesInforme').value), anio = parseInt(document.getElementById('anioInforme').value);
-    if(!mes || !anio){ alert('Selecciona mes y año primero.'); return; }
+    if(!mes || !anio){ alert('Selecciona mes y año.'); return; }
     const h = cargarHistorialDetallado();
     const fechasMes = Object.keys(h).filter(f => { const [y,m] = f.split('-').map(Number); return y===anio && m===mes; }).sort();
     if(fechasMes.length === 0){ alert(`No hay datos para ${mes}/${anio}.`); return; }
@@ -1037,7 +1282,7 @@ window.exportarHistorialCompletoAWord = function(){
     <table class="kpis"><tr>
       <td><div class="kpi-label">Total Entregados</div><div class="kpi-valor">${totEnt}</div></td>
       <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totVis}</div></td>
-      <td><div class="kpi-label">Días Registrados</div><div class="kpi-valor">${fechas.length}</div></td>
+      <td><div class="kpi-label">Días</div><div class="kpi-valor">${fechas.length}</div></td>
       <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></td>
     </tr></table>
     <h3>📅 Resumen por Mes</h3>
@@ -1056,7 +1301,6 @@ window.exportarHistorialCompletoAWord = function(){
     descargarWord(`Colserlog_Historial_Completo.doc`, html);
 };
 
-// ==================== CONTROL DE SESIÓN ====================
 window.guardarDia = ()=>{
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
@@ -1064,7 +1308,7 @@ window.guardarDia = ()=>{
     actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
 window.reiniciarDia = ()=>{
-    if(!confirm("¿Reiniciar día? Se guardará historial y se limpiará.")) return;
+    if(!confirm("¿Reiniciar día?")) return;
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
     limpiarSesion(); alert("✅ Día reiniciado");
@@ -1074,8 +1318,7 @@ function limpiarSesion(){
     ESTADOS.forEach(k=>contadores[k]=0);
     totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
     codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes();
-    actualizarContadorUnicos();
+    renderizarCodigosPendientes(); actualizarContadorUnicos();
     ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); });
     document.getElementById('resumenTiempos').style.display='none';
     document.getElementById('cuerpoTabla').innerHTML='';
@@ -1094,8 +1337,7 @@ window.eliminarTodo = ()=>{
     ESTADOS.forEach(k=>contadores[k]=0);
     totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
     codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes();
-    actualizarContadorUnicos();
+    renderizarCodigosPendientes(); actualizarContadorUnicos();
     ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('resumenTiempos').style.display='none';
     document.getElementById('cuerpoTabla').innerHTML='';
@@ -1115,10 +1357,11 @@ window.generarInformeMensual = ()=>{
     if(fechasMes.length===0){ alert('No hay datos para ese mes'); return; }
     const nombreMes=new Date(anio,mes-1,1).toLocaleString('es',{month:'long'});
     const cap=nombreMes.charAt(0).toUpperCase()+nombreMes.slice(1);
+    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || '';
     let totEnt=0, totVis=0, totMin=0; const contMes={}; ESTADOS.forEach(k=>contMes[k]=0);
     fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
     const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
-    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:#2c3e50;font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
     Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
     html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
     fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
@@ -1150,12 +1393,33 @@ window.recargarUIDesdeStorage = function(){
     }catch(e){ console.warn('Error recargando UI:', e); }
 };
 
+// 🆕 Reiniciar UI sin datos (para cambio de usuario)
+window.reiniciarUIOffline = function(){
+    ESTADOS.forEach(k=>contadores[k]=0);
+    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
+    codigosRegistradosHoy.clear();
+    renderizarCodigosPendientes(); actualizarContadorUnicos();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
+    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    try { actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); } catch(e){}
+};
+
 function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion'];
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual'];
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
 }
+
+// Permitir Enter en el modal para confirmar
+document.getElementById('inputNombreUsuario').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); window.confirmarUsuario(); }
+});
 
 window.onload = ()=>{
     cargarTiemposBase();
@@ -1164,8 +1428,7 @@ window.onload = ()=>{
     actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
     if(visitas.length===0) renderizarGrafica();
     document.getElementById('estadoPaquete').selectedIndex=0;
-    renderizarCodigosPendientes();
-    actualizarContadorUnicos();
+    renderizarCodigosPendientes(); actualizarContadorUnicos();
     window.actualizarPlaceholderDescripcion();
     const ahora=new Date();
     document.getElementById('mesInforme').value=ahora.getMonth()+1;
