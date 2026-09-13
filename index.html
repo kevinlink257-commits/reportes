@@ -55,7 +55,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .informe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
 .btn-group button { flex: 1; min-width: 100px; }
-#lectorQR { width: 100%; max-width: 400px; margin: 10px auto; display: none; border: 2px solid #3498db; border-radius: 8px; overflow: hidden; background: #000; }
+#lectorQR, #lectorQRBanco { width: 100%; max-width: 400px; margin: 10px auto; display: none; border: 2px solid #3498db; border-radius: 8px; overflow: hidden; background: #000; }
 .escaneo-mensaje { text-align: center; color: #fff; background: rgba(0,0,0,0.7); padding: 5px; font-weight: bold; border-radius: 0 0 8px 8px; }
 .busqueda-box { background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; margin-bottom: 12px; }
 .contador-busqueda { font-size: 0.85rem; color: #555; margin: 8px 0 0 0; }
@@ -92,8 +92,21 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .chip-codigo { display: inline-flex; align-items: center; gap: 6px; background: #e8f4fc; color: #2c3e50; padding: 4px 4px 4px 10px; border-radius: 16px; margin: 3px; font-size: 0.82rem; border: 1px solid #bee0f4; font-weight: bold; max-width: 100%; word-break: break-all; }
 .chip-codigo button { background: #e74c3c; color: #fff; border: none; width: 20px; height: 20px; min-width: 20px; border-radius: 50%; padding: 0; font-size: 12px; line-height: 1; cursor: pointer; margin: 0; }
 .chip-codigo button:hover { background: #c0392b; }
+.chip-codigo.usado { background: #d4edda; border-color: #a3d9b1; color: #155724; }
+.chip-codigo.usado button { background: #95a5a6; }
+.chip-codigo.usado button:hover { background: #7f8c8d; }
 .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 .descripcion-cell { font-size: 0.75em; color: #555; max-width: 150px; }
+
+/* NUEVO: búsqueda de códigos en el banco */
+#resultadosBusquedaCodigo { display: none; max-height: 220px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+.resultado-codigo { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; gap: 8px; }
+.resultado-codigo:last-child { border-bottom: none; }
+.resultado-codigo:hover { background: #e8f4fc; }
+.resultado-codigo.usado { color: #999; }
+.resultado-codigo.usado span:first-child { text-decoration: line-through; }
+.resultado-codigo small { color: #e74c3c; font-weight: bold; font-size: 0.75em; white-space: nowrap; }
+.resultado-codigo.disponible small { color: #1abc9c; }
 
 #avisoDuplicado { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); background: #e74c3c; color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 0.95em; z-index: 99999; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; max-width: 90%; text-align: center; animation: shake 0.4s; }
 #avisoDuplicado.visible { display: block; }
@@ -150,6 +163,12 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 }
 #listaUsuariosGuardados button:hover { background: #dfe6e9; }
 
+/* NUEVO: contador del banco */
+.contador-banco { font-size: 0.85rem; color: #2c3e50; margin-top: 8px; text-align: center; font-weight: bold; }
+.contador-banco span { color: #e74c3c; }
+.contador-banco .usados { color: #1abc9c; }
+.contador-banco .disponibles { color: #f39c12; }
+
 @media print {
     body { background: white; padding: 0; margin: 0; font-size: 10pt; }
     .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
@@ -174,7 +193,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 </head>
 <body>
 
-<!-- 🆕 BARRA DE USUARIO (siempre visible) -->
+<!-- BARRA DE USUARIO -->
 <div id="barraUsuario">
     <div class="info-usuario">
         <div class="avatar" id="avatarUsuario">👤</div>
@@ -183,7 +202,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     <button onclick="cambiarUsuario()">🔄 Cambiar</button>
 </div>
 
-<!-- 🆕 MODAL PARA INGRESAR NOMBRE -->
+<!-- MODAL PARA INGRESAR NOMBRE -->
 <div id="modalUsuario">
     <div class="modal-content">
         <h2>👤 ¿Quién eres?</h2>
@@ -211,8 +230,46 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div id="resumenTiempos" class="result-box" style="display: none;"></div>
     </div>
 
+    <!-- ============ NUEVA SECCIÓN: BANCO DE CÓDIGOS ============ -->
     <div class="section no-print">
-        <h2>2. Registrar Nueva Visita</h2>
+        <h2>2. 📥 Banco de Códigos del Día</h2>
+        <p style="font-size: 0.85em; color: #555; text-align: center; margin-top: 0;">
+            Carga primero todos los códigos de barras que llevarás hoy. Luego, al registrar cada visita, podrás buscarlos y asignarlos.
+        </p>
+
+        <label>Escribe o escanea un código:</label>
+        <div class="input-group">
+            <input type="text" id="codigoBanco" placeholder="Escribe o escanea y presiona Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
+            <button class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
+            <button class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
+        </div>
+        <div id="lectorQRBanco"><div class="escaneo-mensaje">🔍 Escaneando al banco... apunta a cada código</div></div>
+        <div style="text-align:center; margin-top:5px;">
+            <button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button>
+        </div>
+
+        <button class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
+        <div id="cargaMasivaContenedor" style="display:none;">
+            <label>Pega los códigos (uno por línea, o separados por coma/;):</label>
+            <textarea id="cargaMasivaTexto" placeholder="123456&#10;789012&#10;345678" style="min-height: 120px;"></textarea>
+            <div class="btn-group" style="margin-top: 8px;">
+                <button class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
+                <button class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
+            </div>
+        </div>
+
+        <label style="margin-top:15px;">Códigos en el banco:</label>
+        <div id="listaBanco" class="lista-codigos"></div>
+        <div id="contadorBanco" class="contador-banco"></div>
+
+        <div class="btn-group" style="margin-top: 10px;">
+            <button class="btn-cancelar" onclick="vaciarBanco()">🗑️ Vaciar banco</button>
+        </div>
+    </div>
+
+    <div class="section no-print">
+        <h2>3. Registrar Nueva Visita</h2>
+
         <label>Hora de llegada al cliente:</label>
         <div class="input-group">
             <input type="time" id="llegadaCliente"><button class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button>
@@ -221,14 +278,28 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div class="input-group">
             <input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button>
         </div>
-        <label>Códigos de barras (uno por paquete):</label>
+
+        <!-- BÚSQUEDA EN EL BANCO -->
+        <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
+        <div class="input-group">
+            <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código..." oninput="buscarCodigosBanco()" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
+            <button class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
+        </div>
+        <div id="resultadosBusquedaCodigo"></div>
+
+        <!-- OPCIÓN MANUAL / ESCÁNER -->
+        <label style="margin-top:15px;">O agrega manualmente / escanea un código nuevo:</label>
         <div class="input-group">
             <input type="text" id="codigoBarras" placeholder="Escribe o escanea un código" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
-            <button class="btn-escaneo" onclick="iniciarEscaneo()">📷</button>
+            <button class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
             <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
         </div>
         <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
-        <div style="text-align:center; margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
+        <div style="text-align:center; margin-top:5px;">
+            <button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button>
+        </div>
+
+        <label style="margin-top:15px;">📦 Códigos seleccionados para esta visita:</label>
         <div id="listaCodigosPendientes" class="lista-codigos"></div>
         <div id="contadorCodigos" class="contador-codigos"></div>
         <div id="contadorUnicos">✅ Códigos únicos registrados hoy: <span>0</span></div>
@@ -259,7 +330,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     </div>
 
     <div class="section" id="seccionHistorial" style="display: none;">
-        <h2>3. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size: 0.7em; color: #7f8c8d;"></span></h2>
+        <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size: 0.7em; color: #7f8c8d;"></span></h2>
         <div class="busqueda-box no-print">
             <label>🔍 Buscar por guía / código:</label>
             <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." oninput="filtrarVisitas()"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
@@ -276,7 +347,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     </div>
 
     <div class="section">
-        <h2>4. Resumen y Gráfica del Día</h2>
+        <h2>5. Resumen y Gráfica del Día</h2>
         <div class="stats-grid">
             <div class="stat-card">Entregados: <span id="c-entregados">0</span></div>
             <div class="stat-card">No Entregados: <span id="c-noentregados">0</span></div>
@@ -288,7 +359,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     </div>
 
     <div class="section no-print">
-        <h2>5. Control de Sesión</h2>
+        <h2>6. Control de Sesión</h2>
         <div class="btn-group">
             <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
             <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
@@ -297,11 +368,11 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         </div>
     </div>
 
-    <div class="section"><h2>6. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
-    <div class="section"><h2>7. Informes Semanales y Mensuales</h2><div class="informe-grid"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
+    <div class="section"><h2>7. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
+    <div class="section"><h2>8. Informes Semanales y Mensuales</h2><div class="informe-grid"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
 
     <div class="section no-print">
-        <h2>8. ☁️ Sincronización en la Nube (Firebase)</h2>
+        <h2>9. ☁️ Sincronización en la Nube (Firebase)</h2>
         <div id="estadoNube" class="estado-nube loading">⏳ Esperando usuario...</div>
         <div class="toggle-wrapper">
             <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
@@ -354,7 +425,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     appId: "1:593319427038:web:dddae0742e979b5640bb4f"
   };
 
-  // 🆕 CÓDIGO DE GRUPO (empresa). Todos los mensajeros lo comparten.
   const CODIGO_GRUPO = "data-archi";
   const CLAVE_USUARIO_LOCAL = "colserlog_usuario_actual";
 
@@ -379,7 +449,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
   }
   window.actualizarEstadoNube = actualizarEstadoNube;
 
-  // 🆕 Utilidades de usuario
   function slugify(txt) {
     return (txt || '').toString().toLowerCase()
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -401,7 +470,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
   window.refUsuario = refUsuario;
   window.getUsuarioActual = getUsuarioActual;
 
-  // 🆕 Actualizar barra superior
   function actualizarBarraUsuario() {
     const usuario = getUsuarioActual();
     const span = document.getElementById('infoUsuario');
@@ -418,7 +486,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }
   }
 
-  // 🆕 Construir payload con datos del usuario
   function construirPayload() {
     const usuario = getUsuarioActual() || 'sin-nombre';
     return {
@@ -438,11 +505,10 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     };
   }
 
-  // 🆕 Sincronizar (usa la ruta del usuario actual)
   window.sincronizarConNube = function() {
     if (!syncActivo || !syncAutomaticoActivo || !db) return;
     const ref = refUsuario();
-    if (!ref) return; // Sin usuario, no sincroniza
+    if (!ref) return;
     clearTimeout(guardadoPendiente);
     guardadoPendiente = setTimeout(async () => {
       try {
@@ -461,7 +527,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }, 800);
   };
 
-  // 🆕 Escuchar cambios del usuario actual
   function iniciarEscucha() {
     if (!db) return;
     if (unsubscribeEscucha) { try { unsubscribeEscucha(); } catch(e){} unsubscribeEscucha = null; }
@@ -500,7 +565,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     });
   }
 
-  // 🆕 Forzar sincronización
   window.forzarSincronizacion = async function() {
     if (!db) { alert('Firebase no está configurado.'); return false; }
     const ref = refUsuario();
@@ -521,7 +585,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }
   };
 
-  // 🆕 Cargar de la nube
   window.cargarDeNube = async function() {
     if (!db) { alert('Firebase no está configurado.'); return; }
     const ref = refUsuario();
@@ -552,15 +615,12 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     actualizarEstadoNube(syncAutomaticoActivo ? '✅ Sync activada' : '⚠️ Sync pausada', syncAutomaticoActivo ? 'ok' : 'error');
   };
 
-  // 🆕 MIGRACIÓN: si existe el doc antiguo (sin subcolección), preguntar al usuario
   async function migrarDatosAntiguosSiExisten(nombreUsuario) {
     if (!db) return false;
     try {
       const refViejo = doc(db, 'colserlog_usuarios', CODIGO_GRUPO);
       const snapViejo = await getDoc(refViejo);
       if (!snapViejo.exists()) return false;
-
-      // ¿Ya migrado a algún usuario?
       if (snapViejo.data()._migrado) return false;
 
       const quiere = confirm(
@@ -570,7 +630,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         'Cancelar = No, empezar de cero'
       );
       if (!quiere) {
-        // Marcar como migrado para no preguntar de nuevo
         await setDoc(refViejo, { _migrado: true, _migradoPor: nombreUsuario, _fechaMigracion: new Date().toISOString() }, { merge: true });
         return false;
       }
@@ -590,7 +649,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
       await setDoc(refViejo, { _migrado: true, _migradoPor: nombreUsuario, _fechaMigracion: new Date().toISOString() }, { merge: true });
 
-      // Cargar localmente
       if (datosViejos.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(datosViejos.estadoSesion));
       if (datosViejos.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(datosViejos.entregasDiariasDetallado));
       if (datosViejos.tiemposBase) for (const k in datosViejos.tiemposBase) { if (datosViejos.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, datosViejos.tiemposBase[k]); }
@@ -603,7 +661,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }
   }
 
-  // 🆕 Lista de usuarios guardados en este dispositivo
   function usuariosGuardadosEnDispositivo() {
     try { return JSON.parse(localStorage.getItem('colserlog_usuarios_guardados') || '[]'); }
     catch { return []; }
@@ -617,7 +674,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     }
   }
 
-  // 🆕 Mostrar modal
   function mostrarModalUsuario() {
     const modal = document.getElementById('modalUsuario');
     const input = document.getElementById('inputNombreUsuario');
@@ -647,7 +703,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
   }
   window.mostrarModalUsuario = mostrarModalUsuario;
 
-  // 🆕 Confirmar usuario
   window.confirmarUsuario = async function() {
     const input = document.getElementById('inputNombreUsuario');
     const nombre = (input.value || '').trim();
@@ -656,9 +711,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
     const usuarioAnterior = getUsuarioActual();
 
-    // Si cambió de usuario, limpiar todo lo local y cargar lo del nuevo
     if (usuarioAnterior && usuarioAnterior !== nombre) {
-      // Guardar el anterior (por si acaso)
       try { await window.forzarSincronizacion(); } catch(e){}
       limpiarTodoLocalStorage();
     }
@@ -668,10 +721,8 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     actualizarBarraUsuario();
     document.getElementById('modalUsuario').classList.remove('visible');
 
-    // ¿Migrar datos antiguos?
     const migro = await migrarDatosAntiguosSiExisten(nombre);
     if (!migro) {
-      // Intentar cargar datos existentes del usuario
       const ref = refUsuario();
       if (ref) {
         try {
@@ -687,7 +738,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
       }
     }
 
-    // Activar sync y recargar UI
     syncActivo = true;
     iniciarEscucha();
     if (typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
@@ -705,34 +755,27 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
   }
   window.limpiarTodoLocalStorage = limpiarTodoLocalStorage;
 
-  // 🆕 Cambiar de usuario
   window.cambiarUsuario = async function() {
     const usuario = getUsuarioActual();
     if (usuario) {
       const ok = confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos actuales de "' + usuario + '" y podrás elegir otro.');
       if (!ok) return;
-      // Forzar sincronización antes de limpiar
       actualizarEstadoNube('⏳ Guardando antes de cambiar...', 'loading');
       try { await window.forzarSincronizacion(); } catch(e){}
     }
-    // Desconectar escucha anterior
     if (unsubscribeEscucha) { try { unsubscribeEscucha(); } catch(e){} unsubscribeEscucha = null; }
     syncActivo = false;
 
-    // Limpiar local
     limpiarTodoLocalStorage();
     localStorage.removeItem(CLAVE_USUARIO_LOCAL);
     actualizarBarraUsuario();
 
-    // Recargar UI al estado "vacío"
     if (typeof window.reiniciarUIOffline === 'function') window.reiniciarUIOffline();
 
-    // Mostrar modal
     actualizarEstadoNube('⏳ Esperando selección de usuario', 'loading');
     mostrarModalUsuario();
   };
 
-  // 🆕 Inicialización
   window.addEventListener('load', () => {
     const pref = localStorage.getItem('syncAutomaticoFirebase');
     syncAutomaticoActivo = (pref === null) ? true : (pref === 'true');
@@ -776,14 +819,199 @@ let codigosRegistradosHoy = new Set();
 let codesScannedRecently = new Map();
 const TIEMPO_BLOQUEO_MS = 5000;
 
+// 🆕 BANCO DE CÓDIGOS: pool de todos los códigos del día
+let bancoCodigos = [];
+
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; let [hh1,mm1]=h1.split(':').map(Number); let [hh2,mm2]=h2.split(':').map(Number); let m1=hh1*60+mm1, m2=hh2*60+mm2; if(m2<m1) m2+=1440; return m2-m1; }
 function getWeekNumber(d){ d=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())); d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7)); const ys=new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d-ys)/86400000)+1)/7); }
+
+// ═══════════════════════════════════════════════════════
+// BANCO DE CÓDIGOS
+// ═══════════════════════════════════════════════════════
+
+function codigosEnVisitas(){
+    const s = new Set();
+    visitas.forEach(v => { if (v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); });
+    return s;
+}
+
+window.agregarCodigoBanco = function(){
+    const inp = document.getElementById('codigoBanco');
+    const cod = (inp.value || '').trim();
+    if (!cod) { inp.focus(); return; }
+    if (bancoCodigos.includes(cod)) {
+        mostrarAviso('⚠️ Ese código ya está en el banco', 'error');
+        beepError();
+        inp.value = ''; inp.focus();
+        return;
+    }
+    bancoCodigos.push(cod);
+    inp.value = '';
+    inp.focus();
+    renderizarBanco();
+    guardarEstadoCompleto();
+    beepOk();
+};
+
+window.eliminarCodigoBanco = function(cod){
+    const idx = bancoCodigos.indexOf(cod);
+    if (idx < 0) return;
+    const enVisita = visitas.some(v => (v.codigo||'').trim() === cod);
+    if (enVisita) {
+        if (!confirm('⚠️ Este código ya está asignado a una visita. ¿Eliminarlo del banco de todas formas?')) return;
+    }
+    bancoCodigos.splice(idx, 1);
+    renderizarBanco();
+    guardarEstadoCompleto();
+};
+
+window.vaciarBanco = function(){
+    if (bancoCodigos.length === 0) return;
+    if (!confirm('¿Vaciar todo el banco de códigos? Los códigos ya usados en visitas no se borrarán.')) return;
+    bancoCodigos = [];
+    renderizarBanco();
+    guardarEstadoCompleto();
+    mostrarAviso('🗑️ Banco vaciado', 'ok');
+};
+
+function renderizarBanco(){
+    const cont = document.getElementById('listaBanco');
+    const contador = document.getElementById('contadorBanco');
+    if (!cont) return;
+    cont.innerHTML = '';
+    if (bancoCodigos.length === 0) {
+        const vac = document.createElement('div');
+        vac.className = 'lista-vacia';
+        vac.textContent = 'Sin códigos en el banco. Agrega códigos arriba o usa la carga masiva.';
+        cont.appendChild(vac);
+        if (contador) contador.innerHTML = '';
+        return;
+    }
+    const usados = codigosEnVisitas();
+    bancoCodigos.forEach(cod => {
+        const usado = usados.has(cod);
+        const chip = document.createElement('span');
+        chip.className = 'chip-codigo' + (usado ? ' usado' : '');
+        const span = document.createElement('span');
+        span.textContent = (usado ? '✓ ' : '') + cod;
+        chip.appendChild(span);
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = '✕';
+        btn.onclick = () => window.eliminarCodigoBanco(cod);
+        chip.appendChild(btn);
+        cont.appendChild(chip);
+    });
+    if (contador) {
+        const usadosCount = bancoCodigos.filter(c => usados.has(c)).length;
+        const disp = bancoCodigos.length - usadosCount;
+        contador.innerHTML = `📦 <span>${bancoCodigos.length}</span> en banco · <span class="usados">${usadosCount}</span> usados · <span class="disponibles">${disp}</span> disponibles`;
+    }
+}
+
+window.toggleCargaMasiva = function(){
+    const el = document.getElementById('cargaMasivaContenedor');
+    if (!el) return;
+    el.style.display = el.style.display === 'none' || el.style.display === '' ? 'block' : 'none';
+};
+
+window.procesarCargaMasiva = function(){
+    const ta = document.getElementById('cargaMasivaTexto');
+    if (!ta) return;
+    const texto = ta.value || '';
+    const codigos = texto.split(/[\n,;]+/).map(s => s.trim()).filter(s => s.length > 0);
+    if (codigos.length === 0) { alert('No hay códigos para procesar.'); return; }
+    let agregados = 0, duplicados = 0;
+    codigos.forEach(cod => {
+        if (bancoCodigos.includes(cod)) { duplicados++; return; }
+        bancoCodigos.push(cod);
+        agregados++;
+    });
+    ta.value = '';
+    document.getElementById('cargaMasivaContenedor').style.display = 'none';
+    renderizarBanco();
+    guardarEstadoCompleto();
+    beepOk();
+    alert(`✅ ${agregados} códigos agregados${duplicados > 0 ? ` (${duplicados} duplicados ignorados)` : ''}.`);
+};
+
+// ═══════════════════════════════════════════════════════
+// BÚSQUEDA DE CÓDIGOS EN EL BANCO (para agregar a visita)
+// ═══════════════════════════════════════════════════════
+
+window.buscarCodigosBanco = function(){
+    const inp = document.getElementById('busquedaCodigoBanco');
+    const cont = document.getElementById('resultadosBusquedaCodigo');
+    if (!inp || !cont) return;
+    const q = (inp.value || '').trim().toLowerCase();
+    cont.innerHTML = '';
+    if (!q) { cont.style.display = 'none'; return; }
+
+    const usados = codigosEnVisitas();
+    const enPendientes = new Set(codigosPendientes);
+
+    const matches = bancoCodigos.filter(c =>
+        c.toLowerCase().includes(q) && !enPendientes.has(c)
+    ).slice(0, 30);
+
+    if (matches.length === 0) {
+        const d = document.createElement('div');
+        d.className = 'sin-resultados';
+        d.textContent = '❌ Sin coincidencias en el banco';
+        cont.appendChild(d);
+        cont.style.display = 'block';
+        return;
+    }
+    matches.forEach(cod => {
+        const usado = usados.has(cod);
+        const item = document.createElement('div');
+        item.className = 'resultado-codigo ' + (usado ? 'usado' : 'disponible');
+        const span = document.createElement('span');
+        span.textContent = cod;
+        const small = document.createElement('small');
+        small.textContent = usado ? '⚠️ Ya usado' : '✓ Disponible';
+        item.appendChild(span);
+        item.appendChild(small);
+        item.onclick = () => window.agregarCodigoDesdeBanco(cod);
+        cont.appendChild(item);
+    });
+    cont.style.display = 'block';
+};
+
+window.limpiarBusquedaCodigo = function(){
+    const inp = document.getElementById('busquedaCodigoBanco');
+    if (inp) { inp.value = ''; inp.focus(); }
+    const cont = document.getElementById('resultadosBusquedaCodigo');
+    if (cont) { cont.innerHTML = ''; cont.style.display = 'none'; }
+};
+
+window.seleccionarPrimerResultado = function(){
+    const cont = document.getElementById('resultadosBusquedaCodigo');
+    if (!cont) return;
+    const first = cont.querySelector('.resultado-codigo');
+    if (first) first.click();
+};
+
+window.agregarCodigoDesdeBanco = function(cod){
+    if (codigosPendientes.includes(cod)) return;
+    const usados = codigosEnVisitas();
+    if (usados.has(cod)) {
+        if (!confirm('⚠️ Este código ya está asignado a otra visita.\n¿Agregarlo de todas formas?')) return;
+    }
+    codigosPendientes.push(cod);
+    renderizarCodigosPendientes();
+    window.limpiarBusquedaCodigo();
+    beepOk();
+    if (navigator.vibrate) navigator.vibrate(60);
+    mostrarAviso('✅ Agregado a la visita: ' + cod, 'ok');
+};
 
 function cargarCodigosRegistradosHoy(){
     codigosRegistradosHoy.clear();
     visitas.forEach(v => { if (v.codigo && v.codigo.trim()) codigosRegistradosHoy.add(v.codigo.trim()); });
     actualizarContadorUnicos();
+    renderizarBanco();
 }
 function actualizarContadorUnicos(){
     const el = document.querySelector('#contadorUnicos span');
@@ -851,12 +1079,27 @@ window.actualizarPlaceholderDescripcion = function(){
 };
 
 function guardarEstadoCompleto(){
-    const e={visitas,contadores,totalMinutosVisitas,totalVisitas};
+    const e={visitas,contadores,totalMinutosVisitas,totalVisitas,bancoCodigos};
     localStorage.setItem('estadoSesion',JSON.stringify(e));
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 }
-function cargarEstadoCompleto(){ const raw=localStorage.getItem('estadoSesion'); if(!raw) return false; try{ const e=JSON.parse(raw); visitas=e.visitas||[]; const savedCont=e.contadores||{}; ESTADOS.forEach(k=>{ contadores[k] = savedCont[k] || 0; }); Object.keys(savedCont).forEach(k=>{ if(!(k in contadores)) contadores[k]=savedCont[k]; }); totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; cargarCodigosRegistradosHoy(); return true;}catch{return false;} }
+function cargarEstadoCompleto(){
+    const raw=localStorage.getItem('estadoSesion');
+    if(!raw) return false;
+    try{
+        const e=JSON.parse(raw);
+        visitas=e.visitas||[];
+        bancoCodigos = e.bancoCodigos || [];
+        const savedCont=e.contadores||{};
+        ESTADOS.forEach(k=>{ contadores[k] = savedCont[k] || 0; });
+        Object.keys(savedCont).forEach(k=>{ if(!(k in contadores)) contadores[k]=savedCont[k]; });
+        totalMinutosVisitas=e.totalMinutosVisitas||0;
+        totalVisitas=e.totalVisitas||0;
+        cargarCodigosRegistradosHoy();
+        return true;
+    }catch{return false;}
+}
 function guardarTiemposBase(){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const v=document.getElementById(id).value; localStorage.setItem('tiempoBase_'+id,v); }); if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube(); }
 function cargarTiemposBase(){ const ids=['inicioCarga','finCarga','salidaEmpresa','primeraEntrega']; ids.forEach(id=>{ const v=localStorage.getItem('tiempoBase_'+id); if(v) document.getElementById(id).value=v; }); if(ids.every(id=>document.getElementById(id).value!=='')) calcularTiemposBase(true); }
 function guardarDiaActual(){ const fecha=new Date().toISOString().split('T')[0]; let h=JSON.parse(localStorage.getItem('entregasDiariasDetallado'))||{}; h[fecha]={contadores:{...contadores},totalVisitas,totalMinutos:totalMinutosVisitas}; localStorage.setItem('entregasDiariasDetallado',JSON.stringify(h)); }
@@ -872,6 +1115,11 @@ window.agregarCodigo = function(){
         mostrarAviso('⚠️ ' + motivo, 'error');
         beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
         inp.value = ''; return;
+    }
+    // Si el código viene del escáner, también lo agregamos al banco si no está
+    if (!bancoCodigos.includes(cod)) {
+        bancoCodigos.push(cod);
+        renderizarBanco();
     }
     agregarCodigoPendiente(cod);
     inp.value = ''; inp.focus();
@@ -899,7 +1147,7 @@ function renderizarCodigosPendientes(){
     if(codigosPendientes.length === 0){
         const vac = document.createElement('div');
         vac.className = 'lista-vacia';
-        vac.textContent = 'Sin códigos agregados.';
+        vac.textContent = 'Sin códigos seleccionados. Usa la búsqueda del banco o escanea.';
         cont.appendChild(vac);
         if(contador) contador.textContent = '';
         return;
@@ -911,7 +1159,7 @@ function renderizarCodigosPendientes(){
         btn.onclick = ()=>window.eliminarCodigoPendiente(i); chip.appendChild(btn);
         cont.appendChild(chip);
     });
-    if(contador) contador.textContent = `📦 ${codigosPendientes.length} pedido(s) pendiente(s)`;
+    if(contador) contador.textContent = `📦 ${codigosPendientes.length} pedido(s) seleccionado(s)`;
 }
 
 function renderizarTabla(){
@@ -963,6 +1211,10 @@ window.guardarEdicion = (index)=>{
     if (nuevoCod && nuevoCod !== (visitas[index].codigo||'')){
         const existeEnOtra = visitas.some((v,i) => i !== index && (v.codigo||'').trim() === nuevoCod);
         if (existeEnOtra){ mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error'); beepError(); return; }
+        // Agregar al banco si no está
+        if (nuevoCod && !bancoCodigos.includes(nuevoCod)) {
+            bancoCodigos.push(nuevoCod);
+        }
     }
     visitas[index].codigo=nuevoCod;
     visitas[index].estado=se.value;
@@ -1001,6 +1253,7 @@ window.registrarVisita = ()=>{
         const motivo = motivoDuplicado(inputCod);
         if (motivo){ mostrarAviso('⚠️ ' + motivo, 'error'); beepError(); return; }
         if(!codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
+        if(!bancoCodigos.includes(inputCod)) bancoCodigos.push(inputCod);
     }
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
     const t = calcularMinutos(l,s);
@@ -1016,24 +1269,36 @@ window.registrarVisita = ()=>{
     window.actualizarPlaceholderDescripcion();
     codigosPendientes = [];
     renderizarCodigosPendientes();
+    window.limpiarBusquedaCodigo();
     cancelarEscaneo();
     recalcularEstadisticas();
     renderizarTabla();
+    renderizarBanco();
     actualizarGraficaPromedios();
     actualizarInformesSemanalesMensuales();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 };
 
-window.iniciarEscaneo = ()=>{
+// ═══════════════════════════════════════════════════════
+// ESCÁNER QR/BARRAS (con modo: 'banco' o 'pendientes')
+// ═══════════════════════════════════════════════════════
+let escaneoModo = 'pendientes';
+
+window.iniciarEscaneo = function(modo){
     if(escaneoActivo) return;
-    const div=document.getElementById('lectorQR');
-    div.style.display='block';
-    document.getElementById('btnCancelarEscaneo').style.display='inline-block';
-    escaneoActivo=true;
+    escaneoModo = modo || 'pendientes';
+    const divId = escaneoModo === 'banco' ? 'lectorQRBanco' : 'lectorQR';
+    const btnId = escaneoModo === 'banco' ? 'btnCancelarEscaneoBanco' : 'btnCancelarEscaneo';
+    const div = document.getElementById(divId);
+    div.style.display = 'block';
+    document.getElementById(btnId).style.display = 'inline-block';
+    escaneoActivo = true;
+
     if(html5QrCode){ try{ html5QrCode.clear(); }catch(e){} html5QrCode=null; }
-    html5QrCode=new Html5Qrcode("lectorQR");
+    html5QrCode = new Html5Qrcode(divId);
     const cfg={fps:8,qrbox:{width:Math.min(window.innerWidth*0.8,300),height:150},formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128,Html5QrcodeSupportedFormats.EAN_13,Html5QrcodeSupportedFormats.UPC_A,Html5QrcodeSupportedFormats.CODE_39,Html5QrcodeSupportedFormats.QR_CODE]};
-    html5QrCode.start({facingMode:"environment"},cfg,
+
+    html5QrCode.start({facingMode:"environment"}, cfg,
         (txt)=>{
             const cod = (txt || '').trim();
             if (!cod) return;
@@ -1045,18 +1310,61 @@ window.iniciarEscaneo = ()=>{
                 const cutoff = ahora - 60000;
                 for (const [k, t] of codesScannedRecently) { if (t < cutoff) codesScannedRecently.delete(k); }
             }
+
+            if (escaneoModo === 'banco') {
+                if (bancoCodigos.includes(cod)) {
+                    mostrarAviso('⚠️ Ya está en el banco: ' + cod, 'error');
+                    beepError();
+                    return;
+                }
+                bancoCodigos.push(cod);
+                renderizarBanco();
+                guardarEstadoCompleto();
+                beepOk();
+                if (navigator.vibrate) navigator.vibrate(60);
+                mostrarAviso('✅ Agregado al banco: ' + cod, 'ok');
+                return;
+            }
+
+            // Modo 'pendientes'
             const motivo = motivoDuplicado(cod);
             if (motivo){
                 mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
                 beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
                 return;
             }
+            // Auto-agregar al banco si no existe
+            if (!bancoCodigos.includes(cod)) {
+                bancoCodigos.push(cod);
+                renderizarBanco();
+            }
             agregarCodigoPendiente(cod);
             mostrarAviso('✅ Código agregado: ' + cod, 'ok');
         }, ()=>{}
-    ).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; html5QrCode=null; });
+    ).catch(err=>{ alert("No se pudo acceder a cámara: "+err); div.style.display='none'; document.getElementById(btnId).style.display='none'; escaneoActivo=false; html5QrCode=null; });
 };
-window.cancelarEscaneo = ()=>{ if(html5QrCode){ html5QrCode.stop().then(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; try{html5QrCode.clear();}catch(e){} html5QrCode=null; escaneoActivo=false; }).catch(()=>{ document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; html5QrCode=null; escaneoActivo=false; }); } else { document.getElementById('lectorQR').style.display='none'; document.getElementById('btnCancelarEscaneo').style.display='none'; escaneoActivo=false; } };
+window.cancelarEscaneo = ()=>{
+    const divBanco = document.getElementById('lectorQRBanco');
+    const divPend = document.getElementById('lectorQR');
+    const btnBanco = document.getElementById('btnCancelarEscaneoBanco');
+    const btnPend = document.getElementById('btnCancelarEscaneo');
+    if(html5QrCode){
+        html5QrCode.stop().then(()=>{
+            divBanco.style.display='none'; divPend.style.display='none';
+            btnBanco.style.display='none'; btnPend.style.display='none';
+            try{html5QrCode.clear();}catch(e){}
+            html5QrCode=null; escaneoActivo=false;
+        }).catch(()=>{
+            divBanco.style.display='none'; divPend.style.display='none';
+            btnBanco.style.display='none'; btnPend.style.display='none';
+            html5QrCode=null; escaneoActivo=false;
+        });
+    } else {
+        divBanco.style.display='none'; divPend.style.display='none';
+        btnBanco.style.display='none'; btnPend.style.display='none';
+        escaneoActivo=false;
+    }
+};
 
 function imprimirContenidoHTML(titulo){
     try{
@@ -1078,10 +1386,9 @@ function imprimirContenidoHTML(titulo){
         let area = document.getElementById('areaImpresion');
         if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
         const clon = fuente.cloneNode(true);
-        clon.querySelectorAll('.no-print, script, button, #lectorQR, .busqueda-box, #avisoDuplicado, #barraUsuario, #modalUsuario').forEach(el => el.remove());
+        clon.querySelectorAll('.no-print, script, button, #lectorQR, #lectorQRBanco, .busqueda-box, #avisoDuplicado, #barraUsuario, #modalUsuario').forEach(el => el.remove());
         if(clon.style && clon.style.display === 'none') clon.style.display = '';
         clon.querySelectorAll('[style*="display: none"], [style*="display:none"]').forEach(el => { el.style.display = ''; });
-        // 🆕 Insertar nombre del usuario en el header del clon
         const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'Sin usuario';
         const h1 = clon.querySelector('h1');
         if (h1 && !informeVisible) {
@@ -1113,7 +1420,7 @@ window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Col
 function crearObjetoRespaldo(){
     const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
     return {
-        version:4, usuario, fecha_respaldo:new Date().toISOString(),
+        version:5, usuario, fecha_respaldo:new Date().toISOString(),
         estadoSesion: JSON.parse(localStorage.getItem('estadoSesion')||'null'),
         entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'),
         tiemposBase:{ inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga: localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||'' }
@@ -1277,165 +1584,3 @@ window.exportarHistorialCompletoAWord = function(){
     });
     let html = `<h1>📦 COLSERLOG - Historial Completo</h1>
     <h2>Desde ${fechas[0].split('-').reverse().join('/')} hasta ${fechas[fechas.length-1].split('-').reverse().join('/')}</h2>
-    <div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
-    <h3>📊 Totales Generales</h3>
-    <table class="kpis"><tr>
-      <td><div class="kpi-label">Total Entregados</div><div class="kpi-valor">${totEnt}</div></td>
-      <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totVis}</div></td>
-      <td><div class="kpi-label">Días</div><div class="kpi-valor">${fechas.length}</div></td>
-      <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></td>
-    </tr></table>
-    <h3>📅 Resumen por Mes</h3>
-    <table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
-    Object.keys(porMes).sort().forEach(k => {
-        const d=porMes[k]; const [y,m]=k.split('-');
-        const nombreMes = new Date(y, m-1, 1).toLocaleString('es', { month:'long', year:'numeric' });
-        const prom = d.dias>0 ? (d.ent/d.dias).toFixed(1) : 0;
-        html += `<tr><td style="text-align:left;">${nombreMes}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${prom}</td></tr>`;
-    });
-    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fechas.length}</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${(totEnt/fechas.length).toFixed(1)}</strong></td></tr></tbody></table>
-    <h3>📆 Detalle Día a Día</h3>
-    <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
-    fechas.forEach(f => { const d=h[f]; const e=d.contadores['Entregado']||0; html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
-    html += `</tbody></table>`;
-    descargarWord(`Colserlog_Historial_Completo.doc`, html);
-};
-
-window.guardarDia = ()=>{
-    guardarDiaActual();
-    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-    alert("✅ Día guardado.");
-    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-};
-window.reiniciarDia = ()=>{
-    if(!confirm("¿Reiniciar día?")) return;
-    guardarDiaActual();
-    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-    limpiarSesion(); alert("✅ Día reiniciado");
-};
-window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual?")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
-function limpiarSesion(){
-    ESTADOS.forEach(k=>contadores[k]=0);
-    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
-    codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes(); actualizarContadorUnicos();
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); });
-    document.getElementById('resumenTiempos').style.display='none';
-    document.getElementById('cuerpoTabla').innerHTML='';
-    document.getElementById('seccionHistorial').style.display='none';
-    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
-    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
-    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
-    localStorage.removeItem('estadoSesion');
-    actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-}
-window.eliminarTodo = ()=>{
-    if(!confirm("¿ELIMINAR TODO? Irreversible")) return;
-    if(!confirm("Confirmación final: ¿Seguro?")) return;
-    ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k));
-    for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); }
-    ESTADOS.forEach(k=>contadores[k]=0);
-    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
-    codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes(); actualizarContadorUnicos();
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('resumenTiempos').style.display='none';
-    document.getElementById('cuerpoTabla').innerHTML='';
-    document.getElementById('seccionHistorial').style.display='none';
-    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
-    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
-    actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo();
-    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-    alert("✅ Todo eliminado");
-};
-
-window.generarInformeMensual = ()=>{
-    const mes=parseInt(document.getElementById('mesInforme').value), anio=parseInt(document.getElementById('anioInforme').value);
-    if(!mes||!anio){ alert('Selecciona mes y año'); return; }
-    const h=cargarHistorialDetallado();
-    const fechasMes=Object.keys(h).filter(f=>{ const [y,m]=f.split('-').map(Number); return y===anio&&m===mes; }).sort();
-    if(fechasMes.length===0){ alert('No hay datos para ese mes'); return; }
-    const nombreMes=new Date(anio,mes-1,1).toLocaleString('es',{month:'long'});
-    const cap=nombreMes.charAt(0).toUpperCase()+nombreMes.slice(1);
-    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || '';
-    let totEnt=0, totVis=0, totMin=0; const contMes={}; ESTADOS.forEach(k=>contMes[k]=0);
-    fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
-    const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
-    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:#2c3e50;font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
-    Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
-    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
-    fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
-    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
-    document.getElementById('informeContenedor').innerHTML=html;
-    document.getElementById('informeContenedor').style.display='block';
-    document.getElementById('seccionInforme').style.display='block';
-    document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'});
-};
-window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
-
-window.recargarUIDesdeStorage = function(){
-    try{
-        const raw = localStorage.getItem('estadoSesion');
-        if(raw){
-            const e = JSON.parse(raw);
-            visitas = e.visitas || [];
-            ESTADOS.forEach(k=>{ contadores[k] = (e.contadores && e.contadores[k]) || 0; });
-            totalMinutosVisitas = e.totalMinutosVisitas || 0;
-            totalVisitas = e.totalVisitas || 0;
-            cargarCodigosRegistradosHoy();
-        }
-        cargarTiemposBase();
-        renderizarTabla();
-        actualizarDashboard();
-        actualizarGraficaPromedios();
-        actualizarInformesSemanalesMensuales();
-        console.log('🔄 UI recargada desde la nube');
-    }catch(e){ console.warn('Error recargando UI:', e); }
-};
-
-// 🆕 Reiniciar UI sin datos (para cambio de usuario)
-window.reiniciarUIOffline = function(){
-    ESTADOS.forEach(k=>contadores[k]=0);
-    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[];
-    codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes(); actualizarContadorUnicos();
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('resumenTiempos').style.display='none';
-    document.getElementById('cuerpoTabla').innerHTML='';
-    document.getElementById('seccionHistorial').style.display='none';
-    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
-    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
-    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
-    try { actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); } catch(e){}
-};
-
-function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual'];
-    const faltan = fns.filter(f => typeof window[f] !== 'function');
-    if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
-    if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
-}
-
-// Permitir Enter en el modal para confirmar
-document.getElementById('inputNombreUsuario').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); window.confirmarUsuario(); }
-});
-
-window.onload = ()=>{
-    cargarTiemposBase();
-    if(cargarEstadoCompleto() && visitas.length>0){ renderizarTabla(); actualizarDashboard(); }
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).addEventListener('change', guardarTiemposBase));
-    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-    if(visitas.length===0) renderizarGrafica();
-    document.getElementById('estadoPaquete').selectedIndex=0;
-    renderizarCodigosPendientes(); actualizarContadorUnicos();
-    window.actualizarPlaceholderDescripcion();
-    const ahora=new Date();
-    document.getElementById('mesInforme').value=ahora.getMonth()+1;
-    document.getElementById('anioInforme').value=ahora.getFullYear();
-    document.getElementById('btnImprimirDiario').addEventListener('click', ()=>window.imprimirReporteDiario());
-    diagnosticar();
-};
-</script>
-</body>
-</html>
