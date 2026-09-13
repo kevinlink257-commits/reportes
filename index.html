@@ -1584,3 +1584,180 @@ window.exportarHistorialCompletoAWord = function(){
     });
     let html = `<h1>📦 COLSERLOG - Historial Completo</h1>
     <h2>Desde ${fechas[0].split('-').reverse().join('/')} hasta ${fechas[fechas.length-1].split('-').reverse().join('/')}</h2>
+    <div class="header-info">Generado ${new Date().toLocaleString('es')}</div>
+    <h3>📊 Totales Generales</h3>
+    <table class="kpis"><tr>
+      <td><div class="kpi-label">Total Entregados</div><div class="kpi-valor">${totEnt}</div></td>
+      <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totVis}</div></td>
+      <td><div class="kpi-label">Días</div><div class="kpi-valor">${fechas.length}</div></td>
+      <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></td>
+    </tr></table>
+    <h3>📅 Resumen por Mes</h3>
+    <table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
+    Object.keys(porMes).sort().forEach(k => {
+        const d=porMes[k]; const [y,m]=k.split('-');
+        const nombreMes = new Date(y, m-1, 1).toLocaleString('es', { month:'long', year:'numeric' });
+        const prom = d.dias>0 ? (d.ent/d.dias).toFixed(1) : 0;
+        html += `<tr><td style="text-align:left;">${nombreMes}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${prom}</td></tr>`;
+    });
+    html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${fechas.length}</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${(totEnt/fechas.length).toFixed(1)}</strong></td></tr></tbody></table>
+    <h3>📆 Detalle Día a Día</h3>
+    <table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
+    fechas.forEach(f => { const d=h[f]; const e=d.contadores['Entregado']||0; html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
+    html += `</tbody></table>`;
+    descargarWord(`Colserlog_Historial_Completo.doc`, html);
+};
+
+window.guardarDia = ()=>{
+    guardarDiaActual();
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    alert("✅ Día guardado.");
+    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+};
+window.reiniciarDia = ()=>{
+    if(!confirm("¿Reiniciar día? Se guardará el día actual y se limpiará todo (incluyendo el banco de códigos).")) return;
+    guardarDiaActual();
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    limpiarSesion(); alert("✅ Día reiniciado");
+};
+window.reiniciarSesion = ()=>{ if(!confirm("¿Limpiar sesión actual? Se perderán las visitas y el banco sin guardar.")) return; limpiarSesion(); alert("✅ Sesión reiniciada"); };
+function limpiarSesion(){
+    ESTADOS.forEach(k=>contadores[k]=0);
+    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; bancoCodigos=[];
+    codigosRegistradosHoy.clear();
+    renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id).value=''; localStorage.removeItem('tiempoBase_'+id); });
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
+    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    window.limpiarBusquedaCodigo();
+    localStorage.removeItem('estadoSesion');
+    actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+}
+window.eliminarTodo = ()=>{
+    if(!confirm("¿ELIMINAR TODO? Irreversible")) return;
+    if(!confirm("Confirmación final: ¿Seguro?")) return;
+    ['estadoSesion','entregasDiariasDetallado'].forEach(k=>localStorage.removeItem(k));
+    for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); }
+    ESTADOS.forEach(k=>contadores[k]=0);
+    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; bancoCodigos=[];
+    codigosRegistradosHoy.clear();
+    renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    window.limpiarBusquedaCodigo();
+    actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo();
+    if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    alert("✅ Todo eliminado");
+};
+
+window.generarInformeMensual = ()=>{
+    const mes=parseInt(document.getElementById('mesInforme').value), anio=parseInt(document.getElementById('anioInforme').value);
+    if(!mes||!anio){ alert('Selecciona mes y año'); return; }
+    const h=cargarHistorialDetallado();
+    const fechasMes=Object.keys(h).filter(f=>{ const [y,m]=f.split('-').map(Number); return y===anio&&m===mes; }).sort();
+    if(fechasMes.length===0){ alert('No hay datos para ese mes'); return; }
+    const nombreMes=new Date(anio,mes-1,1).toLocaleString('es',{month:'long'});
+    const cap=nombreMes.charAt(0).toUpperCase()+nombreMes.slice(1);
+    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || '';
+    let totEnt=0, totVis=0, totMin=0; const contMes={}; ESTADOS.forEach(k=>contMes[k]=0);
+    fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
+    const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
+    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:#2c3e50;font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+    Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
+    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
+    fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
+    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
+    document.getElementById('informeContenedor').innerHTML=html;
+    document.getElementById('informeContenedor').style.display='block';
+    document.getElementById('seccionInforme').style.display='block';
+    document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'});
+};
+window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
+
+window.recargarUIDesdeStorage = function(){
+    try{
+        const raw = localStorage.getItem('estadoSesion');
+        if(raw){
+            const e = JSON.parse(raw);
+            visitas = e.visitas || [];
+            bancoCodigos = e.bancoCodigos || [];
+            ESTADOS.forEach(k=>{ contadores[k] = (e.contadores && e.contadores[k]) || 0; });
+            totalMinutosVisitas = e.totalMinutosVisitas || 0;
+            totalVisitas = e.totalVisitas || 0;
+            cargarCodigosRegistradosHoy();
+        }
+        cargarTiemposBase();
+        renderizarTabla();
+        renderizarBanco();
+        actualizarDashboard();
+        actualizarGraficaPromedios();
+        actualizarInformesSemanalesMensuales();
+        console.log('🔄 UI recargada desde la nube');
+    }catch(e){ console.warn('Error recargando UI:', e); }
+};
+
+window.reiniciarUIOffline = function(){
+    ESTADOS.forEach(k=>contadores[k]=0);
+    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; bancoCodigos=[];
+    codigosRegistradosHoy.clear();
+    renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('resumenTiempos').style.display='none';
+    document.getElementById('cuerpoTabla').innerHTML='';
+    document.getElementById('seccionHistorial').style.display='none';
+    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
+    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
+    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    window.limpiarBusquedaCodigo();
+    try { actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); } catch(e){}
+};
+
+function diagnosticar(){
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado'];
+    const faltan = fns.filter(f => typeof window[f] !== 'function');
+    if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
+    if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
+}
+
+document.getElementById('inputNombreUsuario').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); window.confirmarUsuario(); }
+});
+
+// Cerrar resultados de búsqueda al hacer clic fuera
+document.addEventListener('click', (e) => {
+    const cont = document.getElementById('resultadosBusquedaCodigo');
+    const inp = document.getElementById('busquedaCodigoBanco');
+    if (!cont || !inp) return;
+    if (!cont.contains(e.target) && e.target !== inp) {
+        cont.innerHTML = '';
+        cont.style.display = 'none';
+    }
+});
+
+window.onload = ()=>{
+    cargarTiemposBase();
+    if(cargarEstadoCompleto() && visitas.length>0){ renderizarTabla(); actualizarDashboard(); }
+    renderizarBanco();
+    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).addEventListener('change', guardarTiemposBase));
+    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+    if(visitas.length===0) renderizarGrafica();
+    document.getElementById('estadoPaquete').selectedIndex=0;
+    renderizarCodigosPendientes(); actualizarContadorUnicos();
+    window.actualizarPlaceholderDescripcion();
+    const ahora=new Date();
+    document.getElementById('mesInforme').value=ahora.getMonth()+1;
+    document.getElementById('anioInforme').value=ahora.getFullYear();
+    document.getElementById('btnImprimirDiario').addEventListener('click', ()=>window.imprimirReporteDiario());
+    diagnosticar();
+};
+</script>
+</body>
+</html>
