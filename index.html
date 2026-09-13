@@ -98,7 +98,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .contador-codigos { font-size: 0.8rem; color: #555; margin-top: 8px; font-weight: bold; text-align: right; }
 .descripcion-cell { font-size: 0.75em; color: #555; max-width: 150px; }
 
-/* NUEVO: búsqueda de códigos en el banco */
 #resultadosBusquedaCodigo { display: none; max-height: 220px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
 .resultado-codigo { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 0.9em; gap: 8px; }
 .resultado-codigo:last-child { border-bottom: none; }
@@ -115,6 +114,13 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
 #contadorUnicos { font-size: 0.85rem; color: #2c3e50; margin-top: 6px; text-align: center; font-weight: bold; }
 #contadorUnicos span { color: #e74c3c; }
+
+/* Indicador de formato de código */
+.hint-codigo { font-size: 0.78rem; color: #666; margin-top: 6px; display: flex; align-items: center; gap: 6px; justify-content: center; }
+.hint-codigo .badge { background: #2c3e50; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; }
+.contador-digitos { font-size: 0.78rem; text-align: right; color: #888; margin-top: 4px; font-weight: bold; }
+.contador-digitos.completo { color: #1abc9c; }
+.contador-digitos.invalido { color: #e74c3c; }
 
 /* ====== BARRA DE USUARIO ====== */
 #barraUsuario {
@@ -163,7 +169,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 }
 #listaUsuariosGuardados button:hover { background: #dfe6e9; }
 
-/* NUEVO: contador del banco */
 .contador-banco { font-size: 0.85rem; color: #2c3e50; margin-top: 8px; text-align: center; font-weight: bold; }
 .contador-banco span { color: #e74c3c; }
 .contador-banco .usados { color: #1abc9c; }
@@ -230,7 +235,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div id="resumenTiempos" class="result-box" style="display: none;"></div>
     </div>
 
-    <!-- ============ NUEVA SECCIÓN: BANCO DE CÓDIGOS ============ -->
+    <!-- ============ BANCO DE CÓDIGOS ============ -->
     <div class="section no-print">
         <h2>2. 📥 Banco de Códigos del Día</h2>
         <p style="font-size: 0.85em; color: #555; text-align: center; margin-top: 0;">
@@ -239,10 +244,15 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 
         <label>Escribe o escanea un código:</label>
         <div class="input-group">
-            <input type="text" id="codigoBanco" placeholder="Escribe o escanea y presiona Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
+            <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}"
+                   oninput="filtrarSoloDigitos(this); actualizarContadorDigitos(this, 'contadorDigitosBanco');"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
             <button class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
             <button class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
         </div>
+        <div class="contador-digitos" id="contadorDigitosBanco"></div>
+        <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
+
         <div id="lectorQRBanco"><div class="escaneo-mensaje">🔍 Escaneando al banco... apunta a cada código</div></div>
         <div style="text-align:center; margin-top:5px;">
             <button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button>
@@ -251,7 +261,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <button class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
         <div id="cargaMasivaContenedor" style="display:none;">
             <label>Pega los códigos (uno por línea, o separados por coma/;):</label>
-            <textarea id="cargaMasivaTexto" placeholder="123456&#10;789012&#10;345678" style="min-height: 120px;"></textarea>
+            <textarea id="cargaMasivaTexto" placeholder="123456789012&#10;098765432109&#10;111222333444" style="min-height: 120px;"></textarea>
             <div class="btn-group" style="margin-top: 8px;">
                 <button class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
                 <button class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
@@ -282,7 +292,9 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <!-- BÚSQUEDA EN EL BANCO -->
         <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
         <div class="input-group">
-            <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código..." oninput="buscarCodigosBanco()" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
+            <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código (solo números)" inputmode="numeric"
+                   oninput="filtrarSoloDigitos(this); buscarCodigosBanco();"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
             <button class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
         </div>
         <div id="resultadosBusquedaCodigo"></div>
@@ -290,10 +302,15 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <!-- OPCIÓN MANUAL / ESCÁNER -->
         <label style="margin-top:15px;">O agrega manualmente / escanea un código nuevo:</label>
         <div class="input-group">
-            <input type="text" id="codigoBarras" placeholder="Escribe o escanea un código" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
+            <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}"
+                   oninput="filtrarSoloDigitos(this); actualizarContadorDigitos(this, 'contadorDigitosVisita');"
+                   onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
             <button class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
             <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
         </div>
+        <div class="contador-digitos" id="contadorDigitosVisita"></div>
+        <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
+
         <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
         <div style="text-align:center; margin-top:5px;">
             <button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button>
@@ -333,7 +350,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size: 0.7em; color: #7f8c8d;"></span></h2>
         <div class="busqueda-box no-print">
             <label>🔍 Buscar por guía / código:</label>
-            <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." oninput="filtrarVisitas()"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
+            <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this); filtrarVisitas();"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
             <p id="contadorBusqueda" class="contador-busqueda"></p>
         </div>
         <div style="overflow-x: auto;">
@@ -410,7 +427,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     <div class="section" id="seccionInforme" style="display:none;"><div class="no-print" style="text-align:right; margin-bottom:10px;"><button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto; display:inline-block; padding:10px 20px;">🖨️ Imprimir Informe</button><button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto; display:inline-block; padding:10px 20px;">❌ Cerrar</button></div><div id="informeContenedor"></div></div>
 </div>
 
-<!-- ==================== FIREBASE SYNC (MULTIUSUARIO) ==================== -->
+<!-- ==================== FIREBASE SYNC ==================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
   import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp }
@@ -809,6 +826,37 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 <script type="module">
 const ESTADOS = ['Entregado','Rechazado','Dirección Errónea','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal'];
 
+// ═══════════════════════════════════════════════════════
+// VALIDACIÓN: SOLO 12 DÍGITOS NUMÉRICOS
+// ═══════════════════════════════════════════════════════
+const LONGITUD_CODIGO = 12;
+
+function filtrarSoloDigitos(input) {
+    const limpio = (input.value || '').replace(/\D/g, '').slice(0, LONGITUD_CODIGO);
+    if (input.value !== limpio) input.value = limpio;
+}
+
+function actualizarContadorDigitos(input, idContador) {
+    const el = document.getElementById(idContador);
+    if (!el) return;
+    const n = (input.value || '').length;
+    el.textContent = `${n} / ${LONGITUD_CODIGO} dígitos`;
+    el.classList.remove('completo', 'invalido');
+    if (n === LONGITUD_CODIGO) el.classList.add('completo');
+    else if (n > 0) el.classList.add('invalido');
+}
+
+// Retorna null si es válido, o un string con el motivo de rechazo.
+function validarCodigo(cod) {
+    if (!cod) return 'Código vacío';
+    if (!/^\d+$/.test(cod)) return 'Solo se permiten números (sin letras, puntos ni espacios)';
+    if (cod.length !== LONGITUD_CODIGO) return `Debe tener exactamente ${LONGITUD_CODIGO} dígitos (tiene ${cod.length})`;
+    return null;
+}
+
+window.filtrarSoloDigitos = filtrarSoloDigitos;
+window.actualizarContadorDigitos = actualizarContadorDigitos;
+
 let contadores = {};
 ESTADOS.forEach(e => contadores[e] = 0);
 let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
@@ -819,7 +867,6 @@ let codigosRegistradosHoy = new Set();
 let codesScannedRecently = new Map();
 const TIEMPO_BLOQUEO_MS = 5000;
 
-// 🆕 BANCO DE CÓDIGOS: pool de todos los códigos del día
 let bancoCodigos = [];
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
@@ -839,19 +886,36 @@ function codigosEnVisitas(){
 window.agregarCodigoBanco = function(){
     const inp = document.getElementById('codigoBanco');
     const cod = (inp.value || '').trim();
-    if (!cod) { inp.focus(); return; }
+    if (!cod) {
+        mostrarAviso('⚠️ Ingresa un código de 12 dígitos', 'error');
+        beepError();
+        inp.focus();
+        return;
+    }
+    const error = validarCodigo(cod);
+    if (error) {
+        mostrarAviso('⚠️ ' + error, 'error');
+        beepError();
+        if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        inp.focus();
+        return;
+    }
     if (bancoCodigos.includes(cod)) {
         mostrarAviso('⚠️ Ese código ya está en el banco', 'error');
         beepError();
-        inp.value = ''; inp.focus();
+        inp.value = '';
+        actualizarContadorDigitos(inp, 'contadorDigitosBanco');
+        inp.focus();
         return;
     }
     bancoCodigos.push(cod);
     inp.value = '';
+    actualizarContadorDigitos(inp, 'contadorDigitosBanco');
     inp.focus();
     renderizarBanco();
     guardarEstadoCompleto();
     beepOk();
+    mostrarAviso('✅ Agregado al banco: ' + cod, 'ok');
 };
 
 window.eliminarCodigoBanco = function(cod){
@@ -920,24 +984,45 @@ window.procesarCargaMasiva = function(){
     const ta = document.getElementById('cargaMasivaTexto');
     if (!ta) return;
     const texto = ta.value || '';
-    const codigos = texto.split(/[\n,;]+/).map(s => s.trim()).filter(s => s.length > 0);
-    if (codigos.length === 0) { alert('No hay códigos para procesar.'); return; }
+    const crudos = texto.split(/[\n,;]+/).map(s => s.trim()).filter(s => s.length > 0);
+    if (crudos.length === 0) { alert('No hay códigos para procesar.'); return; }
+
     let agregados = 0, duplicados = 0;
-    codigos.forEach(cod => {
+    const invalidos = [];
+
+    crudos.forEach(crudo => {
+        // Limpiamos caracteres no numéricos por si vienen pegados con espacios/guiones
+        const cod = crudo.replace(/\D/g, '');
+        const error = validarCodigo(cod);
+        if (error) {
+            invalidos.push({ original: crudo, motivo: error });
+            return;
+        }
         if (bancoCodigos.includes(cod)) { duplicados++; return; }
         bancoCodigos.push(cod);
         agregados++;
     });
+
     ta.value = '';
     document.getElementById('cargaMasivaContenedor').style.display = 'none';
     renderizarBanco();
     guardarEstadoCompleto();
-    beepOk();
-    alert(`✅ ${agregados} códigos agregados${duplicados > 0 ? ` (${duplicados} duplicados ignorados)` : ''}.`);
+    if (agregados > 0) beepOk();
+
+    let msg = `✅ ${agregados} código(s) agregado(s)`;
+    if (duplicados > 0) msg += `\n⚠️ ${duplicados} duplicado(s) ignorado(s)`;
+    if (invalidos.length > 0) {
+        msg += `\n\n❌ ${invalidos.length} código(s) rechazado(s):\n`;
+        invalidos.slice(0, 5).forEach(inv => {
+            msg += `• "${inv.original}" → ${inv.motivo}\n`;
+        });
+        if (invalidos.length > 5) msg += `... y ${invalidos.length - 5} más.`;
+    }
+    alert(msg);
 };
 
 // ═══════════════════════════════════════════════════════
-// BÚSQUEDA DE CÓDIGOS EN EL BANCO (para agregar a visita)
+// BÚSQUEDA DE CÓDIGOS EN EL BANCO
 // ═══════════════════════════════════════════════════════
 
 window.buscarCodigosBanco = function(){
@@ -1090,7 +1175,7 @@ function cargarEstadoCompleto(){
     try{
         const e=JSON.parse(raw);
         visitas=e.visitas||[];
-        bancoCodigos = e.bancoCodigos || [];
+        bancoCodigos = (e.bancoCodigos || []).filter(c => /^\d{12}$/.test(c));
         const savedCont=e.contadores||{};
         ESTADOS.forEach(k=>{ contadores[k] = savedCont[k] || 0; });
         Object.keys(savedCont).forEach(k=>{ if(!(k in contadores)) contadores[k]=savedCont[k]; });
@@ -1109,24 +1194,42 @@ function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMin
 window.agregarCodigo = function(){
     const inp = document.getElementById('codigoBarras');
     const cod = (inp.value||'').trim();
-    if(!cod){ inp.focus(); return; }
+    if(!cod){
+        mostrarAviso('⚠️ Ingresa un código de 12 dígitos', 'error');
+        beepError();
+        inp.focus();
+        return;
+    }
+    const error = validarCodigo(cod);
+    if (error) {
+        mostrarAviso('⚠️ ' + error, 'error');
+        beepError();
+        if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        inp.focus();
+        return;
+    }
     const motivo = motivoDuplicado(cod);
     if (motivo){
         mostrarAviso('⚠️ ' + motivo, 'error');
         beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
-        inp.value = ''; return;
+        inp.value = ''; actualizarContadorDigitos(inp, 'contadorDigitosVisita'); return;
     }
-    // Si el código viene del escáner, también lo agregamos al banco si no está
     if (!bancoCodigos.includes(cod)) {
         bancoCodigos.push(cod);
         renderizarBanco();
     }
     agregarCodigoPendiente(cod);
-    inp.value = ''; inp.focus();
+    inp.value = ''; actualizarContadorDigitos(inp, 'contadorDigitosVisita'); inp.focus();
 };
 function agregarCodigoPendiente(cod){
     if(!cod) return;
     cod = cod.trim();
+    const error = validarCodigo(cod);
+    if (error){
+        mostrarAviso('⚠️ ' + error, 'error');
+        beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
+        return;
+    }
     const motivo = motivoDuplicado(cod);
     if (motivo){
         mostrarAviso('⚠️ ' + motivo, 'error');
@@ -1179,7 +1282,10 @@ function renderizarTabla(){
         const tdS=document.createElement('td'); tdS.textContent=v.salida; fila.appendChild(tdS);
         const tdT=document.createElement('td'); tdT.innerHTML=`<strong>${v.tiempo} min</strong>`; fila.appendChild(tdT);
         const tdC=document.createElement('td');
-        if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; tdC.appendChild(inp); } else tdC.textContent=v.codigo||'';
+        if(editando){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; inp.setAttribute('inputmode','numeric'); inp.setAttribute('maxlength','12');
+            inp.addEventListener('input', ()=>{ const limpio = (inp.value||'').replace(/\D/g,'').slice(0,12); if(inp.value!==limpio) inp.value=limpio; });
+            tdC.appendChild(inp);
+        } else tdC.textContent=v.codigo||'';
         fila.appendChild(tdC);
         const tdE=document.createElement('td');
         if(editando){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ESTADOS.forEach(op=>{ const o=document.createElement('option'); o.value=op; o.textContent=op; if(op===v.estado) o.selected=true; sel.appendChild(o); }); tdE.appendChild(sel); } else tdE.textContent=v.estado;
@@ -1208,12 +1314,13 @@ window.guardarEdicion = (index)=>{
     const de=document.getElementById(`edit-desc-${index}`);
     if(!ic||!se) return;
     const nuevoCod = ic.value.trim();
-    if (nuevoCod && nuevoCod !== (visitas[index].codigo||'')){
-        const existeEnOtra = visitas.some((v,i) => i !== index && (v.codigo||'').trim() === nuevoCod);
-        if (existeEnOtra){ mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error'); beepError(); return; }
-        // Agregar al banco si no está
-        if (nuevoCod && !bancoCodigos.includes(nuevoCod)) {
-            bancoCodigos.push(nuevoCod);
+    if (nuevoCod){
+        const error = validarCodigo(nuevoCod);
+        if (error){ mostrarAviso('⚠️ ' + error, 'error'); beepError(); return; }
+        if (nuevoCod !== (visitas[index].codigo||'')){
+            const existeEnOtra = visitas.some((v,i) => i !== index && (v.codigo||'').trim() === nuevoCod);
+            if (existeEnOtra){ mostrarAviso('⚠️ Ese código ya existe en otra visita', 'error'); beepError(); return; }
+            if (!bancoCodigos.includes(nuevoCod)) bancoCodigos.push(nuevoCod);
         }
     }
     visitas[index].codigo=nuevoCod;
@@ -1248,13 +1355,23 @@ window.registrarVisita = ()=>{
     let desc=(document.getElementById('descripcionVisita').value||'').trim();
     if(!l||!s){ alert("Ingresa llegada y salida"); return; }
     if(!es){ alert("Selecciona estado"); return; }
+
     const inputCod = (document.getElementById('codigoBarras').value||'').trim();
     if(inputCod){
+        const error = validarCodigo(inputCod);
+        if (error){ mostrarAviso('⚠️ ' + error, 'error'); beepError(); return; }
         const motivo = motivoDuplicado(inputCod);
         if (motivo){ mostrarAviso('⚠️ ' + motivo, 'error'); beepError(); return; }
         if(!codigosPendientes.includes(inputCod)) codigosPendientes.push(inputCod);
         if(!bancoCodigos.includes(inputCod)) bancoCodigos.push(inputCod);
     }
+
+    // Validar todos los pendientes antes de registrar
+    for (const c of codigosPendientes) {
+        const error = validarCodigo(c);
+        if (error) { mostrarAviso('⚠️ Código inválido: ' + c + ' — ' + error, 'error'); beepError(); return; }
+    }
+
     const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
     const t = calcularMinutos(l,s);
     const horaRegistro = new Date().toISOString();
@@ -1266,6 +1383,7 @@ window.registrarVisita = ()=>{
     document.getElementById('codigoBarras').value='';
     document.getElementById('estadoPaquete').selectedIndex=0;
     document.getElementById('descripcionVisita').value='';
+    actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
     window.actualizarPlaceholderDescripcion();
     codigosPendientes = [];
     renderizarCodigosPendientes();
@@ -1280,7 +1398,7 @@ window.registrarVisita = ()=>{
 };
 
 // ═══════════════════════════════════════════════════════
-// ESCÁNER QR/BARRAS (con modo: 'banco' o 'pendientes')
+// ESCÁNER
 // ═══════════════════════════════════════════════════════
 let escaneoModo = 'pendientes';
 
@@ -1300,8 +1418,11 @@ window.iniciarEscaneo = function(modo){
 
     html5QrCode.start({facingMode:"environment"}, cfg,
         (txt)=>{
-            const cod = (txt || '').trim();
+            // Limpiar y dejar solo dígitos
+            const cod = (txt || '').replace(/\D/g, '');
             if (!cod) return;
+
+            // Bloqueo anti-repetición por código crudo escaneado
             const ahora = Date.now();
             const ultimaVez = codesScannedRecently.get(cod) || 0;
             if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) return;
@@ -1309,6 +1430,15 @@ window.iniciarEscaneo = function(modo){
             if (codesScannedRecently.size > 100) {
                 const cutoff = ahora - 60000;
                 for (const [k, t] of codesScannedRecently) { if (t < cutoff) codesScannedRecently.delete(k); }
+            }
+
+            // Validar formato
+            const error = validarCodigo(cod);
+            if (error) {
+                mostrarAviso('⚠️ ' + error + ' (leído: ' + cod + ')', 'error');
+                beepError();
+                if (navigator.vibrate) navigator.vibrate([100,50,100]);
+                return;
             }
 
             if (escaneoModo === 'banco') {
@@ -1326,14 +1456,12 @@ window.iniciarEscaneo = function(modo){
                 return;
             }
 
-            // Modo 'pendientes'
             const motivo = motivoDuplicado(cod);
             if (motivo){
                 mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
                 beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]);
                 return;
             }
-            // Auto-agregar al banco si no existe
             if (!bancoCodigos.includes(cod)) {
                 bancoCodigos.push(cod);
                 renderizarBanco();
@@ -1420,7 +1548,7 @@ window.imprimirInformeMensual = () => imprimirContenidoHTML('Informe Mensual Col
 function crearObjetoRespaldo(){
     const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
     return {
-        version:5, usuario, fecha_respaldo:new Date().toISOString(),
+        version:6, usuario, fecha_respaldo:new Date().toISOString(),
         estadoSesion: JSON.parse(localStorage.getItem('estadoSesion')||'null'),
         entregasDiariasDetallado: JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'),
         tiemposBase:{ inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga: localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||'' }
@@ -1633,6 +1761,11 @@ function limpiarSesion(){
     const b=document.getElementById('busquedaGuia'); if(b) b.value='';
     const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
     const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    ['codigoBanco','codigoBarras','busquedaCodigoBanco'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
+    actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
     window.limpiarBusquedaCodigo();
     localStorage.removeItem('estadoSesion');
     actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
@@ -1652,6 +1785,11 @@ window.eliminarTodo = ()=>{
     document.getElementById('seccionHistorial').style.display='none';
     const b=document.getElementById('busquedaGuia'); if(b) b.value='';
     const d=document.getElementById('descripcionVisita'); if(d) d.value='';
+    ['codigoBanco','codigoBarras','busquedaCodigoBanco'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.value = '';
+    });
+    actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
+    actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
     window.limpiarBusquedaCodigo();
     actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); cancelarEscaneo();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
@@ -1670,94 +1808,4 @@ window.generarInformeMensual = ()=>{
     let totEnt=0, totVis=0, totMin=0; const contMes={}; ESTADOS.forEach(k=>contMes[k]=0);
     fechasMes.forEach(f=>{ const d=h[f]; totEnt+=d.contadores['Entregado']||0; totVis+=d.totalVisitas||0; totMin+=d.totalMinutos||0; for(let k in d.contadores){ if(!contMes[k]) contMes[k]=0; contMes[k]+=d.contadores[k]||0; } });
     const promDi=(totEnt/fechasMes.length).toFixed(1), promVi=totVis>0?Math.round(totMin/totVis):0, efec=totVis>0?((totEnt/totVis)*100).toFixed(1):0;
-    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:#2c3e50;font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
-    Object.keys(contMes).forEach(est=>{ const cant=contMes[est]; if(cant===0) return; const p=totVis>0?((cant/totVis)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${est}</td><td>${cant}</td><td>${p}%</td></tr>`; });
-    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
-    fechasMes.forEach(f=>{ const d=h[f]; const ent=d.contadores['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${ent}</td><td>${(d.totalVisitas||0)-ent}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
-    html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totVis}</strong></td><td><strong>${totEnt}</strong></td><td><strong>${totVis-totEnt}</strong></td><td><strong>${Math.floor(totMin/60)}h ${totMin%60}m</strong></td></tr></tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
-    document.getElementById('informeContenedor').innerHTML=html;
-    document.getElementById('informeContenedor').style.display='block';
-    document.getElementById('seccionInforme').style.display='block';
-    document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'});
-};
-window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
-
-window.recargarUIDesdeStorage = function(){
-    try{
-        const raw = localStorage.getItem('estadoSesion');
-        if(raw){
-            const e = JSON.parse(raw);
-            visitas = e.visitas || [];
-            bancoCodigos = e.bancoCodigos || [];
-            ESTADOS.forEach(k=>{ contadores[k] = (e.contadores && e.contadores[k]) || 0; });
-            totalMinutosVisitas = e.totalMinutosVisitas || 0;
-            totalVisitas = e.totalVisitas || 0;
-            cargarCodigosRegistradosHoy();
-        }
-        cargarTiemposBase();
-        renderizarTabla();
-        renderizarBanco();
-        actualizarDashboard();
-        actualizarGraficaPromedios();
-        actualizarInformesSemanalesMensuales();
-        console.log('🔄 UI recargada desde la nube');
-    }catch(e){ console.warn('Error recargando UI:', e); }
-};
-
-window.reiniciarUIOffline = function(){
-    ESTADOS.forEach(k=>contadores[k]=0);
-    totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; bancoCodigos=[];
-    codigosRegistradosHoy.clear();
-    renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('resumenTiempos').style.display='none';
-    document.getElementById('cuerpoTabla').innerHTML='';
-    document.getElementById('seccionHistorial').style.display='none';
-    const b=document.getElementById('busquedaGuia'); if(b) b.value='';
-    const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
-    const d=document.getElementById('descripcionVisita'); if(d) d.value='';
-    window.limpiarBusquedaCodigo();
-    try { actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); } catch(e){}
-};
-
-function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado'];
-    const faltan = fns.filter(f => typeof window[f] !== 'function');
-    if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
-    if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
-}
-
-document.getElementById('inputNombreUsuario').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); window.confirmarUsuario(); }
-});
-
-// Cerrar resultados de búsqueda al hacer clic fuera
-document.addEventListener('click', (e) => {
-    const cont = document.getElementById('resultadosBusquedaCodigo');
-    const inp = document.getElementById('busquedaCodigoBanco');
-    if (!cont || !inp) return;
-    if (!cont.contains(e.target) && e.target !== inp) {
-        cont.innerHTML = '';
-        cont.style.display = 'none';
-    }
-});
-
-window.onload = ()=>{
-    cargarTiemposBase();
-    if(cargarEstadoCompleto() && visitas.length>0){ renderizarTabla(); actualizarDashboard(); }
-    renderizarBanco();
-    ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>document.getElementById(id).addEventListener('change', guardarTiemposBase));
-    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-    if(visitas.length===0) renderizarGrafica();
-    document.getElementById('estadoPaquete').selectedIndex=0;
-    renderizarCodigosPendientes(); actualizarContadorUnicos();
-    window.actualizarPlaceholderDescripcion();
-    const ahora=new Date();
-    document.getElementById('mesInforme').value=ahora.getMonth()+1;
-    document.getElementById('anioInforme').value=ahora.getFullYear();
-    document.getElementById('btnImprimirDiario').addEventListener('click', ()=>window.imprimirReporteDiario());
-    diagnosticar();
-};
-</script>
-</body>
-</html>
+    let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:#2c3e50;font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:#777;margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr
