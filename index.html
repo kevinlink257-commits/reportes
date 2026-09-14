@@ -115,14 +115,12 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 #contadorUnicos { font-size: 0.85rem; color: #2c3e50; margin-top: 6px; text-align: center; font-weight: bold; }
 #contadorUnicos span { color: #e74c3c; }
 
-/* Indicador de formato de código */
 .hint-codigo { font-size: 0.78rem; color: #666; margin-top: 6px; display: flex; align-items: center; gap: 6px; justify-content: center; }
 .hint-codigo .badge { background: #2c3e50; color: #fff; padding: 2px 8px; border-radius: 10px; font-weight: bold; font-size: 0.75rem; letter-spacing: 1px; }
 .contador-digitos { font-size: 0.78rem; text-align: right; color: #888; margin-top: 4px; font-weight: bold; }
 .contador-digitos.completo { color: #1abc9c; }
 .contador-digitos.invalido { color: #e74c3c; }
 
-/* ====== BARRA DE USUARIO ====== */
 #barraUsuario {
     position: fixed; top: 0; left: 0; right: 0;
     background: linear-gradient(135deg, #2c3e50, #34495e);
@@ -140,7 +138,6 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 }
 #barraUsuario button:hover { background: #16a085; }
 
-/* ====== MODAL DE USUARIO ====== */
 #modalUsuario {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.75);
@@ -398,15 +395,26 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
         <div class="btn-group" style="margin-top:10px;">
             <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
             <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
-            <button class="btn-informe" onclick="descargarRespaldoLocal()">💾 Descargar respaldo local</button>
         </div>
-        <div class="btn-group" style="margin-top:10px;">
-            <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Cargar respaldo JSON</button>
-        </div>
-        <input type="file" id="inputCargarJSON" accept=".json,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
 
         <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
-        <h3>📄 Exportar a Word</h3>
+        <h3>💾 Respaldo y Restauración (Word)</h3>
+        <p style="font-size:0.85em; color:#555; margin-top:0; text-align:center;">
+            Todo el respaldo (tiempos base, banco de códigos, visitas del día e historial) se guarda y se lee como archivo Word.
+        </p>
+        <div class="btn-group" style="margin-top:10px;">
+            <button class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
+            <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
+        </div>
+        <input type="file" id="inputCargarJSON"
+               accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json"
+               style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
+        <p style="font-size:0.78em; color:#888; text-align:center; margin-top:8px;">
+            ℹ️ Si el Word solo contiene una lista de códigos de 12 dígitos, se cargarán automáticamente al <strong>Banco de Códigos</strong>.
+        </p>
+
+        <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
+        <h3>📄 Exportar informes</h3>
         <div class="btn-group">
             <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día actual</button>
             <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
@@ -846,7 +854,6 @@ function actualizarContadorDigitos(input, idContador) {
     else if (n > 0) el.classList.add('invalido');
 }
 
-// Retorna null si es válido, o un string con el motivo de rechazo.
 function validarCodigo(cod) {
     if (!cod) return 'Código vacío';
     if (!/^\d+$/.test(cod)) return 'Solo se permiten números (sin letras, puntos ni espacios)';
@@ -991,7 +998,6 @@ window.procesarCargaMasiva = function(){
     const invalidos = [];
 
     crudos.forEach(crudo => {
-        // Limpiamos caracteres no numéricos por si vienen pegados con espacios/guiones
         const cod = crudo.replace(/\D/g, '');
         const error = validarCodigo(cod);
         if (error) {
@@ -1366,7 +1372,6 @@ window.registrarVisita = ()=>{
         if(!bancoCodigos.includes(inputCod)) bancoCodigos.push(inputCod);
     }
 
-    // Validar todos los pendientes antes de registrar
     for (const c of codigosPendientes) {
         const error = validarCodigo(c);
         if (error) { mostrarAviso('⚠️ Código inválido: ' + c + ' — ' + error, 'error'); beepError(); return; }
@@ -1418,11 +1423,9 @@ window.iniciarEscaneo = function(modo){
 
     html5QrCode.start({facingMode:"environment"}, cfg,
         (txt)=>{
-            // Limpiar y dejar solo dígitos
             const cod = (txt || '').replace(/\D/g, '');
             if (!cod) return;
 
-            // Bloqueo anti-repetición por código crudo escaneado
             const ahora = Date.now();
             const ultimaVez = codesScannedRecently.get(cod) || 0;
             if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) return;
@@ -1432,7 +1435,6 @@ window.iniciarEscaneo = function(modo){
                 for (const [k, t] of codesScannedRecently) { if (t < cutoff) codesScannedRecently.delete(k); }
             }
 
-            // Validar formato
             const error = validarCodigo(cod);
             if (error) {
                 mostrarAviso('⚠️ ' + error + ' (leído: ' + cod + ')', 'error');
@@ -1554,54 +1556,281 @@ function crearObjetoRespaldo(){
         tiemposBase:{ inicioCarga: localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga: localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa: localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega')||'' }
     };
 }
-window.descargarRespaldoLocal = ()=>{
+
+// ═══════════════════════════════════════════════════════
+// RESPALDO EN WORD (con payload oculto en base64)
+// ═══════════════════════════════════════════════════════
+function b64EncodeUnicode(str){
+    try { return btoa(unescape(encodeURIComponent(str))); } catch(e){ return ''; }
+}
+function b64DecodeUnicode(str){
+    try { return decodeURIComponent(escape(atob(str))); } catch(e){ return ''; }
+}
+
+window.descargarRespaldoWord = function(){
     const respaldo = crearObjetoRespaldo();
-    const blob = new Blob([JSON.stringify(respaldo,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const fecha = new Date().toISOString().split('T')[0];
-    const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : 'usuario').replace(/\s+/g,'-').toLowerCase();
-    const nombre = `colserlog_${usuario}_${fecha}.json`;
-    try{ const a=document.createElement('a'); a.href=url; a.download=nombre; document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),4000); return; }catch(e){ console.warn('download falló', e); }
-    const w = window.open(url, '_blank');
-    if(!w) alert('No se pudo descargar. Permite pop-ups.');
-    setTimeout(()=>URL.revokeObjectURL(url), 8000);
+    const jsonStr = JSON.stringify(respaldo);
+    const b64 = b64EncodeUnicode(jsonStr);
+    const usuario = respaldo.usuario || 'sin-usuario';
+    const ahora = new Date();
+    const fechaBonita = ahora.toLocaleString('es');
+    const fechaArchivo = ahora.toISOString().split('T')[0];
+
+    const estado = respaldo.estadoSesion || {};
+    const tiempos = respaldo.tiemposBase || {};
+    const banco = Array.isArray(estado.bancoCodigos) ? estado.bancoCodigos : [];
+    const listaVisitas = Array.isArray(estado.visitas) ? estado.visitas : [];
+    const contadoresResp = estado.contadores || {};
+    const totalVisitasResp = estado.totalVisitas || 0;
+    const totalMinutosResp = estado.totalMinutosVisitas || 0;
+    const ent = contadoresResp['Entregado'] || 0;
+    const hist = respaldo.entregasDiariasDetallado || {};
+    const fechasHist = Object.keys(hist).sort();
+
+    const efectividad = totalVisitasResp > 0 ? ((ent / totalVisitasResp) * 100).toFixed(1) : '0.0';
+    const promVisita = totalVisitasResp > 0 ? Math.round(totalMinutosResp / totalVisitasResp) : 0;
+
+    let html = '';
+    html += `<h1>📦 COLSERLOG — Respaldo Completo</h1>`;
+    html += `<h2>👤 Mensajero: ${usuario}</h2>`;
+    html += `<div class="header-info">Respaldo generado el ${fechaBonita}</div>`;
+
+    html += `<h3>⏱️ Tiempos Base del Día</h3>`;
+    html += `<table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr>`;
+    html += `<td>${tiempos.inicioCarga || '—'}</td><td>${tiempos.finCarga || '—'}</td><td>${tiempos.salidaEmpresa || '—'}</td><td>${tiempos.primeraEntrega || '—'}</td>`;
+    html += `</tr></tbody></table>`;
+
+    html += `<h3>📊 Resumen del Día</h3>`;
+    html += `<table class="kpis"><tr>
+        <td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td>
+        <td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${totalVisitasResp - ent}</div></td>
+        <td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${totalVisitasResp}</div></td>
+        <td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${promVisita} min</div></td>
+        <td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${efectividad}%</div></td>
+        <td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(totalMinutosResp/60)}h ${totalMinutosResp%60}m</div></td>
+    </tr></table>`;
+
+    html += `<h3>📥 Banco de Códigos (${banco.length} código${banco.length===1?'':'s'})</h3>`;
+    if (banco.length === 0) {
+        html += `<p style="text-align:center;color:#888;"><em>Sin códigos en el banco.</em></p>`;
+    } else {
+        html += `<table><thead><tr><th>#</th><th>Código</th><th>Estado</th></tr></thead><tbody>`;
+        const usados = new Set(listaVisitas.map(v => (v.codigo||'').trim()).filter(Boolean));
+        banco.forEach((c, i) => {
+            const usado = usados.has(c);
+            html += `<tr><td>${i+1}</td><td>${c}</td><td>${usado?'✓ Usado':'Disponible'}</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    }
+
+    html += `<h3>📋 Visitas Registradas (${listaVisitas.length})</h3>`;
+    if (listaVisitas.length === 0) {
+        html += `<p style="text-align:center;color:#888;"><em>Sin visitas registradas.</em></p>`;
+    } else {
+        html += `<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
+        listaVisitas.forEach((v, i) => {
+            html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`;
+        });
+        html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosResp} min</strong></td><td colspan="3"><strong>${totalVisitasResp} visita(s)</strong></td></tr>`;
+        html += `</tbody></table>`;
+    }
+
+    html += `<h3>📈 Distribución por Estado</h3>`;
+    html += `<table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
+    Object.keys(contadoresResp).forEach(k => {
+        const c = contadoresResp[k] || 0;
+        if (c === 0) return;
+        const p = totalVisitasResp > 0 ? ((c/totalVisitasResp)*100).toFixed(1) : '0.0';
+        html += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
+    });
+    html += `</tbody></table>`;
+
+    if (fechasHist.length > 0) {
+        html += `<h3>📅 Historial Guardado (${fechasHist.length} día${fechasHist.length===1?'':'s'})</h3>`;
+        html += `<table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
+        fechasHist.forEach(f => {
+            const d = hist[f];
+            const e = (d.contadores && d.contadores['Entregado']) || 0;
+            html += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
+        });
+        html += `</tbody></table>`;
+    }
+
+    // Payload oculto
+    html += `<div style="margin-top:30px; padding-top:10px; border-top:2px dashed #999; page-break-before: always;">`;
+    html += `<h3 style="text-align:center; color:#c0392b;">⚠️ NO MODIFICAR ESTA SECCIÓN</h3>`;
+    html += `<p style="text-align:center; font-size:8pt; color:#666;">Esta sección contiene los datos codificados del respaldo. Sirve para restaurar automáticamente toda la información al importar el archivo.</p>`;
+    html += `<p style="word-break: break-all; font-family: monospace; font-size: 6pt; color:#aaa; text-align:center;">`;
+    html += `---COLSERLOG-DATA-START---<br>`;
+    const chunks = b64.match(/.{1,80}/g) || [b64];
+    html += chunks.join('<br>');
+    html += `<br>---COLSERLOG-DATA-END---`;
+    html += `</p></div>`;
+
+    const nombre = `Colserlog_Respaldo_${usuario.replace(/\s+/g,'-').toLowerCase()}_${fechaArchivo}.doc`;
+    descargarWord(nombre, html);
 };
 
-window.cargarRespaldoDesdeArchivo = async function(event){
-    const file = event.target.files[0]; if(!file) return;
-    try{
-        const texto = await file.text();
-        const respaldo = JSON.parse(texto);
-        if(!respaldo.entregasDiariasDetallado && !respaldo.estadoSesion){ alert('❌ El archivo no tiene formato.'); return; }
-        const usuarioActual = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
-        if (respaldo.usuario && respaldo.usuario !== usuarioActual){
-            const ok = confirm(`⚠️ Este respaldo es de "${respaldo.usuario}" pero estás como "${usuarioActual}".\n\n¿Continuar de todas formas?`);
-            if (!ok) return;
-        }
-        const opcion = confirm('¿Qué quieres hacer?\n\nAceptar = REEMPLAZAR\nCancelar = FUSIONAR');
-        let historialFinal;
-        if(opcion){ historialFinal = respaldo.entregasDiariasDetallado || {}; }
-        else {
-            const actuales = JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}');
-            const nuevos = respaldo.entregasDiariasDetallado || {};
-            historialFinal = { ...actuales, ...nuevos };
-            for(const fecha in nuevos){
-                if(actuales[fecha]){
-                    const a=actuales[fecha], b=nuevos[fecha];
-                    const cont = { ...a.contadores };
-                    for(const k in b.contadores){ cont[k] = (cont[k]||0) + (b.contadores[k]||0); }
-                    historialFinal[fecha] = { contadores: cont, totalVisitas: (a.totalVisitas||0)+(b.totalVisitas||0), totalMinutos: (a.totalMinutos||0)+(b.totalMinutos||0) };
+// Compatibilidad: algunos botones viejos llaman descargarRespaldoLocal
+window.descargarRespaldoLocal = function(){
+    window.descargarRespaldoWord();
+};
+
+// ═══════════════════════════════════════════════════════
+// IMPORTAR DESDE WORD (respaldo completo o banco de códigos)
+// ═══════════════════════════════════════════════════════
+
+function extraerCodigosDeTexto(texto){
+    const codes = new Set();
+    const re = /(?<!\d)(\d{12})(?!\d)/g;
+    let m;
+    while ((m = re.exec(texto)) !== null) {
+        codes.add(m[1]);
+    }
+    return Array.from(codes);
+}
+
+function extraerPayloadBase64(texto){
+    const match = texto.match(/---COLSERLOG-DATA-START---([\s\S]*?)---COLSERLOG-DATA-END---/);
+    if (!match) return null;
+    const b64 = match[1].replace(/<[^>]*>/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+    if (!b64 || b64.length < 20) return null;
+    try {
+        const jsonStr = b64DecodeUnicode(b64);
+        return JSON.parse(jsonStr);
+    } catch(e) {
+        console.warn('No se pudo decodificar el payload:', e);
+        return null;
+    }
+}
+
+async function aplicarRespaldo(respaldo){
+    const usuarioActual = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
+    if (respaldo.usuario && respaldo.usuario !== usuarioActual) {
+        const ok = confirm(`⚠️ Este respaldo es de "${respaldo.usuario}" pero estás como "${usuarioActual}".\n\n¿Continuar de todas formas?`);
+        if (!ok) return false;
+    }
+
+    const opcion = confirm('¿Qué quieres hacer?\n\n✅ Aceptar = REEMPLAZAR los datos actuales\n❌ Cancelar = FUSIONAR con los actuales');
+    let historialFinal;
+    if (opcion) {
+        historialFinal = respaldo.entregasDiariasDetallado || {};
+    } else {
+        const actuales = JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}');
+        const nuevos = respaldo.entregasDiariasDetallado || {};
+        historialFinal = { ...actuales, ...nuevos };
+        for (const fecha in nuevos) {
+            if (actuales[fecha]) {
+                const a = actuales[fecha], b = nuevos[fecha];
+                const cont = { ...(a.contadores || {}) };
+                for (const k in (b.contadores || {})) {
+                    cont[k] = (cont[k] || 0) + (b.contadores[k] || 0);
                 }
+                historialFinal[fecha] = {
+                    contadores: cont,
+                    totalVisitas: (a.totalVisitas || 0) + (b.totalVisitas || 0),
+                    totalMinutos: (a.totalMinutos || 0) + (b.totalMinutos || 0)
+                };
             }
         }
-        localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historialFinal));
-        if(respaldo.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
-        if(respaldo.tiemposBase){ for(const k in respaldo.tiemposBase){ if(respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, respaldo.tiemposBase[k]); } }
-        if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-        alert('✅ Respaldo cargado. Recargando...');
-        setTimeout(()=>location.reload(), 800);
-    }catch(e){ console.error(e); alert('❌ Error: ' + e.message); }
-    finally{ event.target.value = ''; }
+    }
+
+    localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historialFinal));
+
+    if (respaldo.estadoSesion) {
+        if (respaldo.estadoSesion.visitas) {
+            respaldo.estadoSesion.visitas = respaldo.estadoSesion.visitas.map(v => ({
+                ...v,
+                codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12)
+            }));
+        }
+        if (respaldo.estadoSesion.bancoCodigos) {
+            respaldo.estadoSesion.bancoCodigos = respaldo.estadoSesion.bancoCodigos
+                .filter(c => /^\d{12}$/.test(c));
+        }
+        localStorage.setItem('estadoSesion', JSON.stringify(respaldo.estadoSesion));
+    }
+    if (respaldo.tiemposBase) {
+        for (const k in respaldo.tiemposBase) {
+            if (respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, respaldo.tiemposBase[k]);
+        }
+    }
+    if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+    return true;
+}
+
+function cargarCodigosAlBanco(codes){
+    let agregados = 0, yaEstaban = 0;
+    codes.forEach(c => {
+        if (!/^\d{12}$/.test(c)) return;
+        if (bancoCodigos.includes(c)) { yaEstaban++; return; }
+        bancoCodigos.push(c);
+        agregados++;
+    });
+    if (agregados > 0) {
+        renderizarBanco();
+        guardarEstadoCompleto();
+        beepOk();
+    }
+    return { agregados, yaEstaban };
+}
+
+window.cargarRespaldoDesdeArchivo = async function(event){
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        const texto = await file.text();
+
+        // CASO 1: payload embebido de COLSERLOG
+        const respaldo = extraerPayloadBase64(texto);
+        if (respaldo) {
+            const ok = await aplicarRespaldo(respaldo);
+            if (ok) {
+                alert('✅ Respaldo restaurado correctamente. Recargando...');
+                setTimeout(() => location.reload(), 800);
+            }
+            return;
+        }
+
+        // CASO 2: JSON plano (compatibilidad)
+        let jsonPlano = null;
+        try { jsonPlano = JSON.parse(texto); } catch(e){}
+        if (jsonPlano && (jsonPlano.entregasDiariasDetallado || jsonPlano.estadoSesion)) {
+            const ok = await aplicarRespaldo(jsonPlano);
+            if (ok) {
+                alert('✅ Respaldo JSON restaurado. Recargando...');
+                setTimeout(() => location.reload(), 800);
+            }
+            return;
+        }
+
+        // CASO 3: Word con lista de códigos → cargar al banco
+        const codes = extraerCodigosDeTexto(texto);
+        if (codes.length === 0) {
+            alert('❌ No se encontraron datos válidos ni códigos de 12 dígitos en el archivo.');
+            return;
+        }
+
+        const confirmar = confirm(
+            `📥 Se encontraron ${codes.length} código(s) de 12 dígitos en el archivo Word.\n\n` +
+            `¿Quieres cargarlos al Banco de Códigos del Día?\n\n` +
+            `Aceptar = Sí, agregar al banco\n` +
+            `Cancelar = No hacer nada`
+        );
+        if (!confirmar) return;
+
+        const { agregados, yaEstaban } = cargarCodigosAlBanco(codes);
+        let msg = `✅ ${agregados} código(s) agregado(s) al banco.`;
+        if (yaEstaban > 0) msg += `\n⚠️ ${yaEstaban} ya estaban en el banco (ignorados).`;
+        alert(msg);
+
+    } catch (e) {
+        console.error(e);
+        alert('❌ Error al leer el archivo: ' + e.message);
+    } finally {
+        event.target.value = '';
+    }
 };
 
 function descargarWord(nombreArchivo, contenidoHTML){
@@ -1739,8 +1968,18 @@ window.exportarHistorialCompletoAWord = function(){
 window.guardarDia = ()=>{
     guardarDiaActual();
     if(typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
-    alert("✅ Día guardado.");
-    actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+    actualizarGraficaPromedios();
+    actualizarInformesSemanalesMensuales();
+
+    const exportar = confirm(
+        '✅ Día guardado.\n\n' +
+        '¿Quieres exportar TODO el respaldo a un archivo Word?\n' +
+        '(Tiempos base, banco de códigos, visitas del día e historial)'
+    );
+    if (exportar) {
+        try { window.descargarRespaldoWord(); }
+        catch(e){ alert('⚠️ No se pudo generar el Word: ' + e.message); }
+    }
 };
 window.reiniciarDia = ()=>{
     if(!confirm("¿Reiniciar día? Se guardará el día actual y se limpiará todo (incluyendo el banco de códigos).")) return;
@@ -1859,7 +2098,7 @@ window.reiniciarUIOffline = function(){
 };
 
 function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos'];
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos'];
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -1893,7 +2132,6 @@ window.onload = ()=>{
     document.getElementById('mesInforme').value=ahora.getMonth()+1;
     document.getElementById('anioInforme').value=ahora.getFullYear();
     document.getElementById('btnImprimirDiario').addEventListener('click', ()=>window.imprimirReporteDiario());
-    // Inicializar contadores de dígitos
     actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
     actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
     diagnosticar();
