@@ -398,6 +398,10 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
             <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
             <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
         </div>
+        <div class="btn-group" style="margin-top:8px;">
+            <button class="btn-cancelar" onclick="mostrarDiagnosticoNube()">🔍 Diagnóstico de nube</button>
+            <button class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
+        </div>
 
         <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
         <h3>💾 Respaldo y Restauración (Word)</h3>
@@ -533,26 +537,38 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     };
   }
 
+  // ═══════════════════════════════════════════════════════
+  // AUTO-SYNC (con protección de tamaño y timeout 45s)
+  // ═══════════════════════════════════════════════════════
   window.sincronizarConNube = function() {
     if (!syncActivo || !syncAutomaticoActivo || !db) return;
     const ref = refUsuario();
     if (!ref) return;
     clearTimeout(guardadoPendiente);
     guardadoPendiente = setTimeout(async () => {
-      try {
-        actualizarEstadoNube('⏳ Subiendo a la nube...', 'loading');
-        const payload = construirPayload();
-        ultimaVersionLocal = payload.version;
-        await Promise.race([
-          setDoc(ref, payload, { merge: true }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
-        ]);
-        actualizarEstadoNube('☁️ Sincronizado ' + new Date().toLocaleTimeString(), 'ok');
-      } catch (e) {
-        console.error('Error al sincronizar:', e.code, e.message);
-        actualizarEstadoNube('❌ ' + e.message, 'error');
-      }
-    }, 800);
+        try {
+            const payload = construirPayload();
+            const payloadSize = new Blob([JSON.stringify(payload)]).size;
+
+            // Si es muy grande, no intentamos auto-sync para no colgar la UI
+            if (payloadSize > 950000) {
+                actualizarEstadoNube(`⚠️ Auto-sync pausada: ${(payloadSize/1024).toFixed(0)} KB es demasiado. Compacta el historial.`, 'error');
+                return;
+            }
+
+            actualizarEstadoNube('⏳ Subiendo a la nube...', 'loading');
+            ultimaVersionLocal = payload.version;
+
+            await Promise.race([
+                setDoc(ref, payload, { merge: true }),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 45s')), 45000))
+            ]);
+            actualizarEstadoNube('☁️ Sincronizado ' + new Date().toLocaleTimeString(), 'ok');
+        } catch (e) {
+            console.warn('Error auto-sync:', e.code, e.message);
+            actualizarEstadoNube('❌ ' + e.message, 'error');
+        }
+    }, 1200);
   };
 
   function iniciarEscucha() {
@@ -593,23 +609,83 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     });
   }
 
+  // ═══════════════════════════════════════════════════════
+  // SINCRONIZACIÓN MANUAL (con reintentos y timeout 45s)
+  // ═══════════════════════════════════════════════════════
   window.forzarSincronizacion = async function() {
     if (!db) { alert('Firebase no está configurado.'); return false; }
     const ref = refUsuario();
     if (!ref) { alert('Primero selecciona tu nombre.'); return false; }
-    actualizarEstadoNube('⏳ Subiendo datos...', 'loading');
+
+    actualizarEstadoNube('⏳ Preparando datos...', 'loading');
+
+    const payload = construirPayload();
+    const payloadSize = new Blob([JSON.stringify(payload)]).size;
+    const sizeKB = (payloadSize / 1024).toFixed(1);
+    console.log(`📤 Tamaño del payload: ${sizeKB} KB`);
+
+    if (payloadSize > 950000) {
+        actualizarEstadoNube(`❌ Datos demasiado grandes (${sizeKB} KB > 950 KB). Usa "Compactar historial"`, 'error');
+        alert(
+            `❌ El documento pesa ${sizeKB} KB y Firestore solo acepta ~1000 KB.\n\n` +
+            `Solución: pulsa el botón "🗜️ Compactar historial" para eliminar los días más antiguos, ` +
+            `o usa "💾 Exportar TODO a Word" para respaldarlos antes de borrarlos.`
+        );
+        return false;
+    }
+
+    ultimaVersionLocal = payload.version;
+
+    // ─── Intento 1: con merge y timeout de 45s ───
     try {
-      const payload = construirPayload();
-      ultimaVersionLocal = payload.version;
-      await Promise.race([
-        setDoc(ref, payload, { merge: true }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
-      ]);
-      actualizarEstadoNube('✅ Datos subidos', 'ok');
-      return true;
-    } catch (e) {
-      actualizarEstadoNube('❌ ' + e.message, 'error');
-      return false;
+        actualizarEstadoNube(`⏳ Subiendo ${sizeKB} KB a la nube...`, 'loading');
+        await Promise.race([
+            setDoc(ref, payload, { merge: true }),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 45s (intento 1)')), 45000))
+        ]);
+        actualizarEstadoNube('✅ Datos subidos · ' + new Date().toLocaleTimeString(), 'ok');
+        return true;
+    } catch (e1) {
+        console.warn('⚠️ Intento 1 falló:', e1.message);
+        actualizarEstadoNube('⏳ Reintentando sin merge...', 'loading');
+
+        // ─── Intento 2: reemplazo total (sin merge) con 45s ───
+        try {
+            await Promise.race([
+                setDoc(ref, payload),
+                new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 45s (intento 2)')), 45000))
+            ]);
+            actualizarEstadoNube('✅ Datos subidos (reintento) · ' + new Date().toLocaleTimeString(), 'ok');
+            return true;
+        } catch (e2) {
+            console.error('❌ Intento 2 falló:', e2.code, e2.message);
+
+            let msg = `❌ No se pudo sincronizar.\n\n`;
+            if (e2.code === 'permission-denied') {
+                msg += `🔒 Las reglas de Firestore están bloqueando la escritura.\n\n`;
+                msg += `Ve a Firebase Console → Firestore → Reglas y pon:\n\n`;
+                msg += `rules_version = '2';\n`;
+                msg += `service cloud.firestore {\n`;
+                msg += `  match /databases/{database}/documents {\n`;
+                msg += `    match /{document=**} {\n`;
+                msg += `      allow read, write: if true;\n`;
+                msg += `    }\n`;
+                msg += `  }\n`;
+                msg += `}`;
+            } else if (e2.message.includes('TIMEOUT')) {
+                msg += `⏱️ La conexión con Firestore es muy lenta o el documento es demasiado grande.\n\n`;
+                msg += `Sugerencias:\n`;
+                msg += `• Verifica tu conexión a internet\n`;
+                msg += `• Pulsa "🗜️ Compactar historial" (borra días viejos)\n`;
+                msg += `• Pulsa "🔍 Diagnóstico de nube" para más detalles\n`;
+                msg += `• Revisa la consola del navegador (F12)`;
+            } else {
+                msg += `Error técnico: ${e2.code || ''} ${e2.message}`;
+            }
+            actualizarEstadoNube('❌ ' + e2.message, 'error');
+            alert(msg);
+            return false;
+        }
     }
   };
 
@@ -622,7 +698,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     try {
       const snap = await Promise.race([
         getDoc(ref),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
+        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 45s')), 45000))
       ]);
       if (!snap.exists()) { actualizarEstadoNube('⚠️ No hay datos en la nube', 'error'); return; }
       const d = snap.data();
@@ -634,6 +710,75 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
     } catch (e) {
       actualizarEstadoNube('❌ ' + e.message, 'error');
     }
+  };
+
+  // ═══════════════════════════════════════════════════════
+  // DIAGNÓSTICO DE NUBE
+  // ═══════════════════════════════════════════════════════
+  window.mostrarDiagnosticoNube = async function(){
+    if (!db) { alert('❌ Firebase no está configurado.'); return; }
+
+    const usuario = getUsuarioActual() || '(sin usuario)';
+    const payload = construirPayload();
+    const estadoStr = localStorage.getItem('estadoSesion') || 'null';
+    const histStr = localStorage.getItem('entregasDiariasDetallado') || '{}';
+
+    const sizePayload = new Blob([JSON.stringify(payload)]).size;
+    const sizeEstado = new Blob([estadoStr]).size;
+    const sizeHist = new Blob([histStr]).size;
+
+    const numVisitas = (payload.estadoSesion && payload.estadoSesion.visitas) ? payload.estadoSesion.visitas.length : 0;
+    const numBanco = (payload.estadoSesion && payload.estadoSesion.bancoCodigos) ? payload.estadoSesion.bancoCodigos.length : 0;
+    const numDiasHist = Object.keys(payload.entregasDiariasDetallado || {}).length;
+
+    let msg =
+        `🔍 DIAGNÓSTICO DE SINCRONIZACIÓN\n` +
+        `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+        `👤 Usuario: ${usuario}\n` +
+        `📦 Payload total: ${(sizePayload/1024).toFixed(1)} KB / 1000 KB máx\n` +
+        `   ├─ Estado sesión: ${(sizeEstado/1024).toFixed(1)} KB\n` +
+        `   └─ Historial: ${(sizeHist/1024).toFixed(1)} KB\n\n` +
+        `📊 Contenido actual:\n` +
+        `   ├─ Visitas del día: ${numVisitas}\n` +
+        `   ├─ Códigos en banco: ${numBanco}\n` +
+        `   └─ Días en historial: ${numDiasHist}\n\n`;
+
+    if (sizePayload > 900000) {
+        msg += `❌ CRÍTICO: El payload supera el 90% del límite.\n`;
+        msg += `   Acción: usa "🗜️ Compactar historial".\n`;
+    } else if (sizePayload > 500000) {
+        msg += `⚠️ ATENCIÓN: El payload es grande. Podría fallar la sync.\n`;
+        msg += `   Recomendación: compacta el historial pronto.\n`;
+    } else {
+        msg += `✅ Tamaño OK. El problema puede ser de red o reglas.\n`;
+    }
+
+    msg += `\n⏱️ Probando conexión con Firestore...\n`;
+    const t0 = Date.now();
+    try {
+        const snap = await Promise.race([
+            getDoc(refUsuario()),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000))
+        ]);
+        const ms = Date.now() - t0;
+        msg += `✅ Firestore responde en ${ms} ms\n`;
+        msg += `📄 Documento remoto: ${snap.exists() ? 'existe' : 'NO existe aún'}`;
+        if (snap.exists()) {
+            const d = snap.data();
+            const sizeRemoto = new Blob([JSON.stringify(d)]).size;
+            msg += `\n📦 Tamaño en la nube: ${(sizeRemoto/1024).toFixed(1)} KB`;
+            msg += `\n🕐 Última versión remota: ${d.version ? new Date(d.version).toLocaleString('es') : 'desconocida'}`;
+        }
+    } catch (e) {
+        const ms = Date.now() - t0;
+        msg += `❌ Firestore NO responde (${ms} ms): ${e.message}\n`;
+        msg += `\nPosibles causas:\n`;
+        msg += `• Reglas de Firestore bloqueando lectura/escritura\n`;
+        msg += `• Sin conexión a internet\n`;
+        msg += `• El proyecto Firebase está suspendido\n`;
+    }
+
+    alert(msg);
   };
 
   window.toggleSyncAutomatico = function() {
@@ -2282,8 +2427,71 @@ window.reiniciarUIOffline = function(){
     try { actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); } catch(e){}
 };
 
+// ═══════════════════════════════════════════════════════
+// COMPACTAR HISTORIAL — elimina días muy antiguos
+// ═══════════════════════════════════════════════════════
+window.compactarHistorial = function(){
+    const h = cargarHistorialDetallado();
+    const fechas = Object.keys(h).sort();
+    if (fechas.length === 0) {
+        alert('No hay historial para compactar.');
+        return;
+    }
+
+    const opciones = prompt(
+        `📊 Tienes ${fechas.length} días guardados (desde ${fechas[0]} hasta ${fechas[fechas.length-1]}).\n\n` +
+        `¿Cuántos días recientes quieres conservar?\n\n` +
+        `Ejemplos:\n` +
+        `• 30  → último mes\n` +
+        `• 60  → últimos 2 meses\n` +
+        `• 90  → últimos 3 meses\n` +
+        `• 180 → últimos 6 meses\n\n` +
+        `Los días más antiguos se ELIMINARÁN permanentemente del historial local y de la nube.\n\n` +
+        `⚠️ Recomendación: antes de compactar, descarga tu respaldo con "💾 Exportar TODO a Word".`,
+        '90'
+    );
+
+    if (!opciones) return;
+    const n = parseInt(opciones);
+    if (!n || n < 1) {
+        alert('❌ Ingresa un número válido mayor a 0.');
+        return;
+    }
+    if (n >= fechas.length) {
+        alert(`ℹ️ Tienes solo ${fechas.length} días. No hay nada que borrar.`);
+        return;
+    }
+
+    const aBorrar = fechas.slice(0, fechas.length - n);
+    const aMantener = fechas.slice(fechas.length - n);
+
+    if (!confirm(
+        `⚠️ Vas a borrar ${aBorrar.length} día(s) antiguo(s):\n\n` +
+        `Del ${aBorrar[0]} al ${aBorrar[aBorrar.length-1]}\n\n` +
+        `Y conservarás los últimos ${n} día(s):\n` +
+        `Del ${aMantener[0]} al ${aMantener[aMantener.length-1]}\n\n` +
+        `¿Continuar?`
+    )) return;
+
+    aBorrar.forEach(f => { delete h[f]; });
+    localStorage.setItem('entregasDiariasDetallado', JSON.stringify(h));
+
+    const nuevoTam = new Blob([JSON.stringify(h)]).size;
+    alert(
+        `✅ Historial compactado.\n\n` +
+        `• Días eliminados: ${aBorrar.length}\n` +
+        `• Días restantes: ${aMantener.length}\n` +
+        `• Nuevo tamaño: ${(nuevoTam/1024).toFixed(1)} KB\n\n` +
+        `Ahora puedes pulsar "🔄 Sincronizar ahora".`
+    );
+
+    actualizarGraficaPromedios();
+    actualizarInformesSemanalesMensuales();
+    if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
+};
+
 function diagnosticar(){
-    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos'];
+    const fns = ['imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','confirmarUsuario','mostrarModalUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube'];
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
