@@ -6,6 +6,8 @@
 <title>Reporte de Entregas - Colserlog</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <style>
 * { box-sizing: border-box; }
 body { font-family: Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 15px; padding-top: 60px; color: #333; }
@@ -156,7 +158,7 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
 .modal-content p { color: #666; font-size: 0.9em; text-align: center; margin: 0 0 15px 0; }
 .modal-content input { font-size: 16px; padding: 12px; margin-top: 8px; }
 .modal-content button { margin-top: 15px; padding: 12px; font-size: 1em; background: #1abc9c; }
-.modal-content button:hover { background: #16a085; }
+.modal-content button:hover { background-color: #16a085; }
 .modal-content button.secundario { background: #95a5a6; font-size: 0.9em; }
 #listaUsuariosGuardados { margin-top: 10px; }
 #listaUsuariosGuardados button {
@@ -410,7 +412,8 @@ canvas { margin-top: 20px; background: #fff; padding: 10px; border-radius: 4px; 
                accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json"
                style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
         <p style="font-size:0.78em; color:#888; text-align:center; margin-top:8px;">
-            ℹ️ Si el Word solo contiene una lista de códigos de 12 dígitos, se cargarán automáticamente al <strong>Banco de Códigos</strong>.
+            ℹ️ Si el Word contiene <strong>códigos escritos como texto</strong> o <strong>imágenes de códigos de barras</strong> (fotos, capturas, etiquetas), se leerán automáticamente y se cargarán al <strong>Banco de Códigos</strong>.
+            <br>⚠️ <strong>Solo se aceptan códigos de exactamente 12 dígitos numéricos.</strong> Se descartan 13, 14, 8 u otros formatos.
         </p>
 
         <hr style="margin:20px 0; border:none; border-top:1px dashed #ccc;">
@@ -1775,55 +1778,237 @@ function cargarCodigosAlBanco(codes){
     return { agregados, yaEstaban };
 }
 
+// ═══════════════════════════════════════════════════════
+// LECTURA DE CÓDIGOS DE BARRAS DESDE IMÁGENES EN WORD
+// ═══════════════════════════════════════════════════════
+
+// SOLO se aceptan códigos que, tras quitar caracteres no numéricos,
+// tengan exactamente 12 dígitos. NO se convierte 13→12.
+function normalizarCodigoBarras(cod){
+    if (!cod) return null;
+    let s = String(cod).replace(/\D/g, '');
+    return s;
+}
+
+async function extraerImagenesDeDocx(file){
+    if (!window.JSZip) return [];
+    const zip = await JSZip.loadAsync(file);
+    const imagenes = [];
+    for (const nombre of Object.keys(zip.files)) {
+        const entry = zip.files[nombre];
+        if (entry.dir) continue;
+        if (!/^word\/media\//i.test(nombre)) continue;
+        if (!/\.(png|jpe?g|gif|bmp|tiff?)$/i.test(nombre)) continue;
+        try {
+            const blob = await entry.async('blob');
+            const dataUrl = await new Promise((res, rej) => {
+                const r = new FileReader();
+                r.onload = () => res(r.result);
+                r.onerror = rej;
+                r.readAsDataURL(blob);
+            });
+            imagenes.push({ nombre, dataUrl });
+        } catch(e) {
+            console.warn('No se pudo leer imagen', nombre, e);
+        }
+    }
+    return imagenes;
+}
+
+function extraerImagenesDeDocHTML(texto){
+    const imagenes = [];
+    const re = /<img[^>]+src=["'](data:image\/[^"']+)["']/gi;
+    let m, i = 0;
+    while ((m = re.exec(texto)) !== null) {
+        imagenes.push({ nombre: `img_${i++}`, dataUrl: m[1] });
+    }
+    return imagenes;
+}
+
+async function extraerTextoPlanoDeDocx(file){
+    if (!window.JSZip) return '';
+    try {
+        const zip = await JSZip.loadAsync(file);
+        const docXml = zip.file('word/document.xml');
+        if (!docXml) return '';
+        const xml = await docXml.async('string');
+        return xml.replace(/<[^>]+>/g, '');
+    } catch(e) {
+        return '';
+    }
+}
+
+async function decodificarCodigosDeImagenes(imagenes, onProgress){
+    if (!window.ZXing || imagenes.length === 0) return [];
+    const codigos = new Set();
+    let reader;
+    try {
+        reader = new ZXing.BrowserMultiFormatReader();
+    } catch(e) {
+        console.error('❌ No se pudo crear ZXing reader:', e);
+        return [];
+    }
+
+    for (let i = 0; i < imagenes.length; i++) {
+        const item = imagenes[i];
+        if (onProgress) onProgress(i + 1, imagenes.length, item.nombre);
+
+        try {
+            const imgEl = await new Promise((res, rej) => {
+                const el = new Image();
+                el.onload = () => res(el);
+                el.onerror = rej;
+                el.src = item.dataUrl;
+            });
+
+            const result = await reader.decodeFromImageElement(imgEl);
+            const normalizado = normalizarCodigoBarras(result.getText());
+
+            // ✅ SOLO aceptar exactamente 12 dígitos numéricos
+            if (normalizado && normalizado.length === 12 && /^\d{12}$/.test(normalizado)) {
+                codigos.add(normalizado);
+                console.log(`✅ ${item.nombre}: ${normalizado}`);
+            } else if (normalizado) {
+                console.log(`⏭️ ${item.nombre}: descartado (${normalizado.length} dígitos, se requieren 12): ${normalizado}`);
+            }
+        } catch (e) {
+            console.log(`∅ ${item.nombre}: sin código de barras`);
+        }
+
+        if (i % 3 === 2) await new Promise(r => setTimeout(r, 25));
+    }
+
+    try { reader.reset(); } catch(e){}
+    return Array.from(codigos);
+}
+
 window.cargarRespaldoDesdeArchivo = async function(event){
     const file = event.target.files[0];
     if (!file) return;
 
+    mostrarAviso('⏳ Analizando archivo...', 'ok');
+
     try {
-        const texto = await file.text();
+        const esDocx = /\.docx$/i.test(file.name) ||
+                       (file.type && file.type.includes('openxmlformats'));
 
-        // CASO 1: payload embebido de COLSERLOG
-        const respaldo = extraerPayloadBase64(texto);
-        if (respaldo) {
-            const ok = await aplicarRespaldo(respaldo);
-            if (ok) {
-                alert('✅ Respaldo restaurado correctamente. Recargando...');
-                setTimeout(() => location.reload(), 800);
-            }
-            return;
+        let texto = '';
+        if (!esDocx) {
+            texto = await file.text();
         }
 
-        // CASO 2: JSON plano (compatibilidad)
-        let jsonPlano = null;
-        try { jsonPlano = JSON.parse(texto); } catch(e){}
-        if (jsonPlano && (jsonPlano.entregasDiariasDetallado || jsonPlano.estadoSesion)) {
-            const ok = await aplicarRespaldo(jsonPlano);
-            if (ok) {
-                alert('✅ Respaldo JSON restaurado. Recargando...');
-                setTimeout(() => location.reload(), 800);
+        // ─── CASO 1: payload embebido de COLSERLOG ───
+        if (texto) {
+            const respaldo = extraerPayloadBase64(texto);
+            if (respaldo) {
+                const ok = await aplicarRespaldo(respaldo);
+                if (ok) {
+                    alert('✅ Respaldo restaurado correctamente. Recargando...');
+                    setTimeout(() => location.reload(), 800);
+                }
+                return;
             }
-            return;
         }
 
-        // CASO 3: Word con lista de códigos → cargar al banco
-        const codes = extraerCodigosDeTexto(texto);
+        // ─── CASO 1b: si es .docx, el payload podría estar en document.xml ───
+        if (esDocx) {
+            const textoPlano = await extraerTextoPlanoDeDocx(file);
+            if (textoPlano) {
+                const respaldo = extraerPayloadBase64(textoPlano);
+                if (respaldo) {
+                    const ok = await aplicarRespaldo(respaldo);
+                    if (ok) {
+                        alert('✅ Respaldo restaurado desde .docx. Recargando...');
+                        setTimeout(() => location.reload(), 800);
+                    }
+                    return;
+                }
+            }
+        }
+
+        // ─── CASO 2: JSON plano (compatibilidad) ───
+        if (texto) {
+            let jsonPlano = null;
+            try { jsonPlano = JSON.parse(texto); } catch(e){}
+            if (jsonPlano && (jsonPlano.entregasDiariasDetallado || jsonPlano.estadoSesion)) {
+                const ok = await aplicarRespaldo(jsonPlano);
+                if (ok) {
+                    alert('✅ Respaldo JSON restaurado. Recargando...');
+                    setTimeout(() => location.reload(), 800);
+                }
+                return;
+            }
+        }
+
+        // ─── CASO 3: códigos de 12 dígitos escritos como TEXTO ───
+        const codesTexto = texto ? extraerCodigosDeTexto(texto) : [];
+
+        // ─── CASO 4: códigos de barras en IMÁGENES (fotos/capturas) ───
+        let imagenes = [];
+        if (esDocx) {
+            try {
+                imagenes = await extraerImagenesDeDocx(file);
+                console.log(`🖼️ Encontradas ${imagenes.length} imagen(es) en el .docx`);
+            } catch(e) {
+                console.warn('No se pudo descomprimir el .docx:', e);
+            }
+        } else if (texto) {
+            imagenes = extraerImagenesDeDocHTML(texto);
+            console.log(`🖼️ Encontradas ${imagenes.length} imagen(es) en el .doc`);
+        }
+
+        let codesImagen = [];
+        if (imagenes.length > 0 && window.ZXing) {
+            mostrarAviso(`🔍 Leyendo ${imagenes.length} imagen(es)...`, 'ok');
+            codesImagen = await decodificarCodigosDeImagenes(
+                imagenes,
+                (actual, total, nombre) => {
+                    mostrarAviso(`🔍 Imagen ${actual}/${total}: ${nombre}`, 'ok');
+                }
+            );
+            console.log(`📊 Códigos leídos de imágenes:`, codesImagen);
+        } else if (imagenes.length > 0 && !window.ZXing) {
+            console.warn('⚠️ ZXing no está cargado — no se pueden leer imágenes');
+        }
+
+        // ─── UNIFICAR todos los códigos encontrados ───
+        const todosSet = new Set();
+        codesTexto.forEach(c => { if (c) todosSet.add(c); });
+        codesImagen.forEach(c => { if (c) todosSet.add(c); });
+        const codes = Array.from(todosSet);
+
+        // ─── Si no se encontró NADA, avisar ───
         if (codes.length === 0) {
-            alert('❌ No se encontraron datos válidos ni códigos de 12 dígitos en el archivo.');
+            let msg = '❌ No se encontraron códigos.\n\n';
+            if (imagenes.length > 0) {
+                msg += `Se procesaron ${imagenes.length} imagen(es) pero ninguna contenía un código de barras legible con exactamente 12 dígitos.\n\n`;
+                msg += 'Sugerencias:\n';
+                msg += '• Las imágenes deben ser nítidas y con buena iluminación\n';
+                msg += '• El código de barras debe ser grande y completo\n';
+                msg += '• ⚠️ SOLO se aceptan códigos de 12 dígitos exactos\n';
+                msg += '• Si el código tiene 13 dígitos (EAN-13) será descartado\n';
+                msg += '• Si el código tiene números visibles debajo, escanéalos con la cámara 📷';
+            } else {
+                msg += 'No se encontraron códigos de 12 dígitos como texto ni imágenes de códigos de barras en el archivo.';
+            }
+            alert(msg);
             return;
         }
 
-        const confirmar = confirm(
-            `📥 Se encontraron ${codes.length} código(s) de 12 dígitos en el archivo Word.\n\n` +
-            `¿Quieres cargarlos al Banco de Códigos del Día?\n\n` +
-            `Aceptar = Sí, agregar al banco\n` +
-            `Cancelar = No hacer nada`
-        );
-        if (!confirmar) return;
+        // ─── Confirmar antes de cargar al banco ───
+        let msgResumen = `📥 Se encontraron ${codes.length} código(s) único(s) de 12 dígitos:\n\n`;
+        if (codesTexto.length > 0) msgResumen += `• ${codesTexto.length} como texto\n`;
+        if (codesImagen.length > 0) msgResumen += `• ${codesImagen.length} leído(s) de imágenes (códigos de barras)\n`;
+        msgResumen += `\n¿Cargarlos al Banco de Códigos del Día?`;
+
+        if (!confirm(msgResumen)) return;
 
         const { agregados, yaEstaban } = cargarCodigosAlBanco(codes);
-        let msg = `✅ ${agregados} código(s) agregado(s) al banco.`;
-        if (yaEstaban > 0) msg += `\n⚠️ ${yaEstaban} ya estaban en el banco (ignorados).`;
-        alert(msg);
+
+        let msgFinal = `✅ ${agregados} código(s) agregado(s) al banco.`;
+        if (yaEstaban > 0) msgFinal += `\n⚠️ ${yaEstaban} ya estaban en el banco (ignorados).`;
+
+        alert(msgFinal);
 
     } catch (e) {
         console.error(e);
@@ -2102,6 +2287,9 @@ function diagnosticar(){
     const faltan = fns.filter(f => typeof window[f] !== 'function');
     if(faltan.length) console.error('❌ Funciones faltantes:', faltan); else console.log('✅ Funciones OK');
     if(typeof Chart === 'undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
+    if(typeof JSZip === 'undefined') console.warn('⚠️ JSZip no cargó — no se leerán .docx');
+    if(typeof ZXing === 'undefined') console.warn('⚠️ ZXing no cargó — no se leerán códigos de barras en imágenes');
+    else console.log('✅ ZXing OK');
 }
 
 document.getElementById('inputNombreUsuario').addEventListener('keydown', (e) => {
