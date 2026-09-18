@@ -264,7 +264,9 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
 .btn-descargar-foto { background: #2ecc71; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9em; display: inline-block; }
 .btn-descargar-foto:hover { background: #27ae60; }
 
-/* ═══════ ESTILOS DE IMPRESIÓN — SIEMPRE MODO CLARO ═══════ */
+/* ═══════════════════════════════════════════════════════════
+   ESTILOS DE IMPRESIÓN — SIEMPRE MODO CLARO Y SIN CORTES
+   ═══════════════════════════════════════════════════════════ */
 @media print {
   :root, body, body.dark {
     --bg-body: #fff !important;
@@ -285,36 +287,63 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     --table-header-bg: #2c3e50 !important;
     --table-header-color: #fff !important;
   }
-  body { background: #fff !important; color: #000 !important; padding: 0; margin: 0; font-size: 10pt; }
-  .container { box-shadow: none !important; max-width: 100% !important; padding: 0; margin: 0; }
-  .no-print, #barraUsuario, #modalUsuario, #modalPWA, #avisoDuplicado, #modalFoto { display: none !important; }
-  #lectorQR, #lectorQRBanco { display: none !important; }
-  @page { size: A4 portrait; margin: 8mm; }
 
+  /* Márgenes A4 con margen seguro para que no se corte */
+  @page { size: A4 portrait; margin: 10mm 8mm 10mm 8mm; }
+
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    overflow: visible !important;
+    font-size: 9.5pt;
+  }
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  .container { box-shadow: none !important; max-width: 100% !important; padding: 0 !important; margin: 0 !important; }
+
+  /* Ocultar todo lo interactivo */
+  .no-print, #barraUsuario, #modalUsuario, #modalPWA, #avisoDuplicado,
+  #modalFoto, #lectorQR, #lectorQRBanco,
+  .busqueda-box, .btn-group, .btn-foto, .fotos-wrapper input[type="file"] {
+    display: none !important;
+  }
+
+  /* Solo mostrar el área de impresión */
   body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
-  body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
-  #areaImpresion { font-size: 9pt !important; color: #000; background: #fff; }
+  body.modo-impresion #areaImpresion {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
 
-  #areaImpresion h1 { font-size: 14pt !important; margin: 3px 0 !important; color: #2c3e50 !important; }
-  #areaImpresion h2 { font-size: 12pt !important; margin: 5px 0 !important; color: #2c3e50 !important; }
-  #areaImpresion h3 { font-size: 11pt !important; margin: 8px 0 4px 0 !important; color: #2c3e50 !important; }
-  #areaImpresion .section { background: none !important; padding: 0 !important; margin-bottom: 8px !important; border: none !important; }
-  #areaImpresion table { font-size: 8pt !important; page-break-inside: auto; }
-  #areaImpresion th, #areaImpresion td { padding: 3px 2px !important; font-size: 8pt !important; color: #000 !important; }
-  #areaImpresion th { background: #2c3e50 !important; color: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  #areaImpresion tr { page-break-inside: avoid !important; }
-  #areaImpresion thead { display: table-header-group; }
-  #areaImpresion img { max-width: 100% !important; height: auto !important; }
-  #areaImpresion button { display: none !important; }
+  #areaImpresion {
+    font-size: 9pt !important;
+    color: #000;
+    background: #fff;
+    width: 100%;
+    max-width: 194mm;
+    margin: 0 auto;
+    overflow: visible !important;
+  }
 
+  /* ══════ REPORTE DIARIO ══════ */
   body.modo-reporte-diario #areaImpresion {
     font-size: 9pt !important;
     color: #000;
     width: 100%;
     max-width: 194mm;
-    overflow: hidden;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    overflow: visible !important;
   }
   body.modo-reporte-diario .reporte-diario {
     width: 100%;
@@ -323,82 +352,192 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     font-family: Arial, sans-serif;
     color: #333;
   }
-  body.modo-reporte-diario .rd-header { text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 6px; margin-bottom: 8px; }
-  body.modo-reporte-diario .rd-header h1 { color: #2c3e50; font-size: 15pt; margin: 0 0 4px 0; text-align: center; }
-  body.modo-reporte-diario .rd-header .rd-subtitle { font-size: 10pt; color: #555; font-weight: bold; margin: 3px 0; }
-  body.modo-reporte-diario .rd-info { display: flex; justify-content: space-around; font-size: 9pt; color: #333; flex-wrap: wrap; gap: 5px; }
 
-  body.modo-reporte-diario .rd-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 8px; }
-  body.modo-reporte-diario .rd-kpi {
-    border: 1.5px solid #ccc; border-radius: 3px; padding: 5px 3px;
-    text-align: center; background: #f8f9fa; page-break-inside: avoid;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  /* Header */
+  body.modo-reporte-diario .rd-header {
+    text-align: center;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+    page-break-after: avoid;
   }
-  body.modo-reporte-diario .rd-kpi-label { font-size: 7pt; color: #666; text-transform: uppercase; margin-bottom: 2px; }
-  body.modo-reporte-diario .rd-kpi-valor { font-size: 13pt; font-weight: bold; color: #2c3e50; }
-  body.modo-reporte-diario .rd-kpi.verde { border-color: #2ecc71; background: #e8f8f0; }
+  body.modo-reporte-diario .rd-header h1 {
+    color: #2c3e50 !important;
+    font-size: 15pt;
+    margin: 0 0 4px 0;
+    text-align: center;
+  }
+  body.modo-reporte-diario .rd-header .rd-subtitle {
+    font-size: 10pt;
+    color: #555;
+    font-weight: bold;
+    margin: 3px 0;
+  }
+  body.modo-reporte-diario .rd-info {
+    display: flex;
+    justify-content: space-around;
+    font-size: 9pt;
+    color: #333;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 3px;
+  }
+
+  /* KPIs */
+  body.modo-reporte-diario .rd-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+  }
+  body.modo-reporte-diario .rd-kpi {
+    border: 1.5px solid #ccc;
+    border-radius: 3px;
+    padding: 5px 3px;
+    text-align: center;
+    background: #f8f9fa !important;
+    page-break-inside: avoid;
+  }
+  body.modo-reporte-diario .rd-kpi-label {
+    font-size: 7pt;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  body.modo-reporte-diario .rd-kpi-valor {
+    font-size: 13pt;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  body.modo-reporte-diario .rd-kpi.verde { border-color: #2ecc71; background: #e8f8f0 !important; }
   body.modo-reporte-diario .rd-kpi.verde .rd-kpi-valor { color: #27ae60; }
-  body.modo-reporte-diario .rd-kpi.rojo { border-color: #e74c3c; background: #fdedec; }
+  body.modo-reporte-diario .rd-kpi.rojo { border-color: #e74c3c; background: #fdedec !important; }
   body.modo-reporte-diario .rd-kpi.rojo .rd-kpi-valor { color: #c0392b; }
-  body.modo-reporte-diario .rd-kpi.azul { border-color: #3498db; background: #ebf5fb; }
+  body.modo-reporte-diario .rd-kpi.azul { border-color: #3498db; background: #ebf5fb !important; }
   body.modo-reporte-diario .rd-kpi.azul .rd-kpi-valor { color: #2980b9; }
-  body.modo-reporte-diario .rd-kpi.morado { border-color: #9b59b6; background: #f5eef8; }
+  body.modo-reporte-diario .rd-kpi.morado { border-color: #9b59b6; background: #f5eef8 !important; }
   body.modo-reporte-diario .rd-kpi.morado .rd-kpi-valor { color: #7d3c98; }
-  body.modo-reporte-diario .rd-kpi.naranja { border-color: #e67e22; background: #fdf2e3; }
+  body.modo-reporte-diario .rd-kpi.naranja { border-color: #e67e22; background: #fdf2e3 !important; }
   body.modo-reporte-diario .rd-kpi.naranja .rd-kpi-valor { color: #ca6f1e; }
-  body.modo-reporte-diario .rd-kpi.gris { border-color: #95a5a6; background: #f2f4f4; }
+  body.modo-reporte-diario .rd-kpi.gris { border-color: #95a5a6; background: #f2f4f4 !important; }
   body.modo-reporte-diario .rd-kpi.gris .rd-kpi-valor { color: #566573; }
-  body.modo-reporte-diario .rd-kpi.cyan { border-color: #17a2b8; background: #e3f7fa; }
+  body.modo-reporte-diario .rd-kpi.cyan { border-color: #17a2b8; background: #e3f7fa !important; }
   body.modo-reporte-diario .rd-kpi.cyan .rd-kpi-valor { color: #117a8b; }
-  body.modo-reporte-diario .rd-kpi.dark { border-color: #2c3e50; background: #e8ebee; }
+  body.modo-reporte-diario .rd-kpi.dark { border-color: #2c3e50; background: #e8ebee !important; }
   body.modo-reporte-diario .rd-kpi.dark .rd-kpi-valor { color: #2c3e50; }
 
-  body.modo-reporte-diario .rd-charts { display: grid; grid-template-columns: 1.6fr 1fr; gap: 6px; margin-bottom: 8px; page-break-inside: avoid; }
-  body.modo-reporte-diario .rd-chart-box { border: 1px solid #ddd; border-radius: 3px; padding: 3px; background: #fff; display: flex; align-items: center; justify-content: center; }
-  body.modo-reporte-diario .rd-chart-box img { width: 100%; height: auto; max-height: 55mm; object-fit: contain; }
+  /* Gráficos: se escalan proporcionalmente, nunca se cortan */
+  body.modo-reporte-diario .rd-charts {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 5px;
+    margin-bottom: 8px;
+    page-break-inside: avoid;
+    width: 100%;
+    max-width: 194mm;
+    overflow: hidden;
+  }
+  body.modo-reporte-diario .rd-chart-box {
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    padding: 2px;
+    background: #fff !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    min-height: 45mm;
+  }
+  body.modo-reporte-diario .rd-chart-box img {
+    width: 100%;
+    height: auto;
+    max-height: 60mm;
+    object-fit: contain;
+    display: block;
+  }
 
+  /* Títulos de sección */
   body.modo-reporte-diario h3 {
-    font-size: 10pt; color: #2c3e50; border-bottom: 1.5px solid #3498db;
-    padding-bottom: 2px; margin: 8px 0 4px 0; text-align: left;
+    font-size: 10pt;
+    color: #2c3e50 !important;
+    border-bottom: 1.5px solid #3498db;
+    padding-bottom: 2px;
+    margin: 8px 0 4px 0;
+    text-align: left;
+    page-break-after: avoid;
   }
 
-  body.modo-reporte-diario .rd-tabla-tiempos { width: 100%; border-collapse: collapse; font-size: 9pt; page-break-inside: avoid; }
-  body.modo-reporte-diario .rd-tabla-tiempos td {
-    border: 1px solid #ccc; padding: 4px 3px; text-align: center; background: #f8f9fa;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  /* Tablas generales */
+  body.modo-reporte-diario .rd-tabla-tiempos {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9pt;
+    page-break-inside: avoid;
   }
-  body.modo-reporte-diario .rd-tabla { width: 100%; border-collapse: collapse; font-size: 8pt; table-layout: fixed; page-break-inside: auto; }
+  body.modo-reporte-diario .rd-tabla-tiempos td {
+    border: 1px solid #999 !important;
+    padding: 4px 3px;
+    text-align: center;
+    background: #f8f9fa !important;
+  }
+
+  body.modo-reporte-diario .rd-tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8pt;
+    table-layout: fixed;
+    page-break-inside: auto;
+  }
   body.modo-reporte-diario .rd-tabla th {
-    background: #2c3e50 !important; color: #fff !important;
-    padding: 3px 2px; border: 1px solid #1a252f; font-size: 7.5pt;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    background: #2c3e50 !important;
+    color: #fff !important;
+    padding: 3px 2px;
+    border: 1px solid #1a252f !important;
+    font-size: 7.5pt;
   }
   body.modo-reporte-diario .rd-tabla td {
-    padding: 2px 3px; border: 1px solid #ddd; text-align: center;
-    word-wrap: break-word; overflow-wrap: break-word; font-size: 8pt;
+    padding: 2px 3px;
+    border: 1px solid #999 !important;
+    text-align: center;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    font-size: 8pt;
+    color: #000;
   }
   body.modo-reporte-diario .rd-tabla tr { page-break-inside: avoid; }
   body.modo-reporte-diario .rd-tabla thead { display: table-header-group; }
-  body.modo-reporte-diario .rd-tabla tr:nth-child(even) td { background: #f8f9fa !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  body.modo-reporte-diario .rd-tabla tr.rd-total td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body.modo-reporte-diario .rd-tabla tr:nth-child(even) td { background: #f8f9fa !important; }
+  body.modo-reporte-diario .rd-tabla tr.rd-total td {
+    background: #e8f8f5 !important;
+    font-weight: bold;
+    border-top: 2px solid #1abc9c !important;
+  }
   body.modo-reporte-diario .rd-tabla-estados { max-width: 100%; }
 
-  /* 📸 Grid optimizado: 5 columnas, fotos compactas */
-  body.modo-reporte-diario .rd-fotos-section { page-break-inside: auto; margin-top: 10px; }
+  /* Evidencia fotográfica: 5 columnas por fila, paginado */
+  body.modo-reporte-diario .rd-fotos-section {
+    page-break-inside: auto;
+    margin-top: 10px;
+    width: 100%;
+    max-width: 194mm;
+  }
   body.modo-reporte-diario .rd-fotos-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 3px;
     margin-top: 3px;
+    width: 100%;
   }
   body.modo-reporte-diario .rd-foto-item {
     border: 1px solid #999;
     border-radius: 2px;
     overflow: hidden;
     page-break-inside: avoid;
-    background: #fff;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+    background: #fff !important;
+    display: flex;
+    flex-direction: column;
   }
   body.modo-reporte-diario .rd-foto-item img {
     width: 100%;
@@ -410,7 +549,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     font-size: 5.5pt;
     text-align: center;
     padding: 1px 2px;
-    background: #f8f9fa;
+    background: #f8f9fa !important;
     color: #333;
     border-top: 1px solid #ddd;
     line-height: 1.1;
@@ -420,41 +559,112 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   }
   body.modo-reporte-diario .rd-foto-caption strong { color: #2c3e50; }
 
-  /* 🖼️ Modo álbum (solo fotos, sin tablas) */
-  body.modo-album .reporte-diario .rd-album-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-  }
-  body.modo-album .reporte-diario .rd-album-item {
-    border: 1px solid #999;
-    border-radius: 2px;
-    overflow: hidden;
+  /* Firmas */
+  body.modo-reporte-diario .rd-firmas {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15mm;
     page-break-inside: avoid;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
-  body.modo-album .reporte-diario .rd-album-item img {
-    width: 100%;
-    height: 45mm;
-    object-fit: cover;
-    display: block;
-  }
-  body.modo-album .reporte-diario .rd-album-caption {
-    font-size: 6pt;
-    text-align: center;
-    padding: 2px;
-    background: #f0f0f0;
-    color: #333;
-    line-height: 1.2;
-  }
-
-  body.modo-reporte-diario .rd-firmas { display: flex; justify-content: space-around; margin-top: 15mm; page-break-inside: avoid; }
   body.modo-reporte-diario .rd-firma { width: 40%; text-align: center; font-size: 9pt; }
   body.modo-reporte-diario .rd-firma-linea { border-top: 1px solid #333; margin-bottom: 4px; height: 1px; }
   body.modo-reporte-diario .rd-firma-nombre { font-size: 8pt; color: #666; margin-top: 2px; }
-  body.modo-reporte-diario .rd-footer { text-align: center; font-size: 7pt; color: #999; margin-top: 6mm; border-top: 1px dashed #ccc; padding-top: 3px; }
-  body.modo-reporte-diario .rd-nota { font-size: 7.5pt; color: #555; text-align: center; font-style: italic; margin: 4px 0; }
+  body.modo-reporte-diario .rd-footer {
+    text-align: center;
+    font-size: 7pt;
+    color: #999;
+    margin-top: 6mm;
+    border-top: 1px dashed #ccc;
+    padding-top: 3px;
+    page-break-inside: avoid;
+  }
+  body.modo-reporte-diario .rd-nota {
+    font-size: 7.5pt;
+    color: #555;
+    text-align: center;
+    font-style: italic;
+    margin: 4px 0;
+  }
+
+  /* ══════ ÁLBUM FOTOGRÁFICO ══════ */
+  body.modo-album .reporte-diario {
+    width: 100%;
+    max-width: 194mm;
+    margin: 0 auto;
+    padding: 0 !important;
+  }
+  body.modo-album .rd-header {
+    text-align: center;
+    border-bottom: 3px solid #2c3e50;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  body.modo-album .rd-header h1 {
+    color: #2c3e50 !important;
+    font-size: 15pt;
+    margin: 0 0 4px 0;
+  }
+  body.modo-album .rd-header .rd-subtitle {
+    font-size: 10pt;
+    color: #555;
+    font-weight: bold;
+    margin: 3px 0;
+  }
+  body.modo-album .rd-info {
+    display: flex;
+    justify-content: space-around;
+    font-size: 9pt;
+    color: #333;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 3px;
+  }
+  body.modo-album .rd-album-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    width: 100%;
+    margin-top: 4px;
+  }
+  body.modo-album .rd-album-item {
+    border: 1px solid #999;
+    border-radius: 3px;
+    overflow: hidden;
+    page-break-inside: avoid;
+    background: #fff !important;
+    display: flex;
+    flex-direction: column;
+  }
+  body.modo-album .rd-album-item img {
+    width: 100%;
+    height: 42mm;
+    object-fit: cover;
+    display: block;
+  }
+  body.modo-album .rd-album-caption {
+    font-size: 6pt;
+    text-align: center;
+    padding: 2px 3px;
+    background: #f0f0f0 !important;
+    color: #333;
+    line-height: 1.25;
+    min-height: 12mm;
+    overflow: hidden;
+  }
+  body.modo-album .rd-album-caption strong { color: #2c3e50; }
+  body.modo-album .rd-footer {
+    text-align: center;
+    font-size: 7pt;
+    color: #999;
+    margin-top: 6mm;
+    border-top: 1px dashed #ccc;
+    padding-top: 3px;
+  }
+
+  /* Utilidad: evita que un elemento se corte entre páginas */
+  .page-break-avoid { page-break-inside: avoid !important; }
+  .page-break-before { page-break-before: always !important; }
 }
 </style>
 </head>
@@ -3074,7 +3284,25 @@ function generarChartDona(ancho, alto) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📄 INFORME DIARIO IMPRIMIBLE (con paginación de fotos)
+// 🔧 UTILIDAD: Espera a que TODAS las imágenes del contenedor carguen
+// ═══════════════════════════════════════════════════════════
+function esperarImagenesCargadas(contenedor) {
+  if (!contenedor) return Promise.resolve();
+  const imgs = Array.from(contenedor.querySelectorAll('img'));
+  if (imgs.length === 0) return Promise.resolve();
+  return Promise.all(imgs.map(img => {
+    if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = () => resolve();
+      img.onerror = () => resolve();
+      // Timeout de seguridad por si nunca dispara onload/onerror
+      setTimeout(resolve, 4000);
+    });
+  }));
+}
+
+// ═══════════════════════════════════════════════════════════
+// 📄 INFORME DIARIO IMPRIMIBLE — IMPRIME TODO, SIN CORTES
 // ═══════════════════════════════════════════════════════════
 window.imprimirReporteDiario = async function() {
   if (visitas.length === 0) {
@@ -3096,6 +3324,7 @@ window.imprimirReporteDiario = async function() {
   const codigosUnicos = new Set(visitas.map(v => (v.codigo || '').trim()).filter(Boolean)).size;
   const totalFotos = visitas.reduce((s, v) => s + (Array.isArray(v.fotos) ? v.fotos.length : 0), 0);
 
+  // Gráficos generados como imágenes (van siempre en el informe)
   const chartEstados = generarChartEstadosHorizontal(820, 520);
   const chartDona = generarChartDona(500, 520);
 
@@ -3134,7 +3363,7 @@ window.imprimirReporteDiario = async function() {
 
       <section class="rd-charts">
         <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución por estado"></div>
-        <div class="rd-chart-box small"><img src="${chartDona}" alt="Entregados vs No Entregados"></div>
+        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No Entregados"></div>
       </section>
 
       <section class="rd-tiempos">
@@ -3247,6 +3476,7 @@ window.imprimirReporteDiario = async function() {
     </section>`;
   }
 
+  // Evidencia fotográfica paginada (5 columnas × 8 filas = 40 por página)
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
   if (visitasConFotos.length > 0) {
     const todosIds = [];
@@ -3337,20 +3567,22 @@ window.imprimirReporteDiario = async function() {
   if (estabaDark) document.body.classList.add('theme-switching');
 
   document.body.classList.add('modo-impresion', 'modo-reporte-diario');
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      try { window.print(); } catch(e){ console.error(e); }
-      setTimeout(() => {
-        document.body.classList.remove('modo-impresion', 'modo-reporte-diario');
-        if (estabaDark) document.body.classList.remove('theme-switching');
-        area.innerHTML = '';
-      }, 800);
-    }, 300);
-  });
+
+  // 🔑 ESPERA a que TODAS las imágenes (gráficos + fotos) carguen
+  await esperarImagenesCargadas(area);
+  // Pequeña pausa adicional para que el navegador pinte
+  await new Promise(r => setTimeout(r, 400));
+
+  try { window.print(); } catch(e){ console.error('Error al imprimir:', e); }
+  setTimeout(() => {
+    document.body.classList.remove('modo-impresion', 'modo-reporte-diario');
+    if (estabaDark) document.body.classList.remove('theme-switching');
+    area.innerHTML = '';
+  }, 1500);
 };
 
 // ═══════════════════════════════════════════════════════════
-// 📸 ÁLBUM FOTOGRÁFICO (solo fotos)
+// 📸 ÁLBUM FOTOGRÁFICO — IMPRIME TODAS LAS FOTOS EN HOJAS SUCESIVAS
 // ═══════════════════════════════════════════════════════════
 window.imprimirAlbumFotografico = async function() {
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
@@ -3390,7 +3622,14 @@ window.imprimirAlbumFotografico = async function() {
     });
   });
 
-  const FOTOS_POR_PAGINA = 24;
+  if (fotosPlanas.length === 0) {
+    alert('⚠️ No se pudieron cargar las fotos del registro de hoy.');
+    return;
+  }
+
+  // 20 fotos por página (grid 4 columnas × 5 filas) → cabe perfecto en A4
+  const FOTOS_POR_PAGINA = 20;
+  const totalPaginas = Math.ceil(fotosPlanas.length / FOTOS_POR_PAGINA);
 
   let html = `
     <div class="reporte-diario">
@@ -3402,6 +3641,7 @@ window.imprimirAlbumFotografico = async function() {
           <div><strong>📅 Fecha:</strong> ${fecha}</div>
           <div><strong>🕒 Generado:</strong> ${horaGen}</div>
           <div><strong>📸 Total fotos:</strong> ${fotosPlanas.length}</div>
+          <div><strong>📄 Páginas:</strong> ${totalPaginas}</div>
         </div>
       </header>
   `;
@@ -3409,17 +3649,16 @@ window.imprimirAlbumFotografico = async function() {
   for (let pagina = 0; pagina < fotosPlanas.length; pagina += FOTOS_POR_PAGINA) {
     const fotosPagina = fotosPlanas.slice(pagina, pagina + FOTOS_POR_PAGINA);
     const numPagina = Math.floor(pagina / FOTOS_POR_PAGINA) + 1;
-    const totalPaginas = Math.ceil(fotosPlanas.length / FOTOS_POR_PAGINA);
 
-    html += `<div style="page-break-before: ${pagina > 0 ? 'always' : 'auto'};">
+    html += `<div style="page-break-before: ${pagina > 0 ? 'always' : 'auto'}; padding-top: 3mm;">
       <div style="font-size:8pt;color:#666;text-align:right;margin-bottom:4px;border-bottom:1px solid #ccc;padding-bottom:2px;">
-        Página ${numPagina} de ${totalPaginas}
+        📸 Página ${numPagina} de ${totalPaginas} · ${fotosPlana.length === 0 ? '' : `${pagina + 1}-${Math.min(pagina + FOTOS_POR_PAGINA, fotosPlanas.length)} de ${fotosPlanas.length}`}
       </div>
       <div class="rd-album-grid">`;
 
     fotosPagina.forEach(f => {
       html += `<div class="rd-album-item">
-        <img src="${f.dataUrl}" alt="Foto">
+        <img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}">
         <div class="rd-album-caption">
           <strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>
           ${f.codigo ? `🔖 <span style="font-family:monospace;">${f.codigo}</span><br>` : ''}
@@ -3434,7 +3673,7 @@ window.imprimirAlbumFotografico = async function() {
 
   html += `
       <footer class="rd-footer" style="margin-top:8mm;">
-        Generado por Colserlog · ${horaGen}
+        Generado por Colserlog · ${horaGen} · ${fotosPlanas.length} foto(s) en ${totalPaginas} página(s)
       </footer>
     </div>
   `;
@@ -3451,16 +3690,17 @@ window.imprimirAlbumFotografico = async function() {
   if (estabaDark) document.body.classList.add('theme-switching');
 
   document.body.classList.add('modo-impresion', 'modo-reporte-diario', 'modo-album');
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      try { window.print(); } catch(e){ console.error(e); }
-      setTimeout(() => {
-        document.body.classList.remove('modo-impresion', 'modo-reporte-diario', 'modo-album');
-        if (estabaDark) document.body.classList.remove('theme-switching');
-        area.innerHTML = '';
-      }, 800);
-    }, 300);
-  });
+
+  // 🔑 Espera a que TODAS las fotos carguen antes de imprimir
+  await esperarImagenesCargadas(area);
+  await new Promise(r => setTimeout(r, 400));
+
+  try { window.print(); } catch(e){ console.error('Error al imprimir:', e); }
+  setTimeout(() => {
+    document.body.classList.remove('modo-impresion', 'modo-reporte-diario', 'modo-album');
+    if (estabaDark) document.body.classList.remove('theme-switching');
+    area.innerHTML = '';
+  }, 1500);
 };
 
 function imprimirContenidoHTML(titulo){
@@ -3509,10 +3749,11 @@ function imprimirContenidoHTML(titulo){
     });
     area.innerHTML = ''; area.appendChild(clon);
     document.body.classList.add('modo-impresion');
-    requestAnimationFrame(() => {
+    requestAnimationFrame(async () => {
+      await esperarImagenesCargadas(area);
       setTimeout(() => {
         try { window.print(); } catch(e){ console.error('print err', e); }
-        setTimeout(() => { document.body.classList.remove('modo-impresion'); area.innerHTML = ''; }, 800);
+        setTimeout(() => { document.body.classList.remove('modo-impresion'); area.innerHTML = ''; }, 1500);
       }, 300);
     });
   } catch(err) {
@@ -4388,7 +4629,6 @@ window.reiniciarSesion = () => {
   alert("✅ Sesión reiniciada");
 };
 
-// ✅ VERSIÓN CORREGIDA — antes tenía errores de sintaxis que rompían todo el módulo
 function limpiarSesion(){
   ESTADOS.forEach(k => contadores[k] = 0);
   totalMinutosVisitas = 0; totalVisitas = 0; visitas = []; filaEditando = null;
@@ -4457,7 +4697,6 @@ window.generarInformeMensual = () => {
     for (const k in d.contadores) { if (!contMes[k]) contMes[k] = 0; contMes[k] += d.contadores[k] || 0; }
   });
   const promDi = (totEnt / fechasMes.length).toFixed(1), promVi = totVis > 0 ? Math.round(totMin / totVis) : 0, efec = totVis > 0 ? ((totEnt / totVis) * 100).toFixed(1) : 0;
-  // ✅ FIX: var(--text-mpx) → var(--text-muted)
   let html = `<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
   Object.keys(contMes).forEach(est => {
     const cant = contMes[est]; if (cant === 0) return;
