@@ -383,19 +383,71 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   body.modo-reporte-diario .rd-tabla tr.rd-total td { background: #e8f8f5 !important; font-weight: bold; border-top: 2px solid #1abc9c; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body.modo-reporte-diario .rd-tabla-estados { max-width: 100%; }
 
+  /* 📸 Grid optimizado: 5 columnas, fotos compactas */
   body.modo-reporte-diario .rd-fotos-section { page-break-inside: auto; margin-top: 10px; }
-  body.modo-reporte-diario .rd-fotos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; }
-  body.modo-reporte-diario .rd-foto-item {
-    border: 1px solid #999; border-radius: 3px; overflow: hidden;
-    page-break-inside: avoid; background: #fff;
-    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  body.modo-reporte-diario .rd-fotos-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 3px;
+    margin-top: 3px;
   }
-  body.modo-reporte-diario .rd-foto-item img { width: 100%; height: auto; max-height: 55mm; object-fit: cover; display: block; }
+  body.modo-reporte-diario .rd-foto-item {
+    border: 1px solid #999;
+    border-radius: 2px;
+    overflow: hidden;
+    page-break-inside: avoid;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.modo-reporte-diario .rd-foto-item img {
+    width: 100%;
+    height: 32mm;
+    object-fit: cover;
+    display: block;
+  }
   body.modo-reporte-diario .rd-foto-caption {
-    font-size: 7pt; text-align: center; padding: 2px 3px;
-    background: #f8f9fa; color: #333; border-top: 1px solid #ddd; line-height: 1.2;
+    font-size: 5.5pt;
+    text-align: center;
+    padding: 1px 2px;
+    background: #f8f9fa;
+    color: #333;
+    border-top: 1px solid #ddd;
+    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   body.modo-reporte-diario .rd-foto-caption strong { color: #2c3e50; }
+
+  /* 🖼️ Modo álbum (solo fotos, sin tablas) */
+  body.modo-album .reporte-diario .rd-album-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  body.modo-album .reporte-diario .rd-album-item {
+    border: 1px solid #999;
+    border-radius: 2px;
+    overflow: hidden;
+    page-break-inside: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.modo-album .reporte-diario .rd-album-item img {
+    width: 100%;
+    height: 45mm;
+    object-fit: cover;
+    display: block;
+  }
+  body.modo-album .reporte-diario .rd-album-caption {
+    font-size: 6pt;
+    text-align: center;
+    padding: 2px;
+    background: #f0f0f0;
+    color: #333;
+    line-height: 1.2;
+  }
 
   body.modo-reporte-diario .rd-firmas { display: flex; justify-content: space-around; margin-top: 15mm; page-break-inside: avoid; }
   body.modo-reporte-diario .rd-firma { width: 40%; text-align: center; font-size: 9pt; }
@@ -605,7 +657,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
             <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1; padding:8px; font-size:0.82em; margin-top:0;">🗑️ Vaciar descripción</button>
         </div>
 
-        <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal; font-size:0.78em; color:var(--text-muted);">(opcional · máx. 5 fotos · se guardan en IndexedDB)</span>:</label>
+        <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal; font-size:0.78em; color:var(--text-muted);">(opcional · máx. 20 fotos · IndexedDB)</span>:</label>
         <div class="fotos-wrapper">
           <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
           <div id="galeriaFotosVisita" class="galeria-fotos"></div>
@@ -646,8 +698,11 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
         </div>
         <canvas id="graficaInforme"></canvas>
         <div class="btn-group no-print" style="margin-top:10px;">
-            <button class="btn-imprimir" id="btnImprimirDiario">🖨️ Imprimir / PDF</button>
-            <button class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 Compartir WhatsApp</button>
+            <button class="btn-imprimir" id="btnImprimirDiario">🖨️ Informe completo</button>
+            <button class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 WhatsApp</button>
+        </div>
+        <div class="btn-group no-print" style="margin-top:8px;">
+            <button class="btn-informe" onclick="imprimirAlbumFotografico()">📸 Imprimir álbum fotográfico</button>
         </div>
         <div class="btn-group no-print" style="margin-top:8px;">
             <button class="btn-informe" onclick="copiarResumenPortapapeles('dia')">📋 Copiar resumen</button>
@@ -1163,7 +1218,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
       dispositivo: navigator.userAgent.slice(0, 80),
       version: Date.now()
     };
-    // Fotos NUNCA se sincronizan a Firestore (están en IDB local)
+    // Las fotos NUNCA se sincronizan a Firestore (están en IndexedDB local)
     payload.estadoSesion = estadoSesion === null ? deleteField() : estadoSesion;
     payload.entregasDiariasDetallado = (entregas && Object.keys(entregas).length > 0) ? entregas : deleteField();
     return payload;
@@ -1497,9 +1552,10 @@ const TIEMPO_BLOQUEO_MS = 2000;
 const LECTURAS_ESTABLES_REQUERIDAS = 3;
 const TIMEOUT_ESTABILIDAD_MS = 800;
 
-const MAX_FOTOS_POR_VISITA = 5;
-const FOTO_MAX_DIM = 1024;
-const FOTO_JPEG_QUALITY = 0.7;
+// 📸 PARCHE 1: fotos 20, dim 900, calidad 0.65
+const MAX_FOTOS_POR_VISITA = 20;
+const FOTO_MAX_DIM = 900;
+const FOTO_JPEG_QUALITY = 0.65;
 const CLAVE_FOTOS_NUBE = "syncFotosNube";
 
 const DESCRIPCIONES_RECOMENDADAS = {
@@ -1876,7 +1932,7 @@ async function renderizarGaleriaFotos() {
   if (contador) {
     const totalKB = fotosPendientes.reduce((s, f) => s + (f.tamanoKB || 0), 0);
     contador.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${totalKB} KB (IDB)`;
-    contador.classList.toggle('alerta', totalKB > 800);
+    contador.classList.toggle('alerta', totalKB > 1500);
   }
 }
 
@@ -2207,7 +2263,7 @@ function guardarEstadoCompleto(){
     const estadoActual = {
       visitas, contadores, totalMinutosVisitas, totalVisitas,
       bancoCodigos, codigosPendientes,
-      fotosPendientes // 👈 ahora solo IDs (liviano)
+      fotosPendientes // 👈 solo IDs
     };
     const json = JSON.stringify(estadoActual);
     const tamanoKB = Math.round((json.length * 0.75) / 1024);
@@ -2223,7 +2279,7 @@ function guardarEstadoCompleto(){
     console.warn('No se pudo guardar:', err);
     if (String(err).includes('QuotaExceeded') || String(err).includes('quota')) {
       mostrarAviso('❌ localStorage lleno', 'error');
-      alert('❌ No hay espacio en localStorage.\n\nLas fotos ahora se guardan en IndexedDB (mucho más espacio). Si ves este mensaje es porque los metadatos están al límite.\n\nSolución:\n1. Exporta respaldo a Word\n2. Pulsa "🗜️ Compactar historial"\n3. Si sigue el problema, pulsa "🔥 Vaciar todas las fotos"');
+      alert('❌ No hay espacio en localStorage.\n\nLas fotos están en IndexedDB (mucho más espacio).\n\nSolución:\n1. Exporta respaldo a Word\n2. Pulsa "🗜️ Compactar historial"');
     } else {
       mostrarAviso('⚠️ Error guardando: ' + (err.message || err), 'error');
     }
@@ -2693,7 +2749,7 @@ window.registrarVisita = () => {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 📷 ESCÁNER CORREGIDO
+// 📷 ESCÁNER
 // ═══════════════════════════════════════════════════════════
 let escaneoModo = 'pendientes';
 
@@ -3020,7 +3076,7 @@ function generarChartDona(ancho, alto) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📄 INFORME DIARIO IMPRIMIBLE
+// 📄 INFORME DIARIO IMPRIMIBLE (con paginación de fotos)
 // ═══════════════════════════════════════════════════════════
 window.imprimirReporteDiario = async function() {
   if (visitas.length === 0) {
@@ -3193,6 +3249,7 @@ window.imprimirReporteDiario = async function() {
     </section>`;
   }
 
+  // 📸 PARCHE 3: fotos con paginación (40 fotos por página, grid de 5 columnas)
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
   if (visitasConFotos.length > 0) {
     const todosIds = [];
@@ -3201,26 +3258,55 @@ window.imprimirReporteDiario = async function() {
     });
     const datosFotos = await obtenerFotosDB(todosIds);
 
-    html += `<section class="rd-fotos-section">
-      <h3>📸 Evidencia Fotográfica (${totalFotos} foto${totalFotos !== 1 ? 's' : ''})</h3>
-      <p class="rd-nota">Fotos tomadas durante las visitas del día para respaldo de entregas y novedades.</p>
-      <div class="rd-fotos-grid">`;
+    const fotosPlanas = [];
     visitasConFotos.forEach((v) => {
       const numVisita = visitas.indexOf(v) + 1;
       v.fotos.forEach((foto, idxFoto) => {
-        const dataUrl = datosFotos[foto.id];
-        if (!dataUrl) return;
+        if (datosFotos[foto.id]) {
+          fotosPlanas.push({
+            dataUrl: datosFotos[foto.id],
+            numVisita,
+            codigo: v.codigo,
+            estado: v.estado,
+            idxFoto: idxFoto + 1,
+            totalFotosVisita: v.fotos.length
+          });
+        }
+      });
+    });
+
+    const FOTOS_POR_PAGINA = 40;
+
+    html += `<section class="rd-fotos-section">
+      <h3>📸 Evidencia Fotográfica (${fotosPlanas.length} foto${fotosPlanas.length !== 1 ? 's' : ''})</h3>
+      <p class="rd-nota">Fotos tomadas durante las visitas del día. ${fotosPlanas.length > FOTOS_POR_PAGINA ? `Se distribuyen en ${Math.ceil(fotosPlanas.length / FOTOS_POR_PAGINA)} páginas.` : ''}</p>`;
+
+    for (let pagina = 0; pagina < fotosPlanas.length; pagina += FOTOS_POR_PAGINA) {
+      const fotosPagina = fotosPlanas.slice(pagina, pagina + FOTOS_POR_PAGINA);
+      const numPagina = Math.floor(pagina / FOTOS_POR_PAGINA) + 1;
+      const totalPaginas = Math.ceil(fotosPlanas.length / FOTOS_POR_PAGINA);
+
+      html += `<div style="page-break-before: ${pagina > 0 ? 'always' : 'auto'}; padding-top: 2mm;">
+        ${totalPaginas > 1 ? `<div style="font-size:7pt;color:#666;text-align:right;margin-bottom:3px;">Álbum fotográfico · Página ${numPagina} de ${totalPaginas}</div>` : ''}
+        <div class="rd-fotos-grid">`;
+
+      fotosPagina.forEach(f => {
+        const caption = f.totalFotosVisita > 1
+          ? `V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`
+          : `V#${f.numVisita}`;
         html += `<div class="rd-foto-item">
-          <img src="${dataUrl}" alt="Foto">
+          <img src="${f.dataUrl}" alt="Foto">
           <div class="rd-foto-caption">
-            <strong>Visita #${numVisita}</strong> (foto ${idxFoto + 1}/${v.fotos.length})<br>
-            ${v.codigo ? `<span style="font-family:monospace;">${v.codigo}</span>` : 'Sin código'}<br>
-            <span style="font-size:6.5pt;color:#666;">${v.estado || ''}</span>
+            <strong>${caption}</strong><br>
+            ${f.codigo ? `<span style="font-family:monospace;">${f.codigo}</span>` : 'Sin código'}
           </div>
         </div>`;
       });
-    });
-    html += `</div></section>`;
+
+      html += `</div></div>`;
+    }
+
+    html += `</section>`;
   }
 
   html += `
@@ -3259,6 +3345,120 @@ window.imprimirReporteDiario = async function() {
       try { window.print(); } catch(e){ console.error(e); }
       setTimeout(() => {
         document.body.classList.remove('modo-impresion', 'modo-reporte-diario');
+        if (estabaDark) document.body.classList.remove('theme-switching');
+        area.innerHTML = '';
+      }, 800);
+    }, 300);
+  });
+};
+
+// ═══════════════════════════════════════════════════════════
+// 📸 PARCHE 4: ÁLBUM FOTOGRÁFICO (solo fotos)
+// ═══════════════════════════════════════════════════════════
+window.imprimirAlbumFotografico = async function() {
+  const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
+  if (visitasConFotos.length === 0) {
+    alert('⚠️ No hay fotos registradas hoy.');
+    return;
+  }
+
+  const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || 'Sin usuario';
+  const fecha = new Date().toLocaleDateString('es', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  });
+  const horaGen = new Date().toLocaleTimeString('es');
+
+  const todosIds = [];
+  visitasConFotos.forEach(v => {
+    v.fotos.forEach(f => { if (f.id) todosIds.push(f.id); });
+  });
+  const datosFotos = await obtenerFotosDB(todosIds);
+
+  const fotosPlanas = [];
+  visitasConFotos.forEach((v) => {
+    const numVisita = visitas.indexOf(v) + 1;
+    v.fotos.forEach((foto, idxFoto) => {
+      if (datosFotos[foto.id]) {
+        fotosPlanas.push({
+          dataUrl: datosFotos[foto.id],
+          numVisita,
+          codigo: v.codigo,
+          estado: v.estado,
+          descripcion: v.descripcion,
+          idxFoto: idxFoto + 1,
+          totalFotosVisita: v.fotos.length,
+          hora: v.llegada
+        });
+      }
+    });
+  });
+
+  const FOTOS_POR_PAGINA = 24;
+
+  let html = `
+    <div class="reporte-diario">
+      <header class="rd-header">
+        <h1>📸 COLSERLOG — Álbum Fotográfico</h1>
+        <div class="rd-subtitle">Evidencia visual de entregas del día</div>
+        <div class="rd-info">
+          <div><strong>👤 Mensajero:</strong> ${usuario}</div>
+          <div><strong>📅 Fecha:</strong> ${fecha}</div>
+          <div><strong>🕒 Generado:</strong> ${horaGen}</div>
+          <div><strong>📸 Total fotos:</strong> ${fotosPlanas.length}</div>
+        </div>
+      </header>
+  `;
+
+  for (let pagina = 0; pagina < fotosPlanas.length; pagina += FOTOS_POR_PAGINA) {
+    const fotosPagina = fotosPlanas.slice(pagina, pagina + FOTOS_POR_PAGINA);
+    const numPagina = Math.floor(pagina / FOTOS_POR_PAGINA) + 1;
+    const totalPaginas = Math.ceil(fotosPlanas.length / FOTOS_POR_PAGINA);
+
+    html += `<div style="page-break-before: ${pagina > 0 ? 'always' : 'auto'};">
+      <div style="font-size:8pt;color:#666;text-align:right;margin-bottom:4px;border-bottom:1px solid #ccc;padding-bottom:2px;">
+        Página ${numPagina} de ${totalPaginas}
+      </div>
+      <div class="rd-album-grid">`;
+
+    fotosPagina.forEach(f => {
+      html += `<div class="rd-album-item">
+        <img src="${f.dataUrl}" alt="Foto">
+        <div class="rd-album-caption">
+          <strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>
+          ${f.codigo ? `🔖 <span style="font-family:monospace;">${f.codigo}</span><br>` : ''}
+          <span style="color:#555;">${f.estado || ''}</span>
+          ${f.hora ? `<br>🕐 ${f.hora}` : ''}
+        </div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  }
+
+  html += `
+      <footer class="rd-footer" style="margin-top:8mm;">
+        Generado por Colserlog · ${horaGen}
+      </footer>
+    </div>
+  `;
+
+  let area = document.getElementById('areaImpresion');
+  if (!area) {
+    area = document.createElement('div');
+    area.id = 'areaImpresion';
+    document.body.appendChild(area);
+  }
+  area.innerHTML = html;
+
+  const estabaDark = document.body.classList.contains('dark');
+  if (estabaDark) document.body.classList.add('theme-switching');
+
+  document.body.classList.add('modo-impresion', 'modo-reporte-diario', 'modo-album');
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      try { window.print(); } catch(e){ console.error(e); }
+      setTimeout(() => {
+        document.body.classList.remove('modo-impresion', 'modo-reporte-diario', 'modo-album');
         if (estabaDark) document.body.classList.remove('theme-switching');
         area.innerHTML = '';
       }, 800);
@@ -3583,7 +3783,6 @@ async function crearObjetoRespaldo(){
     }
   };
 
-  // 💾 Incluir fotos de IndexedDB
   try {
     const todasFotosIDB = await obtenerTodasLasFotosDB();
     if (todasFotosIDB.length > 0) {
@@ -3753,7 +3952,6 @@ async function aplicarRespaldo(respaldo){
       if (respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, respaldo.tiemposBase[k]);
     }
   }
-  // 💾 Restaurar fotos a IndexedDB
   if (Array.isArray(respaldo.fotosIndexedDB) && respaldo.fotosIndexedDB.length > 0) {
     let restauradas = 0;
     for (const foto of respaldo.fotosIndexedDB) {
@@ -4194,11 +4392,11 @@ window.reiniciarSesion = () => {
 };
 function limpiarSesion(){
   ESTADOS.forEach(k => contadores[k] = 0);
-  totalMinutosVisitas = 0; totalVisitas = 0; visitas = []; filaEditando = null;
-  codigosPendientes = []; bancoCodigos = [];
-  codigosRegistradosHoy.clear();
-  fotosPendientes = [];
-  renderizarGaleriaFotos();
+  totalMinutosVisitas = 0; totalVisitasuted = 0; visitas = []; filaEdit);ando = null;
+  codigosPendientes = [];margin bancoCodigos = [];
+  codigos-topRegistradosHoy.clear();
+  fotosPend:ientes = [];
+  renderizarGaleriaFotos6();
   renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -4256,7 +4454,7 @@ window.generarInformeMensual = () => {
     for (const k in d.contadores) { if (!contMes[k]) contMes[k] = 0; contMes[k] += d.contadores[k] || 0; }
   });
   const promDi = (totEnt / fechasMes.length).toFixed(1), promVi = totVis > 0 ? Math.round(totMin / totVis) : 0, efec = totVis > 0 ? ((totEnt / totVis) * 100).toFixed(1) : 0;
-  let html = `<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+  let html = `<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:var(--text-mpx;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
   Object.keys(contMes).forEach(est => {
     const cant = contMes[est]; if (cant === 0) return;
     const p = totVis > 0 ? ((cant / totVis) * 100).toFixed(1) : 0;
@@ -4353,7 +4551,7 @@ window.compactarHistorial = function(){
 
 function diagnosticar(){
   const fns = [
-    'imprimirReporteDiario','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube',
+    'imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube',
     'descargarRespaldoWord','descargarRespaldoLocal','generarInformeMensual','calcularTiemposBase','registrarVisita',
     'iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente',
     'cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord',
@@ -4390,7 +4588,6 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('load', async () => {
-  // Inicializar IndexedDB
   try { await abrirFotosDB(); console.log('✅ IndexedDB listo'); }
   catch(e) { console.warn('⚠️ IndexedDB no disponible:', e); }
 
