@@ -264,11 +264,98 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
 .pwa-content ol { text-align: left; padding-left: 20px; line-height: 1.8; }
 .pwa-content .pwa-icon { font-size: 60px; }
 
+/* ═══════ REGISTRO FOTOGRÁFICO ═══════ */
+.fotos-wrapper {
+  background: var(--bg-card); border: 1px solid var(--border-light);
+  border-radius: 6px; padding: 10px; margin-top: 8px;
+}
+.galeria-fotos {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px; min-height: 40px;
+}
+.galeria-vacia {
+  grid-column: 1 / -1; text-align: center; color: var(--text-muted);
+  font-style: italic; font-size: 0.82rem; padding: 10px;
+}
+.foto-thumb {
+  position: relative; aspect-ratio: 1; border-radius: 6px; overflow: hidden;
+  border: 1px solid var(--border-light); background: #000;
+}
+.foto-thumb img {
+  width: 100%; height: 100%; object-fit: cover; cursor: pointer;
+  transition: transform .15s;
+}
+.foto-thumb img:hover { transform: scale(1.05); }
+.foto-thumb .btn-eliminar-foto {
+  position: absolute; top: 3px; right: 3px;
+  width: 22px; height: 22px; min-width: 22px; border-radius: 50%;
+  background: rgba(231,76,60,0.95); color: #fff; border: 2px solid #fff;
+  padding: 0; font-size: 11px; line-height: 1; cursor: pointer; margin: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.foto-thumb .btn-eliminar-foto:hover { background: #c0392b; }
+.btn-foto {
+  background-color: #8e44ad; margin-top: 10px; padding: 10px;
+  font-size: 0.9em;
+}
+.btn-foto:hover { background-color: #7d3c98; }
+.contador-fotos {
+  font-size: 0.78rem; color: var(--text-secondary); margin-top: 6px;
+  text-align: right; font-weight: bold;
+}
+.contador-fotos.alerta { color: #e74c3c; }
+
+.cell-fotos { white-space: nowrap; }
+.btn-ver-fotos {
+  background: #3498db; color: #fff; border: none; padding: 4px 8px;
+  border-radius: 4px; font-size: 0.75em; font-weight: bold; cursor: pointer;
+  margin: 0; width: auto;
+}
+.btn-ver-fotos:hover { background: #2980b9; }
+.sin-fotos { color: var(--text-muted); font-size: 0.75em; font-style: italic; }
+
+.modal-foto {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.92);
+  display: none; align-items: center; justify-content: center;
+  z-index: 100002; padding: 15px;
+}
+.modal-foto.visible { display: flex; }
+.modal-foto-content {
+  position: relative; max-width: 95vw; max-height: 95vh;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.modal-foto-content img {
+  max-width: 95vw; max-height: 78vh; object-fit: contain;
+  border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.modal-foto-cerrar {
+  position: absolute; top: -45px; right: 0;
+  background: #e74c3c; color: #fff; border: none;
+  width: 38px; height: 38px; border-radius: 50%; font-size: 18px;
+  cursor: pointer; margin: 0; padding: 0; font-weight: bold;
+}
+.modal-foto-nav {
+  display: flex; align-items: center; gap: 15px; color: #fff;
+  font-weight: bold; font-size: 1em;
+}
+.modal-foto-nav button {
+  background: rgba(255,255,255,0.15); color: #fff; border: none;
+  width: 42px; height: 42px; border-radius: 50%; font-size: 18px;
+  cursor: pointer; margin: 0; padding: 0; font-weight: bold;
+}
+.modal-foto-nav button:hover { background: rgba(255,255,255,0.3); }
+.btn-descargar-foto {
+  background: #2ecc71; color: #fff; text-decoration: none;
+  padding: 10px 20px; border-radius: 6px; font-weight: bold;
+  font-size: 0.9em; display: inline-block;
+}
+.btn-descargar-foto:hover { background: #27ae60; }
+
 /* ═══════ ESTILOS DE IMPRESIÓN ═══════ */
 @media print {
   body { background: white; padding: 0; margin: 0; font-size: 10pt; }
   .container { box-shadow: none; max-width: 100%; padding: 0; margin: 0; }
-  .no-print, #barraUsuario, #modalUsuario, #modalPWA, #avisoDuplicado { display: none !important; }
+  .no-print, #barraUsuario, #modalUsuario, #modalPWA, #avisoDuplicado, #modalFoto { display: none !important; }
   @page { size: A4 portrait; margin: 8mm; }
   body.modo-impresion > *:not(#areaImpresion) { display: none !important; }
   body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
@@ -475,12 +562,30 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     border-top: 1px dashed #ccc;
     padding-top: 3px;
   }
+
+  body.modo-reporte-diario .rd-fotos-section {
+    page-break-inside: avoid; margin-top: 8px;
+  }
+  body.modo-reporte-diario .rd-fotos-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+  }
+  body.modo-reporte-diario .rd-foto-item {
+    border: 1px solid #ccc; border-radius: 3px; overflow: hidden;
+    page-break-inside: avoid;
+  }
+  body.modo-reporte-diario .rd-foto-item img {
+    width: 100%; height: auto; max-height: 45mm; object-fit: cover;
+    display: block;
+  }
+  body.modo-reporte-diario .rd-foto-caption {
+    font-size: 7pt; text-align: center; padding: 2px;
+    background: #f8f9fa; color: #333;
+  }
 }
 </style>
 </head>
 <body>
 
-<!-- BARRA DE USUARIO -->
 <div id="barraUsuario">
     <div class="info-usuario">
         <div class="avatar" id="avatarUsuario">👤</div>
@@ -493,7 +598,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     </div>
 </div>
 
-<!-- MODAL INSTALAR PWA -->
 <div id="modalPWA">
     <div class="pwa-content">
         <div class="pwa-icon">📲</div>
@@ -503,38 +607,46 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     </div>
 </div>
 
-<!-- MODAL LOGIN/REGISTRO -->
 <div id="modalUsuario">
     <div class="modal-content">
         <h2 id="tituloModalUser">👤 Bienvenido</h2>
         <p id="subtituloModalUser">Inicia sesión o regístrate para guardar tus visitas.</p>
-
         <div class="tabs-user">
             <button id="tabLogin" class="activo" onclick="cambiarTabUser('login')">🔑 Iniciar sesión</button>
             <button id="tabRegistro" onclick="cambiarTabUser('registro')">✨ Registrarse</button>
         </div>
-
         <div id="formLogin">
             <input type="text" id="loginNombre" placeholder="Usuario" maxlength="40" autocomplete="username">
             <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
             <button onclick="hacerLogin()">🔓 Entrar</button>
         </div>
-
         <div id="formRegistro" style="display:none;">
             <input type="text" id="regNombre" placeholder="Nombre de usuario (mín. 3)" maxlength="40" autocomplete="username">
             <input type="password" id="regPassword" placeholder="Contraseña (mín. 4 caracteres)" autocomplete="new-password">
             <input type="password" id="regPassword2" placeholder="Repetir contraseña" autocomplete="new-password">
             <button onclick="hacerRegistro()">✨ Crear cuenta</button>
         </div>
-
         <div id="msjErrorUser" class="msj-error-user"></div>
         <div id="listaUsuariosGuardados"></div>
-
         <button class="secundario" onclick="olvidarUsuariosLocales()" style="margin-top:15px; font-size:0.8em;">🗑️ Olvidar usuarios de este dispositivo</button>
     </div>
 </div>
 
 <div id="avisoDuplicado"></div>
+
+<!-- MODAL VISOR DE FOTOS -->
+<div id="modalFoto" class="modal-foto">
+  <div class="modal-foto-content">
+    <button class="modal-foto-cerrar" onclick="cerrarModalFoto()">✕</button>
+    <img id="modalFotoImg" src="" alt="Foto de evidencia">
+    <div class="modal-foto-nav">
+      <button onclick="navegarFoto(-1)">◀</button>
+      <span id="modalFotoContador">1 / 1</span>
+      <button onclick="navegarFoto(1)">▶</button>
+    </div>
+    <a id="modalFotoDescargar" class="btn-descargar-foto" download>💾 Descargar</a>
+  </div>
+</div>
 
 <div class="container">
     <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
@@ -666,6 +778,15 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
             <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1; padding:8px; font-size:0.82em; margin-top:0;">🗑️ Vaciar descripción</button>
         </div>
 
+        <!-- ═══ REGISTRO FOTOGRÁFICO ═══ -->
+        <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal; font-size:0.78em; color:var(--text-muted);">(opcional · máx. 5 fotos)</span>:</label>
+        <div class="fotos-wrapper">
+          <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
+          <div id="galeriaFotosVisita" class="galeria-fotos"></div>
+          <button type="button" class="btn-foto" onclick="document.getElementById('inputFotoVisita').click()">📷 Tomar foto</button>
+        </div>
+        <div id="contadorFotos" class="contador-fotos"></div>
+
         <button onclick="registrarVisita()" style="background-color: #2c3e50;">📋 Guardar Visita (manual)</button>
         <p style="font-size:0.78rem; color:var(--text-secondary); text-align:center; margin-top:6px;">
             💡 Tip: al guardar, <strong>todos los campos se limpian</strong> listos para la siguiente visita.
@@ -682,7 +803,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
         <div style="overflow-x: auto;">
             <table>
                 <thead>
-                    <tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th><th class="no-print">Acciones</th></tr>
+                    <tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th><th>📸</th><th class="no-print">Acciones</th></tr>
                 </thead>
                 <tbody id="cuerpoTabla"></tbody>
             </table>
@@ -726,6 +847,12 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
         <div class="toggle-wrapper">
             <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
             <div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div>
+        </div>
+        <div class="toggle-wrapper" style="margin-top:8px;">
+          <label class="toggle-label" for="toggleFotosNube">📸 Sincronizar fotos a la nube
+            <span class="toggle-sub">⚠️ Consume más espacio (límite 1 MB/doc). Recomendado: OFF</span>
+          </label>
+          <div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div>
         </div>
         <div class="btn-group" style="margin-top:10px;">
             <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
@@ -800,6 +927,8 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   const CLAVE_USUARIO_LOCAL = "colserlog_usuario_actual";
   const CLAVE_USUARIOS_REGISTRADOS = "colserlog_usuarios_registrados";
   const CLAVE_DARK_MODE = "colserlog_dark_mode";
+  const CLAVE_FOTOS_NUBE = "syncFotosNube";
+  const CLAVE_FOTOS_NUBE_PROXY = "clave_fotos_nube_proxy";
 
   let db, syncActivo = false, guardadoPendiente = null;
   let ultimaVersionLocal = 0, syncAutomaticoActivo = true;
@@ -845,7 +974,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   window.refUsuario = refUsuario;
   window.getUsuarioActual = getUsuarioActual;
 
-  // 🌙 MODO OSCURO
   function aplicarDarkMode(activo) {
     document.body.classList.toggle('dark', activo);
     const btn = document.getElementById('btnDarkMode');
@@ -876,7 +1004,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   }
   window.cargarDarkMode = cargarDarkMode;
 
-  // 📲 PWA
   let deferredPrompt = null;
 
   function crearIconoPWA() {
@@ -956,7 +1083,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     modal.classList.add('visible');
   };
 
-  // 🔐 USUARIOS
   async function hashPassword(password) {
     try {
       const enc = new TextEncoder().encode(password);
@@ -1071,6 +1197,15 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     if (typeof window.reiniciarUIOffline === 'function') window.reiniciarUIOffline();
     actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
     if (typeof window.mostrarAviso === 'function') window.mostrarAviso('✅ Bienvenido, ' + nombre, 'ok');
+
+    // 📸 Restaurar preferencia de fotos en nube
+    try {
+      const tglFotos = document.getElementById('toggleFotosNube');
+      if (tglFotos) {
+        tglFotos.checked = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true';
+        localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tglFotos.checked ? 'true' : 'false');
+      }
+    } catch(e){}
   }
 
   window.olvidarUsuariosLocales = function() {
@@ -1168,12 +1303,25 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     mostrarModalUsuario();
   };
 
-  // SINCRONIZACIÓN
   function construirPayload() {
     const usuario = getUsuarioActual() || 'sin-nombre';
     let estadoSesion = null, entregas = {};
     try { estadoSesion = JSON.parse(localStorage.getItem('estadoSesion') || 'null'); } catch(e){}
     try { entregas = JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'); } catch(e){}
+
+    const incluirFotos = (() => {
+      try { return localStorage.getItem(CLAVE_FOTOS_NUBE_PROXY) === 'true'; } catch(e){ return false; }
+    })();
+
+    if (estadoSesion && !incluirFotos) {
+      if (Array.isArray(estadoSesion.visitas)) {
+        estadoSesion.visitas = estadoSesion.visitas.map(v => {
+          const { fotos, ...sinFotos } = v;
+          return sinFotos;
+        });
+      }
+      delete estadoSesion.fotosPendientes;
+    }
 
     const payload = {
       nombre: usuario, grupo: CODIGO_GRUPO,
@@ -1242,7 +1390,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
       if (remotoVersion && remotoVersion < ultimaVersionLocal) return;
 
       ultimaVersionLocal = remotoVersion;
-
       let huboCambios = false;
 
       if (d.estadoSesion === undefined) {
@@ -1442,6 +1589,16 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     const tgl = document.getElementById('toggleSync');
     if (tgl) tgl.checked = syncAutomaticoActivo;
 
+    // 📸 Sincronizar preferencia de fotos con clave proxy
+    const sinc = () => {
+      try {
+        const t = document.getElementById('toggleFotosNube');
+        localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, (t && t.checked) ? 'true' : 'false');
+      } catch(e){}
+    };
+    sinc();
+    document.getElementById('toggleFotosNube')?.addEventListener('change', sinc);
+
     window.addEventListener('online', () => {
       actualizarEstadoNube('🌐 Conexión restaurada...', 'loading');
       setTimeout(() => window.sincronizarConNube && window.sincronizarConNube(), 1000);
@@ -1504,13 +1661,15 @@ const QUICK_STATES = [
 const LONGITUD_CODIGO = 12;
 const TIEMPO_BLOQUEO_MS = 2000;
 
-// ═══════════════════════════════════════════════════════════
-// 🎯 CONSTANTES DEL ESCÁNER (NUEVAS - evitan los misreads)
-// ═══════════════════════════════════════════════════════════
-const LECTURAS_ESTABLES_REQUERIDAS = 3;   // 3 frames consecutivos con el mismo código
-const TIMEOUT_ESTABILIDAD_MS = 800;        // dentro de una ventana de 800ms
+const LECTURAS_ESTABLES_REQUERIDAS = 3;
+const TIMEOUT_ESTABILIDAD_MS = 800;
 
-// ✨ DESCRIPCIONES RECOMENDADAS POR ESTADO
+// 📸 Constantes de fotos
+const MAX_FOTOS_POR_VISITA = 5;
+const FOTO_MAX_DIM = 1024;
+const FOTO_JPEG_QUALITY = 0.7;
+const CLAVE_FOTOS_NUBE = "syncFotosNube";
+
 const DESCRIPCIONES_RECOMENDADAS = {
   'Entregado': 'Paquete entregado en la dirección indicada. Recibido por el cliente, quien firmó la guía correspondiente. Producto verificado en buen estado y sin novedades.',
   'Rechazado': 'El cliente rechazó el paquete al momento de la entrega. Motivo indicado por el cliente: [especificar motivo]. Se devuelve a bodega para su respectiva gestión.',
@@ -1604,9 +1763,14 @@ let codesScannedRecently = new Map();
 let bancoCodigos = [];
 let ultimoEstadoUsado = '';
 
-// 🎯 NUEVO: estado global del escáner (estabilización + bloqueo de sesión)
 let scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
 let sesionEscaneoYaAgrego = false;
+
+// 📸 Estado fotos
+let fotosPendientes = [];
+let modalFotosActual = { lista: [], indice: 0 };
+let sincronizarFotosNube = false;
+try { sincronizarFotosNube = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true'; } catch(e){}
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){
@@ -1630,6 +1794,197 @@ function fechaLocalISO(d = new Date()){
   return local.toISOString().split('T')[0];
 }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
+
+// ═══════════════════════════════════════════════════════════
+// 📸 FUNCIONES FOTOGRÁFICAS
+// ═══════════════════════════════════════════════════════════
+
+window.toggleFotosNube = function() {
+  const t = document.getElementById('toggleFotosNube');
+  if (!t) return;
+  sincronizarFotosNube = t.checked;
+  try {
+    localStorage.setItem(CLAVE_FOTOS_NUBE, sincronizarFotosNube ? 'true' : 'false');
+    localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube ? 'true' : 'false');
+  } catch(e){}
+  mostrarAviso(sincronizarFotosNube ? '📸 Fotos se sincronizarán' : '📸 Fotos solo locales', 'ok');
+};
+
+function comprimirImagen(file, maxDim = FOTO_MAX_DIM, quality = FOTO_JPEG_QUALITY) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > height && width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        } else if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) { reject(err); }
+      };
+      img.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Error leyendo archivo'));
+    reader.readAsDataURL(file);
+  });
+}
+
+window.capturarFoto = async function(event) {
+  const file = event.target.files && event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+
+  if (fotosPendientes.length >= MAX_FOTOS_POR_VISITA) {
+    mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos por visita`, 'error');
+    beepError();
+    return;
+  }
+
+  if (!file.type || !file.type.startsWith('image/')) {
+    mostrarAviso('⚠️ Solo se permiten imágenes', 'error');
+    return;
+  }
+
+  if (file.size > 15 * 1024 * 1024) {
+    mostrarAviso('⚠️ Imagen demasiado grande (máx. 15 MB)', 'error');
+    return;
+  }
+
+  mostrarAviso('⏳ Procesando foto...', 'ok');
+
+  try {
+    const base64 = await comprimirImagen(file);
+    const tamanoKB = Math.round((base64.length * 0.75) / 1024);
+    fotosPendientes.push({
+      id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      data: base64,
+      fecha: new Date().toISOString(),
+      tamanoKB
+    });
+    renderizarGaleriaFotos();
+    beepOk();
+    if (navigator.vibrate) navigator.vibrate(60);
+    mostrarAviso(`✅ Foto agregada (${tamanoKB} KB)`, 'ok');
+  } catch (e) {
+    console.error('Error procesando foto:', e);
+    mostrarAviso('⚠️ Error al procesar la foto', 'error');
+    beepError();
+  }
+};
+
+function renderizarGaleriaFotos() {
+  const cont = document.getElementById('galeriaFotosVisita');
+  const contador = document.getElementById('contadorFotos');
+  if (!cont) return;
+  cont.innerHTML = '';
+
+  if (fotosPendientes.length === 0) {
+    const vac = document.createElement('div');
+    vac.className = 'galeria-vacia';
+    vac.textContent = 'Sin fotos. Pulsa 📷 para tomar una.';
+    cont.appendChild(vac);
+    if (contador) contador.textContent = '';
+    return;
+  }
+
+  fotosPendientes.forEach((f, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'foto-thumb';
+
+    const img = document.createElement('img');
+    img.src = f.data;
+    img.alt = `Foto ${i + 1}`;
+    img.onclick = () => abrirModalFoto(fotosPendientes, i);
+    wrap.appendChild(img);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-eliminar-foto';
+    btn.textContent = '✕';
+    btn.title = 'Eliminar foto';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      if (!confirm('¿Eliminar esta foto?')) return;
+      fotosPendientes.splice(i, 1);
+      renderizarGaleriaFotos();
+      guardarEstadoCompleto();
+    };
+    wrap.appendChild(btn);
+
+    cont.appendChild(wrap);
+  });
+
+  if (contador) {
+    const totalKB = fotosPendientes.reduce((s, f) => s + (f.tamanoKB || 0), 0);
+    contador.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${totalKB} KB`;
+    contador.classList.toggle('alerta', totalKB > 800);
+  }
+}
+
+window.abrirModalFoto = function(lista, indice) {
+  if (!lista || lista.length === 0) return;
+  modalFotosActual.lista = lista;
+  modalFotosActual.indice = indice || 0;
+  actualizarModalFoto();
+  document.getElementById('modalFoto').classList.add('visible');
+};
+
+function actualizarModalFoto() {
+  const { lista, indice } = modalFotosActual;
+  const foto = lista[indice];
+  if (!foto) return;
+  const img = document.getElementById('modalFotoImg');
+  img.src = foto.data || foto;
+  document.getElementById('modalFotoContador').textContent = `${indice + 1} / ${lista.length}`;
+
+  const link = document.getElementById('modalFotoDescargar');
+  link.href = foto.data || foto;
+  link.download = `foto_visita_${(foto.id || Date.now())}.jpg`;
+
+  const nav = document.querySelector('.modal-foto-nav');
+  if (nav) nav.style.display = lista.length > 1 ? 'flex' : 'none';
+}
+
+window.navegarFoto = function(dir) {
+  const total = modalFotosActual.lista.length;
+  if (total <= 1) return;
+  modalFotosActual.indice = (modalFotosActual.indice + dir + total) % total;
+  actualizarModalFoto();
+};
+
+window.cerrarModalFoto = function() {
+  document.getElementById('modalFoto').classList.remove('visible');
+  document.getElementById('modalFotoImg').src = '';
+};
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') cerrarModalFoto();
+  if (e.key === 'ArrowLeft') navegarFoto(-1);
+  if (e.key === 'ArrowRight') navegarFoto(1);
+});
+document.getElementById('modalFoto')?.addEventListener('click', (e) => {
+  if (e.target.id === 'modalFoto') cerrarModalFoto();
+});
+
+window.verFotosVisita = function(index) {
+  const v = visitas[index];
+  if (!v || !v.fotos || v.fotos.length === 0) return;
+  abrirModalFoto(v.fotos, 0);
+};
 
 // BOTONES RÁPIDOS
 function renderizarQuickStates(){
@@ -1664,7 +2019,6 @@ function sincronizarQuickStates(){
 }
 window.seleccionarEstadoRapido = seleccionarEstadoRapido;
 
-// BANCO
 function codigosEnVisitas(){
   const s = new Set();
   visitas.forEach(v => { if (v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); });
@@ -1811,7 +2165,7 @@ window.agregarCodigoDesdeBanco = function(cod){
   codigosPendientes.push(cod);
   renderizarCodigosPendientes();
   window.limpiarBusquedaCodigo();
-  guardarEstadoCompleto(); // 🔧 FIX: persistir cambio
+  guardarEstadoCompleto();
   beepOk();
   if (navigator.vibrate) navigator.vibrate(60);
   mostrarAviso('✅ Agregado: ' + cod, 'ok');
@@ -1894,14 +2248,34 @@ window.actualizarPlaceholderDescripcion = function(){
 
 function guardarEstadoCompleto(){
   try {
-    // 🔧 FIX: ahora también persiste codigosPendientes
-    const e = { visitas, contadores, totalMinutosVisitas, totalVisitas, bancoCodigos, codigosPendientes };
-    localStorage.setItem('estadoSesion', JSON.stringify(e));
+    const estadoActual = {
+      visitas, contadores, totalMinutosVisitas, totalVisitas,
+      bancoCodigos, codigosPendientes,
+      fotosPendientes
+    };
+    const json = JSON.stringify(estadoActual);
+    const tamanoKB = Math.round((json.length * 0.75) / 1024);
+
+    if (tamanoKB > 4000) {
+      mostrarAviso(`⚠️ Almacenamiento al ${(tamanoKB/5000*100).toFixed(0)}%`, 'error');
+    }
+
+    localStorage.setItem('estadoSesion', json);
     guardarDiaActual();
+
+    if (tamanoKB > 950 && sincronizarFotosNube) {
+      console.warn(`⚠️ Estado en ${tamanoKB} KB — cercano al límite de Firestore`);
+    }
+
     if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
   } catch(err) {
     console.warn('No se pudo guardar:', err);
-    if (String(err).includes('QuotaExceeded')) mostrarAviso('⚠️ Almacenamiento lleno', 'error');
+    if (String(err).includes('QuotaExceeded') || String(err).includes('quota')) {
+      mostrarAviso('❌ Almacenamiento lleno. Exporta y compacta el historial.', 'error');
+      alert('❌ No hay espacio en el dispositivo.\n\nSolución:\n1. Exporta respaldo a Word\n2. Pulsa "🗜️ Compactar historial"\n3. Elimina fotos antiguas');
+    } else {
+      mostrarAviso('⚠️ Error guardando: ' + (err.message || err), 'error');
+    }
   }
 }
 function cargarEstadoCompleto(){
@@ -1909,10 +2283,14 @@ function cargarEstadoCompleto(){
     const raw = localStorage.getItem('estadoSesion');
     if (!raw) return false;
     const e = JSON.parse(raw);
-    visitas = (e.visitas || []).map(v => ({...v, codigo: (v.codigo || '').replace(/\D/g,'').slice(0,12)}));
+    visitas = (e.visitas || []).map(v => ({
+      ...v,
+      codigo: (v.codigo || '').replace(/\D/g,'').slice(0,12),
+      fotos: Array.isArray(v.fotos) ? v.fotos : []
+    }));
     bancoCodigos = (e.bancoCodigos || []).filter(c => /^\d{12}$/.test(c));
-    // 🔧 FIX: restaurar codigosPendientes
     codigosPendientes = (e.codigosPendientes || []).filter(c => /^\d{12}$/.test(c));
+    fotosPendientes = Array.isArray(e.fotosPendientes) ? e.fotosPendientes : [];
     const savedCont = e.contadores || {};
     ESTADOS.forEach(k => { contadores[k] = savedCont[k] || 0; });
     Object.keys(savedCont).forEach(k => { if (!(k in contadores)) contadores[k] = savedCont[k]; });
@@ -1920,8 +2298,9 @@ function cargarEstadoCompleto(){
     totalVisitas = e.totalVisitas || 0;
     cargarCodigosRegistradosHoy();
     renderizarCodigosPendientes();
+    renderizarGaleriaFotos();
     return true;
-  } catch(err){ return false; }
+  } catch(err){ console.error(err); return false; }
 }
 function guardarTiemposBase(){
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id => {
@@ -1994,7 +2373,7 @@ function agregarCodigoPendiente(cod){
 window.eliminarCodigoPendiente = function(i){
   codigosPendientes.splice(i,1);
   renderizarCodigosPendientes();
-  guardarEstadoCompleto(); // 🔧 FIX: persistir cambio
+  guardarEstadoCompleto();
 };
 function renderizarCodigosPendientes(){
   const cont = document.getElementById('listaCodigosPendientes');
@@ -2041,7 +2420,7 @@ function renderizarTabla(){
     : `Total: ${visitas.length} visita(s).`;
   if (items.length === 0) {
     const tr = document.createElement('tr');
-    const td = document.createElement('td'); td.colSpan = 8; td.className = 'sin-resultados'; td.textContent = '❌ Sin resultados.';
+    const td = document.createElement('td'); td.colSpan = 9; td.className = 'sin-resultados'; td.textContent = '❌ Sin resultados.';
     tr.appendChild(td); tabla.appendChild(tr); return;
   }
   items.forEach(({visita: v, indexOriginal}) => {
@@ -2077,6 +2456,26 @@ function renderizarTabla(){
       tdD.appendChild(ta);
     } else tdD.textContent = v.descripcion ? v.descripcion : '—';
     fila.appendChild(tdD);
+
+    // 📸 Columna de fotos
+    const tdF = document.createElement('td');
+    tdF.className = 'cell-fotos';
+    const fotos = Array.isArray(v.fotos) ? v.fotos : [];
+    if (fotos.length > 0) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-ver-fotos';
+      btn.textContent = `📸 ${fotos.length}`;
+      btn.onclick = () => window.verFotosVisita(indexOriginal);
+      tdF.appendChild(btn);
+    } else {
+      const span = document.createElement('span');
+      span.className = 'sin-fotos';
+      span.textContent = '—';
+      tdF.appendChild(span);
+    }
+    fila.appendChild(tdF);
+
     const tdA = document.createElement('td'); tdA.className = 'no-print';
     const div = document.createElement('div'); div.className = 'acciones-btn';
     if (editando) {
@@ -2084,7 +2483,7 @@ function renderizarTabla(){
       const bC = document.createElement('button'); bC.textContent = '❌'; bC.className = 'btn-cancelar-edicion'; bC.onclick = () => { filaEditando = null; renderizarTabla(); }; div.appendChild(bC);
     } else {
       const bE = document.createElement('button'); bE.textContent = '✏️'; bE.className = 'btn-editar'; bE.onclick = () => { filaEditando = indexOriginal; renderizarTabla(); }; div.appendChild(bE);
-      const bD = document.createElement('button'); bD.textContent = '🗑️'; bD.className = 'btn-eliminar-fila'; bD.onclick = () => { if (confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD);
+      const bD = document.createElement('button'); bD.textContent = '🗑️'; bD.className = 'btn-eliminar-fila'; bD.onclick = () => { if (confirm(`¿Eliminar visita #${indexOriginal+1}${fotos.length ? ' y sus '+fotos.length+' foto(s)' : ''}?`)) eliminarVisita(indexOriginal); }; div.appendChild(bD);
     }
     tdA.appendChild(div); fila.appendChild(tdA); tabla.appendChild(fila);
   });
@@ -2272,6 +2671,10 @@ function limpiarFormularioVisita() {
   codigosPendientes = [];
   renderizarCodigosPendientes();
 
+  // 📸 Limpiar fotos pendientes
+  fotosPendientes = [];
+  renderizarGaleriaFotos();
+
   actualizarContadorDigitos(codigoBarras, 'contadorDigitosVisita');
   window.limpiarBusquedaCodigo();
   sincronizarQuickStates();
@@ -2305,8 +2708,15 @@ window.registrarVisita = () => {
   const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
   const t = calcularMinutos(l, s);
   const horaRegistro = new Date().toISOString();
+  const fotosVisita = [...fotosPendientes]; // 📸 copia de fotos
+
   codigos.forEach(co => {
-    visitas.push({ llegada: l, salida: s, tiempo: t, estado: es, codigo: co, descripcion: desc, horaRegistro, grupo: codigos.length > 1 ? horaRegistro : null });
+    visitas.push({
+      llegada: l, salida: s, tiempo: t, estado: es, codigo: co,
+      descripcion: desc, horaRegistro,
+      grupo: codigos.length > 1 ? horaRegistro : null,
+      fotos: fotosVisita
+    });
   });
   ultimoEstadoUsado = es;
   cancelarEscaneo();
@@ -2328,7 +2738,7 @@ window.registrarVisita = () => {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 📷 ESCÁNER — VERSIÓN CORREGIDA (evita "dos números diferentes")
+// 📷 ESCÁNER
 // ═══════════════════════════════════════════════════════════
 let escaneoModo = 'pendientes';
 
@@ -2346,7 +2756,6 @@ window.iniciarEscaneo = function(modo){
   div.style.display = 'block';
   document.getElementById(btnId).style.display = 'inline-block';
 
-  // 🔧 Resetear estado de sesión de escaneo
   sesionEscaneoYaAgrego = false;
   scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
 
@@ -2358,7 +2767,6 @@ window.iniciarEscaneo = function(modo){
     if (mensaje) alert(mensaje);
   };
 
-  // 🔧 Cierra el escáner tras una lectura exitosa
   const cerrarEscaner = () => {
     setTimeout(() => {
       const inst = html5QrCode;
@@ -2384,25 +2792,22 @@ window.iniciarEscaneo = function(modo){
     if (html5QrCode) { try { html5QrCode.clear(); } catch(e){} html5QrCode = null; }
     html5QrCode = new Html5Qrcode(divId);
 
-    // ⚙️ CONFIGURACIÓN CORREGIDA
     const cfg = {
-      fps: 6,                                 // 🔧 Reducido de 8 → 6 (menos CPU, menos misreads)
+      fps: 6,
       qrbox: {
         width:  Math.min(window.innerWidth * 0.8, 300),
-        height: Math.min(window.innerHeight * 0.25, 120)  // 🔧 Dinámico según pantalla
+        height: Math.min(window.innerHeight * 0.25, 120)
       },
       aspectRatio: 1.5,
-      disableFlip: true,                      // 🔧 Clave: NO leer código espejado
+      disableFlip: true,
       formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128, // ✅ Formato típico logístico
-        Html5QrcodeSupportedFormats.EAN_13    // ✅ 13 dígitos
-        // 🔧 Eliminados CODE_39, UPC_A, QR_CODE porque producían falsos positivos
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.EAN_13
       ]
     };
 
     html5QrCode.start({ facingMode: "environment" }, cfg,
       (txt) => {
-        // 🔒 Si ya se detuvo o ya agregó en esta sesión, ignorar
         if (!escaneoActivo || sesionEscaneoYaAgrego) return;
 
         const original = String(txt || '').trim();
@@ -2410,34 +2815,26 @@ window.iniciarEscaneo = function(modo){
         if (!cod || cod.length !== 12) return;
 
         const ahora = Date.now();
-
-        // 🔒 Bloqueo por mismo código (evita duplicados inmediatos)
         const ultimaVez = codesScannedRecently.get(cod) || 0;
         if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) return;
 
-        // 🎯 VERIFICACIÓN DE ESTABILIDAD: el MISMO código debe leerse N veces seguidas
         if (scanEstabilizador.codigo === cod &&
             (ahora - scanEstabilizador.ultimo) < TIMEOUT_ESTABILIDAD_MS) {
           scanEstabilizador.contador++;
           scanEstabilizador.ultimo = ahora;
         } else {
-          // Nueva cadena detectada (o timeout) → reiniciar contador
           scanEstabilizador = { codigo: cod, contador: 1, ultimo: ahora };
-          return; // primera lectura: NO procesar aún (evita misread de un solo frame)
+          return;
         }
 
-        // Aún no alcanza el umbral de lecturas estables
         if (scanEstabilizador.contador < LECTURAS_ESTABLES_REQUERIDAS) return;
 
-        // ✅ CÓDIGO CONFIRMADO (3 frames estables) → procesar UNA SOLA VEZ
         codesScannedRecently.set(cod, ahora);
         scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
         sesionEscaneoYaAgrego = true;
 
-        // 🔒 Pausar la cámara mientras se procesa (evita lecturas residuales)
         try { html5QrCode.pause(true); } catch(_){}
 
-        // ---- Validar ----
         const error = validarCodigo(cod);
         if (error) {
           mostrarAviso('⚠️ ' + error + ' (' + cod + ')', 'error');
@@ -2448,7 +2845,6 @@ window.iniciarEscaneo = function(modo){
           return;
         }
 
-        // ---- Modo BANCO ----
         if (escaneoModo === 'banco') {
           if (bancoCodigos.includes(cod)) {
             mostrarAviso('⚠️ Ya en banco: ' + cod, 'error');
@@ -2463,11 +2859,10 @@ window.iniciarEscaneo = function(modo){
           beepOk();
           if (navigator.vibrate) navigator.vibrate(60);
           mostrarAviso('✅ Agregado: ' + cod, 'ok');
-          cerrarEscaner(); // 🔧 Auto-stop
+          cerrarEscaner();
           return;
         }
 
-        // ---- Modo PENDIENTES ----
         const motivo = motivoDuplicado(cod);
         if (motivo) {
           mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
@@ -2479,11 +2874,11 @@ window.iniciarEscaneo = function(modo){
         }
         if (!bancoCodigos.includes(cod)) { bancoCodigos.push(cod); renderizarBanco(); }
         agregarCodigoPendiente(cod);
-        guardarEstadoCompleto(); // 🔧 FIX: persistir cambio de banco y pendientes
+        guardarEstadoCompleto();
         mostrarAviso('✅ Código: ' + cod, 'ok');
-        cerrarEscaner(); // 🔧 Auto-stop
+        cerrarEscaner();
       },
-      () => {} // callback de error de frame: ignorar silenciosamente
+      () => {}
     ).catch(err => {
       finalizarConError("No se pudo acceder a cámara: " + err);
     });
@@ -2493,7 +2888,6 @@ window.iniciarEscaneo = function(modo){
   }
 };
 
-// 🔧 FIX race-condition: toma referencia local antes de anular
 window.cancelarEscaneo = () => {
   const divBanco = document.getElementById('lectorQRBanco');
   const divPend = document.getElementById('lectorQR');
@@ -2509,7 +2903,6 @@ window.cancelarEscaneo = () => {
     scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
   };
 
-  // 🔧 Tomar referencia local y anular global ANTES de hacer stop()
   const instancia = html5QrCode;
   html5QrCode = null;
 
@@ -2523,7 +2916,7 @@ window.cancelarEscaneo = () => {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 🎨 GENERADORES DE GRÁFICOS PARA EL INFORME IMPRIMIBLE
+// 🎨 GRÁFICOS PARA INFORME
 // ═══════════════════════════════════════════════════════════
 function generarChartEstadosHorizontal(ancho, alto) {
   const canvas = document.createElement('canvas');
@@ -2816,6 +3209,24 @@ window.imprimirReporteDiario = function() {
     </tbody></table></section>`;
   }
 
+  // 📸 Sección de fotos
+  const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
+  if (visitasConFotos.length > 0) {
+    html += `<section class="rd-fotos-section">
+      <h3>📸 Evidencia Fotográfica</h3>
+      <div class="rd-fotos-grid">`;
+    visitasConFotos.forEach((v) => {
+      const numVisita = visitas.indexOf(v) + 1;
+      v.fotos.forEach((foto) => {
+        html += `<div class="rd-foto-item">
+          <img src="${foto.data}" alt="Foto">
+          <div class="rd-foto-caption">Visita #${numVisita}<br>${v.codigo || 'Sin código'}</div>
+        </div>`;
+      });
+    });
+    html += `</div></section>`;
+  }
+
   html += `
       <section class="rd-firmas">
         <div class="rd-firma">
@@ -2958,7 +3369,8 @@ function construirTextoDia(){
   if (visitas.length > 0) {
     txt += `📋 *DETALLE DE VISITAS* (${visitas.length})\n`;
     visitas.forEach((v, i) => {
-      txt += `${i + 1}. ${v.codigo || 'Sin código'} · ${v.estado}\n`;
+      const numFotos = Array.isArray(v.fotos) ? v.fotos.length : 0;
+      txt += `${i + 1}. ${v.codigo || 'Sin código'} · ${v.estado}${numFotos ? ' 📸'+numFotos : ''}\n`;
       if (v.descripcion) txt += `   📝 _${v.descripcion}_\n`;
     });
   }
@@ -3228,6 +3640,11 @@ window.descargarRespaldoWord = function(){
     html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosResp} min</strong></td><td colspan="3"><strong>${totalVisitasResp} visita(s)</strong></td></tr>`;
     html += `</tbody></table>`;
   }
+  if (listaVisitas.some(v => Array.isArray(v.fotos) && v.fotos.length > 0)) {
+    const totalFotos = listaVisitas.reduce((s, v) => s + (Array.isArray(v.fotos) ? v.fotos.length : 0), 0);
+    html += `<h3>📸 Fotos adjuntas</h3>
+    <p style="text-align:center;color:#666;"><em>${totalFotos} foto(s) en ${listaVisitas.filter(v => v.fotos && v.fotos.length).length} visita(s). Las imágenes se incluyen en el respaldo codificado.</em></p>`;
+  }
   html += `<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   Object.keys(contadoresResp).forEach(k => {
     const c = contadoresResp[k] || 0;
@@ -3302,7 +3719,11 @@ async function aplicarRespaldo(respaldo){
   localStorage.setItem('entregasDiariasDetallado', JSON.stringify(historialFinal));
   if (respaldo.estadoSesion) {
     if (respaldo.estadoSesion.visitas) {
-      respaldo.estadoSesion.visitas = respaldo.estadoSesion.visitas.map(v => ({...v, codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12)}));
+      respaldo.estadoSesion.visitas = respaldo.estadoSesion.visitas.map(v => ({
+        ...v,
+        codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12),
+        fotos: Array.isArray(v.fotos) ? v.fotos : []
+      }));
     }
     if (respaldo.estadoSesion.bancoCodigos) {
       respaldo.estadoSesion.bancoCodigos = respaldo.estadoSesion.bancoCodigos.filter(c => /^\d{12}$/.test(c));
@@ -3509,16 +3930,36 @@ window.exportarDiaAWord = function(){
   <h3>📋 Visitas</h3>
   <table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
   visitas.forEach((v, i) => { html += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
-  html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="3"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>
-  <h3>📈 Por Estado</h3>
+  html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="3"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>`;
+  html += `<h3>📈 Por Estado</h3>
   <table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   for (const k in contadores) {
     const c = contadores[k]; if (c === 0) continue;
     const p = totalVisitas > 0 ? ((c / totalVisitas) * 100).toFixed(1) : 0;
     html += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
   }
-  html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>
-  <div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
+  html += `<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>`;
+
+  // 📸 Fotos
+  const visitasConFotosWord = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
+  if (visitasConFotosWord.length > 0) {
+    html += `<h3>📸 Evidencia Fotográfica</h3>
+    <table><thead><tr><th>#</th><th>Visita</th><th>Código</th><th>Foto</th></tr></thead><tbody>`;
+    visitasConFotosWord.forEach(v => {
+      const numVisita = visitas.indexOf(v) + 1;
+      v.fotos.forEach((foto, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>#${numVisita}</td>
+          <td style="font-family:monospace;font-size:7.5pt;">${v.codigo || '—'}</td>
+          <td><img src="${foto.data}" style="max-width:50mm;max-height:50mm;border:1px solid #ccc;"></td>
+        </tr>`;
+      });
+    });
+    html += `</tbody></table>`;
+  }
+
+  html += `<div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
   descargarWord(`Colserlog_Reporte_${fechaLocalISO()}.doc`, html);
 };
 
@@ -3643,6 +4084,8 @@ function limpiarSesion(){
   totalMinutosVisitas = 0; totalVisitas = 0; visitas = []; filaEditando = null;
   codigosPendientes = []; bancoCodigos = [];
   codigosRegistradosHoy.clear();
+  fotosPendientes = [];
+  renderizarGaleriaFotos();
   renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -3728,9 +4171,14 @@ window.recargarUIDesdeStorage = function(){
     const raw = localStorage.getItem('estadoSesion');
     if (raw) {
       const e = JSON.parse(raw);
-      visitas = (e.visitas || []).map(v => ({...v, codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12)}));
+      visitas = (e.visitas || []).map(v => ({
+        ...v,
+        codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12),
+        fotos: Array.isArray(v.fotos) ? v.fotos : []
+      }));
       bancoCodigos = (e.bancoCodigos || []).filter(c => /^\d{12}$/.test(c));
-      codigosPendientes = (e.codigosPendientes || []).filter(c => /^\d{12}$/.test(c)); // 🔧 FIX
+      codigosPendientes = (e.codigosPendientes || []).filter(c => /^\d{12}$/.test(c));
+      fotosPendientes = Array.isArray(e.fotosPendientes) ? e.fotosPendientes : [];
       ESTADOS.forEach(k => { contadores[k] = (e.contadores && e.contadores[k]) || 0; });
       totalMinutosVisitas = e.totalMinutosVisitas || 0;
       totalVisitas = e.totalVisitas || 0;
@@ -3741,6 +4189,7 @@ window.recargarUIDesdeStorage = function(){
     renderizarTabla();
     renderizarBanco();
     renderizarCodigosPendientes();
+    renderizarGaleriaFotos();
     actualizarDashboard();
     actualizarGraficaPromedios();
     actualizarInformesSemanalesMensuales();
@@ -3751,6 +4200,8 @@ window.reiniciarUIOffline = function(){
   totalMinutosVisitas = 0; totalVisitas = 0; visitas = []; filaEditando = null;
   codigosPendientes = []; bancoCodigos = [];
   codigosRegistradosHoy.clear();
+  fotosPendientes = [];
+  renderizarGaleriaFotos();
   renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const r = document.getElementById('resumenTiempos'); if (r) r.style.display = 'none';
@@ -3799,7 +4250,8 @@ function diagnosticar(){
     'compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales',
     'toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp',
     'copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion',
-    'alCambiarEstado','aplicarDescripcionRecomendada'
+    'alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto',
+    'navegarFoto','verFotosVisita','toggleFotosNube'
   ];
   const faltan = fns.filter(f => typeof window[f] !== 'function');
   if (faltan.length) console.error('❌ Faltan funciones:', faltan);
@@ -3825,6 +4277,12 @@ document.addEventListener('click', (e) => {
 });
 
 window.addEventListener('load', () => {
+  // 📸 Estado del toggle de fotos en nube
+  const tglFotos = document.getElementById('toggleFotosNube');
+  if (tglFotos) tglFotos.checked = sincronizarFotosNube;
+  try { localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube ? 'true' : 'false'); } catch(e){}
+  renderizarGaleriaFotos();
+
   cargarTiemposBase();
   if (cargarEstadoCompleto() && visitas.length > 0) { renderizarTabla(); actualizarDashboard(); }
   renderizarBanco();
@@ -3849,7 +4307,6 @@ window.addEventListener('load', () => {
   actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
   actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
 
-  // 🧹 Limpieza periódica del Map anti-duplicados (evita memory leak en jornadas largas)
   setInterval(() => {
     const cutoff = Date.now() - 120000;
     for (const [k, t] of codesScannedRecently) {
