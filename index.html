@@ -264,9 +264,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
 .btn-descargar-foto { background: #2ecc71; color: #fff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; font-size: 0.9em; display: inline-block; }
 .btn-descargar-foto:hover { background: #27ae60; }
 
-/* ═══════════════════════════════════════════════════════════
-   🖨️ ESTILOS DE IMPRESIÓN — SIEMPRE MODO CLARO
-   ═══════════════════════════════════════════════════════════ */
+/* ═══════ ESTILOS DE IMPRESIÓN — SIEMPRE MODO CLARO ═══════ */
 @media print {
   :root, body, body.dark {
     --bg-body: #fff !important;
@@ -325,12 +323,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     font-family: Arial, sans-serif;
     color: #333;
   }
-  body.modo-reporte-diario .rd-header {
-    text-align: center;
-    border-bottom: 3px solid #2c3e50;
-    padding-bottom: 6px;
-    margin-bottom: 8px;
-  }
+  body.modo-reporte-diario .rd-header { text-align: center; border-bottom: 3px solid #2c3e50; padding-bottom: 6px; margin-bottom: 8px; }
   body.modo-reporte-diario .rd-header h1 { color: #2c3e50; font-size: 15pt; margin: 0 0 4px 0; text-align: center; }
   body.modo-reporte-diario .rd-header .rd-subtitle { font-size: 10pt; color: #555; font-weight: bold; margin: 3px 0; }
   body.modo-reporte-diario .rd-info { display: flex; justify-content: space-around; font-size: 9pt; color: #333; flex-wrap: wrap; gap: 5px; }
@@ -612,7 +605,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
             <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1; padding:8px; font-size:0.82em; margin-top:0;">🗑️ Vaciar descripción</button>
         </div>
 
-        <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal; font-size:0.78em; color:var(--text-muted);">(opcional · máx. 5 fotos)</span>:</label>
+        <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal; font-size:0.78em; color:var(--text-muted);">(opcional · máx. 5 fotos · se guardan en IndexedDB)</span>:</label>
         <div class="fotos-wrapper">
           <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
           <div id="galeriaFotosVisita" class="galeria-fotos"></div>
@@ -669,6 +662,15 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
             <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
             <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
         </div>
+        <hr style="margin:15px 0; border:none; border-top:1px dashed var(--border-main);">
+        <h3 style="font-size:0.95em; margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
+        <div class="btn-group">
+            <button class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
+            <button class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Eliminar fotos antiguas</button>
+        </div>
+        <div class="btn-group" style="margin-top:8px;">
+            <button class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas las fotos</button>
+        </div>
     </div>
 
     <div class="section"><h2>7. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
@@ -699,7 +701,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
         <hr style="margin:20px 0; border:none; border-top:1px dashed var(--border-main);">
         <h3>💾 Respaldo y Restauración (Word)</h3>
         <p style="font-size:0.85em; color:var(--text-secondary); margin-top:0; text-align:center;">
-            Todo el respaldo (tiempos base, banco de códigos, visitas del día e historial) se guarda y se lee como archivo Word.
+            Todo el respaldo (tiempos base, banco de códigos, visitas del día, historial y FOTOS) se guarda y se lee como archivo Word.
         </p>
         <div class="btn-group" style="margin-top:10px;">
             <button class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
@@ -1149,20 +1151,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     try { estadoSesion = JSON.parse(localStorage.getItem('estadoSesion') || 'null'); } catch(e){}
     try { entregas = JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'); } catch(e){}
 
-    const incluirFotos = (() => {
-      try { return localStorage.getItem(CLAVE_FOTOS_NUBE_PROXY) === 'true'; } catch(e){ return false; }
-    })();
-
-    if (estadoSesion && !incluirFotos) {
-      if (Array.isArray(estadoSesion.visitas)) {
-        estadoSesion.visitas = estadoSesion.visitas.map(v => {
-          const { fotos, ...sinFotos } = v;
-          return sinFotos;
-        });
-      }
-      delete estadoSesion.fotosPendientes;
-    }
-
     const payload = {
       nombre: usuario, grupo: CODIGO_GRUPO,
       tiemposBase: {
@@ -1175,6 +1163,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
       dispositivo: navigator.userAgent.slice(0, 80),
       version: Date.now()
     };
+    // Fotos NUNCA se sincronizan a Firestore (están en IDB local)
     payload.estadoSesion = estadoSesion === null ? deleteField() : estadoSesion;
     payload.entregasDiariasDetallado = (entregas && Object.keys(entregas).length > 0) ? entregas : deleteField();
     return payload;
@@ -1601,6 +1590,119 @@ function validarCodigo(cod) {
 window.filtrarSoloDigitos = filtrarSoloDigitos;
 window.actualizarContadorDigitos = actualizarContadorDigitos;
 
+// ═══════════════════════════════════════════════════════════
+// 💾 INDEXEDDB PARA FOTOS
+// ═══════════════════════════════════════════════════════════
+const DB_NOMBRE = 'colserlog_fotos_db';
+const DB_VERSION = 1;
+const STORE_FOTOS = 'fotos';
+let fotosDB = null;
+
+function abrirFotosDB() {
+  return new Promise((resolve, reject) => {
+    if (fotosDB) { resolve(fotosDB); return; }
+    const req = indexedDB.open(DB_NOMBRE, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE_FOTOS)) {
+        db.createObjectStore(STORE_FOTOS, { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = (e) => { fotosDB = e.target.result; resolve(fotosDB); };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function guardarFotoDB(id, dataUrl, meta = {}) {
+  const db = await abrirFotosDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_FOTOS, 'readwrite');
+    const store = tx.objectStore(STORE_FOTOS);
+    const req = store.put({ id, data: dataUrl, fecha: new Date().toISOString(), ...meta });
+    req.onsuccess = () => resolve(true);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function obtenerFotoDB(id) {
+  const db = await abrirFotosDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_FOTOS, 'readonly');
+    const store = tx.objectStore(STORE_FOTOS);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result || null);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function obtenerFotosDB(ids) {
+  const db = await abrirFotosDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_FOTOS, 'readonly');
+    const store = tx.objectStore(STORE_FOTOS);
+    const resultados = {};
+    let pendientes = ids.length;
+    if (pendientes === 0) { resolve(resultados); return; }
+    ids.forEach(id => {
+      const req = store.get(id);
+      req.onsuccess = () => {
+        if (req.result) resultados[id] = req.result.data;
+        pendientes--;
+        if (pendientes === 0) resolve(resultados);
+      };
+      req.onerror = () => { pendientes--; if (pendientes === 0) resolve(resultados); };
+    });
+  });
+}
+
+async function eliminarFotoDB(id) {
+  const db = await abrirFotosDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_FOTOS, 'readwrite');
+    const store = tx.objectStore(STORE_FOTOS);
+    store.delete(id);
+    tx.oncomplete = () => resolve(true);
+    tx.onerror = () => resolve(false);
+  });
+}
+
+async function eliminarFotosMultiples(ids) {
+  const db = await abrirFotosDB();
+  return new Promise((resolve) => {
+    if (!ids.length) { resolve(0); return; }
+    const tx = db.transaction(STORE_FOTOS, 'readwrite');
+    const store = tx.objectStore(STORE_FOTOS);
+    ids.forEach(id => store.delete(id));
+    tx.oncomplete = () => resolve(ids.length);
+    tx.onerror = () => resolve(0);
+  });
+}
+
+async function contarFotosDB() {
+  const db = await abrirFotosDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_FOTOS, 'readonly');
+    const store = tx.objectStore(STORE_FOTOS);
+    const req = store.count();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => resolve(0);
+  });
+}
+
+async function obtenerTodasLasFotosDB() {
+  const db = await abrirFotosDB();
+  return new Promise((resolve) => {
+    const tx = db.transaction(STORE_FOTOS, 'readonly');
+    const store = tx.objectStore(STORE_FOTOS);
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = () => resolve([]);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// ESTADO GLOBAL
+// ═══════════════════════════════════════════════════════════
 let contadores = {};
 ESTADOS.forEach(e => contadores[e] = 0);
 let totalMinutosVisitas = 0, totalVisitas = 0, visitas = [];
@@ -1615,7 +1717,7 @@ let ultimoEstadoUsado = '';
 let scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
 let sesionEscaneoYaAgrego = false;
 
-let fotosPendientes = [];
+let fotosPendientes = []; // ⚠️ Solo IDs, no base64
 let modalFotosActual = { lista: [], indice: 0 };
 let sincronizarFotosNube = false;
 try { sincronizarFotosNube = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true'; } catch(e){}
@@ -1710,13 +1812,12 @@ window.capturarFoto = async function(event) {
   try {
     const base64 = await comprimirImagen(file);
     const tamanoKB = Math.round((base64.length * 0.75) / 1024);
-    fotosPendientes.push({
-      id: Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-      data: base64,
-      fecha: new Date().toISOString(),
-      tamanoKB
-    });
-    renderizarGaleriaFotos();
+    const id = 'foto_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+
+    await guardarFotoDB(id, base64, { tamanoKB, fecha: new Date().toISOString() });
+    fotosPendientes.push({ id, tamanoKB, fecha: new Date().toISOString() });
+
+    await renderizarGaleriaFotos();
     beepOk();
     if (navigator.vibrate) navigator.vibrate(60);
     mostrarAviso(`✅ Foto agregada (${tamanoKB} KB)`, 'ok');
@@ -1727,7 +1828,7 @@ window.capturarFoto = async function(event) {
   }
 };
 
-function renderizarGaleriaFotos() {
+async function renderizarGaleriaFotos() {
   const cont = document.getElementById('galeriaFotosVisita');
   const contador = document.getElementById('contadorFotos');
   if (!cont) return;
@@ -1740,24 +1841,33 @@ function renderizarGaleriaFotos() {
     if (contador) contador.textContent = '';
     return;
   }
+  const ids = fotosPendientes.map(f => f.id);
+  const datos = await obtenerFotosDB(ids);
+
   fotosPendientes.forEach((f, i) => {
     const wrap = document.createElement('div');
     wrap.className = 'foto-thumb';
     const img = document.createElement('img');
-    img.src = f.data;
+    img.src = datos[f.id] || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHRleHQgeD0iNDAiIHk9IjQ1IiBmb250LXNpemU9IjQwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7imqDvuI88L3RleHQ+PC9zdmc+';
     img.alt = `Foto ${i + 1}`;
-    img.onclick = () => abrirModalFoto(fotosPendientes, i);
+    img.onclick = async () => {
+      const fotoCompleta = await obtenerFotoDB(f.id);
+      if (fotoCompleta) {
+        abrirModalFoto([fotoCompleta], 0);
+      }
+    };
     wrap.appendChild(img);
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'btn-eliminar-foto';
     btn.textContent = '✕';
     btn.title = 'Eliminar foto';
-    btn.onclick = (e) => {
+    btn.onclick = async (e) => {
       e.stopPropagation();
       if (!confirm('¿Eliminar esta foto?')) return;
+      await eliminarFotoDB(f.id);
       fotosPendientes.splice(i, 1);
-      renderizarGaleriaFotos();
+      await renderizarGaleriaFotos();
       guardarEstadoCompleto();
     };
     wrap.appendChild(btn);
@@ -1765,7 +1875,7 @@ function renderizarGaleriaFotos() {
   });
   if (contador) {
     const totalKB = fotosPendientes.reduce((s, f) => s + (f.tamanoKB || 0), 0);
-    contador.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${totalKB} KB`;
+    contador.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${totalKB} KB (IDB)`;
     contador.classList.toggle('alerta', totalKB > 800);
   }
 }
@@ -1813,10 +1923,17 @@ document.getElementById('modalFoto')?.addEventListener('click', (e) => {
   if (e.target.id === 'modalFoto') cerrarModalFoto();
 });
 
-window.verFotosVisita = function(index) {
+window.verFotosVisita = async function(index) {
   const v = visitas[index];
   if (!v || !v.fotos || v.fotos.length === 0) return;
-  abrirModalFoto(v.fotos, 0);
+  const ids = v.fotos.map(f => f.id || f).filter(Boolean);
+  const datos = await obtenerFotosDB(ids);
+  const listaFotos = ids.map(id => ({ id, data: datos[id] })).filter(f => f.data);
+  if (listaFotos.length === 0) {
+    mostrarAviso('⚠️ No se pudieron cargar las fotos', 'error');
+    return;
+  }
+  abrirModalFoto(listaFotos, 0);
 };
 
 // BOTONES RÁPIDOS
@@ -2090,29 +2207,29 @@ function guardarEstadoCompleto(){
     const estadoActual = {
       visitas, contadores, totalMinutosVisitas, totalVisitas,
       bancoCodigos, codigosPendientes,
-      fotosPendientes
+      fotosPendientes // 👈 ahora solo IDs (liviano)
     };
     const json = JSON.stringify(estadoActual);
     const tamanoKB = Math.round((json.length * 0.75) / 1024);
+
     if (tamanoKB > 4000) {
-      mostrarAviso(`⚠️ Almacenamiento al ${(tamanoKB/5000*100).toFixed(0)}%`, 'error');
+      mostrarAviso(`⚠️ localStorage al ${(tamanoKB/5000*100).toFixed(0)}%`, 'error');
     }
     localStorage.setItem('estadoSesion', json);
     guardarDiaActual();
-    if (tamanoKB > 950 && sincronizarFotosNube) {
-      console.warn(`⚠️ Estado en ${tamanoKB} KB — cercano al límite de Firestore`);
-    }
+
     if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
   } catch(err) {
     console.warn('No se pudo guardar:', err);
     if (String(err).includes('QuotaExceeded') || String(err).includes('quota')) {
-      mostrarAviso('❌ Almacenamiento lleno. Exporta y compacta el historial.', 'error');
-      alert('❌ No hay espacio en el dispositivo.\n\nSolución:\n1. Exporta respaldo a Word\n2. Pulsa "🗜️ Compactar historial"\n3. Elimina fotos antiguas');
+      mostrarAviso('❌ localStorage lleno', 'error');
+      alert('❌ No hay espacio en localStorage.\n\nLas fotos ahora se guardan en IndexedDB (mucho más espacio). Si ves este mensaje es porque los metadatos están al límite.\n\nSolución:\n1. Exporta respaldo a Word\n2. Pulsa "🗜️ Compactar historial"\n3. Si sigue el problema, pulsa "🔥 Vaciar todas las fotos"');
     } else {
       mostrarAviso('⚠️ Error guardando: ' + (err.message || err), 'error');
     }
   }
 }
+
 function cargarEstadoCompleto(){
   try {
     const raw = localStorage.getItem('estadoSesion');
@@ -2345,7 +2462,12 @@ window.guardarEdicion = (index) => {
   filaEditando = null;
   recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
-window.eliminarVisita = (index) => {
+window.eliminarVisita = async (index) => {
+  const visita = visitas[index];
+  if (visita && Array.isArray(visita.fotos) && visita.fotos.length > 0) {
+    const ids = visita.fotos.map(f => f.id || f).filter(Boolean);
+    await eliminarFotosMultiples(ids);
+  }
   visitas.splice(index, 1);
   if (filaEditando === index) filaEditando = null;
   else if (filaEditando !== null && filaEditando > index) filaEditando--;
@@ -2541,7 +2663,7 @@ window.registrarVisita = () => {
   const codigos = codigosPendientes.length > 0 ? [...codigosPendientes] : [''];
   const t = calcularMinutos(l, s);
   const horaRegistro = new Date().toISOString();
-  const fotosVisita = [...fotosPendientes];
+  const fotosVisita = fotosPendientes.map(f => ({ id: f.id, tamanoKB: f.tamanoKB, fecha: f.fecha }));
 
   codigos.forEach(co => {
     visitas.push({
@@ -2744,7 +2866,7 @@ window.cancelarEscaneo = () => {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 🎨 GRÁFICOS PARA INFORME — SIEMPRE CLAROS
+// 🎨 GRÁFICOS PARA INFORME
 // ═══════════════════════════════════════════════════════════
 function generarChartEstadosHorizontal(ancho, alto) {
   const canvas = document.createElement('canvas');
@@ -2898,9 +3020,9 @@ function generarChartDona(ancho, alto) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📄 INFORME DIARIO IMPRIMIBLE — COMPLETO
+// 📄 INFORME DIARIO IMPRIMIBLE
 // ═══════════════════════════════════════════════════════════
-window.imprimirReporteDiario = function() {
+window.imprimirReporteDiario = async function() {
   if (visitas.length === 0) {
     if (!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return;
   }
@@ -2946,47 +3068,19 @@ window.imprimirReporteDiario = function() {
       </header>
 
       <section class="rd-kpis">
-        <div class="rd-kpi verde">
-          <div class="rd-kpi-label">✅ Entregados</div>
-          <div class="rd-kpi-valor">${ent}</div>
-        </div>
-        <div class="rd-kpi rojo">
-          <div class="rd-kpi-label">❌ No Entregados</div>
-          <div class="rd-kpi-valor">${noEnt}</div>
-        </div>
-        <div class="rd-kpi azul">
-          <div class="rd-kpi-label">📦 Total Visitas</div>
-          <div class="rd-kpi-valor">${totalVisitas}</div>
-        </div>
-        <div class="rd-kpi morado">
-          <div class="rd-kpi-label">🎯 Efectividad</div>
-          <div class="rd-kpi-valor">${efectividad}%</div>
-        </div>
-        <div class="rd-kpi naranja">
-          <div class="rd-kpi-label">⏱️ Prom/Visita</div>
-          <div class="rd-kpi-valor">${prom} min</div>
-        </div>
-        <div class="rd-kpi gris">
-          <div class="rd-kpi-label">🕒 Tiempo Total</div>
-          <div class="rd-kpi-valor">${horas}h ${mins}m</div>
-        </div>
-        <div class="rd-kpi cyan">
-          <div class="rd-kpi-label">🔢 Códigos Únicos</div>
-          <div class="rd-kpi-valor">${codigosUnicos}</div>
-        </div>
-        <div class="rd-kpi dark">
-          <div class="rd-kpi-label">📸 Fotos</div>
-          <div class="rd-kpi-valor">${totalFotos}</div>
-        </div>
+        <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
+        <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entregados</div><div class="rd-kpi-valor">${noEnt}</div></div>
+        <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total Visitas</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
+        <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efectividad</div><div class="rd-kpi-valor">${efectividad}%</div></div>
+        <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
+        <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo Total</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
+        <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Códigos Únicos</div><div class="rd-kpi-valor">${codigosUnicos}</div></div>
+        <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${totalFotos}</div></div>
       </section>
 
       <section class="rd-charts">
-        <div class="rd-chart-box">
-          <img src="${chartEstados}" alt="Distribución por estado">
-        </div>
-        <div class="rd-chart-box small">
-          <img src="${chartDona}" alt="Entregados vs No Entregados">
-        </div>
+        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución por estado"></div>
+        <div class="rd-chart-box small"><img src="${chartDona}" alt="Entregados vs No Entregados"></div>
       </section>
 
       <section class="rd-tiempos">
@@ -3101,6 +3195,12 @@ window.imprimirReporteDiario = function() {
 
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
   if (visitasConFotos.length > 0) {
+    const todosIds = [];
+    visitasConFotos.forEach(v => {
+      v.fotos.forEach(f => { if (f.id) todosIds.push(f.id); });
+    });
+    const datosFotos = await obtenerFotosDB(todosIds);
+
     html += `<section class="rd-fotos-section">
       <h3>📸 Evidencia Fotográfica (${totalFotos} foto${totalFotos !== 1 ? 's' : ''})</h3>
       <p class="rd-nota">Fotos tomadas durante las visitas del día para respaldo de entregas y novedades.</p>
@@ -3108,8 +3208,10 @@ window.imprimirReporteDiario = function() {
     visitasConFotos.forEach((v) => {
       const numVisita = visitas.indexOf(v) + 1;
       v.fotos.forEach((foto, idxFoto) => {
+        const dataUrl = datosFotos[foto.id];
+        if (!dataUrl) return;
         html += `<div class="rd-foto-item">
-          <img src="${foto.data}" alt="Foto">
+          <img src="${dataUrl}" alt="Foto">
           <div class="rd-foto-caption">
             <strong>Visita #${numVisita}</strong> (foto ${idxFoto + 1}/${v.fotos.length})<br>
             ${v.codigo ? `<span style="font-family:monospace;">${v.codigo}</span>` : 'Sin código'}<br>
@@ -3463,12 +3565,13 @@ window.copiarResumenPortapapeles = function(tipo){
 };
 
 // RESPALDO WORD
-function crearObjetoRespaldo(){
+async function crearObjetoRespaldo(){
   const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : null) || 'sin-usuario';
   let estadoSesion = null, entregas = {};
   try { estadoSesion = JSON.parse(localStorage.getItem('estadoSesion') || 'null'); } catch(e){}
   try { entregas = JSON.parse(localStorage.getItem('entregasDiariasDetallado') || '{}'); } catch(e){}
-  return {
+
+  const obj = {
     version: 8, usuario,
     fecha_respaldo: new Date().toISOString(),
     estadoSesion, entregasDiariasDetallado: entregas,
@@ -3479,12 +3582,26 @@ function crearObjetoRespaldo(){
       primeraEntrega: localStorage.getItem('tiempoBase_primeraEntrega') || ''
     }
   };
+
+  // 💾 Incluir fotos de IndexedDB
+  try {
+    const todasFotosIDB = await obtenerTodasLasFotosDB();
+    if (todasFotosIDB.length > 0) {
+      obj.fotosIndexedDB = todasFotosIDB.map(f => ({
+        id: f.id, data: f.data, fecha: f.fecha, tamanoKB: f.tamanoKB
+      }));
+    }
+  } catch(e) {
+    console.warn('No se pudieron incluir fotos en respaldo:', e);
+  }
+  return obj;
 }
 function b64EncodeUnicode(str){ try { return btoa(unescape(encodeURIComponent(str))); } catch(e){ return ''; } }
 function b64DecodeUnicode(str){ try { return decodeURIComponent(escape(atob(str))); } catch(e){ return ''; } }
 
-window.descargarRespaldoWord = function(){
-  const respaldo = crearObjetoRespaldo();
+window.descargarRespaldoWord = async function(){
+  mostrarAviso('⏳ Preparando respaldo...', 'ok');
+  const respaldo = await crearObjetoRespaldo();
   const jsonStr = JSON.stringify(respaldo);
   const b64 = b64EncodeUnicode(jsonStr);
   const usuario = respaldo.usuario || 'sin-usuario';
@@ -3542,10 +3659,9 @@ window.descargarRespaldoWord = function(){
     html += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosResp} min</strong></td><td colspan="3"><strong>${totalVisitasResp} visita(s)</strong></td></tr>`;
     html += `</tbody></table>`;
   }
-  if (listaVisitas.some(v => Array.isArray(v.fotos) && v.fotos.length > 0)) {
-    const totalFotos = listaVisitas.reduce((s, v) => s + (Array.isArray(v.fotos) ? v.fotos.length : 0), 0);
-    html += `<h3>📸 Fotos adjuntas</h3>
-    <p style="text-align:center;color:#666;"><em>${totalFotos} foto(s) en ${listaVisitas.filter(v => v.fotos && v.fotos.length).length} visita(s). Las imágenes se incluyen en el respaldo codificado.</em></p>`;
+  if (respaldo.fotosIndexedDB && respaldo.fotosIndexedDB.length > 0) {
+    html += `<h3>📸 Fotos incluidas en el respaldo</h3>
+    <p style="text-align:center;color:#666;"><em>${respaldo.fotosIndexedDB.length} foto(s) incluidas. Se restaurarán automáticamente al importar el respaldo.</em></p>`;
   }
   html += `<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   Object.keys(contadoresResp).forEach(k => {
@@ -3566,7 +3682,7 @@ window.descargarRespaldoWord = function(){
   }
   html += `<div style="margin-top:30px; padding-top:10px; border-top:2px dashed #999; page-break-before: always;">`;
   html += `<h3 style="text-align:center; color:#c0392b;">⚠️ NO MODIFICAR</h3>`;
-  html += `<p style="text-align:center; font-size:8pt; color:#666;">Datos codificados del respaldo.</p>`;
+  html += `<p style="text-align:center; font-size:8pt; color:#666;">Datos codificados del respaldo (incluye fotos).</p>`;
   html += `<p style="word-break: break-all; font-family: monospace; font-size: 6pt; color:#aaa; text-align:center;">`;
   html += `---COLSERLOG-DATA-START---<br>`;
   const chunks = b64.match(/.{1,80}/g) || [b64];
@@ -3636,6 +3752,17 @@ async function aplicarRespaldo(respaldo){
     for (const k in respaldo.tiemposBase) {
       if (respaldo.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, respaldo.tiemposBase[k]);
     }
+  }
+  // 💾 Restaurar fotos a IndexedDB
+  if (Array.isArray(respaldo.fotosIndexedDB) && respaldo.fotosIndexedDB.length > 0) {
+    let restauradas = 0;
+    for (const foto of respaldo.fotosIndexedDB) {
+      try {
+        await guardarFotoDB(foto.id, foto.data, { tamanoKB: foto.tamanoKB, fecha: foto.fecha });
+        restauradas++;
+      } catch(e) {}
+    }
+    console.log(`✅ ${restauradas} fotos restauradas a IndexedDB`);
   }
   if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
   return true;
@@ -3816,7 +3943,7 @@ function descargarWord(nombreArchivo, contenidoHTML){
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
-window.exportarDiaAWord = function(){
+window.exportarDiaAWord = async function(){
   if (visitas.length === 0) { alert('No hay visitas hoy.'); return; }
   const fecha = new Date().toLocaleDateString('es', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   const ent = contadores['Entregado'] || 0, noEnt = totalVisitas - ent;
@@ -3845,17 +3972,25 @@ window.exportarDiaAWord = function(){
   const visitasConFotosWord = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
   if (visitasConFotosWord.length > 0) {
     const totalFotosWord = visitasConFotosWord.reduce((s, v) => s + v.fotos.length, 0);
+    const todosIds = [];
+    visitasConFotosWord.forEach(v => {
+      v.fotos.forEach(f => { if (f.id) todosIds.push(f.id); });
+    });
+    const datosFotos = await obtenerFotosDB(todosIds);
+
     html += `<h3>📸 Evidencia Fotográfica (${totalFotosWord})</h3>
     <table><thead><tr><th style="width:8%">#</th><th style="width:15%">Visita</th><th style="width:20%">Código</th><th style="width:22%">Estado</th><th>Foto</th></tr></thead><tbody>`;
     visitasConFotosWord.forEach(v => {
       const numVisita = visitas.indexOf(v) + 1;
       v.fotos.forEach((foto, i) => {
+        const dataUrl = datosFotos[foto.id];
+        if (!dataUrl) return;
         html += `<tr>
           <td>${i + 1}</td>
           <td>#${numVisita}</td>
           <td style="font-family:monospace;font-size:7.5pt;">${v.codigo || '—'}</td>
           <td style="font-size:7pt;">${v.estado || '—'}</td>
-          <td><img src="${foto.data}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td>
+          <td><img src="${dataUrl}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td>
         </tr>`;
       });
     });
@@ -3960,6 +4095,81 @@ window.exportarHistorialCompletoAWord = function(){
   descargarWord(`Colserlog_Historial_Completo.doc`, html);
 };
 
+// ═══════════════════════════════════════════════════════════
+// 🧹 UTILIDADES DE GESTIÓN DE FOTOS
+// ═══════════════════════════════════════════════════════════
+window.verEstadoAlmacenamiento = async function() {
+  const totalFotos = await contarFotosDB();
+  const todas = await obtenerTodasLasFotosDB();
+  const totalKB = todas.reduce((s, f) => s + (f.tamanoKB || Math.round((f.data?.length || 0) * 0.75 / 1024)), 0);
+
+  let localSize = 0;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      const v = localStorage.getItem(k);
+      localSize += (k.length + (v?.length || 0));
+    }
+  } catch(e){}
+
+  let estimacion;
+  if (navigator.storage && navigator.storage.estimate) {
+    try { estimacion = await navigator.storage.estimate(); } catch(e){}
+  }
+
+  let msg = `💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `📸 Fotos en IndexedDB: ${totalFotos}\n`;
+  msg += `   └─ Tamaño aprox: ${(totalKB / 1024).toFixed(2)} MB\n\n`;
+  msg += `📦 localStorage: ${(localSize / 1024).toFixed(1)} KB\n`;
+  msg += `   └─ Límite típico: 5000-10000 KB\n`;
+  msg += `   └─ Uso: ${((localSize / 1024 / 5000) * 100).toFixed(1)}%\n\n`;
+  if (estimacion) {
+    msg += `🌐 Navegador reporta:\n`;
+    msg += `   ├─ Usado: ${(estimacion.usage / 1024 / 1024).toFixed(2)} MB\n`;
+    msg += `   └─ Cuota: ${(estimacion.quota / 1024 / 1024).toFixed(0)} MB\n`;
+  }
+  alert(msg);
+};
+
+window.eliminarFotosAntiguas = async function() {
+  const dias = prompt(
+    '🗑️ Eliminar fotos anteriores a X días:\n\n' +
+    '• 30 → 1 mes\n' +
+    '• 60 → 2 meses\n' +
+    '• 90 → 3 meses\n\n' +
+    'Escribe el número de días:',
+    '60'
+  );
+  if (!dias) return;
+  const n = parseInt(dias);
+  if (!n || n < 1) { alert('❌ Número inválido'); return; }
+
+  const todas = await obtenerTodasLasFotosDB();
+  const cutoff = Date.now() - (n * 24 * 60 * 60 * 1000);
+  const aBorrar = todas.filter(f => new Date(f.fecha || 0).getTime() < cutoff);
+
+  if (aBorrar.length === 0) {
+    alert(`ℹ️ No hay fotos anteriores a ${n} días`);
+    return;
+  }
+  if (!confirm(`⚠️ Se eliminarán ${aBorrar.length} foto(s).\n\n¿Continuar?`)) return;
+  const eliminadas = await eliminarFotosMultiples(aBorrar.map(f => f.id));
+  alert(`✅ ${eliminadas} foto(s) eliminadas`);
+};
+
+window.vaciarTodasLasFotos = async function() {
+  const total = await contarFotosDB();
+  if (total === 0) { alert('ℹ️ No hay fotos guardadas'); return; }
+  if (!confirm(`⚠️ Se eliminarán TODAS las ${total} fotos.\n\nLos registros de visitas se mantienen pero sin imágenes.\n\n¿Continuar?`)) return;
+  if (!confirm('⚠️ ÚLTIMA CONFIRMACIÓN: ¿Eliminar todas las fotos?')) return;
+  const todas = await obtenerTodasLasFotosDB();
+  await eliminarFotosMultiples(todas.map(f => f.id));
+  alert('✅ Todas las fotos eliminadas');
+};
+
+// ═══════════════════════════════════════════════════════════
+// CONTROL DE SESIÓN
+// ═══════════════════════════════════════════════════════════
 window.guardarDia = () => {
   guardarDiaActual();
   if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
@@ -4154,7 +4364,7 @@ function diagnosticar(){
     'toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp',
     'copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion',
     'alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto',
-    'navegarFoto','verFotosVisita','toggleFotosNube'
+    'navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos'
   ];
   const faltan = fns.filter(f => typeof window[f] !== 'function');
   if (faltan.length) console.error('❌ Faltan funciones:', faltan);
@@ -4179,7 +4389,11 @@ document.addEventListener('click', (e) => {
   }
 });
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
+  // Inicializar IndexedDB
+  try { await abrirFotosDB(); console.log('✅ IndexedDB listo'); }
+  catch(e) { console.warn('⚠️ IndexedDB no disponible:', e); }
+
   const tglFotos = document.getElementById('toggleFotosNube');
   if (tglFotos) tglFotos.checked = sincronizarFotosNube;
   try { localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube ? 'true' : 'false'); } catch(e){}
