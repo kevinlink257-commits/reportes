@@ -1218,7 +1218,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
       dispositivo: navigator.userAgent.slice(0, 80),
       version: Date.now()
     };
-    // Las fotos NUNCA se sincronizan a Firestore (están en IndexedDB local)
     payload.estadoSesion = estadoSesion === null ? deleteField() : estadoSesion;
     payload.entregasDiariasDetallado = (entregas && Object.keys(entregas).length > 0) ? entregas : deleteField();
     return payload;
@@ -1552,7 +1551,6 @@ const TIEMPO_BLOQUEO_MS = 2000;
 const LECTURAS_ESTABLES_REQUERIDAS = 3;
 const TIMEOUT_ESTABILIDAD_MS = 800;
 
-// 📸 PARCHE 1: fotos 20, dim 900, calidad 0.65
 const MAX_FOTOS_POR_VISITA = 20;
 const FOTO_MAX_DIM = 900;
 const FOTO_JPEG_QUALITY = 0.65;
@@ -1773,7 +1771,7 @@ let ultimoEstadoUsado = '';
 let scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
 let sesionEscaneoYaAgrego = false;
 
-let fotosPendientes = []; // ⚠️ Solo IDs, no base64
+let fotosPendientes = [];
 let modalFotosActual = { lista: [], indice: 0 };
 let sincronizarFotosNube = false;
 try { sincronizarFotosNube = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true'; } catch(e){}
@@ -2263,7 +2261,7 @@ function guardarEstadoCompleto(){
     const estadoActual = {
       visitas, contadores, totalMinutosVisitas, totalVisitas,
       bancoCodigos, codigosPendientes,
-      fotosPendientes // 👈 solo IDs
+      fotosPendientes
     };
     const json = JSON.stringify(estadoActual);
     const tamanoKB = Math.round((json.length * 0.75) / 1024);
@@ -3249,7 +3247,6 @@ window.imprimirReporteDiario = async function() {
     </section>`;
   }
 
-  // 📸 PARCHE 3: fotos con paginación (40 fotos por página, grid de 5 columnas)
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
   if (visitasConFotos.length > 0) {
     const todosIds = [];
@@ -3353,7 +3350,7 @@ window.imprimirReporteDiario = async function() {
 };
 
 // ═══════════════════════════════════════════════════════════
-// 📸 PARCHE 4: ÁLBUM FOTOGRÁFICO (solo fotos)
+// 📸 ÁLBUM FOTOGRÁFICO (solo fotos)
 // ═══════════════════════════════════════════════════════════
 window.imprimirAlbumFotografico = async function() {
   const visitasConFotos = visitas.filter(v => Array.isArray(v.fotos) && v.fotos.length > 0);
@@ -4390,13 +4387,15 @@ window.reiniciarSesion = () => {
   limpiarSesion();
   alert("✅ Sesión reiniciada");
 };
+
+// ✅ VERSIÓN CORREGIDA — antes tenía errores de sintaxis que rompían todo el módulo
 function limpiarSesion(){
   ESTADOS.forEach(k => contadores[k] = 0);
-  totalMinutosVisitas = 0; totalVisitasuted = 0; visitas = []; filaEdit);ando = null;
-  codigosPendientes = [];margin bancoCodigos = [];
-  codigos-topRegistradosHoy.clear();
-  fotosPend:ientes = [];
-  renderizarGaleriaFotos6();
+  totalMinutosVisitas = 0; totalVisitas = 0; visitas = []; filaEditando = null;
+  codigosPendientes = []; bancoCodigos = [];
+  codigosRegistradosHoy.clear();
+  fotosPendientes = [];
+  renderizarGaleriaFotos();
   renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -4408,14 +4407,18 @@ function limpiarSesion(){
   const b = document.getElementById('busquedaGuia'); if (b) b.value = '';
   const c = document.getElementById('contadorBusqueda'); if (c) c.textContent = '';
   const d = document.getElementById('descripcionVisita'); if (d) d.value = '';
-  ['codigoBanco','codigoBarras','busquedaCodigoBanco','llegadaCliente','salidaCliente'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['codigoBanco','codigoBarras','busquedaCodigoBanco','llegadaCliente','salidaCliente'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
   const selEst = document.getElementById('estadoPaquete'); if (selEst) selEst.value = '';
   actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
   actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
   window.limpiarBusquedaCodigo();
   try { localStorage.removeItem('estadoSesion'); } catch(e){}
-  actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+  actualizarDashboard(); renderizarTabla();
+  actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 }
+
 window.eliminarTodo = async () => {
   if (!confirm("¿ELIMINAR TODO? Irreversible")) return;
   if (!confirm("Confirmación final: ¿Seguro?")) return;
@@ -4454,7 +4457,8 @@ window.generarInformeMensual = () => {
     for (const k in d.contadores) { if (!contMes[k]) contMes[k] = 0; contMes[k] += d.contadores[k] || 0; }
   });
   const promDi = (totEnt / fechasMes.length).toFixed(1), promVi = totVis > 0 ? Math.round(totMin / totVis) : 0, efec = totVis > 0 ? ((totEnt / totVis) * 100).toFixed(1) : 0;
-  let html = `<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:var(--text-mpx;">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+  // ✅ FIX: var(--text-mpx) → var(--text-muted)
+  let html = `<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${usuario}</div><h2>Periodo: ${cap} ${anio}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${totEnt}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${totVis}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fechasMes.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${efec}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${promDi}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${promVi} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(totMin/60)}h ${totMin%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${totVis-totEnt}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
   Object.keys(contMes).forEach(est => {
     const cant = contMes[est]; if (cant === 0) return;
     const p = totVis > 0 ? ((cant / totVis) * 100).toFixed(1) : 0;
