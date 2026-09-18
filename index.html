@@ -274,7 +274,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   body.modo-impresion #areaImpresion { display: block !important; position: static !important; width: 100% !important; }
   #areaImpresion { font-size: 9pt !important; color: #000; }
 
-  /* Reporte genérico (fallback clon) */
   #areaImpresion h1 { font-size: 14pt !important; margin: 3px 0 !important; }
   #areaImpresion h2 { font-size: 12pt !important; margin: 5px 0 !important; }
   #areaImpresion h3 { font-size: 11pt !important; margin: 8px 0 4px 0 !important; }
@@ -287,7 +286,6 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   #areaImpresion img { max-width: 100% !important; height: auto !important; }
   #areaImpresion button { display: none !important; }
 
-  /* ═══════ REPORTE DIARIO DETALLADO ═══════ */
   body.modo-reporte-diario #areaImpresion {
     font-size: 9pt !important;
     color: #000;
@@ -495,7 +493,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
     </div>
 </div>
 
-<!-- MODAL INSTALAR PWA (iOS/manual) -->
+<!-- MODAL INSTALAR PWA -->
 <div id="modalPWA">
     <div class="pwa-content">
         <div class="pwa-icon">📲</div>
@@ -878,7 +876,7 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
   }
   window.cargarDarkMode = cargarDarkMode;
 
-  // 📲 PWA — INSTALACIÓN
+  // 📲 PWA
   let deferredPrompt = null;
 
   function crearIconoPWA() {
@@ -1507,8 +1505,12 @@ const LONGITUD_CODIGO = 12;
 const TIEMPO_BLOQUEO_MS = 2000;
 
 // ═══════════════════════════════════════════════════════════
-// ✨ DESCRIPCIONES RECOMENDADAS POR ESTADO
+// 🎯 CONSTANTES DEL ESCÁNER (NUEVAS - evitan los misreads)
 // ═══════════════════════════════════════════════════════════
+const LECTURAS_ESTABLES_REQUERIDAS = 3;   // 3 frames consecutivos con el mismo código
+const TIMEOUT_ESTABILIDAD_MS = 800;        // dentro de una ventana de 800ms
+
+// ✨ DESCRIPCIONES RECOMENDADAS POR ESTADO
 const DESCRIPCIONES_RECOMENDADAS = {
   'Entregado': 'Paquete entregado en la dirección indicada. Recibido por el cliente, quien firmó la guía correspondiente. Producto verificado en buen estado y sin novedades.',
   'Rechazado': 'El cliente rechazó el paquete al momento de la entrega. Motivo indicado por el cliente: [especificar motivo]. Se devuelve a bodega para su respectiva gestión.',
@@ -1529,14 +1531,12 @@ const DESCRIPCIONES_RECOMENDADAS = {
   'Exige ver el producto': 'El cliente exige verificar el contenido del paquete antes de recibirlo y firmar la guía de entrega. Se procede según las políticas de la empresa.'
 };
 
-// Helper para saber si un texto es una descripción sugerida
 function esDescripcionSugerida(texto) {
   if (!texto) return false;
   const t = texto.trim();
   return Object.values(DESCRIPCIONES_RECOMENDADAS).some(d => d === t);
 }
 
-// Aplicar la descripción recomendada según el estado seleccionado
 function aplicarDescripcionRecomendada(forzar = false) {
   const sel = document.getElementById('estadoPaquete');
   const ta = document.getElementById('descripcionVisita');
@@ -1544,23 +1544,18 @@ function aplicarDescripcionRecomendada(forzar = false) {
   const est = sel.value;
   const sugerida = DESCRIPCIONES_RECOMENDADAS[est] || '';
   const actual = ta.value;
-
-  // Si forzamos (botón "Restaurar") siempre reemplazamos.
-  // Si no: reemplazar solo si el campo está vacío o contiene una sugerencia previa.
   if (forzar || actual.trim() === '' || esDescripcionSugerida(actual)) {
     ta.value = sugerida;
   }
 }
 window.aplicarDescripcionRecomendada = aplicarDescripcionRecomendada;
 
-// Función que se ejecuta al cambiar el estado en el <select>
 window.alCambiarEstado = function() {
   window.actualizarPlaceholderDescripcion();
   sincronizarQuickStates();
   aplicarDescripcionRecomendada(false);
 };
 
-// Botón "Restaurar descripción sugerida"
 window.restaurarDescripcionRecomendada = function() {
   const sel = document.getElementById('estadoPaquete');
   if (!sel || !sel.value) {
@@ -1571,7 +1566,6 @@ window.restaurarDescripcionRecomendada = function() {
   mostrarAviso('↺ Descripción restaurada', 'ok');
 };
 
-// Botón "Vaciar descripción"
 window.limpiarDescripcion = function() {
   const ta = document.getElementById('descripcionVisita');
   if (ta) ta.value = '';
@@ -1609,6 +1603,10 @@ let codigosRegistradosHoy = new Set();
 let codesScannedRecently = new Map();
 let bancoCodigos = [];
 let ultimoEstadoUsado = '';
+
+// 🎯 NUEVO: estado global del escáner (estabilización + bloqueo de sesión)
+let scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
+let sesionEscaneoYaAgrego = false;
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){
@@ -1813,6 +1811,7 @@ window.agregarCodigoDesdeBanco = function(cod){
   codigosPendientes.push(cod);
   renderizarCodigosPendientes();
   window.limpiarBusquedaCodigo();
+  guardarEstadoCompleto(); // 🔧 FIX: persistir cambio
   beepOk();
   if (navigator.vibrate) navigator.vibrate(60);
   mostrarAviso('✅ Agregado: ' + cod, 'ok');
@@ -1895,7 +1894,8 @@ window.actualizarPlaceholderDescripcion = function(){
 
 function guardarEstadoCompleto(){
   try {
-    const e = { visitas, contadores, totalMinutosVisitas, totalVisitas, bancoCodigos };
+    // 🔧 FIX: ahora también persiste codigosPendientes
+    const e = { visitas, contadores, totalMinutosVisitas, totalVisitas, bancoCodigos, codigosPendientes };
     localStorage.setItem('estadoSesion', JSON.stringify(e));
     guardarDiaActual();
     if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
@@ -1911,12 +1911,15 @@ function cargarEstadoCompleto(){
     const e = JSON.parse(raw);
     visitas = (e.visitas || []).map(v => ({...v, codigo: (v.codigo || '').replace(/\D/g,'').slice(0,12)}));
     bancoCodigos = (e.bancoCodigos || []).filter(c => /^\d{12}$/.test(c));
+    // 🔧 FIX: restaurar codigosPendientes
+    codigosPendientes = (e.codigosPendientes || []).filter(c => /^\d{12}$/.test(c));
     const savedCont = e.contadores || {};
     ESTADOS.forEach(k => { contadores[k] = savedCont[k] || 0; });
     Object.keys(savedCont).forEach(k => { if (!(k in contadores)) contadores[k] = savedCont[k]; });
     totalMinutosVisitas = e.totalMinutosVisitas || 0;
     totalVisitas = e.totalVisitas || 0;
     cargarCodigosRegistradosHoy();
+    renderizarCodigosPendientes();
     return true;
   } catch(err){ return false; }
 }
@@ -1991,6 +1994,7 @@ function agregarCodigoPendiente(cod){
 window.eliminarCodigoPendiente = function(i){
   codigosPendientes.splice(i,1);
   renderizarCodigosPendientes();
+  guardarEstadoCompleto(); // 🔧 FIX: persistir cambio
 };
 function renderizarCodigosPendientes(){
   const cont = document.getElementById('listaCodigosPendientes');
@@ -2250,11 +2254,7 @@ window.marcarSalidaYRegistrar = () => {
   registrarVisita();
 };
 
-// ═══════════════════════════════════════════════════════════
-// REGISTRAR VISITA — con reset completo al terminar
-// ═══════════════════════════════════════════════════════════
 function limpiarFormularioVisita() {
-  // Limpiar TODOS los campos del formulario de visita
   const llegada = document.getElementById('llegadaCliente');
   const salida = document.getElementById('salidaCliente');
   const codigoBarras = document.getElementById('codigoBarras');
@@ -2269,11 +2269,9 @@ function limpiarFormularioVisita() {
   if (estado) estado.value = '';
   if (busqueda) busqueda.value = '';
 
-  // Limpiar códigos pendientes
   codigosPendientes = [];
   renderizarCodigosPendientes();
 
-  // Actualizar contadores y estados visuales
   actualizarContadorDigitos(codigoBarras, 'contadorDigitosVisita');
   window.limpiarBusquedaCodigo();
   sincronizarQuickStates();
@@ -2313,10 +2311,8 @@ window.registrarVisita = () => {
   ultimoEstadoUsado = es;
   cancelarEscaneo();
 
-  // ✅ RESET COMPLETO DEL FORMULARIO
   limpiarFormularioVisita();
 
-  // Recalcular todo
   recalcularEstadisticas();
   renderizarTabla();
   renderizarBanco();
@@ -2324,7 +2320,6 @@ window.registrarVisita = () => {
   actualizarInformesSemanalesMensuales();
   if (typeof window.sincronizarConNube === 'function') window.sincronizarConNube();
 
-  // Focus al primer campo para la siguiente visita
   setTimeout(() => {
     document.getElementById('llegadaCliente')?.focus();
     mostrarAviso('✅ Visita guardada · Listo para la siguiente', 'ok');
@@ -2332,8 +2327,11 @@ window.registrarVisita = () => {
   }, 120);
 };
 
-// ESCÁNER
+// ═══════════════════════════════════════════════════════════
+// 📷 ESCÁNER — VERSIÓN CORREGIDA (evita "dos números diferentes")
+// ═══════════════════════════════════════════════════════════
 let escaneoModo = 'pendientes';
+
 window.iniciarEscaneo = function(modo){
   if (escaneoActivo) return;
   if (typeof Html5Qrcode === 'undefined' || typeof Html5QrcodeSupportedFormats === 'undefined') {
@@ -2348,6 +2346,10 @@ window.iniciarEscaneo = function(modo){
   div.style.display = 'block';
   document.getElementById(btnId).style.display = 'inline-block';
 
+  // 🔧 Resetear estado de sesión de escaneo
+  sesionEscaneoYaAgrego = false;
+  scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
+
   const finalizarConError = (mensaje) => {
     escaneoActivo = false;
     if (html5QrCode) { try { html5QrCode.clear(); } catch(_){} html5QrCode = null; }
@@ -2356,49 +2358,132 @@ window.iniciarEscaneo = function(modo){
     if (mensaje) alert(mensaje);
   };
 
+  // 🔧 Cierra el escáner tras una lectura exitosa
+  const cerrarEscaner = () => {
+    setTimeout(() => {
+      const inst = html5QrCode;
+      if (!inst) return;
+      inst.stop().then(() => {
+        try { inst.clear(); } catch(_){}
+        if (html5QrCode === inst) html5QrCode = null;
+        escaneoActivo = false;
+        div.style.display = 'none';
+        document.getElementById(btnId).style.display = 'none';
+      }).catch(() => {
+        try { inst.clear(); } catch(_){}
+        if (html5QrCode === inst) html5QrCode = null;
+        escaneoActivo = false;
+        div.style.display = 'none';
+        document.getElementById(btnId).style.display = 'none';
+      });
+    }, 400);
+  };
+
   try {
     escaneoActivo = true;
     if (html5QrCode) { try { html5QrCode.clear(); } catch(e){} html5QrCode = null; }
     html5QrCode = new Html5Qrcode(divId);
+
+    // ⚙️ CONFIGURACIÓN CORREGIDA
     const cfg = {
-      fps: 8,
-      qrbox: { width: Math.min(window.innerWidth * 0.8, 300), height: 150 },
+      fps: 6,                                 // 🔧 Reducido de 8 → 6 (menos CPU, menos misreads)
+      qrbox: {
+        width:  Math.min(window.innerWidth * 0.8, 300),
+        height: Math.min(window.innerHeight * 0.25, 120)  // 🔧 Dinámico según pantalla
+      },
+      aspectRatio: 1.5,
+      disableFlip: true,                      // 🔧 Clave: NO leer código espejado
       formatsToSupport: [
-        Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.CODE_39,
-        Html5QrcodeSupportedFormats.QR_CODE
+        Html5QrcodeSupportedFormats.CODE_128, // ✅ Formato típico logístico
+        Html5QrcodeSupportedFormats.EAN_13    // ✅ 13 dígitos
+        // 🔧 Eliminados CODE_39, UPC_A, QR_CODE porque producían falsos positivos
       ]
     };
+
     html5QrCode.start({ facingMode: "environment" }, cfg,
       (txt) => {
+        // 🔒 Si ya se detuvo o ya agregó en esta sesión, ignorar
+        if (!escaneoActivo || sesionEscaneoYaAgrego) return;
+
         const original = String(txt || '').trim();
         const cod = original.replace(/\D/g, '');
         if (!cod || cod.length !== 12) return;
+
         const ahora = Date.now();
+
+        // 🔒 Bloqueo por mismo código (evita duplicados inmediatos)
         const ultimaVez = codesScannedRecently.get(cod) || 0;
         if (ahora - ultimaVez < TIEMPO_BLOQUEO_MS) return;
-        codesScannedRecently.set(cod, ahora);
-        if (codesScannedRecently.size > 200) {
-          const cutoff = ahora - 120000;
-          for (const [k, t] of codesScannedRecently) { if (t < cutoff) codesScannedRecently.delete(k); }
+
+        // 🎯 VERIFICACIÓN DE ESTABILIDAD: el MISMO código debe leerse N veces seguidas
+        if (scanEstabilizador.codigo === cod &&
+            (ahora - scanEstabilizador.ultimo) < TIMEOUT_ESTABILIDAD_MS) {
+          scanEstabilizador.contador++;
+          scanEstabilizador.ultimo = ahora;
+        } else {
+          // Nueva cadena detectada (o timeout) → reiniciar contador
+          scanEstabilizador = { codigo: cod, contador: 1, ultimo: ahora };
+          return; // primera lectura: NO procesar aún (evita misread de un solo frame)
         }
+
+        // Aún no alcanza el umbral de lecturas estables
+        if (scanEstabilizador.contador < LECTURAS_ESTABLES_REQUERIDAS) return;
+
+        // ✅ CÓDIGO CONFIRMADO (3 frames estables) → procesar UNA SOLA VEZ
+        codesScannedRecently.set(cod, ahora);
+        scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
+        sesionEscaneoYaAgrego = true;
+
+        // 🔒 Pausar la cámara mientras se procesa (evita lecturas residuales)
+        try { html5QrCode.pause(true); } catch(_){}
+
+        // ---- Validar ----
         const error = validarCodigo(cod);
-        if (error) { mostrarAviso('⚠️ ' + error + ' (' + cod + ')', 'error'); beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]); return; }
-        if (escaneoModo === 'banco') {
-          if (bancoCodigos.includes(cod)) { mostrarAviso('⚠️ Ya en banco', 'error'); beepError(); return; }
-          bancoCodigos.push(cod); renderizarBanco(); guardarEstadoCompleto(); beepOk();
-          if (navigator.vibrate) navigator.vibrate(60);
-          mostrarAviso('✅ Agregado: ' + cod, 'ok');
+        if (error) {
+          mostrarAviso('⚠️ ' + error + ' (' + cod + ')', 'error');
+          beepError();
+          if (navigator.vibrate) navigator.vibrate([100,50,100]);
+          sesionEscaneoYaAgrego = false;
+          setTimeout(() => { try { html5QrCode.resume(); } catch(_){} }, 1200);
           return;
         }
+
+        // ---- Modo BANCO ----
+        if (escaneoModo === 'banco') {
+          if (bancoCodigos.includes(cod)) {
+            mostrarAviso('⚠️ Ya en banco: ' + cod, 'error');
+            beepError();
+            sesionEscaneoYaAgrego = false;
+            setTimeout(() => { try { html5QrCode.resume(); } catch(_){} }, 800);
+            return;
+          }
+          bancoCodigos.push(cod);
+          renderizarBanco();
+          guardarEstadoCompleto();
+          beepOk();
+          if (navigator.vibrate) navigator.vibrate(60);
+          mostrarAviso('✅ Agregado: ' + cod, 'ok');
+          cerrarEscaner(); // 🔧 Auto-stop
+          return;
+        }
+
+        // ---- Modo PENDIENTES ----
         const motivo = motivoDuplicado(cod);
-        if (motivo) { mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error'); beepError(); if (navigator.vibrate) navigator.vibrate([100,50,100]); return; }
+        if (motivo) {
+          mostrarAviso('⚠️ ' + motivo + ': ' + cod, 'error');
+          beepError();
+          if (navigator.vibrate) navigator.vibrate([100,50,100]);
+          sesionEscaneoYaAgrego = false;
+          setTimeout(() => { try { html5QrCode.resume(); } catch(_){} }, 1000);
+          return;
+        }
         if (!bancoCodigos.includes(cod)) { bancoCodigos.push(cod); renderizarBanco(); }
         agregarCodigoPendiente(cod);
+        guardarEstadoCompleto(); // 🔧 FIX: persistir cambio de banco y pendientes
         mostrarAviso('✅ Código: ' + cod, 'ok');
-      }, () => {}
+        cerrarEscaner(); // 🔧 Auto-stop
+      },
+      () => {} // callback de error de frame: ignorar silenciosamente
     ).catch(err => {
       finalizarConError("No se pudo acceder a cámara: " + err);
     });
@@ -2407,22 +2492,34 @@ window.iniciarEscaneo = function(modo){
     finalizarConError('⚠️ No se pudo iniciar el escáner: ' + e.message);
   }
 };
+
+// 🔧 FIX race-condition: toma referencia local antes de anular
 window.cancelarEscaneo = () => {
   const divBanco = document.getElementById('lectorQRBanco');
   const divPend = document.getElementById('lectorQR');
   const btnBanco = document.getElementById('btnCancelarEscaneoBanco');
   const btnPend = document.getElementById('btnCancelarEscaneo');
-  const finalizar = () => {
+
+  const ocultarTodo = () => {
     if (divBanco) divBanco.style.display = 'none';
     if (divPend) divPend.style.display = 'none';
     if (btnBanco) btnBanco.style.display = 'none';
     if (btnPend) btnPend.style.display = 'none';
     escaneoActivo = false;
+    scanEstabilizador = { codigo: null, contador: 0, ultimo: 0 };
   };
-  if (html5QrCode) {
-    html5QrCode.stop().then(() => { try { html5QrCode.clear(); } catch(e){} html5QrCode = null; finalizar(); })
-      .catch(() => { html5QrCode = null; finalizar(); });
-  } else finalizar();
+
+  // 🔧 Tomar referencia local y anular global ANTES de hacer stop()
+  const instancia = html5QrCode;
+  html5QrCode = null;
+
+  if (instancia) {
+    instancia.stop()
+      .then(() => { try { instancia.clear(); } catch(_){} ocultarTodo(); })
+      .catch(() => { try { instancia.clear(); } catch(_){} ocultarTodo(); });
+  } else {
+    ocultarTodo();
+  }
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -2460,7 +2557,6 @@ function generarChartEstadosHorizontal(ancho, alto) {
   const barH = Math.min(filaH * 0.7, 30);
   const colores = ['#2ecc71','#e74c3c','#e67e22','#3498db','#95a5a6','#f1c40f','#9b59b6','#1abc9c','#e84393','#00b894','#fdcb6e','#e17055','#74b9ff','#a29bfe','#fd79a8','#6c5ce7','#00cec9'];
 
-  // Grid vertical
   ctx.strokeStyle = '#eee';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 4; i++) {
@@ -2479,18 +2575,15 @@ function generarChartEstadosHorizontal(ancho, alto) {
     const y = margenTop + i * filaH + (filaH - barH) / 2;
     const w = (valor / maxVal) * areaW;
 
-    // Barra
     ctx.fillStyle = colores[i % colores.length];
     ctx.fillRect(margenIzq, y, w, barH);
 
-    // Etiqueta izquierda
     ctx.fillStyle = '#333';
     ctx.font = '11px Arial';
     ctx.textAlign = 'right';
     const label = estado.length > 28 ? estado.substring(0, 26) + '…' : estado;
     ctx.fillText(label, margenIzq - 8, y + barH / 2 + 4);
 
-    // Valor a la derecha
     ctx.fillStyle = '#2c3e50';
     ctx.font = 'bold 12px Arial';
     ctx.textAlign = 'left';
@@ -2547,7 +2640,6 @@ function generarChartDona(ancho, alto) {
     anguloInicio += angulo;
   });
 
-  // Texto centro
   ctx.fillStyle = '#2c3e50';
   ctx.font = 'bold 26px Arial';
   ctx.textAlign = 'center';
@@ -2557,7 +2649,6 @@ function generarChartDona(ancho, alto) {
   ctx.fillStyle = '#666';
   ctx.fillText('visitas', cx, cy + 18);
 
-  // Leyenda
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
   const legendY = alto - 35;
@@ -2576,7 +2667,7 @@ function generarChartDona(ancho, alto) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 📄 INFORME DIARIO IMPRIMIBLE DETALLADO
+// 📄 INFORME DIARIO IMPRIMIBLE
 // ═══════════════════════════════════════════════════════════
 window.imprimirReporteDiario = function() {
   if (visitas.length === 0) {
@@ -2592,11 +2683,9 @@ window.imprimirReporteDiario = function() {
   const prom = totalVisitas > 0 ? Math.round(totalMinutosVisitas / totalVisitas) : 0;
   const efectividad = totalVisitas > 0 ? ((ent / totalVisitas) * 100).toFixed(1) : '0.0';
 
-  // Generar gráficos
   const chartEstados = generarChartEstadosHorizontal(820, 520);
   const chartDona = generarChartDona(500, 520);
 
-  // Tiempos base
   const iC = localStorage.getItem('tiempoBase_inicioCarga') || '—';
   const fC = localStorage.getItem('tiempoBase_finCarga') || '—';
   const sE = localStorage.getItem('tiempoBase_salidaEmpresa') || '—';
@@ -2701,7 +2790,6 @@ window.imprimirReporteDiario = function() {
 
   html += `</tbody></table></section>`;
 
-  // Tabla por estado
   const estadosConValor = Object.entries(contadores).filter(([k, v]) => v > 0);
   if (estadosConValor.length > 0) {
     html += `<section class="rd-estados">
@@ -2763,7 +2851,6 @@ window.imprimirReporteDiario = function() {
   });
 };
 
-// Mantener esta función para el informe mensual
 function imprimirContenidoHTML(titulo){
   try {
     const canvasData = [];
@@ -3643,10 +3730,10 @@ window.recargarUIDesdeStorage = function(){
       const e = JSON.parse(raw);
       visitas = (e.visitas || []).map(v => ({...v, codigo: (v.codigo || '').replace(/\D/g, '').slice(0, 12)}));
       bancoCodigos = (e.bancoCodigos || []).filter(c => /^\d{12}$/.test(c));
+      codigosPendientes = (e.codigosPendientes || []).filter(c => /^\d{12}$/.test(c)); // 🔧 FIX
       ESTADOS.forEach(k => { contadores[k] = (e.contadores && e.contadores[k]) || 0; });
       totalMinutosVisitas = e.totalMinutosVisitas || 0;
       totalVisitas = e.totalVisitas || 0;
-      codigosPendientes = [];
       filaEditando = null;
       cargarCodigosRegistradosHoy();
     }
@@ -3722,7 +3809,6 @@ function diagnosticar(){
   if (typeof ZXing === 'undefined') console.warn('⚠️ ZXing no cargó');
 }
 
-// Detectar primer toque para pre-calentar audio (iOS)
 document.addEventListener('touchstart', function unlockAudio(){
   try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); ctx.resume(); } catch(e){}
   document.removeEventListener('touchstart', unlockAudio);
@@ -3762,6 +3848,14 @@ window.addEventListener('load', () => {
   document.getElementById('btnImprimirDiario')?.addEventListener('click', () => window.imprimirReporteDiario());
   actualizarContadorDigitos(document.getElementById('codigoBanco'), 'contadorDigitosBanco');
   actualizarContadorDigitos(document.getElementById('codigoBarras'), 'contadorDigitosVisita');
+
+  // 🧹 Limpieza periódica del Map anti-duplicados (evita memory leak en jornadas largas)
+  setInterval(() => {
+    const cutoff = Date.now() - 120000;
+    for (const [k, t] of codesScannedRecently) {
+      if (t < cutoff) codesScannedRecently.delete(k);
+    }
+  }, 60000);
 
   ['llegadaCliente','salidaCliente'].forEach(id => {
     document.getElementById(id)?.addEventListener('keydown', e => {
