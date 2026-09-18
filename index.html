@@ -594,6 +594,12 @@ body.dark .chip-codigo.usado { color: #a0e0b0; border-color: #2a6030; }
             <option value="Oficina principal">Oficina principal</option>
             <option value="Se trasladó">Se trasladó</option>
             <option value="Exige ver el producto">Exige ver el producto</option>
+            <option value="Destinatario no recibe sábados">Destinatario no recibe sábados</option>
+            <option value="Restricciones en el tránsito reparto urbano">Restricciones en el tránsito reparto urbano</option>
+            <option value="No coincide la mercancía física con lo escrito en la orden de compra">No coincide la mercancía física con lo escrito en la orden de compra</option>
+            <option value="Mercancía se abrió en reparto no entregada">Mercancía se abrió en reparto no entregada</option>
+            <option value="Flete mal liquidado">Flete mal liquidado</option>
+            <option value="Cerrados en horas hábiles">Cerrados en horas hábiles</option>
         </select>
 
         <label style="margin-top:10px;">⚡ Estados rápidos (un clic):</label>
@@ -1483,11 +1489,18 @@ const ESTADOS = [
   'Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)',
   'No lo conocen','Programo para otro día','Dejar en oficina principal',
   'Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo',
-  'Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto'
+  'Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto',
+  'Destinatario no recibe sábados',
+  'Restricciones en el tránsito reparto urbano',
+  'No coincide la mercancía física con lo escrito en la orden de compra',
+  'Mercancía se abrió en reparto no entregada',
+  'Flete mal liquidado',
+  'Cerrados en horas hábiles'
 ];
 const QUICK_STATES = [
   'Entregado','No está en casa','Rechazado','Dirección Errónea',
-  'Dirección incompleta','Coordinado con Cliente','Se trasladó','Exige ver el producto'
+  'Dirección incompleta','Coordinado con Cliente','Se trasladó','Exige ver el producto',
+  'Destinatario no recibe sábados','Cerrados en horas hábiles'
 ];
 const LONGITUD_CODIGO = 12;
 const TIEMPO_BLOQUEO_MS = 2000;
@@ -1517,7 +1530,13 @@ const DESCRIPCIONES_RECOMENDADAS = {
   'Casa totalmente cerrada': 'La casa se encontraba totalmente cerrada (reja, portón y puertas aseguradas). No se pudo acceder al inmueble ni hacer contacto con persona alguna.',
   'Oficina principal': 'Paquete dejado en oficina principal para su respectiva gestión o entrega posterior al cliente, según lo coordinado.',
   'Se trasladó': 'El cliente se mudó de la dirección registrada. Se obtuvo la nueva dirección [especificar si se conoce] para reprogramar la entrega del paquete.',
-  'Exige ver el producto': 'El cliente exige verificar el contenido del paquete antes de recibirlo y firmar la guía de entrega. Se procede según las políticas de la empresa.'
+  'Exige ver el producto': 'El cliente exige verificar el contenido del paquete antes de recibirlo y firmar la guía de entrega. Se procede según las políticas de la empresa.',
+  'Destinatario no recibe sábados': 'El destinatario manifestó expresamente que no recibe entregas los días sábados por políticas internas del cliente o del lugar de entrega. Se debe reprogramar la visita para un día hábil. Se intentó contactar al cliente para confirmar sin obtener respuesta inmediata.',
+  'Restricciones en el tránsito reparto urbano': 'Se presentaron restricciones de tránsito en la zona urbana durante el recorrido: cierres viales, manifestaciones, paros, obras o bloqueos que impidieron el acceso al punto de entrega. Se informa a la empresa para su respectiva gestión y reprogramación.',
+  'No coincide la mercancía física con lo escrito en la orden de compra': 'Al verificar el pedido, la mercancía física NO coincide con lo descrito en la orden de compra (referencias, cantidades, presentación o características diferentes). Se rechaza la entrega y el paquete retorna a bodega para revisión y cruce con el área comercial.',
+  'Mercancía se abrió en reparto no entregada': 'Se detectó que la mercancía presentó apertura, manipulación o deterioro durante el reparto, por lo que no fue posible entregarla en esas condiciones. Se informa novedad a la empresa, se documenta con fotografías y el paquete retorna a bodega para verificación y reemplazo.',
+  'Flete mal liquidado': 'El flete correspondiente a esta guía presenta un ERROR en su liquidación: el valor cobrado, el peso facturado, las dimensiones o la tarifa aplicada no coinciden con lo pactado o registrado en el sistema. Se requiere corrección por parte del área administrativa/contable antes de proceder con la entrega. El paquete retorna a bodega para su respectiva verificación y ajuste del cobro.',
+  'Cerrados en horas hábiles': 'El establecimiento se encontraba cerrado durante el horario hábil de atención al público (dentro del horario normal comercial). No fue posible entregar el paquete ni contactar al responsable. Se dejó aviso de visita y se reprograma para el siguiente día hábil.'
 };
 
 function esDescripcionSugerida(texto) {
@@ -2055,7 +2074,13 @@ window.actualizarPlaceholderDescripcion = function(){
     'Casa totalmente cerrada': 'Ej: Casa cerrada con reja',
     'Oficina principal': 'Ej: Se dejó en oficina principal',
     'Se trasladó': 'Ej: El cliente se mudó, nueva dirección...',
-    'Exige ver el producto': 'Ej: Cliente exige abrir antes de recibir'
+    'Exige ver el producto': 'Ej: Cliente exige abrir antes de recibir',
+    'Destinatario no recibe sábados': 'Ej: El cliente solo recibe de lunes a viernes',
+    'Restricciones en el tránsito reparto urbano': 'Ej: Bloqueo en la vía principal, no se pudo llegar',
+    'No coincide la mercancía física con lo escrito en la orden de compra': 'Ej: Llegaron 3 unidades y la orden dice 5',
+    'Mercancía se abrió en reparto no entregada': 'Ej: La caja llegó abierta, no se entregó',
+    'Flete mal liquidado': 'Ej: El cobro del flete está mal calculado, debe corregirse',
+    'Cerrados en horas hábiles': 'Ej: El local estaba cerrado al mediodía'
   };
   ta.placeholder = placeholders[est] || 'Al seleccionar un estado se autocompletará una descripción detallada que puedes editar...';
 };
