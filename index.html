@@ -201,13 +201,65 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 .modal-foto-nav button:hover{background:rgba(255,255,255,.3)}
 .btn-descargar-foto{background:#2ecc71;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:bold;font-size:.9em;display:inline-block}
 .btn-descargar-foto:hover{background:#27ae60}
+
+/* ═══════════════════════════════════════════════════════════════
+   📸 MODAL DE REGLAS FOTOGRÁFICAS + AVISO DE PRIVACIDAD
+   ═══════════════════════════════════════════════════════════════ */
+#modalReglasFoto{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100003;padding:15px;overflow-y:auto}
+#modalReglasFoto.visible{display:flex}
+.modal-reglas-content{background:var(--bg-container);color:var(--text-primary);border-radius:12px;padding:20px;max-width:540px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.5);animation:aparecer .3s ease}
+.modal-reglas-content h2{color:var(--text-heading);margin:0 0 6px 0;text-align:center;font-size:1.25em}
+.modal-reglas-content .sub{text-align:center;color:var(--text-secondary);font-size:.83em;margin:0 0 15px 0;line-height:1.35}
+.reglas-bloque{background:#fff3cd;border-left:4px solid #f39c12;padding:10px 12px;border-radius:6px;margin-bottom:10px;font-size:.83em;color:#7a5b0f;line-height:1.4}
+body.dark .reglas-bloque{background:#3a2a10;color:#f5c76a;border-left-color:#f39c12}
+.reglas-bloque h4{margin:0 0 6px 0;font-size:.95em;color:inherit;font-weight:bold}
+.reglas-bloque ul{margin:5px 0 5px 18px;padding:0}
+.reglas-bloque li{margin:3px 0;line-height:1.35}
+.tag-no{color:#c0392b;font-weight:bold}
+.tag-ok{color:#1e8449;font-weight:bold}
+body.dark .tag-no{color:#ff8a80}
+body.dark .tag-ok{color:#81e0a0}
+.reglas-bloque.rojo{background:#fdedec;border-left-color:#e74c3c;color:#7a1f1f}
+body.dark .reglas-bloque.rojo{background:#3a1010;color:#ff9a9a}
+.reglas-bloque.verde{background:#e8f8f0;border-left-color:#2ecc71;color:#155724}
+body.dark .reglas-bloque.verde{background:#10301f;color:#a0e0b0}
+.reglas-chk{display:flex;align-items:flex-start;gap:10px;background:var(--bg-section);padding:12px;border-radius:8px;cursor:pointer;user-select:none;margin-top:12px;border:2px solid transparent;transition:.2s}
+.reglas-chk input{width:24px;height:24px;min-width:24px;margin:0;cursor:pointer;accent-color:#1abc9c;flex-shrink:0}
+.reglas-chk span{font-size:.88em;font-weight:bold;color:var(--text-primary);line-height:1.3}
+.reglas-chk.activo{border-color:#1abc9c;background:rgba(26,188,156,.12)}
+.reglas-botones{display:flex;gap:10px;margin-top:15px}
+.reglas-botones button{flex:1;margin-top:0;padding:12px;font-size:.95em}
+.reglas-botones .btn-cancelar-reglas{background:#95a5a6}
+.reglas-botones .btn-ok-reglas{background:#2ecc71;font-weight:bold;font-size:1em}
+.reglas-botones .btn-ok-reglas:disabled{background:#95a5a6;opacity:.5;cursor:not-allowed}
+.aviso-reglas-inline{background:linear-gradient(135deg,#fff3cd,#ffe9b0);border:2px solid #f39c12;border-radius:8px;padding:10px 12px;margin-top:10px;font-size:.8em;color:#7a5b0f;line-height:1.45}
+body.dark .aviso-reglas-inline{background:linear-gradient(135deg,#3a2a10,#2a1e08);color:#f5c76a}
+.aviso-reglas-inline strong{color:#c0392b}
+body.dark .aviso-reglas-inline strong{color:#ff8a80}
+.rules-seccion{background:var(--bg-card);border:1px solid var(--border-light);border-radius:6px;padding:10px 12px;margin-top:10px}
+.rules-seccion summary{cursor:pointer;font-weight:bold;color:var(--text-heading);padding:6px 0;user-select:none;font-size:.92em;list-style:none}
+.rules-seccion summary::-webkit-details-marker{display:none}
+.rules-seccion summary::before{content:'▶';display:inline-block;transition:transform .2s;margin-right:8px;color:#3498db;font-size:.85em}
+.rules-seccion[open] summary::before{transform:rotate(90deg)}
+.rules-seccion .rules-body{padding-top:8px;font-size:.83em;color:var(--text-primary);line-height:1.5}
+.rules-seccion .rules-body h4{color:var(--text-heading);margin:12px 0 6px 0;font-size:.95em;border-bottom:1px solid var(--border-light);padding-bottom:3px}
+.rules-seccion .rules-body ul{margin:5px 0 5px 20px;padding:0}
+.rules-seccion .rules-body li{margin:4px 0}
+.rules-seccion .rules-body .legal{background:var(--bg-section);padding:8px 10px;border-radius:6px;font-size:.92em;margin-top:6px}
+.rules-check-list{background:var(--bg-section);border-radius:6px;padding:10px 15px;margin-top:8px}
+.rules-check-list li{list-style:none;position:relative;padding-left:26px;margin:6px 0;font-size:.92em}
+.rules-check-list li::before{content:'☐';position:absolute;left:0;top:-1px;font-size:1.15em;color:var(--text-heading)}
+
+/* ═══════════════════════════════════════════════════════════════
+   IMPRESIÓN — SIN CORTES
+   ═══════════════════════════════════════════════════════════════ */
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#f5f5f5!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--bg-chip:#e8f4fc!important;--bg-chip-used:#d4edda!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#2c3e50!important;--text-muted:#666!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-main:transparent!important;--table-header-bg:#2c3e50!important;--table-header-color:#fff!important}
   @page{size:A4 portrait;margin:10mm 8mm 10mm 8mm}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9.5pt}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"]{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
@@ -250,7 +302,6 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
   body.modo-reporte-diario .rd-tabla thead{display:table-header-group}
   body.modo-reporte-diario .rd-tabla tr:nth-child(even) td{background:#f8f9fa!important}
   body.modo-reporte-diario .rd-tabla tr.rd-total td{background:#e8f8f5!important;font-weight:bold;border-top:2px solid #1abc9c!important}
-  body.modo-reporte-diario .rd-tabla-estados{max-width:100%}
   body.modo-reporte-diario .rd-fotos-section{page-break-inside:auto;margin-top:10px}
   body.modo-reporte-diario .rd-fotos-page{page-break-inside:avoid!important;break-inside:avoid!important;page-break-after:always!important;break-after:page!important;width:100%!important;max-width:194mm!important;overflow:hidden!important;padding-top:2mm;display:block}
   body.modo-reporte-diario .rd-fotos-page:last-child{page-break-after:auto!important;break-after:auto!important}
@@ -337,6 +388,63 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
       <button onclick="navegarFoto(1)">▶</button>
     </div>
     <a id="modalFotoDescargar" class="btn-descargar-foto" download>💾 Descargar</a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODAL DE REGLAS FOTOGRÁFICAS — aparece antes de abrir la cámara
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="modalReglasFoto">
+  <div class="modal-reglas-content">
+    <h2>📸 Antes de tomar la foto</h2>
+    <p class="sub">Lee y acepta estas reglas para proteger la privacidad de las familias visitadas.</p>
+
+    <div class="reglas-bloque rojo">
+      <h4>🚫 NUNCA fotografíes:</h4>
+      <ul>
+        <li><span class="tag-no">Rostros de niños, niñas o adolescentes</span> (Ley 1098 de 2006)</li>
+        <li><span class="tag-no">Rostros de adultos</span> sin su consentimiento expreso</li>
+        <li><span class="tag-no">Interior de la vivienda</span> (sala, cuartos, cocina)</li>
+        <li><span class="tag-no">Documentos de identidad</span> (cédula, pasaporte, licencia)</li>
+        <li><span class="tag-no">Placas de vehículos</span> ajenos al servicio</li>
+        <li><span class="tag-no">Personas en situación vulnerable</span> o en ropa íntima</li>
+        <li><span class="tag-no">Vecinos o transeúntes</span> que aparezcan de fondo</li>
+        <li><span class="tag-no">Uniformes escolares</span> que identifiquen menores</li>
+      </ul>
+    </div>
+
+    <div class="reglas-bloque verde">
+      <h4>✅ SÍ puedes fotografiar:</h4>
+      <ul>
+        <li><span class="tag-ok">Fachada exterior</span> y número de la dirección</li>
+        <li><span class="tag-ok">Paquete junto a la puerta</span> (desde afuera)</li>
+        <li><span class="tag-ok">Guía o sticker</span> con el código de barras</li>
+        <li><span class="tag-ok">Aviso de visita</span> pegado en la puerta</li>
+        <li><span class="tag-ok">Local cerrado</span> con su letrero visible</li>
+        <li><span class="tag-ok">Firma en el documento</span> (la hoja, no la persona)</li>
+      </ul>
+    </div>
+
+    <div class="reglas-bloque">
+      <h4>💡 Reglas prácticas:</h4>
+      <ul>
+        <li>Aléjate mínimo <strong>1.5 metros</strong> de cualquier persona</li>
+        <li>Enfoca <strong>hacia el piso o hacia la puerta</strong>, nunca hacia arriba ni al interior</li>
+        <li>Si aparece un <strong>menor en el encuadre</strong>, reencuadra o no tomes la foto</li>
+        <li>Si el cliente <strong>NO autoriza</strong>, registra la visita sin foto y anótalo</li>
+        <li>Si accidentalmente capturas a un menor, <strong>borra la foto de inmediato</strong></li>
+      </ul>
+    </div>
+
+    <label class="reglas-chk" id="lblReglasChk">
+      <input type="checkbox" id="chkAceptoReglas" onchange="toggleBotonCamara(); this.parentNode.classList.toggle('activo', this.checked);">
+      <span>Entiendo y acepto estas reglas. Me comprometo a proteger la privacidad de las personas y no exponer a menores de edad.</span>
+    </label>
+
+    <div class="reglas-botones">
+      <button type="button" class="btn-cancelar-reglas" onclick="cerrarModalReglasFoto()">✖ Cancelar</button>
+      <button type="button" class="btn-ok-reglas" id="btnAbrirCamara" onclick="confirmarYabrirCamara()" disabled>📷 Abrir cámara</button>
+    </div>
   </div>
 </div>
 
@@ -443,11 +551,95 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
       <button type="button" class="btn-cancelar" onclick="restaurarDescripcionRecomendada()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">↺ Restaurar descripción sugerida</button>
       <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">🗑️ Vaciar descripción</button>
     </div>
+
     <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(opcional · máx. 20 fotos · IndexedDB)</span>:</label>
+
+    <div class="aviso-reglas-inline">
+      ⚠️ <strong>Protege la privacidad:</strong> nunca fotografíes rostros de niños, rostros de adultos sin permiso, el interior de la vivienda, documentos de identidad ni placas de vehículos. <strong>Al pulsar 📷 deberás aceptar las reglas.</strong>
+    </div>
+
+    <details class="rules-seccion">
+      <summary>📖 Ver reglas completas de registro fotográfico y marco legal</summary>
+      <div class="rules-body">
+        <div class="legal">
+          <strong>⚖️ Marco legal aplicable en Colombia</strong><br>
+          • <strong>Constitución art. 15:</strong> derecho a la intimidad personal y familiar<br>
+          • <strong>Ley 1581 de 2012:</strong> protección de datos personales (la imagen es un dato personal)<br>
+          • <strong>Ley 1098 de 2006 (Cód. Infancia):</strong> interés superior del menor — art. 33<br>
+          • <strong>Ley 1266 de 2008:</strong> manejo de información<br>
+          • <strong>SIC:</strong> sanciones por mal uso de imágenes
+        </div>
+
+        <h4>✅ Lo que SÍ debes fotografiar (evidencia válida)</h4>
+        <ul>
+          <li>Fachada exterior de la vivienda con número/placa de dirección visible</li>
+          <li>Paquete junto a la puerta (si se dejó en el lugar) — desde afuera</li>
+          <li>Guía o sticker con el código de barras</li>
+          <li>Firma del recibido (en el documento, no en la persona)</li>
+          <li>Aviso de visita pegado en la puerta (si nadie estaba)</li>
+          <li>Local comercial cerrado con su letrero visible</li>
+        </ul>
+
+        <h4>🚫 Lo que NUNCA debes fotografiar</h4>
+        <ul>
+          <li><span class="tag-no">Rostros de niños, niñas o adolescentes</span></li>
+          <li><span class="tag-no">Rostros de adultos sin consentimiento</span></li>
+          <li><span class="tag-no">Interior de la vivienda</span> (sala, cuartos, baños, cocina)</li>
+          <li><span class="tag-no">Documentos de identidad</span> (cédula, pasaporte, licencia)</li>
+          <li><span class="tag-no">Placas de vehículos</span> de terceros</li>
+          <li><span class="tag-no">Personas en ropa íntima, enfermas o vulnerables</span></li>
+          <li><span class="tag-no">Vecinos o transeúntes</span> que aparezcan de fondo</li>
+          <li><span class="tag-no">Números telefónicos o correos</span> visibles en fachada</li>
+          <li><span class="tag-no">Uniformes escolares</span> con rostro de menor</li>
+        </ul>
+
+        <h4>🎯 Reglas prácticas al tomar la foto</h4>
+        <ul>
+          <li><strong>Ángulo:</strong> apunta al piso o a la puerta, nunca hacia arriba ni al interior</li>
+          <li><strong>Distancia:</strong> mínimo 1.5 metros de cualquier persona</li>
+          <li><strong>Si hay un menor en el encuadre:</strong> NO tomes la foto — reencuadra o espera</li>
+          <li><strong>Si el cliente está presente:</strong> pide permiso ("¿Me permite una foto del paquete?")</li>
+          <li><strong>Si dice NO:</strong> no insistas — registra la visita sin foto y anótalo</li>
+          <li><strong>Al interior:</strong> nunca entres a la casa aunque te inviten — la foto se toma desde el umbral</li>
+        </ul>
+
+        <h4>📝 Cómo redactar la descripción</h4>
+        <ul>
+          <li>✅ <em>"Paquete entregado en la dirección indicada. Recibido por un adulto responsable, quien firmó la guía."</em></li>
+          <li>✅ <em>"Se dejó aviso de visita en la puerta. Se fotografió la fachada y el aviso para constancia."</em></li>
+          <li>❌ <em>"Entregado a la señora María, quien salió con su hijo pequeño."</em></li>
+        </ul>
+
+        <h4>🚨 Si accidentalmente capturaste a un menor</h4>
+        <ul>
+          <li>1. NO compartir la imagen</li>
+          <li>2. Eliminarla de inmediato con el botón 🗑️ de la foto</li>
+          <li>3. NO subirla a la nube ni a WhatsApp</li>
+          <li>4. Reportar el incidente al supervisor</li>
+        </ul>
+
+        <h4>📋 Checklist antes de cada foto</h4>
+        <ul class="rules-check-list">
+          <li>¿Se ve el paquete / fachada / guía? → SÍ</li>
+          <li>¿Aparece algún rostro? → NO</li>
+          <li>¿Aparece algún menor? → NO</li>
+          <li>¿Se ve el interior de la casa? → NO</li>
+          <li>¿Se ve algún documento de identidad? → NO</li>
+          <li>¿Se ve alguna placa de vehículo? → NO</li>
+          <li>¿El cliente autorizó (si está presente)? → SÍ</li>
+          <li>¿Se ve algún dato personal sensible? → NO</li>
+        </ul>
+
+        <div class="legal" style="margin-top:12px;">
+          💡 <strong>Regla de oro:</strong> la foto debe probar que el paquete llegó y en qué estado — <strong>nada más</strong>. Ni personas, ni interiores, ni datos de nadie.
+        </div>
+      </div>
+    </details>
+
     <div class="fotos-wrapper">
       <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
       <div id="galeriaFotosVisita" class="galeria-fotos"></div>
-      <button type="button" class="btn-foto" onclick="document.getElementById('inputFotoVisita').click()">📷 Tomar foto</button>
+      <button type="button" class="btn-foto" onclick="abrirModalReglasFoto()">📷 Tomar foto</button>
     </div>
     <div id="contadorFotos" class="contador-fotos"></div>
     <button onclick="registrarVisita()" style="background-color:#2c3e50;">📋 Guardar Visita (manual)</button>
@@ -601,10 +793,6 @@ function refUsuario(){ const u=getUsuarioActual(); if(!u||!db)return null; retur
 window.refUsuario = refUsuario;
 window.getUsuarioActual = getUsuarioActual;
 
-/* ═══════════════════════════════════════════════════════════════
-   SINCRONIZACIÓN DE CUENTAS EN LA NUBE
-   /colserlog_usuarios/{GRUPO}/cuentas/{slug-usuario}
-   ═══════════════════════════════════════════════════════════════ */
 async function guardarCuentaEnNube(nombre, hash) {
   if (!db) return false;
   try {
@@ -694,9 +882,6 @@ function ocultarErrorUser(){ const el=document.getElementById('msjErrorUser'); i
 function mostrarInfoUser(m){ const el=document.getElementById('msjInfoUser'); if(!el)return; el.textContent='ℹ️ '+m; el.classList.add('visible'); }
 function ocultarInfoUser(){ const el=document.getElementById('msjInfoUser'); if(el) el.classList.remove('visible'); }
 
-/* ═══════════════════════════════════════════════════════════════
-   REGISTRO — Crea cuenta + doc de datos en paralelo
-   ═══════════════════════════════════════════════════════════════ */
 window.hacerRegistro = async function(){
   ocultarErrorUser(); ocultarInfoUser();
   const n=(document.getElementById('regNombre').value||'').trim();
@@ -715,15 +900,11 @@ window.hacerRegistro = async function(){
   guardarUsuariosRegistrados(lista);
 
   mostrarInfoUser('⏳ Creando cuenta...');
-
-  // 1) Credenciales en la nube (background)
   guardarCuentaEnNube(n.trim(), hash).catch(e => console.warn('Cuenta nube:', e));
 
-  // 2) Fijar usuario actual
   setUsuarioActual(n.trim());
   actualizarBarraUsuario();
 
-  // 3) Crear doc de datos INMEDIATAMENTE (vacío pero existente)
   const ref = refUsuario();
   if (ref) {
     try {
@@ -749,16 +930,12 @@ window.hacerRegistro = async function(){
   await iniciarSesionConUsuario(n.trim());
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   LOGIN — Rápido y con feedback
-   ═══════════════════════════════════════════════════════════════ */
 window.hacerLogin = async function(){
   ocultarErrorUser(); ocultarInfoUser();
   const n = (document.getElementById('loginNombre').value||'').trim();
   const p = (document.getElementById('loginPassword').value||'');
   if(!n || !p) return mostrarErrorUser('Completa usuario y contraseña.');
 
-  // Deshabilitar botón durante login
   const btns = document.querySelectorAll('#formLogin button');
   btns.forEach(b => b.disabled = true);
 
@@ -806,9 +983,6 @@ window.hacerLogin = async function(){
   }
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   INICIAR SESIÓN — Carga paralela (rápido)
-   ═══════════════════════════════════════════════════════════════ */
 async function iniciarSesionConUsuario(nombre){
   const anterior = getUsuarioActual();
   if(anterior && anterior !== nombre){
@@ -825,11 +999,9 @@ async function iniciarSesionConUsuario(nombre){
 
   const ref = refUsuario();
   const tareas = [];
-  // Migración de datos antiguos
   tareas.push(
     migrarDatosAntiguosSiExisten(nombre).catch(e => { console.warn('Migración:', e); return false; })
   );
-  // getDoc del usuario
   let snapData = null;
   if(ref){
     tareas.push(
@@ -842,7 +1014,6 @@ async function iniciarSesionConUsuario(nombre){
   }
   const [migro] = await Promise.all(tareas);
 
-  // Aplicar datos descargados
   if(!migro && snapData && snapData.exists && snapData.exists()){
     const d = snapData.data();
     if(d.estadoSesion){
@@ -874,7 +1045,7 @@ async function iniciarSesionConUsuario(nombre){
   iniciarEscucha();
   if(typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
 
-  // 🚫 NO llamar a reiniciarUIOffline() aquí
+  // 🚫 NO llamar a reiniciarUIOffline() aquí (borraba todo)
 
   actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
   if(typeof window.mostrarAviso === 'function') window.mostrarAviso('✅ Bienvenido, ' + nombre, 'ok');
@@ -894,9 +1065,6 @@ function mostrarBotonCerrarSesion(visible){
   if(btn) btn.style.display = visible ? 'inline-block' : 'none';
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CERRAR SESIÓN — Instantáneo, sync en background
-   ═══════════════════════════════════════════════════════════════ */
 window.cerrarSesion = async function(){
   const usuario = getUsuarioActual();
   if(!usuario){
@@ -908,7 +1076,6 @@ window.cerrarSesion = async function(){
   }
 
   actualizarEstadoNube('⏳ Guardando en segundo plano...', 'loading');
-  // Sync en background SIN bloquear (timeout MUY corto de 4s)
   try {
     if (db) {
       const ref = refUsuario();
@@ -926,7 +1093,6 @@ window.cerrarSesion = async function(){
     }
   } catch(e){ console.warn('Error preparando sync:', e); }
 
-  // Cerrar sesión INMEDIATAMENTE
   if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha = null; }
   syncActivo = false;
   if(typeof window.cancelarEscaneo === 'function') try{ window.cancelarEscaneo(); }catch(e){}
@@ -1047,10 +1213,6 @@ function iniciarEscucha(){
     if(cambios && typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage();
   }, (err)=>{ console.warn(err); actualizarEstadoNube('❌ Sin conexión: '+err.message,'error'); });
 }
-
-/* ═══════════════════════════════════════════════════════════════
-   FORZAR SINCRONIZACIÓN — Timeout 15s (antes 45s)
-   ═══════════════════════════════════════════════════════════════ */
 window.forzarSincronizacion = async function(){
   if(!db){ alert('Firebase no configurado.'); return false; }
   const ref=refUsuario(); if(!ref){ alert('Primero selecciona usuario.'); return false; }
@@ -1080,7 +1242,6 @@ window.forzarSincronizacion = async function(){
     }
   } finally{ guardadoEnProgreso=false; }
 };
-
 window.cargarDeNube = async function(){
   if(!db){ alert('Firebase no configurado.'); return; }
   const ref=refUsuario(); if(!ref){ alert('Primero selecciona usuario.'); return; }
@@ -1213,6 +1374,54 @@ function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; const [a,b]=h1.split(':'
 function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const dn=dt.getDay()||7; dt.setDate(dt.getDate()+4-dn); const ys=new Date(dt.getFullYear(),0,1); return Math.ceil((((dt-ys)/86400000)+1)/7); }
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
+
+/* ═══════════════════════════════════════════════════════════════
+   📸 REGLAS DE PRIVACIDAD FOTOGRÁFICA
+   ═══════════════════════════════════════════════════════════════ */
+window.abrirModalReglasFoto = function(){
+  const m = document.getElementById('modalReglasFoto');
+  const chk = document.getElementById('chkAceptoReglas');
+  const btn = document.getElementById('btnAbrirCamara');
+  const lbl = document.getElementById('lblReglasChk');
+  if(chk) chk.checked = false;
+  if(lbl) lbl.classList.remove('activo');
+  if(btn) btn.disabled = true;
+  if(m) m.classList.add('visible');
+};
+
+window.cerrarModalReglasFoto = function(){
+  const m = document.getElementById('modalReglasFoto');
+  if(m) m.classList.remove('visible');
+};
+
+window.toggleBotonCamara = function(){
+  const chk = document.getElementById('chkAceptoReglas');
+  const btn = document.getElementById('btnAbrirCamara');
+  if(btn) btn.disabled = !(chk && chk.checked);
+};
+
+window.confirmarYabrirCamara = function(){
+  const chk = document.getElementById('chkAceptoReglas');
+  if(!chk || !chk.checked){
+    mostrarAviso('⚠️ Debes aceptar las reglas primero', 'error');
+    return;
+  }
+  cerrarModalReglasFoto();
+  setTimeout(() => {
+    document.getElementById('inputFotoVisita')?.click();
+  }, 250);
+};
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){
+    const m = document.getElementById('modalReglasFoto');
+    if(m && m.classList.contains('visible')) cerrarModalReglasFoto();
+  }
+});
+
+document.getElementById('modalReglasFoto')?.addEventListener('click', (e) => {
+  if(e.target.id === 'modalReglasFoto') cerrarModalReglasFoto();
+});
 
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE, sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
@@ -1707,7 +1916,7 @@ function imprimirContenidoHTML(titulo){
     let area=document.getElementById('areaImpresion');
     if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
     const clon=fuente.cloneNode(true);
-    clon.querySelectorAll('.no-print,script,button,#lectorQR,#lectorQRBanco,.busqueda-box,#avisoDuplicado,#barraUsuario,#modalUsuario,#modalPWA').forEach(el=>el.remove());
+    clon.querySelectorAll('.no-print,script,button,#lectorQR,#lectorQRBanco,.busqueda-box,#avisoDuplicado,#barraUsuario,#modalUsuario,#modalPWA,#modalReglasFoto,.aviso-reglas-inline,.rules-seccion').forEach(el=>el.remove());
     if(clon.style && clon.style.display==='none') clon.style.display='';
     clon.querySelectorAll('[style*="display: none"],[style*="display:none"]').forEach(el=>{ el.style.display=''; });
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
@@ -2066,7 +2275,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
