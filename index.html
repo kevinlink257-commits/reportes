@@ -143,6 +143,8 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 #barraUsuario button.btn-darkmode:hover{background:#4a607a}
 #barraUsuario button.btn-pwa{background:#f39c12}
 #barraUsuario button.btn-pwa:hover{background:#e67e22}
+#barraUsuario button.btn-logout{background:#e74c3c}
+#barraUsuario button.btn-logout:hover{background:#c0392b}
 #modalUsuario{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px}
 #modalUsuario.visible{display:flex}
 .modal-content{background:var(--bg-container);color:var(--text-primary);border-radius:12px;padding:25px;max-width:420px;width:100%;box-shadow:0 10px 40px rgba(0,0,0,.4);animation:aparecer .3s ease;max-height:92vh;overflow-y:auto}
@@ -162,6 +164,8 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 .tabs-user button:hover:not(.activo){background:var(--bg-card)}
 .msj-error-user{background:#f8d7da;color:#721c24;padding:10px;border-radius:6px;font-size:.85em;margin-top:10px;display:none;text-align:center}
 .msj-error-user.visible{display:block}
+.msj-info-user{background:#d1ecf1;color:#0c5460;padding:10px;border-radius:6px;font-size:.85em;margin-top:10px;display:none;text-align:center}
+.msj-info-user.visible{display:block}
 .contador-banco{font-size:.85rem;color:var(--text-heading);margin-top:8px;text-align:center;font-weight:bold}
 .contador-banco span{color:#e74c3c}.contador-banco .usados{color:#1abc9c}.contador-banco .disponibles{color:#f39c12}
 #modalPWA{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100001;padding:20px}
@@ -197,9 +201,6 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 .btn-descargar-foto{background:#2ecc71;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-weight:bold;font-size:.9em;display:inline-block}
 .btn-descargar-foto:hover{background:#27ae60}
 
-/* ═══════════════════════════════════════════════════════════════
-   ESTILOS DE IMPRESIÓN — SIN CORTES, COLORES EXACTOS
-   ═══════════════════════════════════════════════════════════════ */
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#f5f5f5!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--bg-chip:#e8f4fc!important;--bg-chip-used:#d4edda!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#2c3e50!important;--text-muted:#666!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-main:transparent!important;--table-header-bg:#2c3e50!important;--table-header-color:#fff!important}
   @page{size:A4 portrait;margin:10mm 8mm 10mm 8mm}
@@ -250,78 +251,35 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
   body.modo-reporte-diario .rd-tabla tr:nth-child(even) td{background:#f8f9fa!important}
   body.modo-reporte-diario .rd-tabla tr.rd-total td{background:#e8f8f5!important;font-weight:bold;border-top:2px solid #1abc9c!important}
   body.modo-reporte-diario .rd-tabla-estados{max-width:100%}
-
-  /* ═══════════════════════════════════════════════════════════
-     📸 PÁGINA DE FOTOS — INDIVISIBLE Y SIN CORTES
-     25 fotos por hoja (5 columnas × 5 filas)
-     ═══════════════════════════════════════════════════════════ */
   body.modo-reporte-diario .rd-fotos-section{page-break-inside:auto;margin-top:10px}
-  body.modo-reporte-diario .rd-fotos-page{
-    page-break-inside:avoid!important;
-    break-inside:avoid!important;
-    page-break-after:always!important;
-    break-after:page!important;
-    width:100%!important;
-    max-width:194mm!important;
-    overflow:hidden!important;
-    padding-top:2mm;
-    display:block
-  }
+  body.modo-reporte-diario .rd-fotos-page{page-break-inside:avoid!important;break-inside:avoid!important;page-break-after:always!important;break-after:page!important;width:100%!important;max-width:194mm!important;overflow:hidden!important;padding-top:2mm;display:block}
   body.modo-reporte-diario .rd-fotos-page:last-child{page-break-after:auto!important;break-after:auto!important}
   body.modo-reporte-diario .rd-fotos-page-header{font-size:7.5pt;color:#2c3e50;font-weight:bold;text-align:right;margin-bottom:2mm;padding-bottom:1mm;border-bottom:1px solid #ccc}
   body.modo-reporte-diario .rd-fotos-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;width:100%;page-break-inside:avoid!important;break-inside:avoid!important}
-  body.modo-reporte-diario .rd-foto-item{
-    border:1px solid #999!important;border-radius:2px;overflow:hidden;
-    page-break-inside:avoid!important;break-inside:avoid!important;
-    background:#fff!important;display:flex;flex-direction:column;
-    height:42mm
-  }
+  body.modo-reporte-diario .rd-foto-item{border:1px solid #999!important;border-radius:2px;overflow:hidden;page-break-inside:avoid!important;break-inside:avoid!important;background:#fff!important;display:flex;flex-direction:column;height:42mm}
   body.modo-reporte-diario .rd-foto-item img{width:100%;height:30mm;object-fit:cover;display:block;flex-shrink:0}
   body.modo-reporte-diario .rd-foto-caption{font-size:5.5pt;text-align:center;padding:1px 2px;background:#f8f9fa!important;color:#333;border-top:1px solid #ddd;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-grow:1}
   body.modo-reporte-diario .rd-foto-caption strong{color:#2c3e50}
-
-  /* ═══════════════════════════════════════════════════════════
-     🖼️ PÁGINA DEL ÁLBUM — INDIVISIBLE Y SIN CORTES
-     12 fotos por hoja (4 columnas × 3 filas)
-     ═══════════════════════════════════════════════════════════ */
   body.modo-album .reporte-diario{width:100%;max-width:194mm;margin:0 auto;padding:0!important}
   body.modo-album .rd-header{text-align:center;border-bottom:3px solid #2c3e50;padding-bottom:6px;margin-bottom:8px;page-break-after:avoid}
   body.modo-album .rd-header h1{color:#2c3e50!important;font-size:15pt;margin:0 0 4px 0}
   body.modo-album .rd-header .rd-subtitle{font-size:10pt;color:#555;font-weight:bold;margin:3px 0}
   body.modo-album .rd-info{display:flex;justify-content:space-around;font-size:9pt;color:#333;flex-wrap:wrap;gap:5px;margin-top:3px}
-  body.modo-album .rd-album-page{
-    page-break-inside:avoid!important;
-    break-inside:avoid!important;
-    page-break-after:always!important;
-    break-after:page!important;
-    width:100%!important;
-    max-width:194mm!important;
-    overflow:hidden!important;
-    padding-top:2mm;
-    display:block
-  }
+  body.modo-album .rd-album-page{page-break-inside:avoid!important;break-inside:avoid!important;page-break-after:always!important;break-after:page!important;width:100%!important;max-width:194mm!important;overflow:hidden!important;padding-top:2mm;display:block}
   body.modo-album .rd-album-page:last-child{page-break-after:auto!important;break-after:auto!important}
   body.modo-album .rd-album-page-header{font-size:7.5pt;color:#2c3e50;font-weight:bold;text-align:right;margin-bottom:2mm;padding-bottom:1mm;border-bottom:1px solid #ccc}
   body.modo-album .rd-album-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%;page-break-inside:avoid!important;break-inside:avoid!important}
-  body.modo-album .rd-album-item{
-    border:1px solid #999!important;border-radius:3px;overflow:hidden;
-    page-break-inside:avoid!important;break-inside:avoid!important;
-    background:#fff!important;display:flex;flex-direction:column;
-    height:58mm
-  }
+  body.modo-album .rd-album-item{border:1px solid #999!important;border-radius:3px;overflow:hidden;page-break-inside:avoid!important;break-inside:avoid!important;background:#fff!important;display:flex;flex-direction:column;height:58mm}
   body.modo-album .rd-album-item img{width:100%;height:40mm;object-fit:cover;display:block;flex-shrink:0}
   body.modo-album .rd-album-caption{font-size:6pt;text-align:center;padding:2px 3px;background:#f0f0f0!important;color:#333;line-height:1.25;overflow:hidden;flex-grow:1}
   body.modo-album .rd-album-caption strong{color:#2c3e50}
   body.modo-album .rd-footer{text-align:center;font-size:7pt;color:#999;margin-top:6mm;border-top:1px dashed #ccc;padding-top:3px}
-
   body.modo-reporte-diario .rd-firmas{display:flex;justify-content:space-around;margin-top:15mm;page-break-inside:avoid}
   body.modo-reporte-diario .rd-firma{width:40%;text-align:center;font-size:9pt}
   body.modo-reporte-diario .rd-firma-linea{border-top:1px solid #333;margin-bottom:4px;height:1px}
   body.modo-reporte-diario .rd-firma-nombre{font-size:8pt;color:#666;margin-top:2px}
   body.modo-reporte-diario .rd-footer{text-align:center;font-size:7pt;color:#999;margin-top:6mm;border-top:1px dashed #ccc;padding-top:3px;page-break-inside:avoid}
   body.modo-reporte-diario .rd-nota{font-size:7.5pt;color:#555;text-align:center;font-style:italic;margin:4px 0}
-  .page-break-avoid{page-break-inside:avoid!important}
-  .page-break-before{page-break-before:always!important}
 }
 </style>
 </head>
@@ -335,7 +293,7 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
   <div class="acciones-bar">
     <button class="btn-darkmode" onclick="toggleDarkMode()" id="btnDarkMode" title="Modo oscuro">🌙</button>
     <button class="btn-pwa" onclick="instalarPWA()" id="btnInstalarPWA" style="display:none;" title="Instalar app">📲</button>
-    <button onclick="cambiarUsuario()" title="Cambiar usuario">🔄</button>
+    <button class="btn-logout" onclick="cerrarSesion()" id="btnCerrarSesion" title="Cerrar sesión" style="display:none;">🚪</button>
   </div>
 </div>
 
@@ -361,6 +319,7 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
       <button onclick="hacerRegistro()">✨ Crear cuenta</button>
     </div>
     <div id="msjErrorUser" class="msj-error-user"></div>
+    <div id="msjInfoUser" class="msj-info-user"></div>
     <div id="listaUsuariosGuardados"></div>
     <button class="secundario" onclick="olvidarUsuariosLocales()" style="margin-top:15px;font-size:.8em;">🗑️ Olvidar usuarios de este dispositivo</button>
   </div>
@@ -383,7 +342,6 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 
 <div class="container">
   <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
-
   <div class="section">
     <h2>1. Tiempos Base de Salida</h2>
     <div class="no-print">
@@ -540,6 +498,9 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
       <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
       <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
     </div>
+    <div class="btn-group" style="margin-top:8px;">
+      <button class="btn-reiniciar" onclick="cerrarSesion()" style="background:#e74c3c;">🚪 Cerrar Sesión</button>
+    </div>
     <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
     <h3 style="font-size:.95em;margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
     <div class="btn-group">
@@ -640,6 +601,44 @@ function refUsuario(){ const u=getUsuarioActual(); if(!u||!db)return null; retur
 window.refUsuario = refUsuario;
 window.getUsuarioActual = getUsuarioActual;
 
+/* ═══════════════════════════════════════════════════════════════
+   ✨ NUEVO: SINCRONIZACIÓN DE CUENTAS EN LA NUBE
+   Las credenciales se guardan en:
+   /colserlog_usuarios/{GRUPO}/cuentas/{slug-usuario}
+   ═══════════════════════════════════════════════════════════════ */
+async function guardarCuentaEnNube(nombre, hash) {
+  if (!db) return false;
+  try {
+    const slug = slugify(nombre) || 'sin-nombre';
+    const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
+    await setDoc(ref, {
+      nombre: nombre.trim(),
+      hash: hash,
+      fechaRegistro: new Date().toISOString(),
+      ultimaSesion: new Date().toISOString()
+    }, { merge: true });
+    console.log('✅ Cuenta sincronizada a la nube:', nombre);
+    return true;
+  } catch(e) {
+    console.warn('⚠️ No se pudo sincronizar cuenta:', e);
+    return false;
+  }
+}
+
+async function buscarCuentaEnNube(nombre) {
+  if (!db) return null;
+  try {
+    const slug = slugify(nombre) || 'sin-nombre';
+    const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
+    const snap = await getDoc(ref);
+    if (snap.exists()) return snap.data();
+    return null;
+  } catch(e) {
+    console.warn('⚠️ Error buscando cuenta en nube:', e);
+    return null;
+  }
+}
+
 function aplicarDarkMode(activo){
   document.body.classList.add('theme-switching');
   document.body.classList.toggle('dark', activo);
@@ -688,14 +687,16 @@ window.cambiarTabUser = function(tab){
   document.getElementById('formRegistro').style.display = esLogin?'none':'block';
   document.getElementById('tituloModalUser').textContent = esLogin?'🔑 Iniciar sesión':'✨ Crear cuenta';
   document.getElementById('subtituloModalUser').textContent = esLogin?'Ingresa tu usuario y contraseña.':'Registra un usuario y contraseña.';
-  ocultarErrorUser();
+  ocultarErrorUser(); ocultarInfoUser();
   setTimeout(()=>{ (esLogin?document.getElementById('loginNombre'):document.getElementById('regNombre'))?.focus(); },150);
 };
-function mostrarErrorUser(m){ const el=document.getElementById('msjErrorUser'); if(!el)return; el.textContent='⚠️ '+m; el.classList.add('visible'); }
+function mostrarErrorUser(m){ const el=document.getElementById('msjErrorUser'); if(!el)return; el.textContent='⚠️ '+m; el.classList.add('visible'); ocultarInfoUser(); }
 function ocultarErrorUser(){ const el=document.getElementById('msjErrorUser'); if(el) el.classList.remove('visible'); }
+function mostrarInfoUser(m){ const el=document.getElementById('msjInfoUser'); if(!el)return; el.textContent='ℹ️ '+m; el.classList.add('visible'); }
+function ocultarInfoUser(){ const el=document.getElementById('msjInfoUser'); if(el) el.classList.remove('visible'); }
 
 window.hacerRegistro = async function(){
-  ocultarErrorUser();
+  ocultarErrorUser(); ocultarInfoUser();
   const n=(document.getElementById('regNombre').value||'').trim();
   const p1=document.getElementById('regPassword').value||'';
   const p2=document.getElementById('regPassword2').value||'';
@@ -704,47 +705,193 @@ window.hacerRegistro = async function(){
   if(!/^[a-zA-Z0-9áéíóúñÑ\s._-]+$/.test(n)) return mostrarErrorUser('Caracteres no permitidos.');
   if(p1.length<4) return mostrarErrorUser('Contraseña muy corta.');
   if(p1!==p2) return mostrarErrorUser('Las contraseñas no coinciden.');
-  if(buscarUsuario(n)) return mostrarErrorUser('Ese usuario ya existe.');
+  if(buscarUsuario(n)) return mostrarErrorUser('Ese usuario ya existe. Inicia sesión.');
+
   const hash=await hashPassword(p1);
-  const l=getUsuariosRegistrados(); l.push({nombre:n.trim(),hash,fechaRegistro:new Date().toISOString()});
-  guardarUsuariosRegistrados(l);
+  const lista=getUsuariosRegistrados();
+  lista.push({nombre:n.trim(),hash,fechaRegistro:new Date().toISOString()});
+  guardarUsuariosRegistrados(lista);
+
+  // ✨ Guardar la cuenta en la nube para que persista entre dispositivos/sesiones
+  mostrarInfoUser('Guardando cuenta en la nube...');
+  const ok = await guardarCuentaEnNube(n.trim(), hash);
+  if (ok) { mostrarInfoUser('✅ Cuenta creada y guardada. Entrando...'); }
+  else { mostrarInfoUser('⚠️ Cuenta creada localmente (se sincronizará cuando haya internet).'); }
+
+  await new Promise(r => setTimeout(r, 400));
   await iniciarSesionConUsuario(n.trim());
 };
+
 window.hacerLogin = async function(){
-  ocultarErrorUser();
+  ocultarErrorUser(); ocultarInfoUser();
   const n=(document.getElementById('loginNombre').value||'').trim();
   const p=document.getElementById('loginPassword').value||'';
   if(!n||!p) return mostrarErrorUser('Completa usuario y contraseña.');
-  const u=buscarUsuario(n); if(!u) return mostrarErrorUser('Usuario no encontrado.');
-  const h=await hashPassword(p); if(h!==u.hash) return mostrarErrorUser('Contraseña incorrecta.');
-  await iniciarSesionConUsuario(u.nombre);
+
+  let user = buscarUsuario(n);
+
+  // ✨ NUEVO: si no está local, buscar en la nube
+  if (!user) {
+    mostrarInfoUser('Verificando en la nube...');
+    actualizarEstadoNube('⏳ Buscando usuario en la nube...', 'loading');
+    const nubeUser = await buscarCuentaEnNube(n);
+    if (nubeUser) {
+      // Guardar localmente para futuros inicios rápidos
+      const lista = getUsuariosRegistrados();
+      const idx = lista.findIndex(u => u.nombre.toLowerCase() === nubeUser.nombre.toLowerCase());
+      if (idx === -1) {
+        lista.push({ nombre: nubeUser.nombre, hash: nubeUser.hash, fechaRegistro: nubeUser.fechaRegistro });
+      } else {
+        lista[idx].hash = nubeUser.hash;
+      }
+      guardarUsuariosRegistrados(lista);
+      user = nubeUser;
+      mostrarInfoUser('✅ Cuenta encontrada en la nube.');
+      console.log('✅ Usuario recuperado desde la nube:', n);
+    } else {
+      ocultarInfoUser();
+      actualizarEstadoNube('❌ Usuario no encontrado', 'error');
+      return mostrarErrorUser('Usuario no encontrado. Verifica el nombre o regístrate.');
+    }
+  }
+
+  const h=await hashPassword(p);
+  if(h!==user.hash) return mostrarErrorUser('Contraseña incorrecta.');
+
+  // Actualizar fecha de última sesión en la nube
+  guardarCuentaEnNube(user.nombre, user.hash);
+
+  await iniciarSesionConUsuario(user.nombre);
 };
 
 async function iniciarSesionConUsuario(nombre){
   const anterior=getUsuarioActual();
-  if(anterior && anterior!==nombre){ try{ await window.forzarSincronizacion(); }catch(e){} limpiarTodoLocalStorage(); if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){} }
-  setUsuarioActual(nombre); actualizarBarraUsuario();
+
+  // Si venimos de otro usuario, guardar antes de cambiar
+  if(anterior && anterior!==nombre){
+    try{ actualizarEstadoNube('⏳ Guardando datos anteriores...','loading'); await window.forzarSincronizacion(); }catch(e){}
+    limpiarTodoLocalStorage();
+    if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
+  }
+
+  setUsuarioActual(nombre);
+  actualizarBarraUsuario();
   document.getElementById('modalUsuario').classList.remove('visible');
+  actualizarEstadoNube('⏳ Cargando tus datos desde la nube...', 'loading');
+
+  // 1. Migrar datos antiguos si aplica
   const migro = await migrarDatosAntiguosSiExisten(nombre);
-  if(!migro){ const ref=refUsuario(); if(ref){ try{ const snap=await getDoc(ref); if(snap.exists()){ const d=snap.data(); if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion)); if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado)); if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); } if(d.version) ultimaVersionLocal=d.version; } }catch(e){ console.warn(e); } } }
-  syncActivo=true; iniciarEscucha();
+
+  // 2. Cargar datos del usuario desde Firebase (con timeout)
+  if(!migro){
+    const ref=refUsuario();
+    if(ref){
+      try{
+        const snap = await Promise.race([
+          getDoc(ref),
+          new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 15s')), 15000))
+        ]);
+        if(snap.exists()){
+          const d = snap.data();
+          let cargado = 0;
+          if(d.estadoSesion){
+            localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
+            cargado++;
+          }
+          if(d.entregasDiariasDetallado){
+            localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
+            cargado++;
+          }
+          if(d.tiemposBase){
+            for(const k in d.tiemposBase){
+              if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
+            }
+          }
+          if(d.version) ultimaVersionLocal = d.version;
+          console.log('✅ Datos cargados desde la nube. Campos:', cargado);
+        } else {
+          console.log('ℹ️ Usuario nuevo en la nube (sin datos previos)');
+        }
+      } catch(e){
+        console.warn('⚠️ No se pudieron cargar datos remotos:', e.message);
+        // Si estamos offline usamos lo que quede en localStorage
+      }
+    }
+  }
+
+  // 3. Activar sync y escucha
+  syncActivo = true;
+  iniciarEscucha();
+
+  // 4. ✅ Recargar la UI con los datos ya cargados
   if(typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage();
-  if(typeof window.reiniciarUIOffline==='function') window.reiniciarUIOffline();
-  actualizarEstadoNube('☁️ Conectado como '+nombre,'ok');
-  if(typeof window.mostrarAviso==='function') window.mostrarAviso('✅ Bienvenido, '+nombre,'ok');
-  try{ const tgl=document.getElementById('toggleFotosNube'); if(tgl){ tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE)==='true'; localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked?'true':'false'); } }catch(e){}
+
+  // 🚫 IMPORTANTE: NO llamar a reiniciarUIOffline() aquí.
+  //    Eso reseteaba todo a vacío y sobreescribía Firebase con datos vacíos.
+
+  actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
+  if(typeof window.mostrarAviso==='function') window.mostrarAviso('✅ Bienvenido, ' + nombre, 'ok');
+  mostrarBotonCerrarSesion(true);
+
+  try{
+    const tgl=document.getElementById('toggleFotosNube');
+    if(tgl){
+      tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE)==='true';
+      localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked?'true':'false');
+    }
+  }catch(e){}
 }
 
+function mostrarBotonCerrarSesion(visible){
+  const btn = document.getElementById('btnCerrarSesion');
+  if(btn) btn.style.display = visible ? 'inline-block' : 'none';
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ✨ NUEVO: CERRAR SESIÓN
+   ═══════════════════════════════════════════════════════════════ */
+window.cerrarSesion = async function(){
+  const usuario = getUsuarioActual();
+  if(!usuario){
+    mostrarModalUsuario();
+    return;
+  }
+  if(!confirm('🚪 ¿Cerrar sesión de "' + usuario + '"?\n\n✅ Tus datos se guardarán en la nube\n✅ Podrás volver a entrar cuando quieras\n✅ Otra persona podrá usar la app en este dispositivo')){
+    return;
+  }
+  actualizarEstadoNube('⏳ Guardando antes de cerrar...', 'loading');
+  try { await window.forzarSincronizacion(); } catch(e){ console.warn('Sync antes de cerrar:', e); }
+
+  if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
+  syncActivo = false;
+  if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
+
+  limpiarTodoLocalStorage();
+  try{ localStorage.removeItem(CLAVE_USUARIO_LOCAL); }catch(e){}
+  actualizarBarraUsuario();
+  if(typeof window.reiniciarUIOffline==='function') window.reiniciarUIOffline();
+  mostrarBotonCerrarSesion(false);
+  actualizarEstadoNube('🚪 Sesión cerrada. Inicia sesión para continuar.', 'loading');
+  if(typeof window.mostrarAviso==='function') window.mostrarAviso('🚪 Sesión cerrada', 'ok');
+  mostrarModalUsuario();
+};
+
 window.olvidarUsuariosLocales = function(){
-  if(!confirm('⚠️ Se borrarán TODOS los usuarios locales.\n\n¿Continuar?')) return;
+  if(!confirm('⚠️ Se borrarán TODOS los usuarios locales.\n\nLas cuentas seguirán en la nube y podrás iniciar sesión de nuevo.')) return;
   if(!confirm('⚠️ ÚLTIMA CONFIRMACIÓN.')) return;
   try{ localStorage.removeItem(CLAVE_USUARIOS_REGISTRADOS); }catch(e){}
   renderizarListaUsuarios();
-  mostrarErrorUser('Usuarios borrados.');
+  mostrarInfoUser('Usuarios locales borrados. Inicia sesión con tus credenciales.');
 };
 function limpiarTodoLocalStorage(){ try{ localStorage.removeItem('estadoSesion'); localStorage.removeItem('entregasDiariasDetallado'); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); } }catch(e){} }
 window.limpiarTodoLocalStorage = limpiarTodoLocalStorage;
-function actualizarBarraUsuario(){ const u=getUsuarioActual(); const s=document.getElementById('infoUsuario'), a=document.getElementById('avatarUsuario'), t=document.getElementById('tituloUsuarioHistorial'); if(!s||!a)return; if(u){ s.textContent=u; a.textContent=u.charAt(0).toUpperCase(); if(t) t.textContent='— '+u; } else { s.textContent='Sin usuario'; a.textContent='👤'; if(t) t.textContent=''; } }
+function actualizarBarraUsuario(){
+  const u=getUsuarioActual();
+  const s=document.getElementById('infoUsuario'), a=document.getElementById('avatarUsuario'), t=document.getElementById('tituloUsuarioHistorial');
+  if(!s||!a) return;
+  if(u){ s.textContent=u; a.textContent=u.charAt(0).toUpperCase(); if(t) t.textContent='— '+u; mostrarBotonCerrarSesion(true); }
+  else { s.textContent='Sin usuario'; a.textContent='👤'; if(t) t.textContent=''; mostrarBotonCerrarSesion(false); }
+}
 function renderizarListaUsuarios(){
   const c=document.getElementById('listaUsuariosGuardados'); if(!c)return; c.innerHTML='';
   const us=getUsuariosRegistrados(); if(!us.length)return;
@@ -764,6 +911,7 @@ function mostrarModalUsuario(){
   setTimeout(()=>document.getElementById('loginNombre')?.focus(),200);
 }
 window.mostrarModalUsuario = mostrarModalUsuario;
+
 window.cambiarUsuario = async function(){
   const u=getUsuarioActual();
   if(u){ if(!confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos de "'+u+'".')) return; actualizarEstadoNube('⏳ Guardando...','loading'); try{ await window.forzarSincronizacion(); }catch(e){} }
@@ -813,7 +961,7 @@ function iniciarEscucha(){
   if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
   const ref=refUsuario(); if(!ref){ actualizarEstadoNube('⚠️ Esperando usuario','loading'); return; }
   unsubscribeEscucha=onSnapshot(ref, (snap)=>{
-    if(!snap.exists()){ actualizarEstadoNube('☁️ Conectado','ok'); return; }
+    if(!snap.exists()){ actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún','ok'); return; }
     const d=snap.data();
     if(guardadoPendiente || guardadoEnProgreso) return;
     if(d.version && d.version===ultimaVersionLocal) return;
@@ -899,6 +1047,7 @@ async function migrarDatosAntiguosSiExisten(nombre){
   try{ const refV=doc(db,'colserlog_usuarios',CODIGO_GRUPO); const snap=await getDoc(refV); if(!snap.exists()) return false; if(snap.data()._migrado) return false; if(!confirm('📦 Datos antiguos. ¿Importar?')){ await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true}); return false; } const d=snap.data(); const refN=refUsuario(); await setDoc(refN,{ nombre, grupo:CODIGO_GRUPO, estadoSesion:d.estadoSesion||deleteField(), entregasDiariasDetallado:d.entregasDiariasDetallado||{}, tiemposBase:d.tiemposBase||{}, migradoDe:CODIGO_GRUPO, fechaMigracion:new Date().toISOString(), version:Date.now() },{merge:true}); await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true}); if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion)); if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado)); if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); } alert('✅ Datos importados.'); return true; }
   catch(e){ console.warn(e); return false; }
 }
+
 window.addEventListener('load', ()=>{
   inyectarManifest(); cargarDarkMode();
   const pref=localStorage.getItem('syncAutomaticoFirebase'); syncAutomaticoActivo = pref===null?true:pref==='true';
@@ -1083,7 +1232,7 @@ function guardarEstadoCompleto(){
     localStorage.setItem('estadoSesion', json);
     guardarDiaActual();
     if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
-  }catch(err){ console.warn(err); if(String(err).includes('Quota')||String(err).includes('quota')){ mostrarAviso('❌ localStorage lleno','error'); alert('❌ Sin espacio en localStorage.\n\nExporta respaldo a Word y compacta historial.'); } else mostrarAviso('⚠️ Error guardando','error'); }
+  }catch(err){ console.warn(err); if(String(err).includes('Quota')||String(err).includes('quota')){ mostrarAviso('❌ localStorage lleno','error'); alert('❌ Sin espacio en localStorage.'); } else mostrarAviso('⚠️ Error guardando','error'); }
 }
 function cargarEstadoCompleto(){
   try{
@@ -1332,17 +1481,10 @@ function esperarImagenesCargadas(contenedor){
   if(!imgs.length) return Promise.resolve();
   return Promise.all(imgs.map(img=>{
     if(img.complete && img.naturalWidth>0) return Promise.resolve();
-    return new Promise(res=>{
-      const to=setTimeout(res,5000);
-      img.onload=()=>{ clearTimeout(to); res(); };
-      img.onerror=()=>{ clearTimeout(to); res(); };
-    });
+    return new Promise(res=>{ const to=setTimeout(res,5000); img.onload=()=>{ clearTimeout(to); res(); }; img.onerror=()=>{ clearTimeout(to); res(); }; });
   }));
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   🖨️ INFORME DIARIO COMPLETO — SIN CORTES
-   ═══════════════════════════════════════════════════════════════ */
 window.imprimirReporteDiario = async function(){
   if(!visitas.length){ if(!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return; }
   const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
@@ -1354,10 +1496,8 @@ window.imprimirReporteDiario = async function(){
   const horas=Math.floor(totalMinutosVisitas/60), mins=totalMinutosVisitas%60;
   const cUnicos=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean)).size;
   const tFotos=visitas.reduce((s,v)=>s+(Array.isArray(v.fotos)?v.fotos.length:0),0);
-
   const chartEstados=generarChartEstadosHorizontal(820,520);
   const chartDona=generarChartDona(500,520);
-
   const iC=localStorage.getItem('tiempoBase_inicioCarga')||'—';
   const fC=localStorage.getItem('tiempoBase_finCarga')||'—';
   const sE=localStorage.getItem('tiempoBase_salidaEmpresa')||'—';
@@ -1389,8 +1529,8 @@ window.imprimirReporteDiario = async function(){
         <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
       </section>
       <section class="rd-charts">
-        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución por estado"></div>
-        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No Entregados"></div>
+        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
+        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
       </section>
       <section class="rd-tiempos">
         <h3>⏱️ Tiempos Base del Día</h3>
@@ -1398,23 +1538,16 @@ window.imprimirReporteDiario = async function(){
           <tr><td><strong>Inicio carga</strong><br>${iC}</td><td><strong>Fin carga</strong><br>${fC}</td><td><strong>Salida empresa</strong><br>${sE}</td><td><strong>Primera entrega</strong><br>${pE}</td></tr>
           <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
         </table>
-      </section>
-  `;
+      </section>`;
 
   const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
   if(eCV.length){
-    html+=`<section class="rd-estados"><h3>📈 Distribución por Estado (detalle)</h3>
-      <table class="rd-tabla rd-tabla-estados"><thead><tr>
-        <th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th>
-      </tr></thead><tbody>`;
+    html+=`<section class="rd-estados"><h3>📈 Distribución por Estado (detalle)</h3><table class="rd-tabla rd-tabla-estados"><thead><tr><th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th></tr></thead><tbody>`;
     eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); html+=`<tr><td style="text-align:left;">${k}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td><div style="background:#e0e0e0;border-radius:2px;overflow:hidden;height:9px;"><div style="background:#3498db;height:100%;width:${bw}%;"></div></div></td></tr>`; });
     html+=`<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>100%</strong></td><td></td></tr></tbody></table></section>`;
   }
 
-  html+=`<section class="rd-visitas"><h3>📋 Detalle de Visitas (${totalVisitas})</h3>
-    <table class="rd-tabla"><thead><tr>
-      <th style="width:4%">#</th><th style="width:8%">Llegada</th><th style="width:8%">Salida</th><th style="width:7%">Tiempo</th><th style="width:15%">Código</th><th style="width:18%">Estado</th><th style="width:5%">📸</th><th>Descripción</th>
-    </tr></thead><tbody>`;
+  html+=`<section class="rd-visitas"><h3>📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:4%">#</th><th style="width:8%">Llegada</th><th style="width:8%">Salida</th><th style="width:7%">Tiempo</th><th style="width:15%">Código</th><th style="width:18%">Estado</th><th style="width:5%">📸</th><th>Descripción</th></tr></thead><tbody>`;
   if(!visitas.length){ html+=`<tr><td colspan="8" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas registradas</td></tr>`; }
   else{
     visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; html+=`<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#27ae60':'#999'};">${nf>0?nf:'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`; });
@@ -1425,13 +1558,7 @@ window.imprimirReporteDiario = async function(){
   if(bancoCodigos.length){
     const us=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean));
     const uc=bancoCodigos.filter(c=>us.has(c)).length, disp=bancoCodigos.length-uc;
-    html+=`<section class="rd-banco"><h3>📥 Resumen del Banco de Códigos</h3>
-      <table class="rd-tabla-tiempos"><tr>
-        <td><strong>Total en banco</strong><br>${bancoCodigos.length}</td>
-        <td><strong>✓ Usados</strong><br>${uc}</td>
-        <td><strong>⏳ Disponibles</strong><br>${disp}</td>
-        <td><strong>📦 Únicos visitados</strong><br>${cUnicos}</td>
-      </tr></table></section>`;
+    html+=`<section class="rd-banco"><h3>📥 Resumen del Banco de Códigos</h3><table class="rd-tabla-tiempos"><tr><td><strong>Total en banco</strong><br>${bancoCodigos.length}</td><td><strong>✓ Usados</strong><br>${uc}</td><td><strong>⏳ Disponibles</strong><br>${disp}</td><td><strong>📦 Únicos visitados</strong><br>${cUnicos}</td></tr></table></section>`;
   }
 
   const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
@@ -1440,29 +1567,18 @@ window.imprimirReporteDiario = async function(){
     const df=await obtenerFotosDB(ids);
     const planas=[];
     vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length }); }); });
-    const FPP=25;
-    const totalP=Math.ceil(planas.length/FPP);
-    html+=`<section class="rd-fotos-section"><h3>📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''})</h3>
-      <p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
+    const FPP=25; const totalP=Math.ceil(planas.length/FPP);
+    html+=`<section class="rd-fotos-section"><h3>📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''})</h3><p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
     for(let p=0;p<planas.length;p+=FPP){
       const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-fotos-page">
-        <div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP} (fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length})</div>
-        <div class="rd-fotos-grid">`;
+      html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP} (fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length})</div><div class="rd-fotos-grid">`;
       fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:monospace;">${f.codigo}</span>`:'Sin código'}</div></div>`; });
       html+=`</div></div>`;
     }
     html+=`</section>`;
   }
 
-  html+=`
-      <section class="rd-firmas">
-        <div class="rd-firma"><div class="rd-firma-linea"></div><div>Firma Mensajero</div><div class="rd-firma-nombre">${usuario}</div></div>
-        <div class="rd-firma"><div class="rd-firma-linea"></div><div>Firma Supervisor</div></div>
-      </section>
-      <footer class="rd-footer">Generado por Colserlog · ${horaGen}</footer>
-    </div>
-  `;
+  html+=`<section class="rd-firmas"><div class="rd-firma"><div class="rd-firma-linea"></div><div>Firma Mensajero</div><div class="rd-firma-nombre">${usuario}</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div>Firma Supervisor</div></div></section><footer class="rd-footer">Generado por Colserlog · ${horaGen}</footer></div>`;
 
   let area=document.getElementById('areaImpresion');
   if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
@@ -1473,74 +1589,30 @@ window.imprimirReporteDiario = async function(){
   await esperarImagenesCargadas(area);
   await new Promise(r=>setTimeout(r,500));
   try{ window.print(); }catch(e){ console.error(e); }
-  setTimeout(()=>{ document.body.classList.remove('modo-impresion','modo-reporte-diario'); if(estabaDark) document.body.classList.remove('theme-switching'); area.innerHTML=''; }, 2000);
+  setTimeout(()=>{ document.body.classList.remove('modo-impresion','modo-reporte-diario'); if(estabaDark) document.body.classList.remove('theme-switching'); area.innerHTML=''; },2000);
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   📸 ÁLBUM FOTOGRÁFICO — SIN CORTES, TODAS LAS FOTOS
-   ═══════════════════════════════════════════════════════════════ */
 window.imprimirAlbumFotografico = async function(){
   try{
     const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
     if(!vCF.length){ alert('⚠️ No hay fotos registradas hoy.'); return; }
-
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
     const fecha=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     const horaGen=new Date().toLocaleTimeString('es');
-
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
     const df=await obtenerFotosDB(ids);
-
     const planas=[];
-    vCF.forEach(v=>{
-      const nv=visitas.indexOf(v)+1;
-      v.fotos.forEach((foto,idx)=>{
-        if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada });
-      });
-    });
-
+    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada }); }); });
     if(!planas.length){ alert('⚠️ No se pudieron cargar las fotos.'); return; }
-
-    const FPP=12;
-    const totalP=Math.ceil(planas.length/FPP);
-
-    let html=`
-      <div class="reporte-diario">
-        <header class="rd-header">
-          <h1>📸 COLSERLOG — Álbum Fotográfico</h1>
-          <div class="rd-subtitle">Evidencia visual de entregas del día</div>
-          <div class="rd-info">
-            <div><strong>👤 Mensajero:</strong> ${usuario}</div>
-            <div><strong>📅 Fecha:</strong> ${fecha}</div>
-            <div><strong>🕒 Generado:</strong> ${horaGen}</div>
-            <div><strong>📸 Total fotos:</strong> ${planas.length}</div>
-            <div><strong>📄 Páginas:</strong> ${totalP}</div>
-          </div>
-        </header>
-    `;
-
+    const FPP=12; const totalP=Math.ceil(planas.length/FPP);
+    let html=`<div class="reporte-diario"><header class="rd-header"><h1>📸 COLSERLOG — Álbum Fotográfico</h1><div class="rd-subtitle">Evidencia visual de entregas del día</div><div class="rd-info"><div><strong>👤 Mensajero:</strong> ${usuario}</div><div><strong>📅 Fecha:</strong> ${fecha}</div><div><strong>🕒 Generado:</strong> ${horaGen}</div><div><strong>📸 Total fotos:</strong> ${planas.length}</div><div><strong>📄 Páginas:</strong> ${totalP}</div></div></header>`;
     for(let p=0;p<planas.length;p+=FPP){
-      const fp=planas.slice(p,p+FPP);
-      const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-album-page">
-        <div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div>
-        <div class="rd-album-grid">`;
-      fp.forEach(f=>{
-        html+=`<div class="rd-album-item">
-          <img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}">
-          <div class="rd-album-caption">
-            <strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>
-            ${f.codigo?`🔖 <span style="font-family:monospace;">${f.codigo}</span><br>`:''}
-            <span style="color:#555;">${f.estado||''}</span>
-            ${f.hora?`<br>🕐 ${f.hora}`:''}
-          </div>
-        </div>`;
-      });
+      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
+      html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div><div class="rd-album-grid">`;
+      fp.forEach(f=>{ html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}</div></div>`; });
       html+=`</div></div>`;
     }
-
     html+=`<footer class="rd-footer" style="margin-top:8mm;">Generado por Colserlog · ${horaGen} · ${planas.length} foto(s) en ${totalP} página(s)</footer></div>`;
-
     let area=document.getElementById('areaImpresion');
     if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
     area.innerHTML=html;
@@ -1550,12 +1622,8 @@ window.imprimirAlbumFotografico = async function(){
     await esperarImagenesCargadas(area);
     await new Promise(r=>setTimeout(r,500));
     try{ window.print(); }catch(e){ console.error(e); }
-    setTimeout(()=>{ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album'); if(estabaDark) document.body.classList.remove('theme-switching'); area.innerHTML=''; }, 2000);
-  }catch(err){
-    console.error('Error en álbum fotográfico:', err);
-    document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
-    alert('❌ Error al generar el álbum: '+err.message);
-  }
+    setTimeout(()=>{ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album'); if(estabaDark) document.body.classList.remove('theme-switching'); area.innerHTML=''; },2000);
+  }catch(err){ console.error('Error en álbum:', err); document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album'); alert('❌ Error al generar álbum: '+err.message); }
 };
 
 function imprimirContenidoHTML(titulo){
@@ -1565,7 +1633,7 @@ function imprimirContenidoHTML(titulo){
     const si=document.getElementById('seccionInforme');
     const iv=si && si.style.display!=='none' && si.style.display!=='' && getComputedStyle(si).display!=='none';
     const fuente=iv?document.getElementById('informeContenedor'):document.querySelector('.container');
-    if(!fuente){ alert('No hay contenido para imprimir.'); return; }
+    if(!fuente){ alert('No hay contenido.'); return; }
     let area=document.getElementById('areaImpresion');
     if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
     const clon=fuente.cloneNode(true);
@@ -1579,15 +1647,11 @@ function imprimirContenidoHTML(titulo){
     ccs.forEach((cc,i)=>{ const d=canvasData[i]; if(d){ const img=document.createElement('img'); img.src=d; img.style.maxWidth='80%'; img.style.height='auto'; img.style.display='block'; img.style.margin='8px auto'; cc.parentNode.replaceChild(img,cc); } else cc.remove(); });
     area.innerHTML=''; area.appendChild(clon);
     document.body.classList.add('modo-impresion');
-    requestAnimationFrame(async ()=>{
-      await esperarImagenesCargadas(area);
-      setTimeout(()=>{ try{ window.print(); }catch(e){ console.error(e); } setTimeout(()=>{ document.body.classList.remove('modo-impresion'); area.innerHTML=''; },1500); },300);
-    });
+    requestAnimationFrame(async ()=>{ await esperarImagenesCargadas(area); setTimeout(()=>{ try{ window.print(); }catch(e){ console.error(e); } setTimeout(()=>{ document.body.classList.remove('modo-impresion'); area.innerHTML=''; },1500); },300); });
   }catch(err){ console.error(err); document.body.classList.remove('modo-impresion'); alert('Error al imprimir: '+err.message); }
 }
 window.imprimirInformeMensual = ()=>imprimirContenidoHTML('Informe Mensual Colserlog');
 
-/* WhatsApp */
 function construirTextoDia(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -1606,8 +1670,7 @@ function construirTextoMes(mes,anio){
   const h=cargarHistorialDetallado();
   const fm=Object.keys(h).filter(f=>{ const [y,m]=f.split('-').map(Number); return y===anio&&m===mes; }).sort();
   if(!fm.length) return null;
-  const nm=new Date(anio,mes-1,1).toLocaleString('es',{month:'long',year:'numeric'});
-  const cap=nm.charAt(0).toUpperCase()+nm.slice(1);
+  const nm=new Date(anio,mes-1,1).toLocaleString('es',{month:'long',year:'numeric'}); const cap=nm.charAt(0).toUpperCase()+nm.slice(1);
   let tE=0, tV=0, tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
   fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1); const ef=tV>0?((tE/tV)*100).toFixed(1):0;
@@ -1641,10 +1704,8 @@ function abrirWhatsApp(texto){
   if(tr){ setTimeout(()=>{ if(confirm('⚠️ Mensaje largo. ¿Copiar texto completo al portapapeles?')) copiarAlPortapapeles(texto); },500); }
 }
 async function copiarAlPortapapeles(txt){
-  try{
-    if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(txt); mostrarAviso('✅ Copiado','ok'); }
-    else{ const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); mostrarAviso('✅ Copiado','ok'); }
-  }catch(e){ alert('⚠️ No se pudo copiar.'); }
+  try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(txt); mostrarAviso('✅ Copiado','ok'); } else { const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); mostrarAviso('✅ Copiado','ok'); } }
+  catch(e){ alert('⚠️ No se pudo copiar.'); }
 }
 window.compartirDiaWhatsApp = ()=>{ if(!visitas.length){ alert('⚠️ No hay visitas.'); return; } abrirWhatsApp(construirTextoDia()); };
 window.compartirMesWhatsApp = ()=>{ const m=parseInt(document.getElementById('mesInforme').value), a=parseInt(document.getElementById('anioInforme').value); if(!m||!a){ alert('Selecciona mes y año.'); return; } const t=construirTextoMes(m,a); if(!t){ alert('No hay datos.'); return; } abrirWhatsApp(t); };
@@ -1658,8 +1719,7 @@ async function crearObjetoRespaldo(){
   try{ e=JSON.parse(localStorage.getItem('estadoSesion')||'null'); }catch(e2){}
   try{ en=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e2){}
   const obj={ version:8, usuario:u, fecha_respaldo:new Date().toISOString(), estadoSesion:e, entregasDiariasDetallado:en, tiemposBase:{ inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga:localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||'' } };
-  try{ const tf=await obtenerTodasLasFotosDB(); if(tf.length) obj.fotosIndexedDB=tf.map(f=>({ id:f.id, data:f.data, fecha:f.fecha, tamanoKB:f.tamanoKB })); }
-  catch(e2){ console.warn(e2); }
+  try{ const tf=await obtenerTodasLasFotosDB(); if(tf.length) obj.fotosIndexedDB=tf.map(f=>({ id:f.id, data:f.data, fecha:f.fecha, tamanoKB:f.tamanoKB })); }catch(e2){ console.warn(e2); }
   return obj;
 }
 function b64EncodeUnicode(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return ''; } }
@@ -1680,11 +1740,8 @@ window.descargarRespaldoWord = async function(){
   const ef=tV>0?((ent/tV)*100).toFixed(1):'0.0';
   const pv=tV>0?Math.round(tM/tV):0;
   let h='';
-  h+=`<h1>📦 COLSERLOG — Respaldo Completo</h1>`;
-  h+=`<h2>👤 Mensajero: ${u}</h2>`;
-  h+=`<div class="header-info">Respaldo generado el ${fB}</div>`;
-  h+=`<h3>⏱️ Tiempos Base del Día</h3>`;
-  h+=`<table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
+  h+=`<h1>📦 COLSERLOG — Respaldo Completo</h1><h2>👤 Mensajero: ${u}</h2><div class="header-info">Respaldo generado el ${fB}</div>`;
+  h+=`<h3>⏱️ Tiempos Base del Día</h3><table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
   h+=`<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
   h+=`<h3>📥 Banco de Códigos (${banco.length})</h3>`;
   if(!banco.length) h+=`<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
@@ -1692,16 +1749,15 @@ window.descargarRespaldoWord = async function(){
   h+=`<h3>📋 Visitas Registradas (${lv.length})</h3>`;
   if(!lv.length) h+=`<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
   else{ h+=`<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`; lv.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; }); h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`; }
-  if(r.fotosIndexedDB && r.fotosIndexedDB.length) h+=`<h3>📸 Fotos incluidas en el respaldo</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s) incluidas.</em></p>`;
+  if(r.fotosIndexedDB && r.fotosIndexedDB.length) h+=`<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s).</em></p>`;
   h+=`<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   Object.keys(cR).forEach(k=>{ const c=cR[k]||0; if(!c) return; const p=tV>0?((c/tV)*100).toFixed(1):'0.0'; h+=`<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`; });
   h+=`</tbody></table>`;
   if(fH.length){ h+=`<h3>📅 Historial (${fH.length})</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Tiempo</th></tr></thead><tbody>`; fH.forEach(f=>{ const d=hist[f]; const e=(d.contadores&&d.contadores['Entregado'])||0; h+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; }); h+=`</tbody></table>`; }
-  h+=`<div style="margin-top:30px;padding-top:10px;border-top:2px dashed #999;page-break-before:always;"><h3 style="text-align:center;color:#c0392b;">⚠️ NO MODIFICAR</h3><p style="text-align:center;font-size:8pt;color:#666;">Datos codificados del respaldo (incluye fotos).</p><p style="word-break:break-all;font-family:monospace;font-size:6pt;color:#aaa;text-align:center;">---COLSERLOG-DATA-START---<br>`;
+  h+=`<div style="margin-top:30px;padding-top:10px;border-top:2px dashed #999;page-break-before:always;"><h3 style="text-align:center;color:#c0392b;">⚠️ NO MODIFICAR</h3><p style="text-align:center;font-size:8pt;color:#666;">Datos codificados del respaldo.</p><p style="word-break:break-all;font-family:monospace;font-size:6pt;color:#aaa;text-align:center;">---COLSERLOG-DATA-START---<br>`;
   const chunks=b64.match(/.{1,80}/g)||[b64]; h+=chunks.join('<br>');
   h+=`<br>---COLSERLOG-DATA-END---</p></div>`;
-  const nombre=`Colserlog_Respaldo_${u.replace(/\s+/g,'-').toLowerCase()}_${fA}.doc`;
-  descargarWord(nombre,h);
+  descargarWord(`Colserlog_Respaldo_${u.replace(/\s+/g,'-').toLowerCase()}_${fA}.doc`,h);
 };
 window.descargarRespaldoLocal = ()=>window.descargarRespaldoWord();
 
@@ -1713,11 +1769,7 @@ async function aplicarRespaldo(r){
   const op=confirm('¿Qué hacer?\n\n✅ Aceptar = REEMPLAZAR\n❌ Cancelar = FUSIONAR');
   let hF;
   if(op) hF=r.entregasDiariasDetallado||{};
-  else{
-    let ac={}; try{ ac=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e){}
-    const nv=r.entregasDiariasDetallado||{}; hF={...ac,...nv};
-    for(const f in nv){ if(ac[f]){ const a=ac[f], b=nv[f]; const c={...((a.contadores)||{})}; for(const k in (b.contadores||{})) c[k]=(c[k]||0)+(b.contadores[k]||0); hF[f]={ contadores:c, totalVisitas:(a.totalVisitas||0)+(b.totalVisitas||0), totalMinutos:(a.totalMinutos||0)+(b.totalMinutos||0) }; } }
-  }
+  else{ let ac={}; try{ ac=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e){} const nv=r.entregasDiariasDetallado||{}; hF={...ac,...nv}; for(const f in nv){ if(ac[f]){ const a=ac[f], b=nv[f]; const c={...((a.contadores)||{})}; for(const k in (b.contadores||{})) c[k]=(c[k]||0)+(b.contadores[k]||0); hF[f]={ contadores:c, totalVisitas:(a.totalVisitas||0)+(b.totalVisitas||0), totalMinutos:(a.totalMinutos||0)+(b.totalMinutos||0) }; } } }
   localStorage.setItem('entregasDiariasDetallado', JSON.stringify(hF));
   if(r.estadoSesion){ if(r.estadoSesion.visitas){ r.estadoSesion.visitas=r.estadoSesion.visitas.map(v=>({...v, codigo:(v.codigo||'').replace(/\D/g,'').slice(0,12), fotos:Array.isArray(v.fotos)?v.fotos:[]})); } if(r.estadoSesion.bancoCodigos) r.estadoSesion.bancoCodigos=r.estadoSesion.bancoCodigos.filter(c=>/^\d{12}$/.test(c)); localStorage.setItem('estadoSesion', JSON.stringify(r.estadoSesion)); }
   if(r.tiemposBase){ for(const k in r.tiemposBase){ if(r.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, r.tiemposBase[k]); } }
@@ -1745,9 +1797,8 @@ window.cargarRespaldoDesdeArchivo = async function(event){
     let cI=[]; if(im.length && window.ZXing){ mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok'); cI=await decodificarCodigosDeImagenes(im,(a,t,n)=>mostrarAviso(`🔍 ${a}/${t}`,'ok')); }
     const s=new Set(); cT.forEach(c=>s.add(c)); cI.forEach(c=>s.add(c));
     const cs=Array.from(s);
-    if(!cs.length){ alert('❌ No se encontraron códigos de 12 dígitos.'); return; }
-    let mR=`📥 ${cs.length} código(s):\n\n`; if(cT.length) mR+=`• ${cT.length} como texto\n`; if(cI.length) mR+=`• ${cI.length} de imágenes\n`;
-    mR+=`\n¿Cargar al Banco?`; if(!confirm(mR)) return;
+    if(!cs.length){ alert('❌ No se encontraron códigos.'); return; }
+    let mR=`📥 ${cs.length} código(s):\n\n`; if(cT.length) mR+=`• ${cT.length} texto\n`; if(cI.length) mR+=`• ${cI.length} imágenes\n`; mR+=`\n¿Cargar?`; if(!confirm(mR)) return;
     const {agregados,yaEstaban}=cargarCodigosAlBanco(cs);
     let mF=`✅ ${agregados} agregado(s).`; if(yaEstaban>0) mF+=`\n⚠️ ${yaEstaban} ya estaban.`;
     alert(mF);
@@ -1822,7 +1873,7 @@ window.verEstadoAlmacenamiento = async function(){
   const tKB=todas.reduce((s,f)=>s+(f.tamanoKB||Math.round((f.data?.length||0)*0.75/1024)),0);
   let lS=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i), v=localStorage.getItem(k); lS+=(k.length+(v?.length||0)); } }catch(e){}
   let est; if(navigator.storage && navigator.storage.estimate){ try{ est=await navigator.storage.estimate(); }catch(e){} }
-  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos en IndexedDB: ${tf}\n   └─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
+  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   └─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
   if(est) m+=`🌐 Navegador:\n   ├─ Usado: ${(est.usage/1024/1024).toFixed(2)} MB\n   └─ Cuota: ${(est.quota/1024/1024).toFixed(0)} MB\n`;
   alert(m);
 };
@@ -1844,12 +1895,7 @@ window.vaciarTodasLasFotos = async function(){
   alert('✅ Todas las fotos eliminadas');
 };
 
-window.guardarDia = ()=>{
-  guardarDiaActual();
-  if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
-  actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-  if(confirm('✅ Día guardado.\n\n¿Exportar TODO el respaldo a Word?')){ try{ window.descargarRespaldoWord(); }catch(e){ alert('⚠️ No se pudo: '+e.message); } }
-};
+window.guardarDia = ()=>{ guardarDiaActual(); if(typeof window.sincronizarConNube==='function') window.sincronizarConNube(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); if(confirm('✅ Día guardado.\n\n¿Exportar TODO el respaldo a Word?')){ try{ window.descargarRespaldoWord(); }catch(e){ alert('⚠️ No se pudo: '+e.message); } } };
 window.reiniciarDia = ()=>{ if(!confirm('¿Reiniciar día? Se guardará y limpiará todo.')) return; guardarDiaActual(); if(typeof window.sincronizarConNube==='function') window.sincronizarConNube(); limpiarSesion(); alert('✅ Día reiniciado'); };
 window.reiniciarSesion = ()=>{ if(!confirm('¿Limpiar sesión? Se perderán visitas y banco sin guardar.')) return; limpiarSesion(); alert('✅ Sesión reiniciada'); };
 
@@ -1955,7 +2001,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -1963,7 +2009,7 @@ function diagnosticar(){
   if(typeof ZXing==='undefined') console.warn('⚠️ ZXing no cargó');
 }
 
-document.addEventListener('touchstart', function(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart', arguments.callee); }, { once:true });
+document.addEventListener('touchstart', function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart', ua); }, { once:true });
 document.addEventListener('click', (e)=>{ const c=document.getElementById('resultadosBusquedaCodigo'), i=document.getElementById('busquedaCodigoBanco'); if(!c||!i) return; if(!c.contains(e.target) && e.target!==i){ c.innerHTML=''; c.style.display='none'; } });
 
 window.addEventListener('load', async ()=>{
