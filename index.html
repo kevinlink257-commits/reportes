@@ -126,13 +126,6 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 .hint-codigo .badge{background:var(--table-header-bg);color:var(--table-header-color);padding:2px 8px;border-radius:10px;font-weight:bold;font-size:.75rem;letter-spacing:1px}
 .contador-digitos{font-size:.78rem;text-align:right;color:var(--text-muted);margin-top:4px;font-weight:bold}
 .contador-digitos.completo{color:#1abc9c}.contador-digitos.invalido{color:#e74c3c}
-.quick-states{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.quick-states button{width:auto;margin:0;padding:8px 12px;font-size:.82em;border-radius:20px;background:var(--bg-card);color:var(--text-primary);border:1px solid var(--border-main);font-weight:600;flex:0 0 auto;transition:all .15s ease}
-.quick-states button:hover{background:var(--bg-section)}
-.quick-states button.activo{background:#2c3e50;color:#fff;border-color:#2c3e50}
-.quick-states button.entregado{background:#2ecc71;color:#fff;border-color:#27ae60}
-.quick-states button.entregado:hover{background:#27ae60}
-.quick-states button.entregado.activo{background:#1e8449}
 #barraUsuario{position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#2c3e50,#34495e);color:#fff;padding:10px 15px;display:flex;justify-content:space-between;align-items:center;z-index:9998;font-size:.9em;box-shadow:0 2px 6px rgba(0,0,0,.2);gap:8px}
 #barraUsuario .info-usuario{display:flex;align-items:center;gap:8px;font-weight:bold;overflow:hidden}
 #barraUsuario .avatar{width:28px;height:28px;background:#1abc9c;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
@@ -203,6 +196,68 @@ body.dark .chip-codigo.usado{color:#a0e0b0;border-color:#2a6030}
 .btn-descargar-foto:hover{background:#27ae60}
 
 /* ═══════════════════════════════════════════════════════════════
+   📑 SISTEMA DE PESTAÑAS (TABS)
+   ═══════════════════════════════════════════════════════════════ */
+.tabs-nav{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  background:var(--bg-section);
+  padding:8px;
+  border-radius:10px;
+  margin:0 0 15px 0;
+  position:sticky;
+  top:52px;
+  z-index:500;
+  scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.tabs-nav::-webkit-scrollbar{height:4px}
+.tabs-nav::-webkit-scrollbar-thumb{background:#bdc3c7;border-radius:2px}
+.tab-btn{
+  flex:0 0 auto;
+  padding:8px 14px;
+  background:var(--bg-container);
+  color:var(--text-primary);
+  border:1px solid var(--border-light);
+  border-radius:18px;
+  cursor:pointer;
+  font-size:.82em;
+  font-weight:600;
+  white-space:nowrap;
+  margin:0;
+  width:auto;
+  transition:all .15s;
+  font-family:inherit;
+}
+.tab-btn.active{
+  background:linear-gradient(135deg,#3498db,#2980b9);
+  color:#fff;
+  border-color:#2980b9;
+  box-shadow:0 2px 6px rgba(52,152,219,.35);
+}
+.tab-btn:hover:not(.active){background:var(--bg-card)}
+
+.tab-panel{display:none;animation:fadeTab .25s ease}
+.tab-panel.active{display:block}
+@keyframes fadeTab{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+
+.quick-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+.quick-actions button{
+  margin:0;padding:14px 10px;font-size:.85em;border-radius:8px;
+  background:var(--bg-card);color:var(--text-primary);
+  border:1px solid var(--border-light);font-weight:600;
+}
+.quick-actions button:hover{background:var(--bg-section);border-color:#3498db}
+
+@media (max-width:420px){
+  .tab-btn{padding:7px 11px;font-size:.76em}
+  .quick-actions{grid-template-columns:1fr}
+}
+
+/* ═══════════════════════════════════════════════════════════════
    📸 MODAL DE REGLAS FOTOGRÁFICAS + AVISO DE PRIVACIDAD
    ═══════════════════════════════════════════════════════════════ */
 #modalReglasFoto{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100003;padding:15px;overflow-y:auto}
@@ -259,7 +314,7 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9.5pt}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
@@ -391,14 +446,10 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     MODAL DE REGLAS FOTOGRÁFICAS — aparece antes de abrir la cámara
-     ═══════════════════════════════════════════════════════════════ -->
 <div id="modalReglasFoto">
   <div class="modal-reglas-content">
     <h2>📸 Antes de tomar la foto</h2>
     <p class="sub">Lee y acepta estas reglas para proteger la privacidad de las familias visitadas.</p>
-
     <div class="reglas-bloque rojo">
       <h4>🚫 NUNCA fotografíes:</h4>
       <ul>
@@ -412,7 +463,6 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
         <li><span class="tag-no">Uniformes escolares</span> que identifiquen menores</li>
       </ul>
     </div>
-
     <div class="reglas-bloque verde">
       <h4>✅ SÍ puedes fotografiar:</h4>
       <ul>
@@ -424,7 +474,6 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
         <li><span class="tag-ok">Firma en el documento</span> (la hoja, no la persona)</li>
       </ul>
     </div>
-
     <div class="reglas-bloque">
       <h4>💡 Reglas prácticas:</h4>
       <ul>
@@ -435,12 +484,10 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
         <li>Si accidentalmente capturas a un menor, <strong>borra la foto de inmediato</strong></li>
       </ul>
     </div>
-
     <label class="reglas-chk" id="lblReglasChk">
       <input type="checkbox" id="chkAceptoReglas" onchange="toggleBotonCamara(); this.parentNode.classList.toggle('activo', this.checked);">
       <span>Entiendo y acepto estas reglas. Me comprometo a proteger la privacidad de las personas y no exponer a menores de edad.</span>
     </label>
-
     <div class="reglas-botones">
       <button type="button" class="btn-cancelar-reglas" onclick="cerrarModalReglasFoto()">✖ Cancelar</button>
       <button type="button" class="btn-ok-reglas" id="btnAbrirCamara" onclick="confirmarYabrirCamara()" disabled>📷 Abrir cámara</button>
@@ -450,320 +497,383 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
 
 <div class="container">
   <h1>📦 Reporte Diario de Ruta - Colserlog</h1>
-  <div class="section">
-    <h2>1. Tiempos Base de Salida</h2>
-    <div class="no-print">
-      <label>Inicio de carga del carro:</label><input type="time" id="inicioCarga">
-      <label>Fin de carga del carro:</label><input type="time" id="finCarga">
-      <label>Hora de salida de la empresa:</label><input type="time" id="salidaEmpresa">
-      <label>Hora de llegada a la primera entrega:</label><input type="time" id="primeraEntrega">
-      <button onclick="calcularTiemposBase()">Confirmar Tiempos de Salida</button>
+
+  <!-- ═══════════ NAVEGACIÓN POR PESTAÑAS ═══════════ -->
+  <nav class="tabs-nav" id="tabsNav">
+    <button class="tab-btn active" data-tab="inicio" onclick="cambiarTab('inicio')">🏠 Inicio</button>
+    <button class="tab-btn" data-tab="tiempos" onclick="cambiarTab('tiempos')">⏱️ Tiempos</button>
+    <button class="tab-btn" data-tab="banco" onclick="cambiarTab('banco')">📥 Banco</button>
+    <button class="tab-btn" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita</button>
+    <button class="tab-btn" data-tab="historial" onclick="cambiarTab('historial')">📋 Historial</button>
+    <button class="tab-btn" data-tab="informes" onclick="cambiarTab('informes')">📊 Informes</button>
+    <button class="tab-btn" data-tab="nube" onclick="cambiarTab('nube')">☁️ Nube</button>
+    <button class="tab-btn" data-tab="ajustes" onclick="cambiarTab('ajustes')">⚙️ Ajustes</button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: INICIO — Informe del Día aquí arriba
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel active" data-tab="inicio">
+    <div class="section">
+      <h2>📊 Informe del Día</h2>
+      <div class="stats-grid">
+        <div class="stat-card">Entregados: <span id="c-entregados">0</span></div>
+        <div class="stat-card">No Entregados: <span id="c-noentregados">0</span></div>
+        <div class="stat-card">Total Visitas: <span id="c-total">0</span></div>
+        <div class="stat-card">Promedio por visita: <span id="c-promedio">0 min</span></div>
+      </div>
+      <canvas id="graficaInforme"></canvas>
+      <div class="btn-group no-print" style="margin-top:10px;">
+        <button class="btn-imprimir" id="btnImprimirDiario">🖨️ Informe completo</button>
+        <button class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 WhatsApp</button>
+      </div>
+      <div class="btn-group no-print" style="margin-top:8px;">
+        <button class="btn-informe" onclick="imprimirAlbumFotografico()">📸 Álbum fotográfico</button>
+        <button class="btn-informe" onclick="copiarResumenPortapapeles('dia')">📋 Copiar resumen</button>
+      </div>
     </div>
-    <div id="resumenTiempos" class="result-box" style="display:none;"></div>
+
+    <div class="section no-print">
+      <h2>⚡ Acceso Rápido</h2>
+      <div class="quick-actions">
+        <button onclick="cambiarTab('tiempos')">⏱️ Tiempos Base</button>
+        <button onclick="cambiarTab('banco')">📥 Banco de Códigos</button>
+        <button onclick="cambiarTab('visita')">📝 Registrar Visita</button>
+        <button onclick="cambiarTab('historial')">📋 Detalle de Visitas</button>
+        <button onclick="cambiarTab('informes')">📈 Informes</button>
+        <button onclick="cambiarTab('nube')">☁️ Sincronización</button>
+      </div>
+    </div>
   </div>
 
-  <div class="section no-print">
-    <h2>2. 📥 Banco de Códigos del Día</h2>
-    <p style="font-size:.85em;color:var(--text-secondary);text-align:center;margin-top:0;">Carga primero todos los códigos de barras que llevarás hoy. Luego, al registrar cada visita, podrás buscarlos y asignarlos.</p>
-    <label>Escribe o escanea un código:</label>
-    <div class="input-group">
-      <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosBanco');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
-      <button class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
-      <button class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: TIEMPOS
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="tiempos">
+    <div class="section">
+      <h2>1. Tiempos Base de Salida</h2>
+      <div class="no-print">
+        <label>Inicio de carga del carro:</label><input type="time" id="inicioCarga">
+        <label>Fin de carga del carro:</label><input type="time" id="finCarga">
+        <label>Hora de salida de la empresa:</label><input type="time" id="salidaEmpresa">
+        <label>Hora de llegada a la primera entrega:</label><input type="time" id="primeraEntrega">
+        <button onclick="calcularTiemposBase()">Confirmar Tiempos de Salida</button>
+      </div>
+      <div id="resumenTiempos" class="result-box" style="display:none;"></div>
     </div>
-    <div class="contador-digitos" id="contadorDigitosBanco"></div>
-    <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
-    <div id="lectorQRBanco"><div class="escaneo-mensaje">🔍 Escaneando al banco... apunta a cada código</div></div>
-    <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button></div>
-    <button class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
-    <div id="cargaMasivaContenedor" style="display:none;">
-      <label>Pega los códigos (uno por línea, o separados por coma/;):</label>
-      <textarea id="cargaMasivaTexto" placeholder="123456789012&#10;098765432109&#10;111222333444" style="min-height:120px;"></textarea>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: BANCO DE CÓDIGOS
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="banco">
+    <div class="section no-print">
+      <h2>2. 📥 Banco de Códigos del Día</h2>
+      <p style="font-size:.85em;color:var(--text-secondary);text-align:center;margin-top:0;">Carga primero todos los códigos de barras que llevarás hoy. Luego, al registrar cada visita, podrás buscarlos y asignarlos.</p>
+      <label>Escribe o escanea un código:</label>
+      <div class="input-group">
+        <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosBanco');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
+        <button class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
+        <button class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
+      </div>
+      <div class="contador-digitos" id="contadorDigitosBanco"></div>
+      <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
+      <div id="lectorQRBanco"><div class="escaneo-mensaje">🔍 Escaneando al banco... apunta a cada código</div></div>
+      <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button></div>
+      <button class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
+      <div id="cargaMasivaContenedor" style="display:none;">
+        <label>Pega los códigos (uno por línea, o separados por coma/;):</label>
+        <textarea id="cargaMasivaTexto" placeholder="123456789012&#10;098765432109&#10;111222333444" style="min-height:120px;"></textarea>
+        <div class="btn-group" style="margin-top:8px;">
+          <button class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
+          <button class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
+        </div>
+      </div>
+      <label style="margin-top:15px;">Códigos en el banco: <span style="font-weight:normal;font-size:.8em;color:var(--text-muted);">(scroll ↓ dentro del recuadro)</span></label>
+      <div id="listaBanco" class="lista-codigos"></div>
+      <div id="contadorBanco" class="contador-banco"></div>
+      <div class="btn-group" style="margin-top:10px;"><button class="btn-cancelar" onclick="vaciarBanco()">🗑️ Vaciar banco</button></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: REGISTRAR VISITA
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="visita">
+    <div class="section no-print">
+      <h2>3. Registrar Nueva Visita</h2>
+      <label>Hora de llegada al cliente:</label>
+      <div class="input-group"><input type="time" id="llegadaCliente"><button class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button></div>
+      <label>Hora de salida del cliente:</label>
+      <div class="input-group"><input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button></div>
+      <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
+      <div class="input-group">
+        <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código (solo números)" inputmode="numeric" oninput="filtrarSoloDigitos(this);buscarCodigosBanco();" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
+        <button class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
+      </div>
+      <div id="resultadosBusquedaCodigo"></div>
+      <label style="margin-top:15px;">O agrega manualmente / escanea un código nuevo:</label>
+      <div class="input-group">
+        <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosVisita');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
+        <button class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
+        <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
+      </div>
+      <div class="contador-digitos" id="contadorDigitosVisita"></div>
+      <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
+      <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
+      <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
+      <label style="margin-top:15px;">📦 Códigos seleccionados para esta visita:</label>
+      <div id="listaCodigosPendientes" class="lista-codigos"></div>
+      <div id="contadorCodigos" class="contador-codigos"></div>
+      <div id="contadorUnicos">✅ Códigos únicos registrados hoy: <span>0</span></div>
+      <label>Estado del paquete:</label>
+      <select id="estadoPaquete" onchange="alCambiarEstado()">
+        <option value="">-- Seleccione un estado --</option>
+        <option value="Entregado">Entregado</option>
+        <option value="Rechazado">Rechazado</option>
+        <option value="Dirección Errónea">Dirección errónea</option>
+        <option value="Dirección incompleta">Dirección incompleta</option>
+        <option value="Coordinado con Cliente">Coordinado con el Cliente</option>
+        <option value="No está en casa">No está en casa</option>
+        <option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
+        <option value="No lo conocen">No lo conocen</option>
+        <option value="Programo para otro día">Programo para otro día</option>
+        <option value="Dejar en oficina principal">Dejar en oficina principal</option>
+        <option value="Pertenece a otra ciudad">Pertenece a otra ciudad</option>
+        <option value="Cerrado local comercial">Cerrado local comercial</option>
+        <option value="No visita tiempo">No visita tiempo</option>
+        <option value="Casa totalmente cerrada">Casa totalmente cerrada</option>
+        <option value="Oficina principal">Oficina principal</option>
+        <option value="Se trasladó">Se trasladó</option>
+        <option value="Exige ver el producto">Exige ver el producto</option>
+        <option value="Destinatario no recibe sábados">Destinatario no recibe sábados</option>
+        <option value="Restricciones en el tránsito reparto urbano">Restricciones en el tránsito reparto urbano</option>
+        <option value="No coincide la mercancía física con lo escrito en la orden de compra">No coincide la mercancía física con lo escrito en la orden de compra</option>
+        <option value="Mercancía se abrió en reparto no entregada">Mercancía se abrió en reparto no entregada</option>
+        <option value="Flete mal liquidado">Flete mal liquidado</option>
+        <option value="Cerrados en horas hábiles">Cerrados en horas hábiles</option>
+      </select>
+      <label>📝 Descripción detallada <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(se autocompleta al elegir estado, puedes editarla)</span>:</label>
+      <textarea id="descripcionVisita" placeholder="Al seleccionar un estado se autocompletará una descripción detallada que puedes editar..." style="min-height:90px;"></textarea>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button type="button" class="btn-cancelar" onclick="restaurarDescripcionRecomendada()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">↺ Restaurar descripción sugerida</button>
+        <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">🗑️ Vaciar descripción</button>
+      </div>
+
+      <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(opcional · máx. 20 fotos · IndexedDB)</span>:</label>
+      <div class="aviso-reglas-inline">
+        ⚠️ <strong>Protege la privacidad:</strong> nunca fotografíes rostros de niños, rostros de adultos sin permiso, el interior de la vivienda, documentos de identidad ni placas de vehículos. <strong>Al pulsar 📷 deberás aceptar las reglas.</strong>
+      </div>
+
+      <details class="rules-seccion">
+        <summary>📖 Ver reglas completas de registro fotográfico y marco legal</summary>
+        <div class="rules-body">
+          <div class="legal">
+            <strong>⚖️ Marco legal aplicable en Colombia</strong><br>
+            • <strong>Constitución art. 15:</strong> derecho a la intimidad personal y familiar<br>
+            • <strong>Ley 1581 de 2012:</strong> protección de datos personales (la imagen es un dato personal)<br>
+            • <strong>Ley 1098 de 2006 (Cód. Infancia):</strong> interés superior del menor — art. 33<br>
+            • <strong>Ley 1266 de 2008:</strong> manejo de información<br>
+            • <strong>SIC:</strong> sanciones por mal uso de imágenes
+          </div>
+          <h4>✅ Lo que SÍ debes fotografiar (evidencia válida)</h4>
+          <ul>
+            <li>Fachada exterior de la vivienda con número/placa de dirección visible</li>
+            <li>Paquete junto a la puerta (si se dejó en el lugar) — desde afuera</li>
+            <li>Guía o sticker con el código de barras</li>
+            <li>Firma del recibido (en el documento, no en la persona)</li>
+            <li>Aviso de visita pegado en la puerta (si nadie estaba)</li>
+            <li>Local comercial cerrado con su letrero visible</li>
+          </ul>
+          <h4>🚫 Lo que NUNCA debes fotografiar</h4>
+          <ul>
+            <li><span class="tag-no">Rostros de niños, niñas o adolescentes</span></li>
+            <li><span class="tag-no">Rostros de adultos sin consentimiento</span></li>
+            <li><span class="tag-no">Interior de la vivienda</span> (sala, cuartos, baños, cocina)</li>
+            <li><span class="tag-no">Documentos de identidad</span> (cédula, pasaporte, licencia)</li>
+            <li><span class="tag-no">Placas de vehículos</span> de terceros</li>
+            <li><span class="tag-no">Personas en ropa íntima, enfermas o vulnerables</span></li>
+            <li><span class="tag-no">Vecinos o transeúntes</span> que aparezcan de fondo</li>
+            <li><span class="tag-no">Números telefónicos o correos</span> visibles en fachada</li>
+            <li><span class="tag-no">Uniformes escolares</span> con rostro de menor</li>
+          </ul>
+          <h4>🎯 Reglas prácticas al tomar la foto</h4>
+          <ul>
+            <li><strong>Ángulo:</strong> apunta al piso o a la puerta, nunca hacia arriba ni al interior</li>
+            <li><strong>Distancia:</strong> mínimo 1.5 metros de cualquier persona</li>
+            <li><strong>Si hay un menor en el encuadre:</strong> NO tomes la foto — reencuadra o espera</li>
+            <li><strong>Si el cliente está presente:</strong> pide permiso ("¿Me permite una foto del paquete?")</li>
+            <li><strong>Si dice NO:</strong> no insistas — registra la visita sin foto y anótalo</li>
+            <li><strong>Al interior:</strong> nunca entres a la casa aunque te inviten — la foto se toma desde el umbral</li>
+          </ul>
+          <h4>📝 Cómo redactar la descripción</h4>
+          <ul>
+            <li>✅ <em>"Paquete entregado en la dirección indicada. Recibido por un adulto responsable, quien firmó la guía."</em></li>
+            <li>✅ <em>"Se dejó aviso de visita en la puerta. Se fotografió la fachada y el aviso para constancia."</em></li>
+            <li>❌ <em>"Entregado a la señora María, quien salió con su hijo pequeño."</em></li>
+          </ul>
+          <h4>🚨 Si accidentalmente capturaste a un menor</h4>
+          <ul>
+            <li>1. NO compartir la imagen</li>
+            <li>2. Eliminarla de inmediato con el botón 🗑️ de la foto</li>
+            <li>3. NO subirla a la nube ni a WhatsApp</li>
+            <li>4. Reportar el incidente al supervisor</li>
+          </ul>
+          <h4>📋 Checklist antes de cada foto</h4>
+          <ul class="rules-check-list">
+            <li>¿Se ve el paquete / fachada / guía? → SÍ</li>
+            <li>¿Aparece algún rostro? → NO</li>
+            <li>¿Aparece algún menor? → NO</li>
+            <li>¿Se ve el interior de la casa? → NO</li>
+            <li>¿Se ve algún documento de identidad? → NO</li>
+            <li>¿Se ve alguna placa de vehículo? → NO</li>
+            <li>¿El cliente autorizó (si está presente)? → SÍ</li>
+            <li>¿Se ve algún dato personal sensible? → NO</li>
+          </ul>
+          <div class="legal" style="margin-top:12px;">
+            💡 <strong>Regla de oro:</strong> la foto debe probar que el paquete llegó y en qué estado — <strong>nada más</strong>. Ni personas, ni interiores, ni datos de nadie.
+          </div>
+        </div>
+      </details>
+
+      <div class="fotos-wrapper">
+        <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
+        <div id="galeriaFotosVisita" class="galeria-fotos"></div>
+        <button type="button" class="btn-foto" onclick="abrirModalReglasFoto()">📷 Tomar foto</button>
+      </div>
+      <div id="contadorFotos" class="contador-fotos"></div>
+      <button onclick="registrarVisita()" style="background-color:#2c3e50;">📋 Guardar Visita (manual)</button>
+      <p style="font-size:.78rem;color:var(--text-secondary);text-align:center;margin-top:6px;">💡 Tip: al guardar, <strong>todos los campos se limpian</strong> listos para la siguiente visita.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: HISTORIAL DE VISITAS
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="historial">
+    <div class="section" id="seccionHistorial">
+      <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
+      <div class="busqueda-box no-print">
+        <label>🔍 Buscar por guía / código:</label>
+        <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);filtrarVisitas();"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
+        <p id="contadorBusqueda" class="contador-busqueda"></p>
+      </div>
+      <div style="overflow-x:auto;">
+        <table>
+          <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th><th>📸</th><th class="no-print">Acciones</th></tr></thead>
+          <tbody id="cuerpoTabla"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: INFORMES (Promedios + Semanal/Mensual + Informe generado)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="informes">
+    <div class="section">
+      <h2>7. Promedios Históricos</h2>
+      <div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div>
+      <canvas id="graficaPromedios"></canvas>
+    </div>
+    <div class="section">
+      <h2>8. Informes Semanales y Mensuales</h2>
+      <div class="informe-grid">
+        <div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div>
+        <div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div>
+      </div>
+    </div>
+    <div class="section" id="seccionInforme" style="display:none;">
+      <div class="no-print" style="text-align:right;margin-bottom:10px;">
+        <button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto;display:inline-block;padding:10px 20px;">🖨️ Imprimir</button>
+        <button class="btn-whatsapp" onclick="compartirInformeMensualVisible()" style="width:auto;display:inline-block;padding:10px 20px;">💬 WhatsApp</button>
+        <button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto;display:inline-block;padding:10px 20px;">❌ Cerrar</button>
+      </div>
+      <div id="informeContenedor"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: NUBE / SINCRONIZACIÓN
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="nube">
+    <div class="section no-print">
+      <h2>9. ☁️ Sincronización en la Nube (Firebase)</h2>
+      <div id="estadoNube" class="estado-nube loading">⏳ Esperando usuario...</div>
+      <div class="toggle-wrapper">
+        <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
+        <div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div>
+      </div>
+      <div class="toggle-wrapper" style="margin-top:8px;">
+        <label class="toggle-label" for="toggleFotosNube">📸 Sincronizar fotos a la nube<span class="toggle-sub">⚠️ Consume más espacio (límite 1 MB/doc). Recomendado: OFF</span></label>
+        <div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div>
+      </div>
+      <div class="btn-group" style="margin-top:10px;">
+        <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
+        <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
+      </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
-        <button class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
+        <button class="btn-cancelar" onclick="mostrarDiagnosticoNube()">🔍 Diagnóstico de nube</button>
+        <button class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
+      </div>
+      <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
+      <h3>💾 Respaldo y Restauración (Word)</h3>
+      <p style="font-size:.85em;color:var(--text-secondary);margin-top:0;text-align:center;">Todo el respaldo (tiempos base, banco de códigos, visitas del día, historial y FOTOS) se guarda y se lee como archivo Word.</p>
+      <div class="btn-group" style="margin-top:10px;">
+        <button class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
+        <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
+      </div>
+      <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
+      <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
+      <h3>📄 Exportar / Compartir informes</h3>
+      <div class="btn-group">
+        <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día</button>
+        <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
+        <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Historial</button>
+      </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-whatsapp" onclick="compartirHistorialWhatsApp()">💬 Historial por WhatsApp</button>
+      </div>
+      <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
+      <label>📅 Selecciona el mes y año para el informe:</label>
+      <div class="input-group">
+        <select id="mesInforme"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>
+        <input type="number" id="anioInforme" min="2020" max="2100" style="max-width:110px;">
+      </div>
+      <div class="btn-group" style="margin-top:10px;">
+        <button class="btn-informe" onclick="generarInformeMensual()">📊 Generar Informe Mensual</button>
+        <button class="btn-whatsapp" onclick="compartirMesWhatsApp()">💬 Mes por WhatsApp</button>
       </div>
     </div>
-    <label style="margin-top:15px;">Códigos en el banco: <span style="font-weight:normal;font-size:.8em;color:var(--text-muted);">(scroll ↓ dentro del recuadro)</span></label>
-    <div id="listaBanco" class="lista-codigos"></div>
-    <div id="contadorBanco" class="contador-banco"></div>
-    <div class="btn-group" style="margin-top:10px;"><button class="btn-cancelar" onclick="vaciarBanco()">🗑️ Vaciar banco</button></div>
   </div>
 
-  <div class="section no-print">
-    <h2>3. Registrar Nueva Visita</h2>
-    <label>Hora de llegada al cliente:</label>
-    <div class="input-group"><input type="time" id="llegadaCliente"><button class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button></div>
-    <label>Hora de salida del cliente:</label>
-    <div class="input-group"><input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button></div>
-    <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
-    <div class="input-group">
-      <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código (solo números)" inputmode="numeric" oninput="filtrarSoloDigitos(this);buscarCodigosBanco();" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
-      <button class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
-    </div>
-    <div id="resultadosBusquedaCodigo"></div>
-    <label style="margin-top:15px;">O agrega manualmente / escanea un código nuevo:</label>
-    <div class="input-group">
-      <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosVisita');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
-      <button class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
-      <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
-    </div>
-    <div class="contador-digitos" id="contadorDigitosVisita"></div>
-    <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
-    <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
-    <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
-    <label style="margin-top:15px;">📦 Códigos seleccionados para esta visita:</label>
-    <div id="listaCodigosPendientes" class="lista-codigos"></div>
-    <div id="contadorCodigos" class="contador-codigos"></div>
-    <div id="contadorUnicos">✅ Códigos únicos registrados hoy: <span>0</span></div>
-    <label>Estado del paquete:</label>
-    <select id="estadoPaquete" onchange="alCambiarEstado()">
-      <option value="">-- Seleccione un estado --</option>
-      <option value="Entregado">Entregado</option>
-      <option value="Rechazado">Rechazado</option>
-      <option value="Dirección Errónea">Dirección errónea</option>
-      <option value="Dirección incompleta">Dirección incompleta</option>
-      <option value="Coordinado con Cliente">Coordinado con el Cliente</option>
-      <option value="No está en casa">No está en casa</option>
-      <option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
-      <option value="No lo conocen">No lo conocen</option>
-      <option value="Programo para otro día">Programo para otro día</option>
-      <option value="Dejar en oficina principal">Dejar en oficina principal</option>
-      <option value="Pertenece a otra ciudad">Pertenece a otra ciudad</option>
-      <option value="Cerrado local comercial">Cerrado local comercial</option>
-      <option value="No visita tiempo">No visita tiempo</option>
-      <option value="Casa totalmente cerrada">Casa totalmente cerrada</option>
-      <option value="Oficina principal">Oficina principal</option>
-      <option value="Se trasladó">Se trasladó</option>
-      <option value="Exige ver el producto">Exige ver el producto</option>
-      <option value="Destinatario no recibe sábados">Destinatario no recibe sábados</option>
-      <option value="Restricciones en el tránsito reparto urbano">Restricciones en el tránsito reparto urbano</option>
-      <option value="No coincide la mercancía física con lo escrito en la orden de compra">No coincide la mercancía física con lo escrito en la orden de compra</option>
-      <option value="Mercancía se abrió en reparto no entregada">Mercancía se abrió en reparto no entregada</option>
-      <option value="Flete mal liquidado">Flete mal liquidado</option>
-      <option value="Cerrados en horas hábiles">Cerrados en horas hábiles</option>
-    </select>
-    <label style="margin-top:10px;">⚡ Estados rápidos (un clic):</label>
-    <div id="quickStates" class="quick-states"></div>
-    <label>📝 Descripción detallada <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(se autocompleta al elegir estado, puedes editarla)</span>:</label>
-    <textarea id="descripcionVisita" placeholder="Al seleccionar un estado se autocompletará una descripción detallada que puedes editar..." style="min-height:90px;"></textarea>
-    <div style="display:flex;gap:6px;margin-top:6px;">
-      <button type="button" class="btn-cancelar" onclick="restaurarDescripcionRecomendada()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">↺ Restaurar descripción sugerida</button>
-      <button type="button" class="btn-cancelar" onclick="limpiarDescripcion()" style="flex:1;padding:8px;font-size:.82em;margin-top:0;">🗑️ Vaciar descripción</button>
-    </div>
-
-    <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(opcional · máx. 20 fotos · IndexedDB)</span>:</label>
-
-    <div class="aviso-reglas-inline">
-      ⚠️ <strong>Protege la privacidad:</strong> nunca fotografíes rostros de niños, rostros de adultos sin permiso, el interior de la vivienda, documentos de identidad ni placas de vehículos. <strong>Al pulsar 📷 deberás aceptar las reglas.</strong>
-    </div>
-
-    <details class="rules-seccion">
-      <summary>📖 Ver reglas completas de registro fotográfico y marco legal</summary>
-      <div class="rules-body">
-        <div class="legal">
-          <strong>⚖️ Marco legal aplicable en Colombia</strong><br>
-          • <strong>Constitución art. 15:</strong> derecho a la intimidad personal y familiar<br>
-          • <strong>Ley 1581 de 2012:</strong> protección de datos personales (la imagen es un dato personal)<br>
-          • <strong>Ley 1098 de 2006 (Cód. Infancia):</strong> interés superior del menor — art. 33<br>
-          • <strong>Ley 1266 de 2008:</strong> manejo de información<br>
-          • <strong>SIC:</strong> sanciones por mal uso de imágenes
-        </div>
-
-        <h4>✅ Lo que SÍ debes fotografiar (evidencia válida)</h4>
-        <ul>
-          <li>Fachada exterior de la vivienda con número/placa de dirección visible</li>
-          <li>Paquete junto a la puerta (si se dejó en el lugar) — desde afuera</li>
-          <li>Guía o sticker con el código de barras</li>
-          <li>Firma del recibido (en el documento, no en la persona)</li>
-          <li>Aviso de visita pegado en la puerta (si nadie estaba)</li>
-          <li>Local comercial cerrado con su letrero visible</li>
-        </ul>
-
-        <h4>🚫 Lo que NUNCA debes fotografiar</h4>
-        <ul>
-          <li><span class="tag-no">Rostros de niños, niñas o adolescentes</span></li>
-          <li><span class="tag-no">Rostros de adultos sin consentimiento</span></li>
-          <li><span class="tag-no">Interior de la vivienda</span> (sala, cuartos, baños, cocina)</li>
-          <li><span class="tag-no">Documentos de identidad</span> (cédula, pasaporte, licencia)</li>
-          <li><span class="tag-no">Placas de vehículos</span> de terceros</li>
-          <li><span class="tag-no">Personas en ropa íntima, enfermas o vulnerables</span></li>
-          <li><span class="tag-no">Vecinos o transeúntes</span> que aparezcan de fondo</li>
-          <li><span class="tag-no">Números telefónicos o correos</span> visibles en fachada</li>
-          <li><span class="tag-no">Uniformes escolares</span> con rostro de menor</li>
-        </ul>
-
-        <h4>🎯 Reglas prácticas al tomar la foto</h4>
-        <ul>
-          <li><strong>Ángulo:</strong> apunta al piso o a la puerta, nunca hacia arriba ni al interior</li>
-          <li><strong>Distancia:</strong> mínimo 1.5 metros de cualquier persona</li>
-          <li><strong>Si hay un menor en el encuadre:</strong> NO tomes la foto — reencuadra o espera</li>
-          <li><strong>Si el cliente está presente:</strong> pide permiso ("¿Me permite una foto del paquete?")</li>
-          <li><strong>Si dice NO:</strong> no insistas — registra la visita sin foto y anótalo</li>
-          <li><strong>Al interior:</strong> nunca entres a la casa aunque te inviten — la foto se toma desde el umbral</li>
-        </ul>
-
-        <h4>📝 Cómo redactar la descripción</h4>
-        <ul>
-          <li>✅ <em>"Paquete entregado en la dirección indicada. Recibido por un adulto responsable, quien firmó la guía."</em></li>
-          <li>✅ <em>"Se dejó aviso de visita en la puerta. Se fotografió la fachada y el aviso para constancia."</em></li>
-          <li>❌ <em>"Entregado a la señora María, quien salió con su hijo pequeño."</em></li>
-        </ul>
-
-        <h4>🚨 Si accidentalmente capturaste a un menor</h4>
-        <ul>
-          <li>1. NO compartir la imagen</li>
-          <li>2. Eliminarla de inmediato con el botón 🗑️ de la foto</li>
-          <li>3. NO subirla a la nube ni a WhatsApp</li>
-          <li>4. Reportar el incidente al supervisor</li>
-        </ul>
-
-        <h4>📋 Checklist antes de cada foto</h4>
-        <ul class="rules-check-list">
-          <li>¿Se ve el paquete / fachada / guía? → SÍ</li>
-          <li>¿Aparece algún rostro? → NO</li>
-          <li>¿Aparece algún menor? → NO</li>
-          <li>¿Se ve el interior de la casa? → NO</li>
-          <li>¿Se ve algún documento de identidad? → NO</li>
-          <li>¿Se ve alguna placa de vehículo? → NO</li>
-          <li>¿El cliente autorizó (si está presente)? → SÍ</li>
-          <li>¿Se ve algún dato personal sensible? → NO</li>
-        </ul>
-
-        <div class="legal" style="margin-top:12px;">
-          💡 <strong>Regla de oro:</strong> la foto debe probar que el paquete llegó y en qué estado — <strong>nada más</strong>. Ni personas, ni interiores, ni datos de nadie.
-        </div>
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: AJUSTES / CONTROL DE SESIÓN
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="tab-panel" data-tab="ajustes">
+    <div class="section no-print">
+      <h2>6. Control de Sesión</h2>
+      <div class="btn-group">
+        <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
+        <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
+        <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
+        <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
       </div>
-    </details>
-
-    <div class="fotos-wrapper">
-      <input type="file" id="inputFotoVisita" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
-      <div id="galeriaFotosVisita" class="galeria-fotos"></div>
-      <button type="button" class="btn-foto" onclick="abrirModalReglasFoto()">📷 Tomar foto</button>
-    </div>
-    <div id="contadorFotos" class="contador-fotos"></div>
-    <button onclick="registrarVisita()" style="background-color:#2c3e50;">📋 Guardar Visita (manual)</button>
-    <p style="font-size:.78rem;color:var(--text-secondary);text-align:center;margin-top:6px;">💡 Tip: al guardar, <strong>todos los campos se limpian</strong> listos para la siguiente visita.</p>
-  </div>
-
-  <div class="section" id="seccionHistorial" style="display:none;">
-    <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
-    <div class="busqueda-box no-print">
-      <label>🔍 Buscar por guía / código:</label>
-      <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);filtrarVisitas();"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
-      <p id="contadorBusqueda" class="contador-busqueda"></p>
-    </div>
-    <div style="overflow-x:auto;">
-      <table>
-        <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th><th>📸</th><th class="no-print">Acciones</th></tr></thead>
-        <tbody id="cuerpoTabla"></tbody>
-      </table>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-reiniciar" onclick="cerrarSesion()" style="background:#e74c3c;">🚪 Cerrar Sesión</button>
+      </div>
+      <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
+      <h3 style="font-size:.95em;margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
+      <div class="btn-group">
+        <button class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
+        <button class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Eliminar fotos antiguas</button>
+      </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas las fotos</button>
+      </div>
     </div>
   </div>
 
-  <div class="section">
-    <h2>5. Resumen y Gráfica del Día</h2>
-    <div class="stats-grid">
-      <div class="stat-card">Entregados: <span id="c-entregados">0</span></div>
-      <div class="stat-card">No Entregados: <span id="c-noentregados">0</span></div>
-      <div class="stat-card">Total Visitas: <span id="c-total">0</span></div>
-      <div class="stat-card">Promedio por visita: <span id="c-promedio">0 min</span></div>
-    </div>
-    <canvas id="graficaInforme"></canvas>
-    <div class="btn-group no-print" style="margin-top:10px;">
-      <button class="btn-imprimir" id="btnImprimirDiario">🖨️ Informe completo</button>
-      <button class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 WhatsApp</button>
-    </div>
-    <div class="btn-group no-print" style="margin-top:8px;">
-      <button class="btn-informe" onclick="imprimirAlbumFotografico()">📸 Imprimir álbum fotográfico</button>
-    </div>
-    <div class="btn-group no-print" style="margin-top:8px;">
-      <button class="btn-informe" onclick="copiarResumenPortapapeles('dia')">📋 Copiar resumen</button>
-    </div>
-  </div>
-
-  <div class="section no-print">
-    <h2>6. Control de Sesión</h2>
-    <div class="btn-group">
-      <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
-      <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
-      <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
-      <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
-    </div>
-    <div class="btn-group" style="margin-top:8px;">
-      <button class="btn-reiniciar" onclick="cerrarSesion()" style="background:#e74c3c;">🚪 Cerrar Sesión</button>
-    </div>
-    <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
-    <h3 style="font-size:.95em;margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
-    <div class="btn-group">
-      <button class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
-      <button class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Eliminar fotos antiguas</button>
-    </div>
-    <div class="btn-group" style="margin-top:8px;">
-      <button class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas las fotos</button>
-    </div>
-  </div>
-
-  <div class="section"><h2>7. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
-  <div class="section"><h2>8. Informes Semanales y Mensuales</h2><div class="informe-grid"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
-
-  <div class="section no-print">
-    <h2>9. ☁️ Sincronización en la Nube (Firebase)</h2>
-    <div id="estadoNube" class="estado-nube loading">⏳ Esperando usuario...</div>
-    <div class="toggle-wrapper">
-      <label class="toggle-label" for="toggleSync">🔄 Sincronización automática<span class="toggle-sub">Los cambios se suben/bajan automáticamente entre dispositivos</span></label>
-      <div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div>
-    </div>
-    <div class="toggle-wrapper" style="margin-top:8px;">
-      <label class="toggle-label" for="toggleFotosNube">📸 Sincronizar fotos a la nube<span class="toggle-sub">⚠️ Consume más espacio (límite 1 MB/doc). Recomendado: OFF</span></label>
-      <div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div>
-    </div>
-    <div class="btn-group" style="margin-top:10px;">
-      <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
-      <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
-    </div>
-    <div class="btn-group" style="margin-top:8px;">
-      <button class="btn-cancelar" onclick="mostrarDiagnosticoNube()">🔍 Diagnóstico de nube</button>
-      <button class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
-    </div>
-    <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
-    <h3>💾 Respaldo y Restauración (Word)</h3>
-    <p style="font-size:.85em;color:var(--text-secondary);margin-top:0;text-align:center;">Todo el respaldo (tiempos base, banco de códigos, visitas del día, historial y FOTOS) se guarda y se lee como archivo Word.</p>
-    <div class="btn-group" style="margin-top:10px;">
-      <button class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
-      <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
-    </div>
-    <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
-    <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
-    <h3>📄 Exportar / Compartir informes</h3>
-    <div class="btn-group">
-      <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día</button>
-      <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
-      <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Historial</button>
-    </div>
-    <div class="btn-group" style="margin-top:8px;">
-      <button class="btn-whatsapp" onclick="compartirHistorialWhatsApp()">💬 Historial por WhatsApp</button>
-    </div>
-    <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
-    <label>📅 Selecciona el mes y año para el informe:</label>
-    <div class="input-group">
-      <select id="mesInforme"><option value="1">Enero</option><option value="2">Febrero</option><option value="3">Marzo</option><option value="4">Abril</option><option value="5">Mayo</option><option value="6">Junio</option><option value="7">Julio</option><option value="8">Agosto</option><option value="9">Septiembre</option><option value="10">Octubre</option><option value="11">Noviembre</option><option value="12">Diciembre</option></select>
-      <input type="number" id="anioInforme" min="2020" max="2100" style="max-width:110px;">
-    </div>
-    <div class="btn-group" style="margin-top:10px;">
-      <button class="btn-informe" onclick="generarInformeMensual()">📊 Generar Informe Mensual</button>
-      <button class="btn-whatsapp" onclick="compartirMesWhatsApp()">💬 Mes por WhatsApp</button>
-    </div>
-  </div>
-
-  <div class="section" id="seccionInforme" style="display:none;">
-    <div class="no-print" style="text-align:right;margin-bottom:10px;">
-      <button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto;display:inline-block;padding:10px 20px;">🖨️ Imprimir</button>
-      <button class="btn-whatsapp" onclick="compartirInformeMensualVisible()" style="width:auto;display:inline-block;padding:10px 20px;">💬 WhatsApp</button>
-      <button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto;display:inline-block;padding:10px 20px;">❌ Cerrar</button>
-    </div>
-    <div id="informeContenedor"></div>
-  </div>
 </div>
 
 <script type="module">
@@ -798,18 +908,10 @@ async function guardarCuentaEnNube(nombre, hash) {
   try {
     const slug = slugify(nombre) || 'sin-nombre';
     const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
-    await setDoc(ref, {
-      nombre: nombre.trim(),
-      hash: hash,
-      fechaRegistro: new Date().toISOString(),
-      ultimaSesion: new Date().toISOString()
-    }, { merge: true });
+    await setDoc(ref, { nombre: nombre.trim(), hash: hash, fechaRegistro: new Date().toISOString(), ultimaSesion: new Date().toISOString() }, { merge: true });
     console.log('✅ Cuenta sincronizada:', nombre);
     return true;
-  } catch(e) {
-    console.warn('⚠️ No se pudo sincronizar cuenta:', e);
-    return false;
-  }
+  } catch(e) { console.warn('⚠️ No se pudo sincronizar cuenta:', e); return false; }
 }
 
 async function buscarCuentaEnNube(nombre) {
@@ -820,10 +922,7 @@ async function buscarCuentaEnNube(nombre) {
     const snap = await getDoc(ref);
     if (snap.exists()) return snap.data();
     return null;
-  } catch(e) {
-    console.warn('⚠️ Error buscando cuenta en nube:', e);
-    return null;
-  }
+  } catch(e) { console.warn('⚠️ Error buscando cuenta en nube:', e); return null; }
 }
 
 function aplicarDarkMode(activo){
@@ -909,20 +1008,9 @@ window.hacerRegistro = async function(){
   if (ref) {
     try {
       const payload = construirPayload();
-      await Promise.race([
-        setDoc(ref, {
-          ...payload,
-          nombre: n.trim(),
-          grupo: CODIGO_GRUPO,
-          fechaRegistro: new Date().toISOString(),
-          cuentaCreada: true
-        }, { merge: true }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000))
-      ]);
+      await Promise.race([ setDoc(ref, { ...payload, nombre: n.trim(), grupo: CODIGO_GRUPO, fechaRegistro: new Date().toISOString(), cuentaCreada: true }, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000)) ]);
       console.log('✅ Documento de datos creado en la nube');
-    } catch(e) {
-      console.warn('⚠️ No se pudo crear doc aún:', e.message);
-    }
+    } catch(e) { console.warn('⚠️ No se pudo crear doc aún:', e.message); }
   }
 
   mostrarInfoUser('✅ Cuenta creada. Iniciando sesión...');
@@ -941,24 +1029,14 @@ window.hacerLogin = async function(){
 
   try {
     let user = buscarUsuario(n);
-
     if(!user){
       mostrarInfoUser('🔍 Buscando en la nube...');
       actualizarEstadoNube('⏳ Buscando usuario...', 'loading');
-
-      const nubeUser = await Promise.race([
-        buscarCuentaEnNube(n),
-        new Promise(r => setTimeout(() => r(null), 8000))
-      ]);
-
+      const nubeUser = await Promise.race([ buscarCuentaEnNube(n), new Promise(r => setTimeout(() => r(null), 8000)) ]);
       if(nubeUser){
         const lista = getUsuariosRegistrados();
         const idx = lista.findIndex(u => u.nombre.toLowerCase() === nubeUser.nombre.toLowerCase());
-        if(idx === -1){
-          lista.push({ nombre: nubeUser.nombre, hash: nubeUser.hash, fechaRegistro: nubeUser.fechaRegistro });
-        } else {
-          lista[idx].hash = nubeUser.hash;
-        }
+        if(idx === -1){ lista.push({ nombre: nubeUser.nombre, hash: nubeUser.hash, fechaRegistro: nubeUser.fechaRegistro }); } else { lista[idx].hash = nubeUser.hash; }
         guardarUsuariosRegistrados(lista);
         user = nubeUser;
         mostrarInfoUser('✅ Cuenta recuperada de la nube.');
@@ -969,12 +1047,9 @@ window.hacerLogin = async function(){
         return mostrarErrorUser('Usuario no encontrado. Verifica el nombre o regístrate.');
       }
     }
-
     const h = await hashPassword(p);
     if(h !== user.hash) return mostrarErrorUser('Contraseña incorrecta.');
-
     guardarCuentaEnNube(user.nombre, user.hash).catch(() => {});
-
     mostrarInfoUser('✅ Credenciales correctas. Cargando datos...');
     await new Promise(r => setTimeout(r, 100));
     await iniciarSesionConUsuario(user.nombre);
@@ -999,44 +1074,25 @@ async function iniciarSesionConUsuario(nombre){
 
   const ref = refUsuario();
   const tareas = [];
-  tareas.push(
-    migrarDatosAntiguosSiExisten(nombre).catch(e => { console.warn('Migración:', e); return false; })
-  );
+  tareas.push(migrarDatosAntiguosSiExisten(nombre).catch(e => { console.warn('Migración:', e); return false; }));
   let snapData = null;
   if(ref){
-    tareas.push(
-      Promise.race([
-        getDoc(ref),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000))
-      ]).then(snap => { snapData = snap; return true; })
-        .catch(e => { console.warn('getDoc:', e.message); return false; })
-    );
+    tareas.push(Promise.race([ getDoc(ref), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]).then(snap => { snapData = snap; return true; }).catch(e => { console.warn('getDoc:', e.message); return false; }));
   }
   const [migro] = await Promise.all(tareas);
 
   if(!migro && snapData && snapData.exists && snapData.exists()){
     const d = snapData.data();
-    if(d.estadoSesion){
-      localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
-    }
-    if(d.entregasDiariasDetallado){
-      localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
-    }
-    if(d.tiemposBase){
-      for(const k in d.tiemposBase){
-        if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]);
-      }
-    }
+    if(d.estadoSesion){ localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion)); }
+    if(d.entregasDiariasDetallado){ localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado)); }
+    if(d.tiemposBase){ for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]); } }
     if(d.version) ultimaVersionLocal = d.version;
     console.log('✅ Datos cargados desde la nube');
   } else if(ref && (!snapData || !snapData.exists || !snapData.exists())){
     console.log('ℹ️ Sin documento remoto. Creando uno nuevo...');
     try {
       const payload = construirPayload();
-      await Promise.race([
-        setDoc(ref, payload, { merge: true }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000))
-      ]);
+      await Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]);
       console.log('✅ Documento creado');
     } catch(e){ console.warn('Creación doc:', e.message); }
   }
@@ -1044,36 +1100,22 @@ async function iniciarSesionConUsuario(nombre){
   syncActivo = true;
   iniciarEscucha();
   if(typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
-
-  // 🚫 NO llamar a reiniciarUIOffline() aquí (borraba todo)
-
   actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
   if(typeof window.mostrarAviso === 'function') window.mostrarAviso('✅ Bienvenido, ' + nombre, 'ok');
   mostrarBotonCerrarSesion(true);
 
   try{
     const tgl = document.getElementById('toggleFotosNube');
-    if(tgl){
-      tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true';
-      localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked ? 'true' : 'false');
-    }
+    if(tgl){ tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true'; localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked ? 'true' : 'false'); }
   }catch(e){}
 }
 
-function mostrarBotonCerrarSesion(visible){
-  const btn = document.getElementById('btnCerrarSesion');
-  if(btn) btn.style.display = visible ? 'inline-block' : 'none';
-}
+function mostrarBotonCerrarSesion(visible){ const btn = document.getElementById('btnCerrarSesion'); if(btn) btn.style.display = visible ? 'inline-block' : 'none'; }
 
 window.cerrarSesion = async function(){
   const usuario = getUsuarioActual();
-  if(!usuario){
-    mostrarModalUsuario();
-    return;
-  }
-  if(!confirm('🚪 ¿Cerrar sesión de "' + usuario + '"?\n\n✅ Tus datos se guardarán en la nube\n✅ Podrás volver a entrar cuando quieras')){
-    return;
-  }
+  if(!usuario){ mostrarModalUsuario(); return; }
+  if(!confirm('🚪 ¿Cerrar sesión de "' + usuario + '"?\n\n✅ Tus datos se guardarán en la nube\n✅ Podrás volver a entrar cuando quieras')){ return; }
 
   actualizarEstadoNube('⏳ Guardando en segundo plano...', 'loading');
   try {
@@ -1081,14 +1123,7 @@ window.cerrarSesion = async function(){
       const ref = refUsuario();
       if (ref) {
         const payload = construirPayload();
-        Promise.race([
-          setDoc(ref, payload, { merge: true }),
-          new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000))
-        ]).then(() => {
-          console.log('✅ Datos guardados en background');
-        }).catch(e => {
-          console.warn('⚠️ Sync en background falló, cerramos igual:', e.message);
-        });
+        Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => { console.log('✅ Datos guardados en background'); }).catch(e => { console.warn('⚠️ Sync en background falló, cerramos igual:', e.message); });
       }
     }
   } catch(e){ console.warn('Error preparando sync:', e); }
@@ -1104,7 +1139,6 @@ window.cerrarSesion = async function(){
   mostrarBotonCerrarSesion(false);
   actualizarEstadoNube('🚪 Sesión cerrada', 'loading');
   if(typeof window.mostrarAviso === 'function') window.mostrarAviso('🚪 Sesión cerrada', 'ok');
-
   mostrarModalUsuario();
 };
 
@@ -1146,11 +1180,7 @@ window.mostrarModalUsuario = mostrarModalUsuario;
 
 window.cambiarUsuario = async function(){
   const u=getUsuarioActual();
-  if(u){
-    if(!confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos de "'+u+'".')) return;
-    try { window.sincronizarConNube(); } catch(e){}
-    await new Promise(r => setTimeout(r, 400));
-  }
+  if(u){ if(!confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos de "'+u+'".')) return; try { window.sincronizarConNube(); } catch(e){} await new Promise(r => setTimeout(r, 400)); }
   if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
   syncActivo=false;
   if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
@@ -1286,6 +1316,18 @@ async function migrarDatosAntiguosSiExisten(nombre){
   catch(e){ console.warn(e); return false; }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   📑 SISTEMA DE PESTAÑAS
+   ═══════════════════════════════════════════════════════════════ */
+window.cambiarTab = function(tab){
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
+  if(tab === 'historial' && typeof window.renderizarTabla === 'function') window.renderizarTabla();
+  if(tab === 'inicio' && typeof window.recargarGraficas === 'function') window.recargarGraficas();
+  try { localStorage.setItem('colserlog_tab_actual', tab); }catch(e){}
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
 window.addEventListener('load', ()=>{
   inyectarManifest(); cargarDarkMode();
   const pref=localStorage.getItem('syncAutomaticoFirebase'); syncAutomaticoActivo = pref===null?true:pref==='true';
@@ -1296,6 +1338,13 @@ window.addEventListener('load', ()=>{
   window.addEventListener('offline', ()=>actualizarEstadoNube('📴 Sin conexión','loading'));
   ['loginNombre','loginPassword'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); window.hacerLogin(); } }));
   ['regNombre','regPassword','regPassword2'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); window.hacerRegistro(); } }));
+
+  // Restaurar pestaña activa
+  try{
+    const tabGuardada = localStorage.getItem('colserlog_tab_actual');
+    if(tabGuardada && document.querySelector(`.tab-btn[data-tab="${tabGuardada}"]`)){ window.cambiarTab(tabGuardada); }
+  }catch(e){}
+
   setTimeout(()=>{
     actualizarBarraUsuario();
     const u=getUsuarioActual();
@@ -1309,7 +1358,6 @@ window.addEventListener('load', ()=>{
 
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
-const QUICK_STATES=['Entregado','No está en casa','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=900; const FOTO_JPEG_QUALITY=0.65; const CLAVE_FOTOS_NUBE='syncFotosNube';
 
@@ -1342,7 +1390,7 @@ const DESCRIPCIONES_RECOMENDADAS={
 function esDescripcionSugerida(t){ if(!t)return false; const x=t.trim(); return Object.values(DESCRIPCIONES_RECOMENDADAS).some(d=>d===x); }
 function aplicarDescripcionRecomendada(f=false){ const sel=document.getElementById('estadoPaquete'); const ta=document.getElementById('descripcionVisita'); if(!sel||!ta)return; const s=DESCRIPCIONES_RECOMENDADAS[sel.value]||''; const a=ta.value; if(f||a.trim()===''||esDescripcionSugerida(a)) ta.value=s; }
 window.aplicarDescripcionRecomendada = aplicarDescripcionRecomendada;
-window.alCambiarEstado = function(){ window.actualizarPlaceholderDescripcion(); sincronizarQuickStates(); aplicarDescripcionRecomendada(false); };
+window.alCambiarEstado = function(){ window.actualizarPlaceholderDescripcion(); aplicarDescripcionRecomendada(false); };
 window.restaurarDescripcionRecomendada = function(){ const sel=document.getElementById('estadoPaquete'); if(!sel||!sel.value){ mostrarAviso('⚠️ Primero selecciona un estado','error'); return; } aplicarDescripcionRecomendada(true); mostrarAviso('↺ Descripción restaurada','ok'); };
 window.limpiarDescripcion = function(){ const ta=document.getElementById('descripcionVisita'); if(ta) ta.value=''; };
 function filtrarSoloDigitos(i){ const l=(i.value||'').replace(/\D/g,'').slice(0,LONGITUD_CODIGO); if(i.value!==l) i.value=l; }
@@ -1375,9 +1423,7 @@ function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getD
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
 
-/* ═══════════════════════════════════════════════════════════════
-   📸 REGLAS DE PRIVACIDAD FOTOGRÁFICA
-   ═══════════════════════════════════════════════════════════════ */
+/* 📸 REGLAS DE PRIVACIDAD FOTOGRÁFICA */
 window.abrirModalReglasFoto = function(){
   const m = document.getElementById('modalReglasFoto');
   const chk = document.getElementById('chkAceptoReglas');
@@ -1388,40 +1434,16 @@ window.abrirModalReglasFoto = function(){
   if(btn) btn.disabled = true;
   if(m) m.classList.add('visible');
 };
-
-window.cerrarModalReglasFoto = function(){
-  const m = document.getElementById('modalReglasFoto');
-  if(m) m.classList.remove('visible');
-};
-
-window.toggleBotonCamara = function(){
-  const chk = document.getElementById('chkAceptoReglas');
-  const btn = document.getElementById('btnAbrirCamara');
-  if(btn) btn.disabled = !(chk && chk.checked);
-};
-
+window.cerrarModalReglasFoto = function(){ const m = document.getElementById('modalReglasFoto'); if(m) m.classList.remove('visible'); };
+window.toggleBotonCamara = function(){ const chk = document.getElementById('chkAceptoReglas'); const btn = document.getElementById('btnAbrirCamara'); if(btn) btn.disabled = !(chk && chk.checked); };
 window.confirmarYabrirCamara = function(){
   const chk = document.getElementById('chkAceptoReglas');
-  if(!chk || !chk.checked){
-    mostrarAviso('⚠️ Debes aceptar las reglas primero', 'error');
-    return;
-  }
+  if(!chk || !chk.checked){ mostrarAviso('⚠️ Debes aceptar las reglas primero', 'error'); return; }
   cerrarModalReglasFoto();
-  setTimeout(() => {
-    document.getElementById('inputFotoVisita')?.click();
-  }, 250);
+  setTimeout(() => { document.getElementById('inputFotoVisita')?.click(); }, 250);
 };
-
-document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape'){
-    const m = document.getElementById('modalReglasFoto');
-    if(m && m.classList.contains('visible')) cerrarModalReglasFoto();
-  }
-});
-
-document.getElementById('modalReglasFoto')?.addEventListener('click', (e) => {
-  if(e.target.id === 'modalReglasFoto') cerrarModalReglasFoto();
-});
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape'){ const m = document.getElementById('modalReglasFoto'); if(m && m.classList.contains('visible')) cerrarModalReglasFoto(); } });
+document.getElementById('modalReglasFoto')?.addEventListener('click', (e) => { if(e.target.id === 'modalReglasFoto') cerrarModalReglasFoto(); });
 
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE, sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
@@ -1468,11 +1490,6 @@ window.cerrarModalFoto = function(){ document.getElementById('modalFoto').classL
 document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') cerrarModalFoto(); if(e.key==='ArrowLeft') navegarFoto(-1); if(e.key==='ArrowRight') navegarFoto(1); });
 document.getElementById('modalFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalFoto') cerrarModalFoto(); });
 window.verFotosVisita = async function(index){ const v=visitas[index]; if(!v||!v.fotos||!v.fotos.length) return; const ids=v.fotos.map(f=>f.id||f).filter(Boolean); const datos=await obtenerFotosDB(ids); const lista=ids.map(id=>({id,data:datos[id]})).filter(f=>f.data); if(!lista.length){ mostrarAviso('⚠️ No se pudieron cargar las fotos','error'); return; } abrirModalFoto(lista,0); };
-
-function renderizarQuickStates(){ const c=document.getElementById('quickStates'); if(!c) return; c.innerHTML=''; QUICK_STATES.forEach(est=>{ const b=document.createElement('button'); b.type='button'; b.textContent=est; if(est==='Entregado') b.classList.add('entregado'); b.dataset.estado=est; b.onclick=()=>seleccionarEstadoRapido(est); c.appendChild(b); }); sincronizarQuickStates(); }
-function seleccionarEstadoRapido(est){ const s=document.getElementById('estadoPaquete'); if(!s) return; s.value=est; window.actualizarPlaceholderDescripcion(); sincronizarQuickStates(); aplicarDescripcionRecomendada(false); beepOk(); }
-function sincronizarQuickStates(){ const s=document.getElementById('estadoPaquete'); const a=s?s.value:''; document.querySelectorAll('#quickStates button').forEach(b=>{ b.classList.toggle('activo', b.dataset.estado===a); }); }
-window.seleccionarEstadoRapido = seleccionarEstadoRapido;
 
 function codigosEnVisitas(){ const s=new Set(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); }); return s; }
 window.agregarCodigoBanco = function(){ const i=document.getElementById('codigoBanco'); if(!i) return; const c=(i.value||'').trim(); if(!c){ mostrarAviso('⚠️ Ingresa un código','error'); beepError(); i.focus(); return; } const e=validarCodigo(c); if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); i.focus(); return; } if(bancoCodigos.includes(c)){ mostrarAviso('⚠️ Ya está en banco','error'); beepError(); i.value=''; actualizarContadorDigitos(i,'contadorDigitosBanco'); i.focus(); return; } bancoCodigos.push(c); i.value=''; actualizarContadorDigitos(i,'contadorDigitosBanco'); i.focus(); renderizarBanco(); guardarEstadoCompleto(); beepOk(); mostrarAviso('✅ Agregado: '+c,'ok'); };
@@ -1548,10 +1565,17 @@ function renderizarCodigosPendientes(){ const c=document.getElementById('listaCo
 function renderizarTabla(){
   const t=document.getElementById('cuerpoTabla'); if(!t) return; t.innerHTML='';
   const f=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase();
-  if(!visitas.length){ document.getElementById('seccionHistorial').style.display='none'; const c=document.getElementById('contadorBusqueda'); if(c) c.textContent=''; return; }
-  document.getElementById('seccionHistorial').style.display='block';
+  const cb=document.getElementById('contadorBusqueda');
+  if(!visitas.length){
+    const tr=document.createElement('tr'); const td=document.createElement('td');
+    td.colSpan=9; td.className='sin-resultados';
+    td.textContent='📋 Aún no hay visitas registradas hoy.';
+    tr.appendChild(td); t.appendChild(tr);
+    if(cb) cb.textContent='';
+    return;
+  }
   const items=[]; visitas.forEach((v,i)=>{ const co=(v.codigo||'').toLowerCase(); if(!f||co.includes(f)) items.push({visita:v,indexOriginal:i}); });
-  const cb=document.getElementById('contadorBusqueda'); if(cb) cb.textContent=f?`🔎 ${items.length} resultado(s) de ${visitas.length}`:`Total: ${visitas.length} visita(s).`;
+  if(cb) cb.textContent=f?`🔎 ${items.length} resultado(s) de ${visitas.length}`:`Total: ${visitas.length} visita(s).`;
   if(!items.length){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=9; td.className='sin-resultados'; td.textContent='❌ Sin resultados.'; tr.appendChild(td); t.appendChild(tr); return; }
   items.forEach(({visita:v,indexOriginal})=>{
     const ed=filaEditando===indexOriginal;
@@ -1582,6 +1606,7 @@ function renderizarTabla(){
     tdA.appendChild(dv); tr.appendChild(tdA); t.appendChild(tr);
   });
 }
+window.renderizarTabla = renderizarTabla;
 window.filtrarVisitas = ()=>{ if(filaEditando!==null) filaEditando=null; renderizarTabla(); };
 window.limpiarBusqueda = ()=>{ const i=document.getElementById('busquedaGuia'); if(i) i.value=''; renderizarTabla(); i?.focus(); };
 window.guardarEdicion = (index)=>{
@@ -1657,7 +1682,7 @@ function limpiarFormularioVisita(){
   codigosPendientes=[]; renderizarCodigosPendientes();
   fotosPendientes=[]; renderizarGaleriaFotos();
   actualizarContadorDigitos(document.getElementById('codigoBarras'),'contadorDigitosVisita');
-  window.limpiarBusquedaCodigo(); sincronizarQuickStates(); window.actualizarPlaceholderDescripcion();
+  window.limpiarBusquedaCodigo(); window.actualizarPlaceholderDescripcion();
 }
 
 window.registrarVisita = ()=>{
@@ -1916,7 +1941,7 @@ function imprimirContenidoHTML(titulo){
     let area=document.getElementById('areaImpresion');
     if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
     const clon=fuente.cloneNode(true);
-    clon.querySelectorAll('.no-print,script,button,#lectorQR,#lectorQRBanco,.busqueda-box,#avisoDuplicado,#barraUsuario,#modalUsuario,#modalPWA,#modalReglasFoto,.aviso-reglas-inline,.rules-seccion').forEach(el=>el.remove());
+    clon.querySelectorAll('.no-print,script,button,#lectorQR,#lectorQRBanco,.busqueda-box,#avisoDuplicado,#barraUsuario,#modalUsuario,#modalPWA,#modalReglasFoto,.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions').forEach(el=>el.remove());
     if(clon.style && clon.style.display==='none') clon.style.display='';
     clon.querySelectorAll('[style*="display: none"],[style*="display:none"]').forEach(el=>{ el.style.display=''; });
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
@@ -2184,7 +2209,6 @@ function limpiarSesion(){
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; localStorage.removeItem('tiempoBase_'+id); });
   const r=document.getElementById('resumenTiempos'); if(r) r.style.display='none';
   const ct=document.getElementById('cuerpoTabla'); if(ct) ct.innerHTML='';
-  const sh=document.getElementById('seccionHistorial'); if(sh) sh.style.display='none';
   const b=document.getElementById('busquedaGuia'); if(b) b.value='';
   const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
   const d=document.getElementById('descripcionVisita'); if(d) d.value='';
@@ -2223,7 +2247,8 @@ window.generarInformeMensual = ()=>{
   document.getElementById('informeContenedor').innerHTML=html;
   document.getElementById('informeContenedor').style.display='block';
   document.getElementById('seccionInforme').style.display='block';
-  document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'});
+  if(typeof window.cambiarTab === 'function') window.cambiarTab('informes');
+  setTimeout(()=>{ document.getElementById('seccionInforme').scrollIntoView({behavior:'smooth'}); }, 200);
 };
 window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.display='none'; document.getElementById('informeContenedor').innerHTML=''; document.getElementById('informeContenedor').style.display='none'; };
 
@@ -2251,7 +2276,6 @@ window.reiniciarUIOffline = function(){
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const r=document.getElementById('resumenTiempos'); if(r) r.style.display='none';
   const ct=document.getElementById('cuerpoTabla'); if(ct) ct.innerHTML='';
-  const sh=document.getElementById('seccionHistorial'); if(sh) sh.style.display='none';
   const b=document.getElementById('busquedaGuia'); if(b) b.value='';
   const c=document.getElementById('contadorBusqueda'); if(c) c.textContent='';
   const d=document.getElementById('descripcionVisita'); if(d) d.value='';
@@ -2275,7 +2299,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -2293,7 +2317,7 @@ window.addEventListener('load', async ()=>{
   renderizarGaleriaFotos();
   cargarTiemposBase();
   if(cargarEstadoCompleto() && visitas.length){ renderizarTabla(); actualizarDashboard(); }
-  renderizarBanco(); renderizarQuickStates();
+  renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id)?.addEventListener('change', guardarTiemposBase); });
   actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   if(!visitas.length) renderizarGrafica();
