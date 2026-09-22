@@ -488,9 +488,35 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
 .rules-check-list li{list-style:none;position:relative;padding-left:28px;margin:8px 0;font-size:.92em}
 .rules-check-list li::before{content:'☐';position:absolute;left:0;top:-1px;font-size:1.15em;color:var(--text-heading)}
 
+/* ═══ FILTROS DE VISITAS DEL DÍA ═══ */
+.filtros-visitas{display:flex;gap:6px;overflow-x:auto;background:var(--bg-section);padding:6px;border-radius:var(--radius-md);margin-bottom:12px;border:1px solid var(--border-light)}
+.filtro-btn{flex:0 0 auto;padding:9px 14px;background:transparent;color:var(--text-secondary);border:none;border-radius:var(--radius-pill);cursor:pointer;font-size:.82em;font-weight:600;white-space:nowrap;margin:0;width:auto;transition:all .2s var(--ease);font-family:inherit}
+.filtro-btn.active{background:var(--bg-container);color:var(--sys-blue);box-shadow:var(--shadow-sm)}
+.filtro-btn:hover:not(.active){background:var(--bg-card)}
+.filtro-btn[data-filtro="entregados"].active{color:var(--sys-green)}
+.filtro-btn[data-filtro="no-entregados"].active{color:var(--sys-red)}
+.filtro-btn span{font-weight:700;margin-left:2px}
+body.dark .filtro-btn.active{background:var(--gray-7)}
+.tabla-visitas-dia{width:100%;border-collapse:collapse;font-size:.8rem;background:var(--bg-table);border-radius:var(--radius-md);overflow:hidden}
+.tabla-visitas-dia th{background:var(--table-header-bg);color:var(--table-header-color);padding:8px 6px;font-size:.72rem;font-weight:600;text-align:center;border-bottom:1px solid var(--border-light)}
+.tabla-visitas-dia td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--border-light);color:var(--text-primary)}
+.tabla-visitas-dia tr:last-child td{border-bottom:none}
+.tabla-visitas-dia tr:hover{background:var(--bg-section)}
+.tabla-visitas-dia .desc{text-align:left;font-size:.72rem;color:var(--text-secondary);max-width:180px}
+.badge-ent{display:inline-block;padding:2px 8px;border-radius:var(--radius-pill);font-size:.7rem;font-weight:700}
+.badge-ent.ok{background:rgba(48,209,88,.14);color:#1e8449}
+.badge-ent.no{background:rgba(255,69,58,.12);color:#a02015}
+body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
+#listaVisitasDia{max-height:480px;overflow-y:auto;border:1px solid var(--border-light);border-radius:var(--radius-md);background:var(--bg-card)}
+#listaVisitasDia::-webkit-scrollbar{width:8px}
+#listaVisitasDia::-webkit-scrollbar-thumb{background:var(--gray-4);border-radius:4px}
+
 /* ═══════════════════════════════════════════════════════════════
    🖨️ IMPRESIÓN PROFESIONAL PARA AUDITORÍA
    ═══════════════════════════════════════════════════════════════ */
+.rd-fecha-emision-print{text-align:right;font-size:8pt;color:#333;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ccc}
+.rd-fecha-emision-print strong{color:#1c1c1e}
+
 @media print{
   :root,body,body.dark{
     --bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#fafafa!important;
@@ -505,39 +531,23 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9.5pt;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important;border:none!important;background:#fff!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,#informeContenedor>.no-print{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor>.no-print{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:190mm;margin:0 auto;overflow:visible!important}
   body.modo-reporte-diario #areaImpresion{font-size:9pt!important;width:100%;max-width:190mm}
   body.modo-reporte-diario .reporte-diario{width:100%;max-width:190mm;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1c1e}
 
-  /* Encabezado corporativo auditoría */
-  .rd-corp-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px double #1c1c1e;padding-bottom:8px;margin-bottom:10px;page-break-inside:avoid;gap:10px}
-  .rd-corp-left{flex:1}
-  .rd-corp-logo{font-size:14pt;font-weight:900;color:#1c1c1e;letter-spacing:-.5px;line-height:1;margin-bottom:3px}
-  .rd-corp-logo .box{display:inline-block;background:#1c1c1e;color:#fff;padding:2px 6px;border-radius:3px;margin-right:4px}
-  .rd-corp-info{font-size:7pt;color:#444;line-height:1.35}
-  .rd-corp-info strong{color:#1c1c1e}
-  .rd-corp-right{text-align:right;font-size:7pt;color:#333;line-height:1.5;border-left:1px solid #999;padding-left:10px;min-width:60mm}
-  .rd-corp-right .doc-code{font-family:'Courier New',monospace;font-weight:bold;background:#f0f0f0;border:1px solid #999;padding:2px 6px;border-radius:2px;font-size:7.5pt;display:inline-block;margin-bottom:3px}
-  .rd-corp-right .version-badge{background:#c0392b;color:#fff;padding:1px 6px;border-radius:2px;font-size:6.5pt;font-weight:bold;margin-left:4px;vertical-align:middle}
+  /* Encabezados de impresión ya NO muestran datos corporativos */
+  .rd-corp-header,.rd-corp-left,.rd-corp-right,.rd-audit-panel{display:none!important}
+  .rd-fecha-emision-print{display:block!important;text-align:right;font-size:8pt;color:#333;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ccc}
+  .rd-fecha-emision-print strong{color:#1c1c1e}
 
-  /* Bloque de metadatos de auditoría */
-  .rd-audit-panel{border:1.5px solid #1c1c1e;border-radius:4px;padding:6px 10px;margin-bottom:10px;background:#fafafa!important;font-size:7.5pt;page-break-inside:avoid}
-  .rd-audit-panel-title{font-weight:900;color:#1c1c1e;text-transform:uppercase;letter-spacing:.5px;font-size:7.5pt;border-bottom:1px solid #999;padding-bottom:3px;margin-bottom:5px}
-  .rd-audit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px 12px;font-size:7pt}
-  .rd-audit-grid > div{color:#333;line-height:1.35}
-  .rd-audit-grid strong{color:#1c1c1e;display:inline-block;min-width:60px}
-  .rd-audit-hash{font-family:'Courier New',monospace;font-size:6.5pt;color:#555;word-break:break-all;background:#fff;border:1px solid #ccc;padding:3px 5px;border-radius:2px;margin-top:5px;display:block}
-
-  /* Título del reporte */
   .rd-header{text-align:center;border-bottom:2px solid #1c1c1e;padding-bottom:8px;margin-bottom:10px;page-break-inside:avoid;page-break-after:avoid}
   .rd-header h1{color:#1c1c1e!important;font-size:14pt;margin:0 0 5px 0;text-align:center;letter-spacing:-.5px;font-weight:900}
   .rd-header .rd-subtitle{font-size:9.5pt;color:#555;font-weight:bold;margin:3px 0}
   .rd-info{display:flex;justify-content:space-around;font-size:8.5pt;color:#333;flex-wrap:wrap;gap:5px;margin-top:5px}
 
-  /* KPIs */
   .rd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;page-break-inside:avoid}
   .rd-kpi{border:1.2px solid #999!important;border-radius:3px;padding:6px 4px;text-align:center;background:#f8f9fa!important;page-break-inside:avoid}
   .rd-kpi-label{font-size:7pt;color:#666;text-transform:uppercase;margin-bottom:3px;letter-spacing:.3px;font-weight:700}
@@ -551,15 +561,12 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   .rd-kpi.cyan{border-color:#17a2b8!important;background:#e3f7fa!important}.rd-kpi.cyan .rd-kpi-valor{color:#0e5f6f}
   .rd-kpi.dark{border-color:#1c1c1e!important;background:#e8ebee!important}.rd-kpi.dark .rd-kpi-valor{color:#1c1c1e}
 
-  /* Charts */
   .rd-charts{display:grid;grid-template-columns:1.5fr 1fr;gap:6px;margin-bottom:10px;page-break-inside:avoid;width:100%;max-width:190mm;overflow:hidden}
   .rd-chart-box{border:1px solid #999!important;border-radius:3px;padding:3px;background:#fff!important;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:48mm}
   .rd-chart-box img{width:100%;height:auto;max-height:64mm;object-fit:contain;display:block}
 
-  /* Títulos de sección */
   h3.rd-section-title{font-size:10pt;color:#1c1c1e!important;border-bottom:2px solid #1c1c1e;padding-bottom:3px;margin:10px 0 6px 0;text-align:left;page-break-after:avoid;font-weight:900;text-transform:uppercase;letter-spacing:.4px}
 
-  /* Tablas */
   .rd-tabla-tiempos{width:100%;border-collapse:collapse;font-size:8.5pt;page-break-inside:avoid;margin-bottom:8px}
   .rd-tabla-tiempos td{border:1px solid #999!important;padding:5px 4px;text-align:center;background:#f8f9fa!important;line-height:1.35}
   .rd-tabla{width:100%;border-collapse:collapse;font-size:8pt;table-layout:fixed;page-break-inside:auto;margin-bottom:8px}
@@ -570,7 +577,6 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   .rd-tabla tr:nth-child(even) td{background:#f8f9fa!important}
   .rd-tabla tr.rd-total td{background:#e8f8f5!important;font-weight:900;border-top:2px solid #1abc9c!important;font-size:8pt}
 
-  /* Firmas auditoría */
   .rd-firmas{display:grid;grid-template-columns:repeat(3,1fr);gap:10mm;margin-top:18mm;page-break-inside:avoid}
   .rd-firma{text-align:center;font-size:8pt}
   .rd-firma-linea{border-top:1.2px solid #1c1c1e;margin-bottom:5px;height:1px}
@@ -578,15 +584,13 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   .rd-firma-nombre{font-size:8pt;color:#1c1c1e;font-weight:600;margin-bottom:2px}
   .rd-firma-detalle{font-size:6.5pt;color:#666;line-height:1.4}
 
-  /* Pie de página auditoría */
   .rd-footer{
     text-align:center;font-size:6.5pt;color:#666;margin-top:10mm;
     border-top:1px solid #999;padding-top:4px;page-break-inside:avoid;line-height:1.5;
   }
-  .rd-footer .rd-confidencial{color:#c0392b;font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
+  .rd-footer .rd-confidencial{color:#666!important;font-weight:600!important;text-transform:uppercase;letter-spacing:.3px;margin-bottom:2px}
   .rd-nota{font-size:7pt;color:#555;text-align:center;font-style:italic;margin:4px 0}
 
-  /* Álbum fotográfico */
   body.modo-album .rd-album-page{page-break-inside:avoid!important;page-break-after:always!important;width:100%!important;max-width:190mm!important;overflow:hidden!important;padding-top:2mm;display:block}
   body.modo-album .rd-album-page:last-child{page-break-after:auto!important}
   body.modo-album .rd-album-page-header{font-size:7pt;color:#1c1c1e;font-weight:700;text-align:right;margin-bottom:2mm;padding-bottom:1mm;border-bottom:1px solid #ccc}
@@ -596,7 +600,6 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
   body.modo-album .rd-album-caption{font-size:6pt;text-align:center;padding:3px;background:#f0f0f0!important;color:#333;line-height:1.3;overflow:hidden;flex-grow:1}
   body.modo-album .rd-album-caption strong{color:#1c1c1e}
 
-  /* Fotos en reporte diario */
   body.modo-reporte-diario .rd-fotos-section{page-break-inside:auto;margin-top:10px}
   body.modo-reporte-diario .rd-fotos-page{page-break-inside:avoid!important;page-break-after:always!important;width:100%!important;max-width:190mm!important;overflow:hidden!important;padding-top:2mm;display:block}
   body.modo-reporte-diario .rd-fotos-page:last-child{page-break-after:auto!important}
@@ -729,6 +732,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     <button class="tab-btn" data-tab="ajustes" onclick="cambiarTab('ajustes')">⚙️ Ajustes</button>
   </nav>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: INICIO — Informe del Día con filtros y buscador
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel active" data-tab="inicio">
     <div class="section">
       <h2>📊 Informe del Día</h2>
@@ -750,6 +756,24 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
 
     <div class="section no-print">
+      <h2>📋 Detalle de Visitas del Día</h2>
+      <div class="filtros-visitas">
+        <button class="filtro-btn active" data-filtro="todas" onclick="filtrarVistaDia('todas')">Todas <span id="cnt-todas">(0)</span></button>
+        <button class="filtro-btn" data-filtro="entregados" onclick="filtrarVistaDia('entregados')">✅ Entregados <span id="cnt-entregados">(0)</span></button>
+        <button class="filtro-btn" data-filtro="no-entregados" onclick="filtrarVistaDia('no-entregados')">❌ No Entregados <span id="cnt-no-entregados">(0)</span></button>
+      </div>
+      <div class="busqueda-box" style="margin-bottom:12px;">
+        <label style="margin-top:0;">🔍 Buscar por guía / código:</label>
+        <div class="input-group">
+          <input type="text" id="busquedaDia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);renderizarVistaDia();" autocomplete="off">
+          <button class="btn-buscar-limpiar" onclick="limpiarBusquedaDia()">✖</button>
+        </div>
+        <p id="contadorBusquedaDia" class="contador-busqueda"></p>
+      </div>
+      <div id="listaVisitasDia"></div>
+    </div>
+
+    <div class="section no-print">
       <h2>⚡ Acceso Rápido</h2>
       <div class="quick-actions">
         <button onclick="cambiarTab('tiempos')">⏱️ Tiempos Base</button>
@@ -762,6 +786,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: TIEMPOS
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="tiempos">
     <div class="section">
       <h2>1. Tiempos Base de Salida</h2>
@@ -776,6 +803,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: BANCO DE CÓDIGOS
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="banco">
     <div class="section no-print">
       <h2>2. 📥 Banco de Códigos del Día</h2>
@@ -806,6 +836,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: REGISTRAR VISITA
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="visita">
     <div class="section no-print">
       <h2>3. Registrar Nueva Visita</h2>
@@ -954,6 +987,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: HISTORIAL DE VISITAS
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="historial">
     <div class="section" id="seccionHistorial">
       <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
@@ -971,6 +1007,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: INFORMES
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="informes">
     <div class="section">
       <h2>7. Promedios Históricos</h2>
@@ -994,6 +1033,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: NUBE
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="nube">
     <div class="section no-print">
       <h2>9. ☁️ Sincronización en la Nube (Firebase)</h2>
@@ -1045,6 +1087,9 @@ body.dark .aviso-reglas-inline strong{color:#ff8a80}
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════
+       TAB: AJUSTES
+       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="ajustes">
     <div class="section no-print">
       <h2>6. Control de Sesión</h2>
@@ -1106,7 +1151,7 @@ async function guardarCuentaEnNube(nombre, hash) {
     const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
     await setDoc(ref, { nombre: nombre.trim(), hash: hash, fechaRegistro: new Date().toISOString(), ultimaSesion: new Date().toISOString() }, { merge: true });
     return true;
-  } catch(e) { console.warn('⚠️ No se pudo sincronizar cuenta:', e); return false; }
+  } catch(e) { return false; }
 }
 
 async function buscarCuentaEnNube(nombre) {
@@ -1194,7 +1239,7 @@ window.hacerRegistro = async function(){
   guardarUsuariosRegistrados(lista);
 
   mostrarInfoUser('⏳ Creando cuenta...');
-  guardarCuentaEnNube(n.trim(), hash).catch(e => console.warn('Cuenta nube:', e));
+  guardarCuentaEnNube(n.trim(), hash).catch(e => {});
 
   setUsuarioActual(n.trim());
   actualizarBarraUsuario();
@@ -1204,7 +1249,7 @@ window.hacerRegistro = async function(){
     try {
       const payload = construirPayload();
       await Promise.race([ setDoc(ref, { ...payload, nombre: n.trim(), grupo: CODIGO_GRUPO, fechaRegistro: new Date().toISOString(), cuentaCreada: true }, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000)) ]);
-    } catch(e) { console.warn('⚠️ No se pudo crear doc aún:', e.message); }
+    } catch(e) {  }
   }
 
   mostrarInfoUser('✅ Cuenta creada. Iniciando sesión...');
@@ -1284,7 +1329,7 @@ async function iniciarSesionConUsuario(nombre){
     try {
       const payload = construirPayload();
       await Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]);
-    } catch(e){ console.warn('Creación doc:', e.message); }
+    } catch(e){  }
   }
 
   syncActivo = true;
@@ -1313,7 +1358,7 @@ window.cerrarSesion = async function(){
       const ref = refUsuario();
       if (ref) {
         const payload = construirPayload();
-        Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => {}).catch(e => { console.warn('Sync bg:', e.message); });
+        Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => {}).catch(e => {});
       }
     }
   } catch(e){}
@@ -1407,7 +1452,7 @@ window.sincronizarConNube = function(){
       await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 20s')),20000)) ]);
       intentosSync=0;
       actualizarEstadoNube('☁️ Sincronizado '+new Date().toLocaleTimeString(),'ok');
-    }catch(e){ intentosSync++; console.warn(e); actualizarEstadoNube('❌ '+e.message,'error'); }
+    }catch(e){ intentosSync++; actualizarEstadoNube('❌ '+e.message,'error'); }
     finally{ guardadoEnProgreso=false; guardadoPendiente=null; }
   }, delay);
 };
@@ -1509,6 +1554,7 @@ window.cambiarTab = function(tab){
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
   if(tab === 'historial' && typeof window.renderizarTabla === 'function') window.renderizarTabla();
   if(tab === 'inicio' && typeof window.recargarGraficas === 'function') window.recargarGraficas();
+  if(tab === 'inicio' && typeof window.renderizarVistaDia === 'function') window.renderizarVistaDia();
   try { localStorage.setItem('colserlog_tab_actual', tab); }catch(e){}
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
@@ -1544,7 +1590,6 @@ window.addEventListener('load', ()=>{
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=900; const FOTO_JPEG_QUALITY=0.65; const CLAVE_FOTOS_NUBE='syncFotosNube';
-const EMPRESA={nombre:'COLSERLOG S.A.S.',nit:'900.123.456-7',dir:'Calle 100 # 15-30, Bogotá D.C., Colombia',tel:'+57 (601) 123-4567',email:'auditoria@colserlog.com',web:'www.colserlog.com'};
 
 const DESCRIPCIONES_RECOMENDADAS={
   'Entregado':'Paquete entregado en la dirección indicada. Recibido por el cliente, quien firmó la guía correspondiente. Producto verificado en buen estado y sin novedades.',
@@ -1579,7 +1624,6 @@ window.alCambiarEstado = function(){ window.actualizarPlaceholderDescripcion(); 
 window.restaurarDescripcionRecomendada = function(){ const sel=document.getElementById('estadoPaquete'); if(!sel||!sel.value){ mostrarAviso('⚠️ Primero selecciona un estado','error'); return; } aplicarDescripcionRecomendada(true); mostrarAviso('↺ Descripción restaurada','ok'); };
 window.limpiarDescripcion = function(){ const ta=document.getElementById('descripcionVisita'); if(ta) ta.value=''; };
 
-/* FIX #3: validar i */
 function filtrarSoloDigitos(i){ if(!i||typeof i.value!=='string') return; const l=i.value.replace(/\D/g,'').slice(0,LONGITUD_CODIGO); if(i.value!==l) i.value=l; }
 function actualizarContadorDigitos(i,idc){ const el=document.getElementById(idc); if(!el||!i)return; const n=(i.value||'').length; el.textContent=`${n} / ${LONGITUD_CODIGO} dígitos`; el.classList.remove('completo','invalido'); if(n===LONGITUD_CODIGO) el.classList.add('completo'); else if(n>0) el.classList.add('invalido'); }
 function validarCodigo(c){ if(!c) return 'Código vacío'; if(!/^\d+$/.test(c)) return 'Solo números'; if(c.length!==LONGITUD_CODIGO) return `Debe tener ${LONGITUD_CODIGO} dígitos (tiene ${c.length})`; return null; }
@@ -1610,7 +1654,6 @@ function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getD
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
 
-/* FIX #9: limpiar src en modal */
 window.abrirModalFoto = function(lista,indice){ if(!lista||!lista.length) return; modalFotosActual.lista=lista; modalFotosActual.indice=indice||0; actualizarModalFoto(); document.getElementById('modalFoto').classList.add('visible'); };
 function actualizarModalFoto(){ const {lista,indice}=modalFotosActual; const f=lista[indice]; if(!f) return; const img=document.getElementById('modalFotoImg'); img.src=f.data||f; document.getElementById('modalFotoContador').textContent=`${indice+1} / ${lista.length}`; const l=document.getElementById('modalFotoDescargar'); l.href=f.data||f; l.download=`foto_visita_${(f.id||Date.now())}.jpg`; const n=document.querySelector('.modal-foto-nav'); if(n) n.style.display=lista.length>1?'flex':'none'; }
 window.navegarFoto = function(dir){ const t=modalFotosActual.lista.length; if(t<=1) return; modalFotosActual.indice=(modalFotosActual.indice+dir+t)%t; actualizarModalFoto(); };
@@ -1619,7 +1662,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') cerrarModalFoto(
 document.getElementById('modalFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalFoto') cerrarModalFoto(); });
 window.verFotosVisita = async function(index){ const v=visitas[index]; if(!v||!v.fotos||!v.fotos.length) return; const ids=v.fotos.map(f=>f.id||f).filter(Boolean); const datos=await obtenerFotosDB(ids); const lista=ids.map(id=>({id,data:datos[id]})).filter(f=>f.data); if(!lista.length){ mostrarAviso('⚠️ No se pudieron cargar las fotos','error'); return; } abrirModalFoto(lista,0); };
 
-/* Reglas fotos */
 window.abrirModalReglasFoto = function(){ const m=document.getElementById('modalReglasFoto'); const chk=document.getElementById('chkAceptoReglas'); const btn=document.getElementById('btnAbrirCamara'); const lbl=document.getElementById('lblReglasChk'); if(chk) chk.checked=false; if(lbl) lbl.classList.remove('activo'); if(btn) btn.disabled=true; if(m) m.classList.add('visible'); };
 window.cerrarModalReglasFoto = function(){ const m = document.getElementById('modalReglasFoto'); if(m) m.classList.remove('visible'); };
 window.toggleBotonCamara = function(){ const chk = document.getElementById('chkAceptoReglas'); const btn = document.getElementById('btnAbrirCamara'); if(btn) btn.disabled = !(chk && chk.checked); };
@@ -1702,7 +1744,6 @@ window.actualizarPlaceholderDescripcion = function(){
   t.placeholder=ph[s.value]||'Al seleccionar un estado se autocompletará una descripción...';
 };
 
-/* FIX #11: evitar bucle */
 let guardandoEstado=false;
 function guardarEstadoCompleto(){
   if(guardandoEstado) return; guardandoEstado=true;
@@ -1801,6 +1842,82 @@ window.eliminarVisita = async (index)=>{
   recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
 
+/* ═══════════════════════════════════════════════════════════════
+   FILTRO DE VISITAS DEL DÍA (Todas / Entregados / No Entregados)
+   ═══════════════════════════════════════════════════════════════ */
+let filtroVistaDia = 'todas';
+
+window.filtrarVistaDia = function(filtro){
+  filtroVistaDia = filtro || 'todas';
+  document.querySelectorAll('.filtro-btn').forEach(b => b.classList.toggle('active', b.dataset.filtro === filtroVistaDia));
+  renderizarVistaDia();
+};
+
+window.limpiarBusquedaDia = function(){
+  const i = document.getElementById('busquedaDia');
+  if(i){ i.value=''; i.focus(); }
+  renderizarVistaDia();
+};
+
+window.renderizarVistaDia = function(){
+  const lista = document.getElementById('listaVisitasDia');
+  if(!lista) return;
+
+  const cntEnt = visitas.filter(v => v.estado === 'Entregado').length;
+  const cntNoEnt = visitas.length - cntEnt;
+  const elT = document.getElementById('cnt-todas');
+  const elE = document.getElementById('cnt-entregados');
+  const elN = document.getElementById('cnt-no-entregados');
+  if(elT) elT.textContent = `(${visitas.length})`;
+  if(elE) elE.textContent = `(${cntEnt})`;
+  if(elN) elN.textContent = `(${cntNoEnt})`;
+
+  const busq = (document.getElementById('busquedaDia')?.value||'').trim().toLowerCase();
+  const cb = document.getElementById('contadorBusquedaDia');
+
+  let filtradas = visitas.map((v,i) => ({v, i}));
+  if(filtroVistaDia === 'entregados') filtradas = filtradas.filter(({v}) => v.estado === 'Entregado');
+  else if(filtroVistaDia === 'no-entregados') filtradas = filtradas.filter(({v}) => v.estado !== 'Entregado');
+  if(busq) filtradas = filtradas.filter(({v}) => (v.codigo||'').toLowerCase().includes(busq));
+
+  if(cb){
+    const etiqueta = filtroVistaDia === 'todas' ? 'Todas' : filtroVistaDia === 'entregados' ? 'Entregados' : 'No entregados';
+    cb.textContent = busq
+      ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}`
+      : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
+  }
+
+  if(!filtradas.length){
+    lista.innerHTML = '<div class="sin-resultados">📭 No hay visitas para mostrar</div>';
+    return;
+  }
+
+  let html = `<table class="tabla-visitas-dia"><thead><tr>
+    <th style="width:5%">#</th>
+    <th style="width:10%">Llegada</th>
+    <th style="width:10%">Salida</th>
+    <th style="width:10%">Tiempo</th>
+    <th style="width:22%">Guía / Código</th>
+    <th style="width:18%">Estado</th>
+    <th>Descripción</th>
+  </tr></thead><tbody>`;
+
+  filtradas.forEach(({v, i}) => {
+    const esEnt = v.estado === 'Entregado';
+    html += `<tr>
+      <td>${i + 1}</td>
+      <td>${v.llegada || '—'}</td>
+      <td>${v.salida || '—'}</td>
+      <td><strong>${v.tiempo || 0} min</strong></td>
+      <td style="font-family:'Courier New',monospace;font-size:.75rem;font-weight:700;">${v.codigo || '—'}</td>
+      <td><span class="badge-ent ${esEnt?'ok':'no'}">${v.estado || '—'}</span></td>
+      <td class="desc">${v.descripcion || '—'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  lista.innerHTML = html;
+};
+
 function actualizarDashboard(){
   const e=contadores['Entregado']||0, n=totalVisitas-e, p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
   document.getElementById('c-entregados').innerText=e;
@@ -1808,6 +1925,7 @@ function actualizarDashboard(){
   document.getElementById('c-total').innerText=totalVisitas;
   document.getElementById('c-promedio').innerText=p+' min';
   renderizarGrafica();
+  if(typeof window.renderizarVistaDia === 'function') window.renderizarVistaDia();
 }
 function coloresGrafica(){ return esDarkMode()?['#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffd60a','#bf5af2','#40c8e0','#ff375f','#30d158','#ffd60a','#ff9f0a','#0a84ff','#5e5ce6','#ff375f','#5e5ce6','#40c8e0']:['#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffcc00','#bf5af2','#40c8e0','#ff375f','#248a3d','#ffb340','#ff6b00','#007aff','#5e5ce6','#ff2d55','#4a3fa3','#17a2b8']; }
 function renderizarGrafica(){ const c=document.getElementById('graficaInforme'); if(!c||typeof Chart==='undefined') return; const ctx=c.getContext('2d'); if(miGrafico) miGrafico.destroy(); const tc=esDarkMode()?'#f5f5f7':'#1c1c1e'; miGrafico=new Chart(ctx,{ type:'bar', data:{ labels:Object.keys(contadores), datasets:[{ label:'Cantidad', data:Object.values(contadores), backgroundColor:coloresGrafica(), borderRadius:6 }] }, options:{ responsive:true, animation:false, scales:{ y:{ beginAtZero:true, ticks:{stepSize:1,color:tc}, grid:{color:esDarkMode()?'#2c2c2e':'#e8e8ed'} }, x:{ ticks:{color:tc}, grid:{display:false} } }, plugins:{ legend:{display:false} } } }); }
@@ -1851,7 +1969,6 @@ window.calcularTiemposBase = function(silencioso){
   guardarTiemposBase();
 };
 window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); };
-/* FIX #8: validar tiempo mínimo */
 window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert('Primero marca llegada'); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert('Selecciona estado'); return; } const s=horaActual(); if(calcularMinutos(l,s)<1){ if(!confirm('⚠️ El tiempo de visita es menor a 1 minuto. ¿Continuar?')) return; } document.getElementById('salidaCliente').value=s; registrarVisita(); };
 
 function limpiarFormularioVisita(){
@@ -1929,7 +2046,7 @@ window.cancelarEscaneo = ()=>{
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   🖨️ GENERACIÓN DE INFORMES AUDITORÍA
+   🖨️ GENERACIÓN DE INFORMES AUDITORÍA (sin marca corporativa)
    ═══════════════════════════════════════════════════════════════ */
 async function sha256(texto){ try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(texto)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(); }catch(e){ let h=5381; for(let i=0;i<texto.length;i++) h=((h<<5)+h+texto.charCodeAt(i))|0; return 'FB'+(h>>>0).toString(16).toUpperCase().padStart(14,'0'); } }
 
@@ -1978,28 +2095,17 @@ function esperarImagenesCargadas(contenedor){
   }));
 }
 
+/* Encabezado simplificado: solo fecha de emisión */
 function generarEncabezadoCorporativo(tituloDoc, codigoDoc){
   const ahora=new Date();
   const fechaISO=fechaLocalISO(ahora);
   const horaStr=ahora.toLocaleTimeString('es');
-  return `<div class="rd-corp-header">
-    <div class="rd-corp-left">
-      <div class="rd-corp-logo"><span class="box">C</span>COLSERLOG S.A.S.</div>
-      <div class="rd-corp-info">
-        <strong>NIT:</strong> ${EMPRESA.nit} · <strong>Tel:</strong> ${EMPRESA.tel}<br>
-        <strong>Dirección:</strong> ${EMPRESA.dir}<br>
-        <strong>Email:</strong> ${EMPRESA.email} · <strong>Web:</strong> ${EMPRESA.web}
-      </div>
-    </div>
-    <div class="rd-corp-right">
-      <div class="doc-code">${codigoDoc}</div>
-      <div>${tituloDoc}</div>
-      <div style="margin-top:3px;"><strong>Fecha emisión:</strong> ${fechaISO} ${horaStr}</div>
-      <div><strong>Versión:</strong> 1.0 <span class="version-badge">OFICIAL</span></div>
-    </div>
+  return `<div class="rd-fecha-emision-print">
+    <strong>Fecha de emisión:</strong> ${fechaISO} · ${horaStr}
   </div>`;
 }
 
+/* Panel de auditoría sin datos de empresa */
 function generarPanelAuditoria(hash, datosExtra={}){
   const u = (typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
   const ahora=new Date();
@@ -2021,15 +2127,15 @@ function generarPanelAuditoria(hash, datosExtra={}){
   </div>`;
 }
 
+/* Pie sin referencias a la empresa */
 function generarPieAuditoria(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
   const ahora=new Date();
   return `<div class="rd-footer">
-    <div class="rd-confidencial">⚠️ Documento confidencial — Uso exclusivo interno y auditoría</div>
-    <div>${EMPRESA.nombre} · NIT ${EMPRESA.nit} · ${EMPRESA.dir}</div>
-    <div>Generado por <strong>${u}</strong> el ${ahora.toLocaleString('es')} · Sistema Colserlog v1.0</div>
+    <div class="rd-confidencial">Documento confidencial — Uso exclusivo interno y auditoría</div>
+    <div>Generado por <strong>${u}</strong> el ${ahora.toLocaleString('es')}</div>
     <div>Este documento contiene información sujeta a reserva. Su reproducción no autorizada está prohibida.</div>
-    <div style="margin-top:4px;font-family:'Courier New',monospace;font-size:6pt;color:#999;">Página impresa desde la aplicación oficial · Verificación: consulte el hash SHA-256 en el panel de auditoría</div>
+    <div style="margin-top:4px;font-family:'Courier New',monospace;font-size:6pt;color:#999;">Verificación: consulte el hash SHA-256 en el panel de auditoría</div>
   </div>`;
 }
 
@@ -2055,7 +2161,7 @@ window.imprimirReporteDiario = async function(){
   const minP=(fC!=='—'&&sE!=='—')?calcularMinutos(fC,sE):0;
   const minV=(sE!=='—'&&pE!=='—')?calcularMinutos(sE,pE):0;
   const minT=(iC!=='—'&&pE!=='—')?calcularMinutos(iC,pE):0;
-  const codigoDoc=`COL-RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+  const codigoDoc=`RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
   const payloadHash = JSON.stringify({u:usuario, f:fechaLocalISO(), v:visitas.map(v=>({l:v.llegada,s:v.salida,c:v.codigo,e:v.estado})), t:totalVisitas, m:totalMinutosVisitas});
   const hash = await sha256(payloadHash);
 
@@ -2175,7 +2281,7 @@ window.imprimirAlbumFotografico = async function(){
     vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada }); }); });
     if(!planas.length){ alert('⚠️ No se pudieron cargar las fotos.'); return; }
     const FPP=12; const totalP=Math.ceil(planas.length/FPP);
-    const codigoDoc=`COL-ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+    const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     const hash=await sha256(JSON.stringify({u:usuario, t:planas.length, f:fechaLocalISO()}));
     let html=`<div class="reporte-diario">
       ${generarEncabezadoCorporativo('Álbum Fotográfico · Evidencia de Entregas', codigoDoc)}
@@ -2212,7 +2318,6 @@ window.imprimirAlbumFotografico = async function(){
   }catch(err){ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album'); alert('❌ Error al generar álbum: '+err.message); }
 };
 
-/* FIX #1: no imprimir toda la UI */
 window.imprimirInformeMensual = ()=>{
   const ic=document.getElementById('informeContenedor');
   if(!ic||!ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe mensual.'); return; }
@@ -2222,7 +2327,7 @@ window.imprimirInformeMensual = ()=>{
   area.style.display='block';
   area.innerHTML='';
   const wrap=document.createElement('div'); wrap.className='reporte-diario';
-  const codigoDoc=`COL-MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+  const codigoDoc=`MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
   wrap.innerHTML=generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)+generarPanelAuditoria('PENDIENTE-VER-CLON')+clon.innerHTML+generarPieAuditoria();
   area.appendChild(wrap);
   document.body.classList.add('modo-impresion','modo-reporte-diario');
@@ -2316,7 +2421,7 @@ window.descargarRespaldoWord = async function(){
   const ef=tV>0?((ent/tV)*100).toFixed(1):'0.0';
   const pv=tV>0?Math.round(tM/tV):0;
   let h='';
-  h+=`<h1>📦 COLSERLOG — Respaldo Completo</h1><h2>👤 Mensajero: ${u}</h2><div class="header-info">Respaldo generado el ${fB}</div>`;
+  h+=`<h1>📦 Respaldo Completo</h1><h2>👤 Mensajero: ${u}</h2><div class="header-info">Respaldo generado el ${fB}</div>`;
   h+=`<h3>⏱️ Tiempos Base del Día</h3><table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
   h+=`<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
   h+=`<h3>📥 Banco de Códigos (${banco.length})</h3>`;
@@ -2394,7 +2499,7 @@ window.exportarDiaAWord = async function(){
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const e=contadores['Entregado']||0, n=totalVisitas-e;
   const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
-  let h=`<h1>📦 COLSERLOG - Reporte Diario</h1><h2>${f}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${e}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${n}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${totalVisitas}</div></td><td><div class="kpi-label">Promedio</div><div class="kpi-valor">${p} min</div></td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
+  let h=`<h1>📦 Reporte Diario</h1><h2>${f}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${e}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${n}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${totalVisitas}</div></td><td><div class="kpi-label">Promedio</div><div class="kpi-valor">${p} min</div></td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
   visitas.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
   h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="3"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>`;
   h+=`<h3>📈 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
@@ -2409,7 +2514,7 @@ window.exportarDiaAWord = async function(){
     h+=`</tbody></table>`;
   }
   h+=`<div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
-  descargarWord(`Colserlog_Reporte_${fechaLocalISO()}.doc`, h);
+  descargarWord(`Reporte_${fechaLocalISO()}.doc`, h);
 };
 
 window.exportarMesAWord = function(){
@@ -2422,12 +2527,12 @@ window.exportarMesAWord = function(){
   let tE=0,tV=0,tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
   fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1), pV=tV>0?Math.round(tM/tV):0, ef=tV>0?((tE/tV)*100).toFixed(1):0;
-  let html=`<h1>📦 COLSERLOG - Informe Mensual</h1><h2>${cap} ${a}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${fm.length}</div></td></tr></table><h3>📋 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
+  let html=`<h1>📦 Informe Mensual</h1><h2>${cap} ${a}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${fm.length}</div></td></tr></table><h3>📋 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   for(const e in cm){ const c=cm[e]; if(!c) continue; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${e}</td><td>${c}</td><td>${pp}%</td></tr>`; }
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td>100%</td></tr></tbody></table><h3>📆 Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
   fm.forEach(f=>{ const d=h[f]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td><strong>${tE}</strong></td><td><strong>${tV-tE}</strong></td><td><strong>${Math.floor(tM/60)}h ${tM%60}m</strong></td></tr></tbody></table><div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
-  descargarWord(`Colserlog_Informe_${cap}_${a}.doc`, html);
+  descargarWord(`Informe_${cap}_${a}.doc`, html);
 };
 
 window.exportarHistorialCompletoAWord = function(){
@@ -2435,12 +2540,12 @@ window.exportarHistorialCompletoAWord = function(){
   if(!f.length){ alert('No hay historial.'); return; }
   let tE=0,tV=0,tM=0; const pm={};
   f.forEach(k=>{ const d=h[k]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; const [y,m]=k.split('-'); const key=`${y}-${m}`; if(!pm[key]) pm[key]={vis:0,ent:0,min:0,dias:0}; pm[key].vis+=d.totalVisitas||0; pm[key].ent+=d.contadores?.['Entregado']||0; pm[key].min+=d.totalMinutos||0; pm[key].dias+=1; });
-  let html=`<h1>📦 COLSERLOG - Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Totales</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${f.length}</div></td><td><div class="kpi-label">Tiempo</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table><h3>📅 Por Mes</h3><table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
+  let html=`<h1>📦 Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Totales</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${f.length}</div></td><td><div class="kpi-label">Tiempo</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table><h3>📅 Por Mes</h3><table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
   Object.keys(pm).sort().forEach(k=>{ const d=pm[k]; const [y,m]=k.split('-'); const nm=new Date(y,m-1,1).toLocaleString('es',{month:'long',year:'numeric'}); const p=d.dias>0?(d.ent/d.dias).toFixed(1):0; html+=`<tr><td style="text-align:left;">${nm}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${p}</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${f.length}</strong></td><td><strong>${tV}</strong></td><td><strong>${tE}</strong></td><td><strong>${tV-tE}</strong></td><td><strong>${(tE/f.length).toFixed(1)}</strong></td></tr></tbody></table><h3>📆 Detalle Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
   f.forEach(k=>{ const d=h[k]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${k.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
   html+=`</tbody></table>`;
-  descargarWord(`Colserlog_Historial_Completo.doc`, html);
+  descargarWord(`Historial_Completo.doc`, html);
 };
 
 window.verEstadoAlmacenamiento = async function(){
@@ -2510,7 +2615,7 @@ window.generarInformeMensual = ()=>{
   let tE=0,tV=0,tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
   fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1), pV=tV>0?Math.round(tM/tV):0, ef=tV>0?((tE/tV)*100).toFixed(1):0;
-  let html=`<div class="informe-header"><h1>📦 COLSERLOG - Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${u}</div><h2>Periodo: ${cap} ${a}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${pD}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${pV} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(tM/60)}h ${tM%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${tV-tE}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+  let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${u}</div><h2>Periodo: ${cap} ${a}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${pD}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${pV} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(tM/60)}h ${tM%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${tV-tE}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
   Object.keys(cm).forEach(e=>{ const c=cm[e]; if(!c) return; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${e}</td><td>${c}</td><td>${pp}%</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
   fm.forEach(f=>{ const d=h[f]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
@@ -2537,6 +2642,7 @@ window.recargarUIDesdeStorage = function(){
     }
     cargarTiemposBase(); renderizarTabla(); renderizarBanco(); renderizarCodigosPendientes(); renderizarGaleriaFotos();
     actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
+    if(typeof window.renderizarVistaDia === 'function') window.renderizarVistaDia();
   }catch(e){}
 };
 window.reiniciarUIOffline = function(){
@@ -2570,7 +2676,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -2590,6 +2696,7 @@ window.addEventListener('load', async ()=>{
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id)?.addEventListener('change', guardarTiemposBase); });
   actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   if(!visitas.length) renderizarGrafica();
+  if(typeof window.renderizarVistaDia === 'function') window.renderizarVistaDia();
   const se=document.getElementById('estadoPaquete'); if(se) se.selectedIndex=0;
   renderizarCodigosPendientes(); actualizarContadorUnicos(); window.actualizarPlaceholderDescripcion();
   const ahora=new Date(); const me=document.getElementById('mesInforme'), ae=document.getElementById('anioInforme');
