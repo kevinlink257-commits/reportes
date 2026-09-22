@@ -538,7 +538,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
   body.modo-reporte-diario #areaImpresion{font-size:9pt!important;width:100%;max-width:190mm}
   body.modo-reporte-diario .reporte-diario{width:100%;max-width:190mm;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1c1e}
 
-  /* Encabezados de impresión ya NO muestran datos corporativos */
   .rd-corp-header,.rd-corp-left,.rd-corp-right,.rd-audit-panel{display:none!important}
   .rd-fecha-emision-print{display:block!important;text-align:right;font-size:8pt;color:#333;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ccc}
   .rd-fecha-emision-print strong{color:#1c1c1e}
@@ -732,9 +731,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     <button class="tab-btn" data-tab="ajustes" onclick="cambiarTab('ajustes')">⚙️ Ajustes</button>
   </nav>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: INICIO — Informe del Día con filtros y buscador
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel active" data-tab="inicio">
     <div class="section">
       <h2>📊 Informe del Día</h2>
@@ -786,9 +782,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: TIEMPOS
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="tiempos">
     <div class="section">
       <h2>1. Tiempos Base de Salida</h2>
@@ -803,9 +796,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: BANCO DE CÓDIGOS
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="banco">
     <div class="section no-print">
       <h2>2. 📥 Banco de Códigos del Día</h2>
@@ -836,9 +826,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: REGISTRAR VISITA
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="visita">
     <div class="section no-print">
       <h2>3. Registrar Nueva Visita</h2>
@@ -987,9 +974,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: HISTORIAL DE VISITAS
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="historial">
     <div class="section" id="seccionHistorial">
       <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
@@ -1007,9 +991,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: INFORMES
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="informes">
     <div class="section">
       <h2>7. Promedios Históricos</h2>
@@ -1033,9 +1014,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: NUBE
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="nube">
     <div class="section no-print">
       <h2>9. ☁️ Sincronización en la Nube (Firebase)</h2>
@@ -1087,9 +1065,6 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════════════
-       TAB: AJUSTES
-       ═══════════════════════════════════════════════════════════ -->
   <div class="tab-panel" data-tab="ajustes">
     <div class="section no-print">
       <h2>6. Control de Sesión</h2>
@@ -1629,9 +1604,64 @@ function actualizarContadorDigitos(i,idc){ const el=document.getElementById(idc)
 function validarCodigo(c){ if(!c) return 'Código vacío'; if(!/^\d+$/.test(c)) return 'Solo números'; if(c.length!==LONGITUD_CODIGO) return `Debe tener ${LONGITUD_CODIGO} dígitos (tiene ${c.length})`; return null; }
 window.filtrarSoloDigitos = filtrarSoloDigitos; window.actualizarContadorDigitos = actualizarContadorDigitos;
 
+/* ═══════════════════════════════════════════════════════════════
+   📸 INDEXEDDB — VERSIÓN CORREGIDA
+   ═══════════════════════════════════════════════════════════════ */
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
-function abrirFotosDB(){ return new Promise((res,rej)=>{ if(fotosDB){ res(fotosDB); return; } const req=indexedDB.open(DB_NOMBRE,DB_VERSION); req.onupgradeneeded=(e)=>{ const db=e.target.result; if(!db.objectStoreNames.contains(STORE_FOTOS)) db.createObjectStore(STORE_FOTOS,{keyPath:'id'}); }; req.onsuccess=(e)=>{ fotosDB=e.target.result; res(fotosDB); }; req.onerror=()=>rej(req.error); }); }
-async function guardarFotoDB(id,dataUrl,meta={}){ const db=await abrirFotosDB(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOTOS,'readwrite'); const s=tx.objectStore(STORE_FOTOS); const r=s.put({id,data:dataUrl,fecha:new Date().toISOString(),...meta}); r.onsuccess=()=>res(true); r.onerror=()=>rej(r.error); }); }
+
+function abrirFotosDB(){
+  return new Promise((resolve, reject) => {
+    if(fotosDB){ resolve(fotosDB); return; }
+    if(!window.indexedDB){ reject(new Error('IndexedDB no soportado en este navegador')); return; }
+    let req;
+    try {
+      req = indexedDB.open(DB_NOMBRE, DB_VERSION);
+    } catch(e) {
+      reject(new Error('No se pudo abrir IndexedDB: ' + (e.message||'')));
+      return;
+    }
+    req.onupgradeneeded = (e) => {
+      try {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains(STORE_FOTOS)) {
+          db.createObjectStore(STORE_FOTOS, {keyPath:'id'});
+        }
+      } catch(err) { /* silencioso */ }
+    };
+    req.onsuccess = (e) => { fotosDB = e.target.result; resolve(fotosDB); };
+    req.onerror = () => reject(req.error || new Error('Error abriendo IndexedDB'));
+    req.onblocked = () => reject(new Error('IndexedDB bloqueado. Cierra otras pestañas de la app.'));
+  });
+}
+
+async function guardarFotoDB(id, dataUrl, meta={}){
+  const db = await abrirFotosDB();
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const done = (ok, err) => { if(settled) return; settled=true; ok ? resolve(true) : reject(err); };
+
+    let tx;
+    try {
+      tx = db.transaction(STORE_FOTOS, 'readwrite');
+    } catch(e) {
+      done(false, new Error('No se pudo abrir transacción: ' + (e.message||'')));
+      return;
+    }
+
+    tx.onabort   = () => done(false, tx.error || new Error('Transacción abortada (posible cuota excedida). Libera espacio en Ajustes → Vaciar fotos.'));
+    tx.onerror   = () => done(false, tx.error || new Error('Error en transacción IndexedDB'));
+    tx.oncomplete= () => done(true);
+
+    try {
+      const store = tx.objectStore(STORE_FOTOS);
+      const req = store.put({ id, data: dataUrl, fecha: new Date().toISOString(), ...meta });
+      req.onerror = () => done(false, req.error || new Error('Error guardando foto en IndexedDB'));
+    } catch(e) {
+      done(false, new Error('Error al preparar guardado: ' + (e.message||'')));
+    }
+  });
+}
+
 async function obtenerFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const r=tx.objectStore(STORE_FOTOS).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
 async function obtenerFotosDB(ids){ const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const s=tx.objectStore(STORE_FOTOS); const out={}; let p=ids.length; if(!p){ res(out); return; } ids.forEach(id=>{ const r=s.get(id); r.onsuccess=()=>{ if(r.result) out[id]=r.result.data; p--; if(!p) res(out); }; r.onerror=()=>{ p--; if(!p) res(out); }; }); }); }
 async function eliminarFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readwrite'); tx.objectStore(STORE_FOTOS).delete(id); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }
@@ -1671,24 +1701,140 @@ document.getElementById('modalReglasFoto')?.addEventListener('click', (e) => { i
 
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE, sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
-function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){ return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=(e)=>{ const img=new Image(); img.onload=()=>{ let {width,height}=img; if(width>height && width>maxDim){ height=Math.round((height*maxDim)/width); width=maxDim; } else if(height>maxDim){ width=Math.round((width*maxDim)/height); height=maxDim; } const c=document.createElement('canvas'); c.width=width; c.height=height; const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,width,height); ctx.drawImage(img,0,0,width,height); try{ res(c.toDataURL('image/jpeg',quality)); }catch(err){ rej(err); } }; img.onerror=()=>rej(new Error('No se pudo leer')); img.src=e.target.result; }; r.onerror=()=>rej(new Error('Error')); r.readAsDataURL(file); }); }
+/* ═══════════════════════════════════════════════════════════════
+   📸 COMPRESIÓN DE IMAGEN — VERSIÓN CORREGIDA
+   Maneja HEIC, toBlob, canvas grande, errores explícitos
+   ═══════════════════════════════════════════════════════════════ */
+function comprimirImagen(file, maxDim=FOTO_MAX_DIM, quality=FOTO_JPEG_QUALITY){
+  return new Promise((resolve, reject) => {
+    if(!file || !file.type || !file.type.startsWith('image/')){
+      reject(new Error('El archivo no es una imagen válida'));
+      return;
+    }
 
+    const esHEIC = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name||'');
+
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo desde el dispositivo'));
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const img = new Image();
+      img.onerror = () => {
+        if(esHEIC){
+          reject(new Error('Formato HEIC no soportado. En iPhone: Ajustes → Cámara → Formatos → "Más compatible" (JPG).'));
+        } else {
+          reject(new Error('No se pudo decodificar la imagen. Prueba con otra foto o formato JPG.'));
+        }
+      };
+      img.onload = () => {
+        try {
+          let { width, height } = img;
+          if(!width || !height){
+            reject(new Error('La imagen tiene dimensiones inválidas'));
+            return;
+          }
+
+          // Redimensionar manteniendo proporción
+          if(width > height && width > maxDim){
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if(height > maxDim){
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if(!ctx){ reject(new Error('No se pudo crear el contexto del canvas')); return; }
+
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(0, 0, width, height);
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const finalizar = (dataUrlFinal) => {
+            if(!dataUrlFinal || typeof dataUrlFinal !== 'string' || !dataUrlFinal.startsWith('data:image/')){
+              reject(new Error('El canvas no generó una imagen válida'));
+              return;
+            }
+            resolve(dataUrlFinal);
+          };
+
+          // Preferir toBlob (más eficiente en móvil)
+          if(typeof canvas.toBlob === 'function'){
+            canvas.toBlob((blob) => {
+              if(!blob){
+                try { finalizar(canvas.toDataURL('image/jpeg', quality)); }
+                catch(err){ reject(new Error('Fallo al comprimir (blob nulo y toDataURL falló)')); }
+                return;
+              }
+              const fr = new FileReader();
+              fr.onload = () => finalizar(fr.result);
+              fr.onerror = () => reject(new Error('No se pudo convertir el blob a dataURL'));
+              fr.readAsDataURL(blob);
+            }, 'image/jpeg', quality);
+          } else {
+            try { finalizar(canvas.toDataURL('image/jpeg', quality)); }
+            catch(err){ reject(new Error('El navegador no pudo comprimir la imagen')); }
+          }
+        } catch(err) {
+          reject(new Error('Error procesando imagen: ' + (err.message || 'desconocido')));
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   📸 CAPTURA DE FOTO — VERSIÓN CORREGIDA
+   Muestra el error real en pantalla + consola
+   ═══════════════════════════════════════════════════════════════ */
 window.capturarFoto = async function(event){
-  const file=event.target.files && event.target.files[0]; event.target.value=''; if(!file) return;
-  if(fotosPendientes.length>=MAX_FOTOS_POR_VISITA){ mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos`,'error'); beepError(); return; }
-  if(!file.type || !file.type.startsWith('image/')){ mostrarAviso('⚠️ Solo imágenes','error'); return; }
-  if(file.size>15*1024*1024){ mostrarAviso('⚠️ Imagen muy grande','error'); return; }
-  mostrarAviso('⏳ Procesando foto...','ok');
-  try{
-    const b64=await comprimirImagen(file);
-    const kb=Math.round((b64.length*0.75)/1024);
-    const id='foto_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-    await guardarFotoDB(id,b64,{tamanoKB:kb,fecha:new Date().toISOString()});
-    fotosPendientes.push({id,tamanoKB:kb,fecha:new Date().toISOString()});
+  const input = event.target;
+  const file = input.files && input.files[0];
+  if(!file){ input.value=''; return; }
+
+  if(fotosPendientes.length >= MAX_FOTOS_POR_VISITA){
+    mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos por visita`, 'error');
+    beepError(); input.value=''; return;
+  }
+  if(!file.type || !file.type.startsWith('image/')){
+    mostrarAviso('⚠️ Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
+    input.value=''; return;
+  }
+  if(file.size > 15*1024*1024){
+    mostrarAviso(`⚠️ Imagen muy grande (${(file.size/1024/1024).toFixed(1)} MB, máx 15 MB)`, 'error');
+    input.value=''; return;
+  }
+
+  mostrarAviso('⏳ Procesando foto...', 'ok');
+
+  try {
+    const b64 = await comprimirImagen(file);
+    if(!b64 || !b64.startsWith('data:image/')){
+      throw new Error('La imagen comprimida no es válida');
+    }
+    const kb = Math.round((b64.length * 0.75) / 1024);
+    const id = 'foto_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
+
+    await guardarFotoDB(id, b64, { tamanoKB: kb, fecha: new Date().toISOString() });
+
+    fotosPendientes.push({ id, tamanoKB: kb, fecha: new Date().toISOString() });
     await renderizarGaleriaFotos();
-    beepOk(); if(navigator.vibrate) navigator.vibrate(60);
-    mostrarAviso(`✅ Foto agregada (${kb} KB)`,'ok');
-  }catch(e){ mostrarAviso('⚠️ Error al procesar foto','error'); beepError(); }
+    beepOk();
+    if(navigator.vibrate) navigator.vibrate(60);
+    mostrarAviso(`✅ Foto agregada (${kb} KB)`, 'ok');
+  } catch(e) {
+    console.error('❌ Error capturando foto:', e);
+    const msg = (e && e.message) ? e.message : 'Error desconocido al procesar foto';
+    mostrarAviso('⚠️ ' + msg, 'error');
+    beepError();
+  } finally {
+    input.value = '';
+  }
 };
 
 async function renderizarGaleriaFotos(){
@@ -1732,7 +1878,7 @@ window.seleccionarPrimerResultado = function(){ const c=document.getElementById(
 window.agregarCodigoDesdeBanco = function(cod){ if(codigosPendientes.includes(cod)){ mostrarAviso('⚠️ Ya seleccionado','error'); beepError(); return; } const u=codigosEnVisitas(); if(u.has(cod) && !confirm('⚠️ Ya está en otra visita. ¿Agregar?')) return; codigosPendientes.push(cod); renderizarCodigosPendientes(); window.limpiarBusquedaCodigo(); guardarEstadoCompleto(); beepOk(); if(navigator.vibrate) navigator.vibrate(60); mostrarAviso('✅ Agregado: '+cod,'ok'); };
 function cargarCodigosRegistradosHoy(){ codigosRegistradosHoy.clear(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) codigosRegistradosHoy.add(v.codigo.trim()); }); actualizarContadorUnicos(); renderizarBanco(); }
 function actualizarContadorUnicos(){ const el=document.querySelector('#contadorUnicos span'); if(el) el.textContent=codigosRegistradosHoy.size; }
-function mostrarAviso(texto,tipo='error'){ const el=document.getElementById('avisoDuplicado'); if(!el) return; el.textContent=texto; el.className=tipo==='ok'?'visible ok':'visible'; clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.className=''; },2800); }
+function mostrarAviso(texto,tipo='error'){ const el=document.getElementById('avisoDuplicado'); if(!el) return; el.textContent=texto; el.className=tipo==='ok'?'visible ok':'visible'; clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.className=''; }, tipo==='error'?5000:2800); }
 window.mostrarAviso = mostrarAviso;
 function beepError(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=220; o.type='square'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3); o.start(); o.stop(ctx.currentTime+0.3); setTimeout(()=>ctx.close(),500); }catch(e){} }
 function beepOk(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15); o.start(); o.stop(ctx.currentTime+0.15); setTimeout(()=>ctx.close(),400); }catch(e){} }
@@ -1842,9 +1988,6 @@ window.eliminarVisita = async (index)=>{
   recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   FILTRO DE VISITAS DEL DÍA (Todas / Entregados / No Entregados)
-   ═══════════════════════════════════════════════════════════════ */
 let filtroVistaDia = 'todas';
 
 window.filtrarVistaDia = function(filtro){
@@ -2045,9 +2188,6 @@ window.cancelarEscaneo = ()=>{
   if(i){ i.stop().then(()=>{ try{ i.clear(); }catch(_){} oc(); }).catch(()=>{ try{ i.clear(); }catch(_){} oc(); }); } else oc();
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   🖨️ GENERACIÓN DE INFORMES AUDITORÍA (sin marca corporativa)
-   ═══════════════════════════════════════════════════════════════ */
 async function sha256(texto){ try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(texto)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(); }catch(e){ let h=5381; for(let i=0;i<texto.length;i++) h=((h<<5)+h+texto.charCodeAt(i))|0; return 'FB'+(h>>>0).toString(16).toUpperCase().padStart(14,'0'); } }
 
 function generarChartEstadosHorizontal(ancho,alto){
@@ -2095,7 +2235,6 @@ function esperarImagenesCargadas(contenedor){
   }));
 }
 
-/* Encabezado simplificado: solo fecha de emisión */
 function generarEncabezadoCorporativo(tituloDoc, codigoDoc){
   const ahora=new Date();
   const fechaISO=fechaLocalISO(ahora);
@@ -2105,7 +2244,6 @@ function generarEncabezadoCorporativo(tituloDoc, codigoDoc){
   </div>`;
 }
 
-/* Panel de auditoría sin datos de empresa */
 function generarPanelAuditoria(hash, datosExtra={}){
   const u = (typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
   const ahora=new Date();
@@ -2127,7 +2265,6 @@ function generarPanelAuditoria(hash, datosExtra={}){
   </div>`;
 }
 
-/* Pie sin referencias a la empresa */
 function generarPieAuditoria(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
   const ahora=new Date();
