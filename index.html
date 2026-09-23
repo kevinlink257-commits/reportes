@@ -551,7 +551,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
       <div class="busqueda-box" style="margin-bottom:12px;">
         <label style="margin-top:0;">🔍 Buscar por guía / código:</label>
         <div class="input-group">
-          <input type="text" id="busquedaDia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);renderizarVistaDia();" autocomplete="off">
+          <input type="text" id="busquedaDia" placeholder="Escribe el código..." inputmode="numeric" autocomplete="off" oninput="filtrarSoloDigitos(this);renderizarVistaDia();">
           <button type="button" class="btn-buscar-limpiar" onclick="limpiarBusquedaDia()">✖</button>
         </div>
         <p id="contadorBusquedaDia" class="contador-busqueda"></p>
@@ -801,12 +801,19 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <button type="button" class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
       </div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
-      <h3>💾 Respaldo y Restauración (Word)</h3>
+      <h3>💾 Respaldo y Restauración (Word + JSON)</h3>
       <div class="btn-group" style="margin-top:10px;">
-        <button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
-        <button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
+        <button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO (.doc + .json)</button>
+        <button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar respaldo</button>
       </div>
-      <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:6px;line-height:1.4;">
+        💡 <strong>Importante:</strong> para importar, usa preferiblemente el archivo <strong>.json</strong>.
+        El <code>.doc</code> también funciona, pero si lo abres y lo guardas con Word puede corromperse.
+      </p>
+      <input type="file" id="inputCargarJSON"
+        accept=".doc,.docx,.json,.rtf,.txt,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json,application/rtf,text/plain"
+        style="display:none;"
+        onchange="cargarRespaldoDesdeArchivo(event)">
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>📄 Exportar / Compartir informes</h3>
       <div class="btn-group">
@@ -2395,8 +2402,6 @@ function esperarImagenesCargadas(contenedor){
 
 /* ═══════════════════════════════════════════════════════════════
    🖨️ UTILIDADES DE IMPRESIÓN
-   Ejecuta `window.print()` y espera al evento `afterprint` (o fallback)
-   para restaurar el DOM de forma segura en todos los navegadores.
    ═══════════════════════════════════════════════════════════════ */
 // FIX #8: imprimirYLimpiar restaura correctamente el modo oscuro tras imprimir
 function imprimirYLimpiar(area, clases, estabanDark){
@@ -2415,7 +2420,6 @@ function imprimirYLimpiar(area, clases, estabanDark){
     };
     window.addEventListener('afterprint', finalizar, { once:true });
     try{ window.print(); }catch(e){ console.warn('print() lanzó excepción:', e); finalizar(); return; }
-    // Fallback: si el navegador no dispara afterprint (iOS antiguo), limpiamos tras 30s
     setTimeout(finalizar, 30000);
   });
 }
@@ -2742,56 +2746,194 @@ function b64DecodeUnicode(str){
   }catch(e){ console.error('b64DecodeUnicode error:', e); return ''; }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// EXPORTACIÓN DE RESPALDO ROBUSTA (.doc + .json)
+// Payload en UNA SOLA LÍNEA con marcadores v2 inconfundibles.
+// Además descarga un .json puro (infalible al re-importar).
+// ═══════════════════════════════════════════════════════════════
 window.descargarRespaldoWord = async function(){
   mostrarAviso('⏳ Preparando respaldo...','ok');
-  const r=await crearObjetoRespaldo();
-  const json=JSON.stringify(r); const b64=b64EncodeUnicode(json);
-  if(!b64){ alert('❌ No se pudo codificar el respaldo. Intenta de nuevo.'); return; }
-  const u=r.usuario||'sin-usuario'; const ahora=new Date();
-  const fB=ahora.toLocaleString('es'); const fA=fechaLocalISO(ahora);
-  const es=r.estadoSesion||{}, tb=r.tiemposBase||{};
-  const banco=Array.isArray(es.bancoCodigos)?es.bancoCodigos:[];
-  const lv=Array.isArray(es.visitas)?es.visitas:[];
-  const cR=es.contadores||{}; const tV=es.totalVisitas||0; const tM=es.totalMinutosVisitas||0;
-  const ent=cR['Entregado']||0; const hist=r.entregasDiariasDetallado||{};
-  const fH=Object.keys(hist).sort();
-  const ef=tV>0?((ent/tV)*100).toFixed(1):'0.0';
-  const pv=tV>0?Math.round(tM/tV):0;
-  let h='';
-  h+=`<h1>📦 Respaldo Completo</h1><h2>👤 Mensajero: ${u}</h2><div class="header-info">Respaldo generado el ${fB}</div>`;
-  h+=`<h3>⏱️ Tiempos Base del Día</h3><table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
-  h+=`<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
-  h+=`<h3>📥 Banco de Códigos (${banco.length})</h3>`;
-  if(!banco.length) h+=`<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
-  else{ h+=`<table><thead><tr><th>#</th><th>Código</th><th>Estado</th></tr></thead><tbody>`; const us=new Set(lv.map(v=>(v.codigo||'').trim()).filter(Boolean)); banco.forEach((c,i)=>{ h+=`<tr><td>${i+1}</td><td>${c}</td><td>${us.has(c)?'✓ Usado':'Disponible'}</td></tr>`; }); h+=`</tbody></table>`; }
-  h+=`<h3>📋 Visitas Registradas (${lv.length})</h3>`;
-  if(!lv.length) h+=`<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
-  else{ h+=`<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`; lv.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; }); h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`; }
-  if(r.fotosIndexedDB && r.fotosIndexedDB.length){ const nC=r.fotosIndexedDB.filter(f=>f.censurada).length; h+=`<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s)${nC?` · ${nC} censurada(s) con 🛡️`:''}.</em></p>`; }
-  h+=`<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
-  Object.keys(cR).forEach(k=>{ const c=cR[k]||0; if(!c) return; const p=tV>0?((c/tV)*100).toFixed(1):'0.0'; h+=`<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`; });
-  h+=`</tbody></table>`;
-  if(fH.length){ h+=`<h3>📅 Historial (${fH.length})</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Tiempo</th></tr></thead><tbody>`; fH.forEach(f=>{ const d=hist[f]; const e=(d.contadores&&d.contadores['Entregado'])||0; h+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; }); h+=`</tbody></table>`; }
-  h+=`<div style="margin-top:30px;padding-top:10px;border-top:2px dashed #999;page-break-before:always;"><h3 style="text-align:center;color:#c0392b;">⚠️ NO MODIFICAR</h3><p style="text-align:center;font-size:8pt;color:#666;">Datos codificados del respaldo.</p><p style="word-break:break-all;font-family:monospace;font-size:6pt;color:#aaa;text-align:center;">---COLSERLOG-DATA-START---<br>`;
-  const chunks=b64.match(/.{1,80}/g)||[b64]; h+=chunks.join('<br>');
-  h+=`<br>---COLSERLOG-DATA-END---</p></div>`;
-  descargarWord(`Colserlog_Respaldo_${u.replace(/\s+/g,'-').toLowerCase()}_${fA}.doc`,h);
+  const r = await crearObjetoRespaldo();
+  const json = JSON.stringify(r);
+  const b64 = b64EncodeUnicode(json);
+  if(!b64){ alert('❌ No se pudo codificar el respaldo.'); return; }
+  const u = r.usuario || 'sin-usuario';
+  const ahora = new Date();
+  const fB = ahora.toLocaleString('es');
+  const fA = fechaLocalISO(ahora);
+  const es = r.estadoSesion || {}, tb = r.tiemposBase || {};
+  const banco = Array.isArray(es.bancoCodigos) ? es.bancoCodigos : [];
+  const lv = Array.isArray(es.visitas) ? es.visitas : [];
+  const cR = es.contadores || {};
+  const tV = es.totalVisitas || 0;
+  const tM = es.totalMinutosVisitas || 0;
+  const ent = cR['Entregado'] || 0;
+  const hist = r.entregasDiariasDetallado || {};
+  const fH = Object.keys(hist).sort();
+  const ef = tV > 0 ? ((ent / tV) * 100).toFixed(1) : '0.0';
+  const pv = tV > 0 ? Math.round(tM / tV) : 0;
+
+  const PAYLOAD_START = '==COLSERLOG-PAYLOAD-BEGIN-v2==';
+  const PAYLOAD_END   = '==COLSERLOG-PAYLOAD-END-v2==';
+
+  let h = '';
+  h += `<h1>📦 Respaldo Completo Colserlog</h1>`;
+  h += `<h2>👤 Mensajero: ${u}</h2>`;
+  h += `<div class="header-info">Respaldo generado el ${fB}</div>`;
+
+  h += `<div style="margin:8px 0 16px 0;padding:8px;border:2px dashed #c0392b;background:#fff8f8;">`;
+  h += `<p style="text-align:center;font-size:9pt;color:#c0392b;font-weight:bold;margin:0 0 4px 0;">⚠️ NO MODIFICAR ESTA SECCIÓN — Datos del respaldo</p>`;
+  h += `<p style="text-align:center;font-size:7pt;color:#666;margin:0 0 6px 0;">Si mueves o borras esta línea, el respaldo no se podrá importar.</p>`;
+  h += `<p style="word-break:break-all;font-family:'Courier New',monospace;font-size:5pt;color:#333;text-align:left;margin:0;line-height:1.1;">`;
+  h += `${PAYLOAD_START}${b64}${PAYLOAD_END}`;
+  h += `</p></div>`;
+
+  h += `<h3>⏱️ Tiempos Base del Día</h3>`;
+  h += `<table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
+
+  h += `<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
+
+  h += `<h3>📥 Banco de Códigos (${banco.length})</h3>`;
+  if(!banco.length) h += `<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
+  else {
+    h += `<table><thead><tr><th>#</th><th>Código</th><th>Estado</th></tr></thead><tbody>`;
+    const us = new Set(lv.map(v => (v.codigo||'').trim()).filter(Boolean));
+    banco.forEach((c,i) => { h += `<tr><td>${i+1}</td><td>${c}</td><td>${us.has(c)?'✓ Usado':'Disponible'}</td></tr>`; });
+    h += `</tbody></table>`;
+  }
+
+  h += `<h3>📋 Visitas Registradas (${lv.length})</h3>`;
+  if(!lv.length) h += `<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
+  else {
+    h += `<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
+    lv.forEach((v,i) => { h += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
+    h += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`;
+  }
+
+  if(r.fotosIndexedDB && r.fotosIndexedDB.length){
+    const nC = r.fotosIndexedDB.filter(f => f.censurada).length;
+    h += `<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s)${nC?` · ${nC} censurada(s) con 🛡️`:''}.</em></p>`;
+  }
+
+  h += `<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
+  Object.keys(cR).forEach(k => {
+    const c = cR[k]||0; if(!c) return;
+    const p = tV > 0 ? ((c/tV)*100).toFixed(1) : '0.0';
+    h += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
+  });
+  h += `</tbody></table>`;
+
+  if(fH.length){
+    h += `<h3>📅 Historial (${fH.length})</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
+    fH.forEach(f => {
+      const d = hist[f];
+      const e = (d.contadores && d.contadores['Entregado']) || 0;
+      h += `<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`;
+    });
+    h += `</tbody></table>`;
+  }
+
+  const nombreBase = `Colserlog_Respaldo_${u.replace(/\s+/g,'-').toLowerCase()}_${fA}`;
+  descargarWord(`${nombreBase}.doc`, h);
+
+  if(confirm('✅ Respaldo .doc descargado.\n\n💡 ¿Quieres descargar también el archivo .json puro?\n(Es MUCHO más confiable para volver a importar y no se corrompe en Word)')){
+    descargarJSON(`${nombreBase}.json`, json);
+  }
 };
-window.descargarRespaldoLocal = ()=>window.descargarRespaldoWord();
-function extraerCodigosDeTexto(t){ const c=new Set(); const re=/(?:^|[^\d])(\d{12})(?!\d)/g; let m; while((m=re.exec(t))!==null) c.add(m[1]); return Array.from(c); }
-function extraerPayloadBase64(t){
-  const m=t.match(/---COLSERLOG-DATA-START---([\s\S]*?)---COLSERLOG-DATA-END---/);
-  if(!m) return null;
-  const raw = m[1].replace(/<[^>]*>/g,'').replace(/[\s]/g,'').replace(/[^A-Za-z0-9+/=]/g,'');
-  if(!raw || raw.length<20) return null;
-  try{
-    const json = b64DecodeUnicode(raw);
-    if(!json) return null;
-    const obj = JSON.parse(json);
-    if(!obj || typeof obj!=='object') return null;
-    return obj;
-  }catch(e){ console.warn('extraerPayloadBase64 error:', e); return null; }
+
+function descargarJSON(nombre, jsonStr){
+  try {
+    const blob = new Blob([jsonStr], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nombre;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    mostrarAviso('✅ JSON descargado','ok');
+  } catch(e){ console.error('descargarJSON error:', e); alert('⚠️ No se pudo descargar el JSON: ' + e.message); }
 }
+window.descargarJSON = descargarJSON;
+
+window.descargarRespaldoLocal = ()=>window.descargarRespaldoWord();
+
+function extraerCodigosDeTexto(t){ const c=new Set(); const re=/(?:^|[^\d])(\d{12})(?!\d)/g; let m; while((m=re.exec(t))!==null) c.add(m[1]); return Array.from(c); }
+
+// ═══════════════════════════════════════════════════════════════
+// LECTOR ROBUSTO MULTI-FORMATO DE PAYLOAD
+// Soporta: v2, v1 legacy, con/sin HTML, con entidades, BOM,
+// base64 multilínea y fallback heurístico.
+// ═══════════════════════════════════════════════════════════════
+function extraerPayloadBase64(t){
+  if(!t || typeof t !== 'string') return null;
+
+  let txt = t
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&#160;/g, ' ')
+    .replace(/&#xA0;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\uFEFF/g, '')
+    .replace(/\u200B/g, '')
+    .replace(/\u00A0/g, ' ');
+
+  const pares = [
+    ['==COLSERLOG-PAYLOAD-BEGIN-v2==', '==COLSERLOG-PAYLOAD-END-v2=='],
+    ['---COLSERLOG-DATA-START---',     '---COLSERLOG-DATA-END---'],
+    ['COLSERLOG-PAYLOAD-BEGIN',        'COLSERLOG-PAYLOAD-END']
+  ];
+
+  let raw = null;
+  for(const [ini, fin] of pares){
+    const idx1 = txt.indexOf(ini);
+    if(idx1 < 0) continue;
+    const idx2 = txt.indexOf(fin, idx1 + ini.length);
+    if(idx2 < 0) continue;
+    raw = txt.substring(idx1 + ini.length, idx2);
+    break;
+  }
+
+  if(raw === null){
+    const match = txt.match(/([A-Za-z0-9+/=]{2000,})/);
+    if(!match) return null;
+    raw = match[1];
+    console.warn('⚠️ Payload encontrado por heurística (sin marcadores). Puede ser menos fiable.');
+  }
+
+  raw = raw
+    .replace(/<[^>]*>/g, '')
+    .replace(/[\s\r\n\t]+/g, '')
+    .replace(/[^A-Za-z0-9+/=]/g, '');
+
+  if(!raw || raw.length < 20){
+    console.warn('extraerPayloadBase64: payload demasiado corto tras limpieza:', raw ? raw.length : 0);
+    return null;
+  }
+
+  const rem = raw.length % 4;
+  if(rem === 1){ raw = raw.slice(0, -1); }
+  else if(rem === 2){ raw += '=='; }
+  else if(rem === 3){ raw += '='; }
+
+  try {
+    const json = b64DecodeUnicode(raw);
+    if(!json){ return null; }
+    const obj = JSON.parse(json);
+    if(!obj || typeof obj !== 'object'){ return null; }
+    if(!('estadoSesion' in obj) && !('entregasDiariasDetallado' in obj) && !('usuario' in obj)){
+      console.warn('Payload decodificó pero no parece un respaldo Colserlog:', Object.keys(obj));
+      return null;
+    }
+    console.log('✅ Payload COLSERLOG decodificado. Versión:', obj.version || '—', 'Usuario:', obj.usuario || '—');
+    return obj;
+  } catch(e){
+    console.warn('extraerPayloadBase64 → fallo al decodificar/parsear:', e.message);
+    return null;
+  }
+}
+
 async function aplicarRespaldo(r){
   const uA=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'sin-usuario';
   if(r.usuario && r.usuario!==uA){ if(!confirm(`⚠️ Respaldo de "${r.usuario}" pero estás como "${uA}".\n\n¿Continuar?`)) return false; }
@@ -2802,7 +2944,7 @@ async function aplicarRespaldo(r){
   localStorage.setItem('entregasDiariasDetallado', JSON.stringify(hF));
   if(r.estadoSesion){ if(r.estadoSesion.visitas){ r.estadoSesion.visitas=r.estadoSesion.visitas.map(v=>({...v, codigo:(v.codigo||'').replace(/\D/g,'').slice(0,12), fotos:Array.isArray(v.fotos)?v.fotos:[]})); } if(r.estadoSesion.bancoCodigos) r.estadoSesion.bancoCodigos=r.estadoSesion.bancoCodigos.filter(c=>/^\d{12}$/.test(c)); localStorage.setItem('estadoSesion', JSON.stringify(r.estadoSesion)); }
   if(r.tiemposBase){ for(const k in r.tiemposBase){ if(r.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, r.tiemposBase[k]); } }
-  if(Array.isArray(r.fotosIndexedDB) && r.fotosIndexedDB.length){ let rst=0; for(const f of r.fotosIndexedDB){ try{ await guardarFotoDB(f.id,f.data,{tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}); rst++; }catch(e){} } }
+  if(Array.isArray(r.fotosIndexedDB) && r.fotosIndexedDB.length){ for(const f of r.fotosIndexedDB){ try{ await guardarFotoDB(f.id,f.data,{tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}); }catch(e){} } }
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
   return true;
 }
@@ -2812,30 +2954,213 @@ function extraerImagenesDeDocHTML(t){ const im=[]; const re=/<img[^>]+src=["'](d
 async function extraerTextoPlanoDeDocx(file){ if(!window.JSZip) return ''; try{ const z=await JSZip.loadAsync(file); const dx=z.file('word/document.xml'); if(!dx) return ''; const x=await dx.async('string'); return x.replace(/<[^>]+>/g,''); }catch(e){ return ''; } }
 async function decodificarCodigosDeImagenes(im,onP){ if(!window.ZXing||!im.length) return []; const cs=new Set(); let r; try{ r=new ZXing.BrowserMultiFormatReader(); }catch(e){ return []; } for(let i=0;i<im.length;i++){ const it=im[i]; if(onP) onP(i+1,im.length,it.nombre); try{ const el=await new Promise((res,rej)=>{ const e=new Image(); e.onload=()=>res(e); e.onerror=rej; e.src=it.dataUrl; }); const res=await r.decodeFromImageElement(el); const n=String(res.getText()||'').replace(/\D/g,''); if(n.length===12&&/^\d{12}$/.test(n)) cs.add(n); }catch(e){} if(i%3===2) await new Promise(rr=>setTimeout(rr,25)); } try{ r.reset(); }catch(e){} return Array.from(cs); }
 
+// ═══════════════════════════════════════════════════════════════
+// Detectores de tipo de archivo por magic bytes
+// ═══════════════════════════════════════════════════════════════
+function detectarTipoArchivo(bytes){
+  if(!bytes || bytes.length < 8) return 'desconocido';
+  if(bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) return 'zip';
+  if(bytes[0] === 0xD0 && bytes[1] === 0xCF && bytes[2] === 0x11 && bytes[3] === 0xE0) return 'ole2';
+  if(bytes[0] === 0x7B && bytes[1] === 0x5C && bytes[2] === 0x72 && bytes[3] === 0x74) return 'rtf';
+  if(bytes[0] === 0x25 && bytes[1] === 0x50 && bytes[2] === 0x44 && bytes[3] === 0x46) return 'pdf';
+  if(bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) return 'utf8-bom';
+  if(bytes[0] === 0xFF && bytes[1] === 0xFE) return 'utf16le';
+  if(bytes[0] === 0xFE && bytes[1] === 0xFF) return 'utf16be';
+  return 'texto';
+}
+function extraerTextoDeOLE2(bytes){
+  try {
+    let latin1 = '';
+    const CH = 0x8000;
+    for(let i = 0; i < bytes.length; i += CH){
+      latin1 += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length)));
+    }
+    const out = [latin1];
+    try {
+      const utf16 = new TextDecoder('utf-16le', { fatal: false }).decode(bytes);
+      out.push(utf16);
+    } catch(e){}
+    return out.join('\n\n');
+  } catch(e){
+    console.warn('extraerTextoDeOLE2 falló:', e);
+    return '';
+  }
+}
+function extraerTextoDeRTF(txt){
+  if(!txt) return '';
+  let s = txt.replace(/\{\\\*[\s\S]*?\}/g, '');
+  s = s.replace(/\\[a-zA-Z]+-?\d*\s?/g, ' ');
+  s = s.replace(/[{}]/g, '');
+  s = s.replace(/\\'([0-9a-fA-F]{2})/g, (m,h) => String.fromCharCode(parseInt(h,16)));
+  return s;
+}
+function bytesATexto(bytes, tipo){
+  try {
+    if(tipo === 'utf16le') return new TextDecoder('utf-16le').decode(bytes);
+    if(tipo === 'utf16be') return new TextDecoder('utf-16be').decode(bytes);
+    if(tipo === 'utf8-bom') return new TextDecoder('utf-8').decode(bytes);
+    return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
+  } catch(e){
+    let s = '';
+    const CH = 0x8000;
+    for(let i = 0; i < bytes.length; i += CH){
+      s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length)));
+    }
+    return s;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Importador principal robusto multi-formato con logs
+// ═══════════════════════════════════════════════════════════════
 window.cargarRespaldoDesdeArchivo = async function(event){
-  const file=event.target.files[0]; if(!file) return;
+  const file = event.target.files && event.target.files[0];
+  if(!file){ console.warn('⚠️ No se seleccionó archivo'); return; }
+
+  console.group('📂 IMPORTAR RESPALDO');
+  console.log('📄 Nombre:', file.name);
+  console.log('📦 Tamaño:', (file.size/1024).toFixed(1), 'KB');
+  console.log('🏷️ MIME:', file.type || '(vacío)');
+
   mostrarAviso('⏳ Analizando archivo...','ok');
-  try{
-    const esDocx=/\.docx$/i.test(file.name)||(file.type&&file.type.includes('openxmlformats'));
-    let texto=''; if(!esDocx) texto=await file.text();
 
-    if(texto){ const r=extraerPayloadBase64(texto); if(r){ const ok=await aplicarRespaldo(r); if(ok){ alert('✅ Respaldo restaurado desde .doc. Recargando...'); setTimeout(()=>location.reload(),800); return; } } }
-    if(esDocx){ const tp=await extraerTextoPlanoDeDocx(file); if(tp){ const r=extraerPayloadBase64(tp); if(r){ const ok=await aplicarRespaldo(r); if(ok){ alert('✅ Respaldo .docx restaurado. Recargando...'); setTimeout(()=>location.reload(),800); } return; } } }
+  try {
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const tipo = detectarTipoArchivo(bytes);
+    console.log('🔍 Tipo detectado por magic bytes:', tipo);
 
-    if(texto){ let jp=null; try{ jp=JSON.parse(texto); }catch(e){} if(jp && (jp.entregasDiariasDetallado||jp.estadoSesion)){ const ok=await aplicarRespaldo(jp); if(ok){ alert('✅ JSON restaurado. Recargando...'); setTimeout(()=>location.reload(),800); } return; } }
+    let texto = '';
+    let payload = null;
 
-    const cT=texto?extraerCodigosDeTexto(texto):[];
-    let im=[]; if(esDocx){ try{ im=await extraerImagenesDeDocx(file); }catch(e){} } else if(texto) im=extraerImagenesDeDocHTML(texto);
-    let cI=[]; if(im.length && window.ZXing){ mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok'); cI=await decodificarCodigosDeImagenes(im,(a,t,n)=>mostrarAviso(`🔍 ${a}/${t}`,'ok')); }
-    const s=new Set(); cT.forEach(c=>s.add(c)); cI.forEach(c=>s.add(c));
-    const cs=Array.from(s);
-    if(!cs.length){ alert('❌ No se encontraron códigos ni respaldo COLSERLOG en el archivo.'); return; }
-    let mR=`📥 ${cs.length} código(s) encontrados:\n\n`; if(cT.length) mR+=`• ${cT.length} en texto\n`; if(cI.length) mR+=`• ${cI.length} en imágenes\n`; mR+=`\n¿Cargar al banco de códigos?`; if(!confirm(mR)) return;
-    const {agregados,yaEstaban}=cargarCodigosAlBanco(cs);
-    let mF=`✅ ${agregados} agregado(s).`; if(yaEstaban>0) mF+=`\n⚠️ ${yaEstaban} ya estaban.`;
+    if(tipo === 'zip'){
+      console.log('→ Procesando como .docx (ZIP)…');
+      if(!window.JSZip){
+        alert('⚠️ Este archivo es un .docx real pero falta la librería JSZip. Recarga la página.');
+        return;
+      }
+      try {
+        const z = await JSZip.loadAsync(file);
+        const candidatos = Object.keys(z.files).filter(n => /^word\/.*\.xml$/i.test(n));
+        console.log('→ XMLs en el docx:', candidatos);
+        for(const nombre of candidatos){
+          const xml = await z.file(nombre).async('string');
+          payload = extraerPayloadBase64(xml);
+          if(payload) { console.log('✅ Payload encontrado en', nombre); break; }
+        }
+        if(!payload){
+          console.log('→ Buscando payload en TODOS los archivos del ZIP…');
+          for(const n of Object.keys(z.files)){
+            const f = z.files[n]; if(f.dir) continue;
+            try {
+              const content = await f.async('string');
+              payload = extraerPayloadBase64(content);
+              if(payload){ console.log('✅ Payload en', n); break; }
+            } catch(e){}
+          }
+        }
+      } catch(e){
+        console.warn('Fallo procesando ZIP:', e);
+      }
+    }
+    else if(tipo === 'ole2'){
+      console.log('→ Procesando como .doc binario (OLE2)…');
+      texto = extraerTextoDeOLE2(bytes);
+      payload = extraerPayloadBase64(texto);
+    }
+    else if(tipo === 'rtf'){
+      console.log('→ Procesando como RTF…');
+      texto = bytesATexto(bytes, 'texto');
+      texto = extraerTextoDeRTF(texto);
+      payload = extraerPayloadBase64(texto);
+    }
+    else {
+      console.log('→ Procesando como texto/HTML/JSON…');
+      texto = bytesATexto(bytes, tipo);
+
+      const trimmed = texto.replace(/^\uFEFF/, '').trim();
+      if(trimmed.startsWith('{')){
+        try {
+          const jp = JSON.parse(trimmed);
+          if(jp && (jp.entregasDiariasDetallado || jp.estadoSesion || jp.usuario)){
+            console.log('✅ JSON puro detectado');
+            payload = jp;
+          }
+        } catch(e){ console.log('→ No es JSON puro:', e.message); }
+      }
+
+      if(!payload){
+        payload = extraerPayloadBase64(texto);
+      }
+    }
+
+    if(payload){
+      console.log('🎯 Payload válido. Aplicando…');
+      const ok = await aplicarRespaldo(payload);
+      if(ok){
+        console.log('✅ Respaldo aplicado. Recargando UI…');
+        try { if(typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage(); } catch(e){}
+        alert('✅ Respaldo restaurado correctamente.\n\nLa página se recargará para mostrar los datos.');
+        setTimeout(() => location.reload(), 500);
+        return;
+      } else {
+        console.warn('⚠️ aplicarRespaldo devolvió false (usuario canceló)');
+        mostrarAviso('⚠️ Importación cancelada','error');
+        return;
+      }
+    }
+
+    console.warn('❌ No se encontró payload COLSERLOG estructurado');
+    if(!texto && tipo !== 'zip'){
+      alert('❌ No se pudo leer el archivo.\n\nTipo detectado: ' + tipo + '\n\nSi el archivo es un Word, intenta exportarlo de nuevo desde Colserlog y NO lo abras/guardes en Word antes de importarlo.');
+      return;
+    }
+
+    const cT = texto ? extraerCodigosDeTexto(texto) : [];
+    let im = [];
+    if(tipo === 'zip' && window.JSZip){
+      try { im = await extraerImagenesDeDocx(file); } catch(e){}
+    } else if(texto){
+      im = extraerImagenesDeDocHTML(texto);
+    }
+    let cI = [];
+    if(im.length && window.ZXing){
+      mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok');
+      cI = await decodificarCodigosDeImagenes(im, (a,t,n) => mostrarAviso(`🔍 ${a}/${t}`,'ok'));
+    }
+    const s = new Set();
+    cT.forEach(c => s.add(c));
+    cI.forEach(c => s.add(c));
+    const cs = Array.from(s);
+
+    if(!cs.length){
+      alert('❌ No se encontraron datos de respaldo COLSERLOG en el archivo.\n\n' +
+            '📋 Diagnóstico:\n' +
+            '• Tipo detectado: ' + tipo + '\n' +
+            '• Archivo: ' + file.name + '\n' +
+            '• Tamaño: ' + (file.size/1024).toFixed(1) + ' KB\n\n' +
+            '💡 Recomendación:\n' +
+            'Vuelve a exportar desde Colserlog y descarga el archivo .json (opción "JSON puro").\n' +
+            'Ese formato NO se corrompe al abrir/guardar en Word.');
+      return;
+    }
+
+    let mR = `📥 ${cs.length} código(s) encontrados:\n\n`;
+    if(cT.length) mR += `• ${cT.length} en texto\n`;
+    if(cI.length) mR += `• ${cI.length} en imágenes\n`;
+    mR += `\n¿Cargar al banco de códigos?`;
+    if(!confirm(mR)) return;
+    const {agregados, yaEstaban} = cargarCodigosAlBanco(cs);
+    let mF = `✅ ${agregados} agregado(s).`;
+    if(yaEstaban > 0) mF += `\n⚠️ ${yaEstaban} ya estaban.`;
     alert(mF);
-  }catch(e){ console.error('cargarRespaldoDesdeArchivo:', e); alert('❌ Error al procesar: '+e.message); }
-  finally{ event.target.value=''; }
+
+  } catch(e){
+    console.error('❌ Error al procesar el archivo:', e);
+    alert('❌ Error al procesar el archivo:\n\n' + e.message + '\n\nRevisa la consola (F12) para más detalles.');
+  } finally {
+    console.groupEnd();
+    event.target.value = '';
+  }
 };
 
 function descargarWord(nombre,html){
@@ -3030,7 +3355,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -3048,11 +3373,8 @@ document.addEventListener('input', (e) => {
   }
 });
 
-// ═══════════════════════════════════════════════════════════════
 // FIX #5: Sincronización inicial ANTES de que el módulo 1 decida mostrar modal
-// ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', async ()=>{
-  // Asegura que el proxy de fotos nube esté sincronizado en localStorage
   try {
     sincronizarFotosNube = (localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true');
     const tf = document.getElementById('toggleFotosNube');
