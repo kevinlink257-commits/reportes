@@ -197,7 +197,6 @@ body.dark #barraUsuario button{background:var(--gray-7);color:var(--text-primary
 body.dark #barraUsuario button:hover{background:var(--gray-6)}
 #barraUsuario button.btn-pwa{background:var(--sys-orange);color:#fff}
 #barraUsuario button.btn-logout{background:var(--sys-red);color:#fff}
-/* Indicador de guardado */
 #indicadorGuardado{display:none;font-size:.72rem;padding:3px 8px;border-radius:var(--radius-pill);background:rgba(48,209,88,.15);color:#1e8449;font-weight:600}
 #indicadorGuardado.visible{display:inline-block}
 body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
@@ -1212,7 +1211,8 @@ window.forzarSincronizacion = async function(){
   }catch(e1){
     try{
       actualizarEstadoNube('⏳ Reintentando...','loading');
-      await Promise.race([ setDoc(ref,payload), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
+      /* ✅ CORRECCIÓN: se agrega {merge:true} para permitir deleteField() */
+      await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
       actualizarEstadoNube('✅ Subido (reintento)','ok'); return true;
     }catch(e2){
       actualizarEstadoNube('❌ '+e2.message,'error');
@@ -1409,9 +1409,6 @@ function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getD
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
 
-/* ═══════════════════════════════════════════════════════════════
-   💾 PERSISTENCIA — Guarda TODO automáticamente
-   ═══════════════════════════════════════════════════════════════ */
 function mostrarIndicadorGuardado(){
   const el = document.getElementById('indicadorGuardado');
   if(!el) return;
@@ -1443,7 +1440,6 @@ function restaurarBorrador(){
     const raw = localStorage.getItem(CLAVE_BORRADOR);
     if(!raw) return false;
     const b = JSON.parse(raw);
-    // Ignorar borradores viejos (>24h)
     if(b.timestamp && (Date.now() - b.timestamp) > 24*60*60*1000){ localStorage.removeItem(CLAVE_BORRADOR); return false; }
     const set = (id, v) => { const el = document.getElementById(id); if(el && v) el.value = v; };
     set('llegadaCliente', b.llegadaCliente);
@@ -1458,7 +1454,6 @@ function restaurarBorrador(){
   } catch(e){ return false; }
 }
 
-// Auto-save cada 20 segundos
 setInterval(() => { 
   if(typeof window._guardarEstadoSilencioso === 'function') window._guardarEstadoSilencioso();
   guardarBorrador();
@@ -1479,9 +1474,6 @@ document.addEventListener('visibilitychange', () => {
   } 
 });
 
-/* ═══════════════════════════════════════════════════════════════
-   📸 FOTOS
-   ═══════════════════════════════════════════════════════════════ */
 window.abrirModalFoto = function(lista,indice){ if(!lista||!lista.length) return; modalFotosActual.lista=lista; modalFotosActual.indice=indice||0; actualizarModalFoto(); document.getElementById('modalFoto').classList.add('visible'); };
 function actualizarModalFoto(){ const {lista,indice}=modalFotosActual; const f=lista[indice]; if(!f) return; const img=document.getElementById('modalFotoImg'); img.src=f.data||f; document.getElementById('modalFotoContador').textContent=`${indice+1} / ${lista.length}`; const l=document.getElementById('modalFotoDescargar'); l.href=f.data||f; l.download=`foto_visita_${(f.id||Date.now())}.jpg`; const n=document.querySelector('.modal-foto-nav'); if(n) n.style.display=lista.length>1?'flex':'none'; }
 window.navegarFoto = function(dir){ const t=modalFotosActual.lista.length; if(t<=1) return; modalFotosActual.indice=(modalFotosActual.indice+dir+t)%t; actualizarModalFoto(); };
@@ -1490,7 +1482,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') cerrarModalFoto(
 document.getElementById('modalFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalFoto') cerrarModalFoto(); });
 window.verFotosVisita = async function(index){ const v=visitas[index]; if(!v||!v.fotos||!v.fotos.length) return; const ids=v.fotos.map(f=>f.id||f).filter(Boolean); const datos=await obtenerFotosDB(ids); const lista=ids.map(id=>({id,data:datos[id]})).filter(f=>f.data); if(!lista.length){ mostrarAviso('⚠️ No se pudieron cargar las fotos','error'); return; } abrirModalFoto(lista,0); };
 
-/* Reglas + modo de origen (cámara o galería) */
 let modoFotoPendiente = 'camara';
 window.abrirModalReglasFoto = function(modo){
   modoFotoPendiente = modo === 'galeria' ? 'galeria' : 'camara';
@@ -1605,7 +1596,7 @@ window.capturarFoto = async function(event){
 
     fotosPendientes.push({ id, tamanoKB: kb, fecha: new Date().toISOString() });
     await renderizarGaleriaFotos();
-    guardarEstadoCompleto(); // <-- Persistencia inmediata
+    guardarEstadoCompleto();
     beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
     mostrarAviso(`✅ Foto agregada (${kb} KB)`, 'ok');
@@ -1622,7 +1613,6 @@ window.capturarFoto = async function(event){
 async function renderizarGaleriaFotos(){
   const c=document.getElementById('galeriaFotosVisita'); const ct=document.getElementById('contadorFotos'); if(!c) return;
   c.innerHTML='';
-  // Limpiar fotosPendientes de IDs huérfanos (fotos que ya no existen en IDB)
   if(fotosPendientes.length > 0){
     const ids = fotosPendientes.map(f=>f.id);
     const datos = await obtenerFotosDB(ids);
@@ -1697,14 +1687,13 @@ function guardarEstadoCompleto(){
   }catch(err){ if(String(err).includes('Quota')||String(err).includes('quota')){ mostrarAviso('❌ localStorage lleno','error'); } else mostrarAviso('⚠️ Error guardando','error'); }
   finally{ guardandoEstado=false; }
 }
-// Versión silenciosa para auto-save periódico
 window._guardarEstadoSilencioso = function(){
   if(guardandoEstado) return;
   try{
     const e={ visitas, contadores, totalMinutosVisitas, totalVisitas, bancoCodigos, codigosPendientes, fotosPendientes };
     localStorage.setItem('estadoSesion', JSON.stringify(e));
     guardarDiaActual();
-  }catch(err){ /* silencioso */ }
+  }catch(err){ }
 };
 
 function cargarEstadoCompleto(){
@@ -2595,7 +2584,6 @@ function diagnosticar(){
 document.addEventListener('touchstart', function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart', ua); }, { once:true });
 document.addEventListener('click', (e)=>{ const c=document.getElementById('resultadosBusquedaCodigo'), i=document.getElementById('busquedaCodigoBanco'); if(!c||!i) return; if(!c.contains(e.target) && e.target!==i){ c.innerHTML=''; c.style.display='none'; } });
 
-// Auto-guardado del borrador en cada input
 document.addEventListener('input', (e) => {
   const id = e.target && e.target.id;
   if(!id) return;
@@ -2611,7 +2599,6 @@ window.addEventListener('load', async ()=>{
   try{ localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){}
   cargarTiemposBase();
   if(cargarEstadoCompleto() && visitas.length){ renderizarTabla(); actualizarDashboard(); }
-  // Restaurar borrador después de cargar estado
   const teniaBorrador = restaurarBorrador();
   if(teniaBorrador){ console.log('📝 Borrador restaurado'); }
   await renderizarGaleriaFotos();
