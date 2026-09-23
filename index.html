@@ -895,9 +895,6 @@ catch(e) { console.error('❌ Error Firebase:', e); actualizarEstadoNube('❌ Er
 function actualizarEstadoNube(txt,tipo='ok'){ const el=document.getElementById('estadoNube'); if(!el)return; el.textContent=txt; el.className='estado-nube '+tipo; }
 window.actualizarEstadoNube = actualizarEstadoNube;
 
-// ═══════════════════════════════════════════════════════════════
-// FIX #3: slugify con fallback determinista para evitar colisiones
-// ═══════════════════════════════════════════════════════════════
 function slugify(txt){
   const s = (txt||'').toString().toLowerCase().normalize('NFD')
     .replace(/[\u0300-\u036f]/g,'')
@@ -947,9 +944,6 @@ function cargarDarkMode(){ let p=null; try{ p=localStorage.getItem(CLAVE_DARK_MO
 window.cargarDarkMode = cargarDarkMode;
 
 let deferredPrompt = null;
-// ═══════════════════════════════════════════════════════════════
-// FIX #1: crearIconoPWA sin unescape/encodeURIComponent (deprecados)
-// ═══════════════════════════════════════════════════════════════
 function crearIconoPWA(){
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient></defs><rect width="512" height="512" rx="96" fill="url(#g)"/><text x="256" y="330" font-size="240" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold">C</text></svg>`;
   return 'data:image/svg+xml;base64,' + btoa(svg);
@@ -973,9 +967,6 @@ window.instalarPWA = async function(){
   modal.classList.add('visible');
 };
 
-// ═══════════════════════════════════════════════════════════════
-// FIX #10: hashPassword rechaza contextos inseguros (file://, http://)
-// ═══════════════════════════════════════════════════════════════
 async function hashPassword(p){
   if(!window.isSecureContext || !crypto || !crypto.subtle){
     throw new Error('Se requiere HTTPS para iniciar sesión de forma segura. Abre la app por https:// o localhost.');
@@ -1194,9 +1185,6 @@ function renderizarListaUsuarios(){
     c.appendChild(b);
   });
 }
-// ═══════════════════════════════════════════════════════════════
-// FIX #6: mostrarModalUsuario no borra campos si el modal ya está visible
-// ═══════════════════════════════════════════════════════════════
 function mostrarModalUsuario(){
   const m = document.getElementById('modalUsuario');
   if(!m) return;
@@ -1654,9 +1642,33 @@ async function detectarYCensurar(dataUrl, onProgreso){
 window.detectarYCensurar = detectarYCensurar;
 
 /* ═══════════════════════════════════════════════════════════════
-   📸 IndexedDB (fotos)
+   📸 IndexedDB (fotos) + Cache en memoria para impresión síncrona
    ═══════════════════════════════════════════════════════════════ */
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
+
+// ═══════════════════════════════════════════════════════════════
+// CACHE DE FOTOS: permite construir el informe SIN await,
+// garantizando que window.print() se ejecute dentro del gesto del usuario.
+// ═══════════════════════════════════════════════════════════════
+const cacheFotos = new Map();
+
+async function precargarFotosEnCache(){
+  try {
+    const todas = await obtenerTodasLasFotosDB();
+    cacheFotos.clear();
+    todas.forEach(f => cacheFotos.set(f.id, f.data));
+    console.log(`📸 Cache fotos: ${todas.length} entradas (${(todas.reduce((s,f)=>s+(f.data?.length||0),0)/1024/1024).toFixed(2)} MB)`);
+  } catch(e){
+    console.warn('precargarFotosEnCache falló:', e);
+  }
+}
+function getFotoDataUrlSync(id){ return cacheFotos.get(id) || null; }
+function getFotosSync(ids){
+  const out = {};
+  ids.forEach(id => { const d = cacheFotos.get(id); if(d) out[id] = d; });
+  return out;
+}
+window.precargarFotosEnCache = precargarFotosEnCache;
 
 function abrirFotosDB(){
   return new Promise((resolve, reject) => {
@@ -1682,9 +1694,9 @@ async function guardarFotoDB(id, dataUrl, meta={}){
     let tx;
     try { tx = db.transaction(STORE_FOTOS, 'readwrite'); }
     catch(e) { done(false, new Error('No se pudo abrir transacción: ' + (e.message||''))); return; }
-    tx.onabort = () => done(false, tx.error || new Error('Transacción abortada (cuota excedida). Libera espacio en Ajustes → Vaciar fotos.'));
+    tx.onabort = () => done(false, tx.error || new Error('Transacción abortada (cuota excedida).'));
     tx.onerror = () => done(false, tx.error || new Error('Error en transacción IndexedDB'));
-    tx.oncomplete = () => done(true);
+    tx.oncomplete = () => { cacheFotos.set(id, dataUrl); done(true); };
     try {
       const store = tx.objectStore(STORE_FOTOS);
       const req = store.put({ id, data: dataUrl, fecha: new Date().toISOString(), ...meta });
@@ -1693,13 +1705,12 @@ async function guardarFotoDB(id, dataUrl, meta={}){
   });
 }
 
-async function obtenerFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const r=tx.objectStore(STORE_FOTOS).get(id); r.onsuccess=()=>res(r.result||null); r.onerror=()=>rej(r.error); }); }
-async function obtenerFotosDB(ids){ const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const s=tx.objectStore(STORE_FOTOS); const out={}; let p=ids.length; if(!p){ res(out); return; } ids.forEach(id=>{ const r=s.get(id); r.onsuccess=()=>{ if(r.result) out[id]=r.result.data; p--; if(!p) res(out); }; r.onerror=()=>{ p--; if(!p) res(out); }; }); }); }
-async function eliminarFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readwrite'); tx.objectStore(STORE_FOTOS).delete(id); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }
-async function eliminarFotosMultiples(ids){ const db=await abrirFotosDB(); return new Promise((res)=>{ if(!ids.length){ res(0); return; } const tx=db.transaction(STORE_FOTOS,'readwrite'); const s=tx.objectStore(STORE_FOTOS); ids.forEach(id=>s.delete(id)); tx.oncomplete=()=>res(ids.length); tx.onerror=()=>res(0); }); }
+async function obtenerFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res,rej)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const r=tx.objectStore(STORE_FOTOS).get(id); r.onsuccess=()=>{ const v=r.result||null; if(v && v.data) cacheFotos.set(id, v.data); res(v); }; r.onerror=()=>rej(r.error); }); }
+async function obtenerFotosDB(ids){ const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readonly'); const s=tx.objectStore(STORE_FOTOS); const out={}; let p=ids.length; if(!p){ res(out); return; } ids.forEach(id=>{ const r=s.get(id); r.onsuccess=()=>{ if(r.result){ out[id]=r.result.data; cacheFotos.set(id, r.result.data); } p--; if(!p) res(out); }; r.onerror=()=>{ p--; if(!p) res(out); }; }); }); }
+async function eliminarFotoDB(id){ cacheFotos.delete(id); const db=await abrirFotosDB(); return new Promise((res)=>{ const tx=db.transaction(STORE_FOTOS,'readwrite'); tx.objectStore(STORE_FOTOS).delete(id); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }); }
+async function eliminarFotosMultiples(ids){ ids.forEach(id => cacheFotos.delete(id)); const db=await abrirFotosDB(); return new Promise((res)=>{ if(!ids.length){ res(0); return; } const tx=db.transaction(STORE_FOTOS,'readwrite'); const s=tx.objectStore(STORE_FOTOS); ids.forEach(id=>s.delete(id)); tx.oncomplete=()=>res(ids.length); tx.onerror=()=>res(0); }); }
 async function contarFotosDB(){ const db=await abrirFotosDB(); return new Promise((res)=>{ const r=db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).count(); r.onsuccess=()=>res(r.result); r.onerror=()=>res(0); }); }
 async function obtenerTodasLasFotosDB(){ const db=await abrirFotosDB(); return new Promise((res)=>{ const r=db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>res([]); }); }
-async function existeFotoDB(id){ const db=await abrirFotosDB(); return new Promise((res)=>{ const r=db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).getKey(id); r.onsuccess=()=>res(!!r.result); r.onerror=()=>res(false); }); }
 
 let contadores={}; ESTADOS.forEach(e=>contadores[e]=0);
 let totalMinutosVisitas=0, totalVisitas=0, visitas=[];
@@ -1709,12 +1720,28 @@ let codigosPendientes=[]; let codigosRegistradosHoy=new Set(); let codesScannedR
 let scanEstabilizador={codigo:null,contador:0,ultimo:0}; let sesionEscaneoYaAgrego=false;
 let fotosPendientes=[]; let modalFotosActual={lista:[],indice:0};
 let sincronizarFotosNube=false; try{ sincronizarFotosNube=localStorage.getItem(CLAVE_FOTOS_NUBE)==='true'; }catch(e){}
+let _estabaDarkAlImprimir = false;
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; const [a,b]=h1.split(':').map(Number); const [c,d]=h2.split(':').map(Number); let m1=a*60+b, m2=c*60+d; if(m2<m1) m2+=1440; return m2-m1; }
 function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const dn=dt.getDay()||7; dt.setDate(dt.getDate()+4-dn); const ys=new Date(dt.getFullYear(),0,1); return Math.ceil((((dt-ys)/86400000)+1)/7); }
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
+
+// ═══════════════════════════════════════════════════════════════
+// HASH SÍNCRONO para el panel de auditoría (FNV-1a + djb2)
+// Permite que las funciones de impresión NO usen await.
+// ═══════════════════════════════════════════════════════════════
+function hashSync(texto){
+  let h1 = 0x811c9dc5;
+  for(let i = 0; i < texto.length; i++){
+    h1 ^= texto.charCodeAt(i);
+    h1 = (h1 * 0x01000193) >>> 0;
+  }
+  let h2 = 5381;
+  for(let i = 0; i < texto.length; i++) h2 = ((h2 << 5) + h2 + texto.charCodeAt(i)) | 0;
+  return `${h1.toString(16).padStart(8,'0').toUpperCase()}-${(h2>>>0).toString(16).padStart(8,'0').toUpperCase()}-${texto.length.toString(16).toUpperCase()}`;
+}
 
 function mostrarIndicadorGuardado(){
   const el = document.getElementById('indicadorGuardado');
@@ -1929,6 +1956,7 @@ window.capturarFoto = async function(event){
       rostros: censura.rostros || 0,
       vehiculos: censura.vehiculos || 0
     });
+    cacheFotos.set(id, dataFinal);
 
     fotosPendientes.push({
       id, tamanoKB: kb, fecha: new Date().toISOString(),
@@ -1960,9 +1988,6 @@ window.capturarFoto = async function(event){
   }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// FIX #7: renderizarGaleriaFotos lee IndexedDB una sola vez
-// ═══════════════════════════════════════════════════════════════
 async function renderizarGaleriaFotos(){
   const c = document.getElementById('galeriaFotosVisita');
   const ct = document.getElementById('contadorFotos');
@@ -1994,7 +2019,7 @@ async function renderizarGaleriaFotos(){
     const w = document.createElement('div');
     w.className = 'foto-thumb';
     const img = document.createElement('img');
-    img.src = datos[f.id] || '';
+    img.src = datos[f.id] || cacheFotos.get(f.id) || '';
     img.alt = `Foto ${i + 1}`;
     img.onclick = async () => { const foto = await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto], 0); };
     w.appendChild(img);
@@ -2353,8 +2378,6 @@ window.cancelarEscaneo = ()=>{
   if(i){ i.stop().then(()=>{ try{ i.clear(); }catch(_){} oc(); }).catch(()=>{ try{ i.clear(); }catch(_){} oc(); }); } else oc();
 };
 
-async function sha256(texto){ try{ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(texto)); return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(); }catch(e){ let h=5381; for(let i=0;i<texto.length;i++) h=((h<<5)+h+texto.charCodeAt(i))|0; return 'FB'+(h>>>0).toString(16).toUpperCase().padStart(14,'0'); } }
-
 function generarChartEstadosHorizontal(ancho,alto){
   const c=document.createElement('canvas'); c.width=ancho; c.height=alto;
   const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,ancho,alto);
@@ -2390,39 +2413,247 @@ function generarChartDona(ancho,alto){
   return c.toDataURL('image/png');
 }
 
-function esperarImagenesCargadas(contenedor){
-  if(!contenedor) return Promise.resolve();
-  const imgs=Array.from(contenedor.querySelectorAll('img'));
-  if(!imgs.length) return Promise.resolve();
-  return Promise.all(imgs.map(img=>{
-    if(img.complete && img.naturalWidth>0) return Promise.resolve();
-    return new Promise(res=>{ const to=setTimeout(res,5000); img.onload=()=>{ clearTimeout(to); res(); }; img.onerror=()=>{ clearTimeout(to); res(); }; });
-  }));
+/* ═══════════════════════════════════════════════════════════════
+   🖨️ IMPRESIÓN SÍNCRONA (compatible con iOS Safari y Chrome Android)
+   La clave: window.print() debe llamarse sin await previo.
+   Para lograrlo usamos hashSync + cacheFotos (ambos síncronos).
+   ═══════════════════════════════════════════════════════════════ */
+function prepararAreaImpresion(html, clasesExtra){
+  let area=document.getElementById('areaImpresion');
+  if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
+  area.innerHTML = html;
+  area.style.display = 'block';
+  // Marcar dark antes de añadir clases para poder restaurar
+  _estabaDarkAlImprimir = document.body.classList.contains('dark');
+  if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching');
+  document.body.classList.add('modo-impresion','modo-reporte-diario');
+  (clasesExtra||[]).forEach(c => document.body.classList.add(c));
+  return area;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   🖨️ UTILIDADES DE IMPRESIÓN
-   ═══════════════════════════════════════════════════════════════ */
-// FIX #8: imprimirYLimpiar restaura correctamente el modo oscuro tras imprimir
-function imprimirYLimpiar(area, clases, estabanDark){
-  return new Promise((resolve) => {
-    let terminado = false;
-    const finalizar = () => {
-      if(terminado) return;
-      terminado = true;
-      document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
-      clases.forEach(c => document.body.classList.remove(c));
-      document.body.classList.remove('theme-switching');
-      if(estabanDark && typeof window.cargarDarkMode === 'function') window.cargarDarkMode();
-      if(area){ area.innerHTML=''; area.style.display='none'; }
-      window.removeEventListener('afterprint', finalizar);
-      resolve();
-    };
-    window.addEventListener('afterprint', finalizar, { once:true });
-    try{ window.print(); }catch(e){ console.warn('print() lanzó excepción:', e); finalizar(); return; }
-    setTimeout(finalizar, 30000);
-  });
+function finalizarImpresion(){
+  document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
+  document.body.classList.remove('theme-switching');
+  const area = document.getElementById('areaImpresion');
+  if(area){ area.innerHTML=''; area.style.display='none'; }
+  if(_estabaDarkAlImprimir && typeof window.cargarDarkMode === 'function'){
+    try { window.cargarDarkMode(); } catch(e){}
+  }
+  _estabaDarkAlImprimir = false;
 }
+
+// Listener global único para limpiar tras imprimir
+window.addEventListener('afterprint', finalizarImpresion);
+
+window.imprimirReporteDiario = function(){
+  try {
+    if(!visitas.length){ if(!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return; }
+    const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
+    const ahora=new Date();
+    const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const horaGen=ahora.toLocaleTimeString('es');
+    const ent=contadores['Entregado']||0, noEnt=totalVisitas-ent;
+    const prom=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
+    const efec=totalVisitas>0?((ent/totalVisitas)*100).toFixed(1):'0.0';
+    const horas=Math.floor(totalMinutosVisitas/60), mins=totalMinutosVisitas%60;
+    const cUnicos=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean)).size;
+    const tFotos=visitas.reduce((s,v)=>s+(Array.isArray(v.fotos)?v.fotos.length:0),0);
+    const tCensuradas=visitas.reduce((s,v)=>s+((Array.isArray(v.fotos)?v.fotos:[]).filter(f=>f.censurada).length),0);
+    const chartEstados=generarChartEstadosHorizontal(820,520);
+    const chartDona=generarChartDona(500,520);
+    const iC=localStorage.getItem('tiempoBase_inicioCarga')||'—';
+    const fC=localStorage.getItem('tiempoBase_finCarga')||'—';
+    const sE=localStorage.getItem('tiempoBase_salidaEmpresa')||'—';
+    const pE=localStorage.getItem('tiempoBase_primeraEntrega')||'—';
+    const minC=(iC!=='—'&&fC!=='—')?calcularMinutos(iC,fC):0;
+    const minP=(fC!=='—'&&sE!=='—')?calcularMinutos(fC,sE):0;
+    const minV=(sE!=='—'&&pE!=='—')?calcularMinutos(sE,pE):0;
+    const minT=(iC!=='—'&&pE!=='—')?calcularMinutos(iC,pE):0;
+    const codigoDoc=`RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+    const payloadHash = JSON.stringify({u:usuario, f:fechaLocalISO(), v:visitas.map(v=>({l:v.llegada,s:v.salida,c:v.codigo,e:v.estado})), t:totalVisitas, m:totalMinutosVisitas});
+    const hash = hashSync(payloadHash);
+
+    let html=`
+      <div class="reporte-diario">
+        ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
+        ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos, 'Fotos censuradas':tCensuradas})}
+        <header class="rd-header">
+          <h1>Reporte Diario de Entregas</h1>
+          <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
+          <div class="rd-info">
+            <div><strong>Mensajero:</strong> ${usuario}</div>
+            <div><strong>Fecha de ruta:</strong> ${fecha}</div>
+            <div><strong>Generado:</strong> ${horaGen}</div>
+          </div>
+        </header>
+        <section class="rd-kpis">
+          <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
+          <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entregados</div><div class="rd-kpi-valor">${noEnt}</div></div>
+          <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total Visitas</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
+          <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efectividad</div><div class="rd-kpi-valor">${efec}%</div></div>
+          <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
+          <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo Total</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
+          <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Códigos Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
+          <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
+        </section>
+        <section class="rd-charts">
+          <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
+          <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
+        </section>
+        <section class="rd-tiempos">
+          <h3 class="rd-section-title">⏱️ Tiempos Base del Día</h3>
+          <table class="rd-tabla-tiempos">
+            <tr><td><strong>Inicio carga</strong><br>${iC}</td><td><strong>Fin carga</strong><br>${fC}</td><td><strong>Salida empresa</strong><br>${sE}</td><td><strong>Primera entrega</strong><br>${pE}</td></tr>
+            <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
+          </table>
+        </section>`;
+    const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+    if(eCV.length){
+      html+=`<section class="rd-estados"><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla rd-tabla-estados"><thead><tr><th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th></tr></thead><tbody>`;
+      eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); html+=`<tr><td style="text-align:left;">${k}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td><div style="background:#e8e8ed;border-radius:2px;overflow:hidden;height:9px;"><div style="background:#0a84ff;height:100%;width:${bw}%;"></div></div></td></tr>`; });
+      html+=`<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>100%</strong></td><td></td></tr></tbody></table></section>`;
+    }
+    html+=`<section class="rd-visitas"><h3 class="rd-section-title">📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:4%">#</th><th style="width:8%">Llegada</th><th style="width:8%">Salida</th><th style="width:7%">Tiempo</th><th style="width:15%">Código</th><th style="width:18%">Estado</th><th style="width:5%">📸</th><th>Descripción</th></tr></thead><tbody>`;
+    if(!visitas.length){ html+=`<tr><td colspan="8" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas registradas</td></tr>`; }
+    else{
+      visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; const nCens=(v.fotos||[]).filter(f=>f.censurada).length; html+=`<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`; });
+      html+=`<tr class="rd-total"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${tFotos} foto(s)${tCensuradas?` · ${tCensuradas} censurada(s)`:''}</strong></td></tr>`;
+    }
+    html+=`</tbody></table></section>`;
+    if(bancoCodigos.length){
+      const us=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean));
+      const uc=bancoCodigos.filter(c=>us.has(c)).length, disp=bancoCodigos.length-uc;
+      html+=`<section class="rd-banco"><h3 class="rd-section-title">📥 Resumen del Banco de Códigos</h3><table class="rd-tabla-tiempos"><tr><td><strong>Total en banco</strong><br>${bancoCodigos.length}</td><td><strong>✓ Usados</strong><br>${uc}</td><td><strong>⏳ Disponibles</strong><br>${disp}</td><td><strong>📦 Únicos visitados</strong><br>${cUnicos}</td></tr></table></section>`;
+    }
+    const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
+    if(vCF.length){
+      // ⚡ SIN await: usamos cacheFotos en memoria
+      const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
+      const df = getFotosSync(ids);
+      const planas=[];
+      vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
+      const FPP=25; const totalP=Math.ceil(planas.length/FPP);
+      html+=`<section class="rd-fotos-section"><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''}${tCensuradas?` · ${tCensuradas} con censura`:''})</h3><p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
+      for(let p=0;p<planas.length;p+=FPP){
+        const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
+        html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP} (fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length})</div><div class="rd-fotos-grid">`;
+        fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${f.codigo}</span>`:'Sin código'}${cs}</div></div>`; });
+        html+=`</div></div>`;
+      }
+      html+=`</section>`;
+    }
+    html+=`<section class="rd-firmas">
+      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero responsable</div><div class="rd-firma-nombre">${usuario}</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
+      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor de operaciones</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
+      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor / Revisor</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
+    </section>
+    ${generarPieAuditoria()}</div>`;
+
+    prepararAreaImpresion(html, []);
+
+    // ⚡⚡ LLAMADA SÍNCRONA — MISMO GESTO DEL USUARIO ⚡⚡
+    setTimeout(() => {
+      try { window.print(); }
+      catch(err){
+        console.error('print() falló:', err);
+        finalizarImpresion();
+        alert('❌ No se pudo abrir el diálogo de impresión.\n\n' + (err.message || ''));
+      }
+    }, 50);
+
+  } catch(err){
+    console.error('Error al preparar el informe:', err);
+    finalizarImpresion();
+    alert('❌ Error al preparar el informe:\n\n' + (err.message || 'desconocido'));
+  }
+};
+
+window.imprimirAlbumFotografico = function(){
+  try {
+    const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
+    if(!vCF.length){ alert('⚠️ No hay fotos registradas hoy.'); return; }
+    const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
+    const ahora=new Date();
+    const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const horaGen=ahora.toLocaleTimeString('es');
+    const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
+    const df = getFotosSync(ids);
+    const planas=[];
+    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
+    if(!planas.length){ alert('⚠️ No se pudieron cargar las fotos desde la caché. Recarga la página.'); return; }
+    const FPP=12; const totalP=Math.ceil(planas.length/FPP);
+    const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+    const hash=hashSync(JSON.stringify({u:usuario, t:planas.length, f:fechaLocalISO()}));
+    const tCens=planas.filter(p=>p.censurada).length;
+    let html=`<div class="reporte-diario">
+      ${generarEncabezadoCorporativo('Álbum Fotográfico · Evidencia de Entregas', codigoDoc)}
+      ${generarPanelAuditoria(hash, {'Total fotos':planas.length, 'Total páginas':totalP, 'Visitas con foto':vCF.length, 'Fotos censuradas':tCens})}
+      <header class="rd-header">
+        <h1>Álbum Fotográfico de Evidencias</h1>
+        <div class="rd-subtitle">Registro visual de entregas del día</div>
+        <div class="rd-info">
+          <div><strong>Mensajero:</strong> ${usuario}</div>
+          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
+          <div><strong>Generado:</strong> ${horaGen}</div>
+          <div><strong>Total fotos:</strong> ${planas.length}</div>
+          <div><strong>Páginas:</strong> ${totalP}</div>
+        </div>
+      </header>`;
+    for(let p=0;p<planas.length;p+=FPP){
+      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
+      html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div><div class="rd-album-grid">`;
+      fp.forEach(f=>{ const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ ${[f.rostros?`👤${f.rostros}`:'',f.vehiculos?`🚗${f.vehiculos}`:''].filter(Boolean).join(' ')}</span>`:''; html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}${cs}</div></div>`; });
+      html+=`</div></div>`;
+    }
+    html+=generarPieAuditoria()+'</div>';
+
+    prepararAreaImpresion(html, ['modo-album']);
+
+    setTimeout(() => {
+      try { window.print(); }
+      catch(err){ console.error('print() falló:', err); finalizarImpresion(); alert('❌ No se pudo imprimir: ' + (err.message||'')); }
+    }, 50);
+
+  } catch(err){
+    console.error('Error al preparar el álbum:', err);
+    finalizarImpresion();
+    alert('❌ Error al generar álbum:\n\n' + (err.message || 'desconocido'));
+  }
+};
+
+window.imprimirInformeMensual = function(){
+  try {
+    const ic=document.getElementById('informeContenedor');
+    if(!ic||!ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe mensual.'); return; }
+    const clon=ic.cloneNode(true);
+    const codigoDoc=`MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+    const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
+    const hash=hashSync(JSON.stringify({u:usuario, t:Date.now(), informe:clon.innerHTML.length}));
+    const wrap=document.createElement('div');
+    wrap.className='reporte-diario';
+    wrap.innerHTML=generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)+generarPanelAuditoria(hash)+clon.innerHTML+generarPieAuditoria();
+
+    let area=document.getElementById('areaImpresion');
+    if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
+    area.innerHTML='';
+    area.appendChild(wrap);
+    area.style.display='block';
+
+    _estabaDarkAlImprimir = document.body.classList.contains('dark');
+    if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching');
+    document.body.classList.add('modo-impresion','modo-reporte-diario');
+
+    setTimeout(() => {
+      try { window.print(); }
+      catch(err){ console.error('print() falló:', err); finalizarImpresion(); alert('❌ No se pudo imprimir: ' + (err.message||'')); }
+    }, 50);
+
+  } catch(err){
+    console.error('Error al preparar el informe mensual:', err);
+    finalizarImpresion();
+    alert('❌ Error al preparar la impresión:\n\n' + (err.message || 'desconocido'));
+  }
+};
 
 function generarEncabezadoCorporativo(tituloDoc, codigoDoc){
   const ahora=new Date();
@@ -2452,7 +2683,7 @@ function generarPanelAuditoria(hash, datosExtra={}){
       <div><strong>Plataforma:</strong> ${plataforma}</div>
       ${Object.entries(datosExtra).map(([k,v])=>`<div><strong>${k}:</strong> ${v}</div>`).join('')}
     </div>
-    <code class="rd-audit-hash"><strong>Hash SHA-256 de verificación:</strong> ${hash}</code>
+    <code class="rd-audit-hash"><strong>Hash de verificación:</strong> ${hash}</code>
   </div>`;
 }
 
@@ -2463,194 +2694,8 @@ function generarPieAuditoria(){
     <div class="rd-confidencial">Documento confidencial — Uso exclusivo interno y auditoría</div>
     <div>Generado por <strong>${u}</strong> el ${ahora.toLocaleString('es')}</div>
     <div>Este documento contiene información sujeta a reserva. Su reproducción no autorizada está prohibida.</div>
-    <div style="margin-top:4px;font-family:'Courier New',monospace;font-size:6pt;color:#999;">Verificación: consulte el hash SHA-256 en el panel de auditoría</div>
   </div>`;
 }
-
-window.imprimirReporteDiario = async function(){
-  if(!visitas.length){ if(!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return; }
-  const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
-  const ahora=new Date();
-  const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const horaGen=ahora.toLocaleTimeString('es');
-  const ent=contadores['Entregado']||0, noEnt=totalVisitas-ent;
-  const prom=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
-  const efec=totalVisitas>0?((ent/totalVisitas)*100).toFixed(1):'0.0';
-  const horas=Math.floor(totalMinutosVisitas/60), mins=totalMinutosVisitas%60;
-  const cUnicos=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean)).size;
-  const tFotos=visitas.reduce((s,v)=>s+(Array.isArray(v.fotos)?v.fotos.length:0),0);
-  const tCensuradas=visitas.reduce((s,v)=>s+((Array.isArray(v.fotos)?v.fotos:[]).filter(f=>f.censurada).length),0);
-  const chartEstados=generarChartEstadosHorizontal(820,520);
-  const chartDona=generarChartDona(500,520);
-  const iC=localStorage.getItem('tiempoBase_inicioCarga')||'—';
-  const fC=localStorage.getItem('tiempoBase_finCarga')||'—';
-  const sE=localStorage.getItem('tiempoBase_salidaEmpresa')||'—';
-  const pE=localStorage.getItem('tiempoBase_primeraEntrega')||'—';
-  const minC=(iC!=='—'&&fC!=='—')?calcularMinutos(iC,fC):0;
-  const minP=(fC!=='—'&&sE!=='—')?calcularMinutos(fC,sE):0;
-  const minV=(sE!=='—'&&pE!=='—')?calcularMinutos(sE,pE):0;
-  const minT=(iC!=='—'&&pE!=='—')?calcularMinutos(iC,pE):0;
-  const codigoDoc=`RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-  const payloadHash = JSON.stringify({u:usuario, f:fechaLocalISO(), v:visitas.map(v=>({l:v.llegada,s:v.salida,c:v.codigo,e:v.estado})), t:totalVisitas, m:totalMinutosVisitas});
-  const hash = await sha256(payloadHash);
-  let html=`
-    <div class="reporte-diario">
-      ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
-      ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos, 'Fotos censuradas':tCensuradas})}
-      <header class="rd-header">
-        <h1>Reporte Diario de Entregas</h1>
-        <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
-        <div class="rd-info">
-          <div><strong>Mensajero:</strong> ${usuario}</div>
-          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
-          <div><strong>Generado:</strong> ${horaGen}</div>
-        </div>
-      </header>
-      <section class="rd-kpis">
-        <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
-        <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entregados</div><div class="rd-kpi-valor">${noEnt}</div></div>
-        <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total Visitas</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
-        <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efectividad</div><div class="rd-kpi-valor">${efec}%</div></div>
-        <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
-        <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo Total</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
-        <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Códigos Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
-        <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
-      </section>
-      <section class="rd-charts">
-        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
-        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
-      </section>
-      <section class="rd-tiempos">
-        <h3 class="rd-section-title">⏱️ Tiempos Base del Día</h3>
-        <table class="rd-tabla-tiempos">
-          <tr><td><strong>Inicio carga</strong><br>${iC}</td><td><strong>Fin carga</strong><br>${fC}</td><td><strong>Salida empresa</strong><br>${sE}</td><td><strong>Primera entrega</strong><br>${pE}</td></tr>
-          <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
-        </table>
-      </section>`;
-  const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
-  if(eCV.length){
-    html+=`<section class="rd-estados"><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla rd-tabla-estados"><thead><tr><th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th></tr></thead><tbody>`;
-    eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); html+=`<tr><td style="text-align:left;">${k}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td><div style="background:#e8e8ed;border-radius:2px;overflow:hidden;height:9px;"><div style="background:#0a84ff;height:100%;width:${bw}%;"></div></div></td></tr>`; });
-    html+=`<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>100%</strong></td><td></td></tr></tbody></table></section>`;
-  }
-  html+=`<section class="rd-visitas"><h3 class="rd-section-title">📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:4%">#</th><th style="width:8%">Llegada</th><th style="width:8%">Salida</th><th style="width:7%">Tiempo</th><th style="width:15%">Código</th><th style="width:18%">Estado</th><th style="width:5%">📸</th><th>Descripción</th></tr></thead><tbody>`;
-  if(!visitas.length){ html+=`<tr><td colspan="8" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas registradas</td></tr>`; }
-  else{
-    visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; const nCens=(v.fotos||[]).filter(f=>f.censurada).length; html+=`<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`; });
-    html+=`<tr class="rd-total"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${tFotos} foto(s)${tCensuradas?` · ${tCensuradas} censurada(s)`:''}</strong></td></tr>`;
-  }
-  html+=`</tbody></table></section>`;
-  if(bancoCodigos.length){
-    const us=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean));
-    const uc=bancoCodigos.filter(c=>us.has(c)).length, disp=bancoCodigos.length-uc;
-    html+=`<section class="rd-banco"><h3 class="rd-section-title">📥 Resumen del Banco de Códigos</h3><table class="rd-tabla-tiempos"><tr><td><strong>Total en banco</strong><br>${bancoCodigos.length}</td><td><strong>✓ Usados</strong><br>${uc}</td><td><strong>⏳ Disponibles</strong><br>${disp}</td><td><strong>📦 Únicos visitados</strong><br>${cUnicos}</td></tr></table></section>`;
-  }
-  const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
-  if(vCF.length){
-    const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
-    const df=await obtenerFotosDB(ids);
-    const planas=[];
-    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
-    const FPP=25; const totalP=Math.ceil(planas.length/FPP);
-    html+=`<section class="rd-fotos-section"><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''}${tCensuradas?` · ${tCensuradas} con censura`:''})</h3><p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
-    for(let p=0;p<planas.length;p+=FPP){
-      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP} (fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length})</div><div class="rd-fotos-grid">`;
-      fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${f.codigo}</span>`:'Sin código'}${cs}</div></div>`; });
-      html+=`</div></div>`;
-    }
-    html+=`</section>`;
-  }
-  html+=`<section class="rd-firmas">
-    <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero responsable</div><div class="rd-firma-nombre">${usuario}</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
-    <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor de operaciones</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
-    <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor / Revisor</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
-  </section>
-  ${generarPieAuditoria()}</div>`;
-  let area=document.getElementById('areaImpresion');
-  if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
-  area.style.display='block';
-  area.innerHTML=html;
-  const estabaDark=document.body.classList.contains('dark');
-  if(estabaDark) document.body.classList.add('theme-switching');
-  document.body.classList.add('modo-impresion','modo-reporte-diario');
-  await esperarImagenesCargadas(area);
-  await new Promise(r=>setTimeout(r,400));
-  await imprimirYLimpiar(area, [], estabaDark);
-};
-
-window.imprimirAlbumFotografico = async function(){
-  try{
-    const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
-    if(!vCF.length){ alert('⚠️ No hay fotos registradas hoy.'); return; }
-    const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
-    const ahora=new Date();
-    const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-    const horaGen=ahora.toLocaleTimeString('es');
-    const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
-    const df=await obtenerFotosDB(ids);
-    const planas=[];
-    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
-    if(!planas.length){ alert('⚠️ No se pudieron cargar las fotos.'); return; }
-    const FPP=12; const totalP=Math.ceil(planas.length/FPP);
-    const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-    const hash=await sha256(JSON.stringify({u:usuario, t:planas.length, f:fechaLocalISO()}));
-    const tCens=planas.filter(p=>p.censurada).length;
-    let html=`<div class="reporte-diario">
-      ${generarEncabezadoCorporativo('Álbum Fotográfico · Evidencia de Entregas', codigoDoc)}
-      ${generarPanelAuditoria(hash, {'Total fotos':planas.length, 'Total páginas':totalP, 'Visitas con foto':vCF.length, 'Fotos censuradas':tCens})}
-      <header class="rd-header">
-        <h1>Álbum Fotográfico de Evidencias</h1>
-        <div class="rd-subtitle">Registro visual de entregas del día</div>
-        <div class="rd-info">
-          <div><strong>Mensajero:</strong> ${usuario}</div>
-          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
-          <div><strong>Generado:</strong> ${horaGen}</div>
-          <div><strong>Total fotos:</strong> ${planas.length}</div>
-          <div><strong>Páginas:</strong> ${totalP}</div>
-        </div>
-      </header>`;
-    for(let p=0;p<planas.length;p+=FPP){
-      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div><div class="rd-album-grid">`;
-      fp.forEach(f=>{ const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ ${[f.rostros?`👤${f.rostros}`:'',f.vehiculos?`🚗${f.vehiculos}`:''].filter(Boolean).join(' ')}</span>`:''; html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}${cs}</div></div>`; });
-      html+=`</div></div>`;
-    }
-    html+=generarPieAuditoria()+'</div>';
-    let area=document.getElementById('areaImpresion');
-    if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
-    area.style.display='block';
-    area.innerHTML=html;
-    const estabaDark=document.body.classList.contains('dark');
-    if(estabaDark) document.body.classList.add('theme-switching');
-    document.body.classList.add('modo-impresion','modo-reporte-diario','modo-album');
-    await esperarImagenesCargadas(area);
-    await new Promise(r=>setTimeout(r,400));
-    await imprimirYLimpiar(area, ['modo-album'], estabaDark);
-  }catch(err){ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album'); alert('❌ Error al generar álbum: '+err.message); }
-};
-
-window.imprimirInformeMensual = async ()=>{
-  const ic=document.getElementById('informeContenedor');
-  if(!ic||!ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe mensual.'); return; }
-  const clon=ic.cloneNode(true);
-  let area=document.getElementById('areaImpresion');
-  if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
-  area.style.display='block';
-  area.innerHTML='';
-  const wrap=document.createElement('div'); wrap.className='reporte-diario';
-  const codigoDoc=`MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-  const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
-  const hash=await sha256(JSON.stringify({u:usuario, t:Date.now(), informe:clon.innerHTML.length}));
-  wrap.innerHTML=generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)+generarPanelAuditoria(hash)+clon.innerHTML+generarPieAuditoria();
-  area.appendChild(wrap);
-  const estabaDark=document.body.classList.contains('dark');
-  if(estabaDark) document.body.classList.add('theme-switching');
-  document.body.classList.add('modo-impresion','modo-reporte-diario');
-  await esperarImagenesCargadas(area);
-  await new Promise(r=>setTimeout(r,300));
-  await imprimirYLimpiar(area, [], estabaDark);
-};
 
 function construirTextoDia(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
@@ -2723,9 +2768,6 @@ async function crearObjetoRespaldo(){
   return obj;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   🔐 BASE64 MODERNO (UTF-8 seguro, maneja payloads grandes)
-   ═══════════════════════════════════════════════════════════════ */
 function b64EncodeUnicode(str){
   try{
     const bytes = new TextEncoder().encode(str);
@@ -2746,11 +2788,6 @@ function b64DecodeUnicode(str){
   }catch(e){ console.error('b64DecodeUnicode error:', e); return ''; }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// EXPORTACIÓN DE RESPALDO ROBUSTA (.doc + .json)
-// Payload en UNA SOLA LÍNEA con marcadores v2 inconfundibles.
-// Además descarga un .json puro (infalible al re-importar).
-// ═══════════════════════════════════════════════════════════════
 window.descargarRespaldoWord = async function(){
   mostrarAviso('⏳ Preparando respaldo...','ok');
   const r = await crearObjetoRespaldo();
@@ -2780,19 +2817,15 @@ window.descargarRespaldoWord = async function(){
   h += `<h1>📦 Respaldo Completo Colserlog</h1>`;
   h += `<h2>👤 Mensajero: ${u}</h2>`;
   h += `<div class="header-info">Respaldo generado el ${fB}</div>`;
-
   h += `<div style="margin:8px 0 16px 0;padding:8px;border:2px dashed #c0392b;background:#fff8f8;">`;
   h += `<p style="text-align:center;font-size:9pt;color:#c0392b;font-weight:bold;margin:0 0 4px 0;">⚠️ NO MODIFICAR ESTA SECCIÓN — Datos del respaldo</p>`;
   h += `<p style="text-align:center;font-size:7pt;color:#666;margin:0 0 6px 0;">Si mueves o borras esta línea, el respaldo no se podrá importar.</p>`;
   h += `<p style="word-break:break-all;font-family:'Courier New',monospace;font-size:5pt;color:#333;text-align:left;margin:0;line-height:1.1;">`;
   h += `${PAYLOAD_START}${b64}${PAYLOAD_END}`;
   h += `</p></div>`;
-
   h += `<h3>⏱️ Tiempos Base del Día</h3>`;
   h += `<table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
-
   h += `<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
-
   h += `<h3>📥 Banco de Códigos (${banco.length})</h3>`;
   if(!banco.length) h += `<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
   else {
@@ -2801,7 +2834,6 @@ window.descargarRespaldoWord = async function(){
     banco.forEach((c,i) => { h += `<tr><td>${i+1}</td><td>${c}</td><td>${us.has(c)?'✓ Usado':'Disponible'}</td></tr>`; });
     h += `</tbody></table>`;
   }
-
   h += `<h3>📋 Visitas Registradas (${lv.length})</h3>`;
   if(!lv.length) h += `<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
   else {
@@ -2809,12 +2841,10 @@ window.descargarRespaldoWord = async function(){
     lv.forEach((v,i) => { h += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
     h += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`;
   }
-
   if(r.fotosIndexedDB && r.fotosIndexedDB.length){
     const nC = r.fotosIndexedDB.filter(f => f.censurada).length;
     h += `<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s)${nC?` · ${nC} censurada(s) con 🛡️`:''}.</em></p>`;
   }
-
   h += `<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   Object.keys(cR).forEach(k => {
     const c = cR[k]||0; if(!c) return;
@@ -2822,7 +2852,6 @@ window.descargarRespaldoWord = async function(){
     h += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
   });
   h += `</tbody></table>`;
-
   if(fH.length){
     h += `<h3>📅 Historial (${fH.length})</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
     fH.forEach(f => {
@@ -2832,10 +2861,8 @@ window.descargarRespaldoWord = async function(){
     });
     h += `</tbody></table>`;
   }
-
   const nombreBase = `Colserlog_Respaldo_${u.replace(/\s+/g,'-').toLowerCase()}_${fA}`;
   descargarWord(`${nombreBase}.doc`, h);
-
   if(confirm('✅ Respaldo .doc descargado.\n\n💡 ¿Quieres descargar también el archivo .json puro?\n(Es MUCHO más confiable para volver a importar y no se corrompe en Word)')){
     descargarJSON(`${nombreBase}.json`, json);
   }
@@ -2853,38 +2880,14 @@ function descargarJSON(nombre, jsonStr){
   } catch(e){ console.error('descargarJSON error:', e); alert('⚠️ No se pudo descargar el JSON: ' + e.message); }
 }
 window.descargarJSON = descargarJSON;
-
 window.descargarRespaldoLocal = ()=>window.descargarRespaldoWord();
 
 function extraerCodigosDeTexto(t){ const c=new Set(); const re=/(?:^|[^\d])(\d{12})(?!\d)/g; let m; while((m=re.exec(t))!==null) c.add(m[1]); return Array.from(c); }
 
-// ═══════════════════════════════════════════════════════════════
-// LECTOR ROBUSTO MULTI-FORMATO DE PAYLOAD
-// Soporta: v2, v1 legacy, con/sin HTML, con entidades, BOM,
-// base64 multilínea y fallback heurístico.
-// ═══════════════════════════════════════════════════════════════
 function extraerPayloadBase64(t){
   if(!t || typeof t !== 'string') return null;
-
-  let txt = t
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&#160;/g, ' ')
-    .replace(/&#xA0;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&lt;/gi, '<')
-    .replace(/&gt;/gi, '>')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/\uFEFF/g, '')
-    .replace(/\u200B/g, '')
-    .replace(/\u00A0/g, ' ');
-
-  const pares = [
-    ['==COLSERLOG-PAYLOAD-BEGIN-v2==', '==COLSERLOG-PAYLOAD-END-v2=='],
-    ['---COLSERLOG-DATA-START---',     '---COLSERLOG-DATA-END---'],
-    ['COLSERLOG-PAYLOAD-BEGIN',        'COLSERLOG-PAYLOAD-END']
-  ];
-
+  let txt = t.replace(/&nbsp;/gi, ' ').replace(/&#160;/g, ' ').replace(/&#xA0;/gi, ' ').replace(/&amp;/gi, '&').replace(/&lt;/gi, '<').replace(/&gt;/gi, '>').replace(/&quot;/gi, '"').replace(/&#39;/gi, "'").replace(/\uFEFF/g, '').replace(/\u200B/g, '').replace(/\u00A0/g, ' ');
+  const pares = [['==COLSERLOG-PAYLOAD-BEGIN-v2==','==COLSERLOG-PAYLOAD-END-v2=='],['---COLSERLOG-DATA-START---','---COLSERLOG-DATA-END---'],['COLSERLOG-PAYLOAD-BEGIN','COLSERLOG-PAYLOAD-END']];
   let raw = null;
   for(const [ini, fin] of pares){
     const idx1 = txt.indexOf(ini);
@@ -2894,44 +2897,25 @@ function extraerPayloadBase64(t){
     raw = txt.substring(idx1 + ini.length, idx2);
     break;
   }
-
   if(raw === null){
     const match = txt.match(/([A-Za-z0-9+/=]{2000,})/);
     if(!match) return null;
     raw = match[1];
-    console.warn('⚠️ Payload encontrado por heurística (sin marcadores). Puede ser menos fiable.');
   }
-
-  raw = raw
-    .replace(/<[^>]*>/g, '')
-    .replace(/[\s\r\n\t]+/g, '')
-    .replace(/[^A-Za-z0-9+/=]/g, '');
-
-  if(!raw || raw.length < 20){
-    console.warn('extraerPayloadBase64: payload demasiado corto tras limpieza:', raw ? raw.length : 0);
-    return null;
-  }
-
+  raw = raw.replace(/<[^>]*>/g, '').replace(/[\s\r\n\t]+/g, '').replace(/[^A-Za-z0-9+/=]/g, '');
+  if(!raw || raw.length < 20) return null;
   const rem = raw.length % 4;
   if(rem === 1){ raw = raw.slice(0, -1); }
   else if(rem === 2){ raw += '=='; }
   else if(rem === 3){ raw += '='; }
-
   try {
     const json = b64DecodeUnicode(raw);
     if(!json){ return null; }
     const obj = JSON.parse(json);
     if(!obj || typeof obj !== 'object'){ return null; }
-    if(!('estadoSesion' in obj) && !('entregasDiariasDetallado' in obj) && !('usuario' in obj)){
-      console.warn('Payload decodificó pero no parece un respaldo Colserlog:', Object.keys(obj));
-      return null;
-    }
-    console.log('✅ Payload COLSERLOG decodificado. Versión:', obj.version || '—', 'Usuario:', obj.usuario || '—');
+    if(!('estadoSesion' in obj) && !('entregasDiariasDetallado' in obj) && !('usuario' in obj)){ return null; }
     return obj;
-  } catch(e){
-    console.warn('extraerPayloadBase64 → fallo al decodificar/parsear:', e.message);
-    return null;
-  }
+  } catch(e){ return null; }
 }
 
 async function aplicarRespaldo(r){
@@ -2954,9 +2938,6 @@ function extraerImagenesDeDocHTML(t){ const im=[]; const re=/<img[^>]+src=["'](d
 async function extraerTextoPlanoDeDocx(file){ if(!window.JSZip) return ''; try{ const z=await JSZip.loadAsync(file); const dx=z.file('word/document.xml'); if(!dx) return ''; const x=await dx.async('string'); return x.replace(/<[^>]+>/g,''); }catch(e){ return ''; } }
 async function decodificarCodigosDeImagenes(im,onP){ if(!window.ZXing||!im.length) return []; const cs=new Set(); let r; try{ r=new ZXing.BrowserMultiFormatReader(); }catch(e){ return []; } for(let i=0;i<im.length;i++){ const it=im[i]; if(onP) onP(i+1,im.length,it.nombre); try{ const el=await new Promise((res,rej)=>{ const e=new Image(); e.onload=()=>res(e); e.onerror=rej; e.src=it.dataUrl; }); const res=await r.decodeFromImageElement(el); const n=String(res.getText()||'').replace(/\D/g,''); if(n.length===12&&/^\d{12}$/.test(n)) cs.add(n); }catch(e){} if(i%3===2) await new Promise(rr=>setTimeout(rr,25)); } try{ r.reset(); }catch(e){} return Array.from(cs); }
 
-// ═══════════════════════════════════════════════════════════════
-// Detectores de tipo de archivo por magic bytes
-// ═══════════════════════════════════════════════════════════════
 function detectarTipoArchivo(bytes){
   if(!bytes || bytes.length < 8) return 'desconocido';
   if(bytes[0] === 0x50 && bytes[1] === 0x4B && bytes[2] === 0x03 && bytes[3] === 0x04) return 'zip';
@@ -2972,19 +2953,11 @@ function extraerTextoDeOLE2(bytes){
   try {
     let latin1 = '';
     const CH = 0x8000;
-    for(let i = 0; i < bytes.length; i += CH){
-      latin1 += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length)));
-    }
+    for(let i = 0; i < bytes.length; i += CH){ latin1 += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length))); }
     const out = [latin1];
-    try {
-      const utf16 = new TextDecoder('utf-16le', { fatal: false }).decode(bytes);
-      out.push(utf16);
-    } catch(e){}
+    try { const utf16 = new TextDecoder('utf-16le', { fatal: false }).decode(bytes); out.push(utf16); } catch(e){}
     return out.join('\n\n');
-  } catch(e){
-    console.warn('extraerTextoDeOLE2 falló:', e);
-    return '';
-  }
+  } catch(e){ return ''; }
 }
 function extraerTextoDeRTF(txt){
   if(!txt) return '';
@@ -3001,162 +2974,91 @@ function bytesATexto(bytes, tipo){
     if(tipo === 'utf8-bom') return new TextDecoder('utf-8').decode(bytes);
     return new TextDecoder('utf-8', { fatal: false }).decode(bytes);
   } catch(e){
-    let s = '';
-    const CH = 0x8000;
-    for(let i = 0; i < bytes.length; i += CH){
-      s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length)));
-    }
+    let s = ''; const CH = 0x8000;
+    for(let i = 0; i < bytes.length; i += CH){ s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(i+CH, bytes.length))); }
     return s;
   }
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Importador principal robusto multi-formato con logs
-// ═══════════════════════════════════════════════════════════════
 window.cargarRespaldoDesdeArchivo = async function(event){
   const file = event.target.files && event.target.files[0];
-  if(!file){ console.warn('⚠️ No se seleccionó archivo'); return; }
-
+  if(!file){ return; }
   console.group('📂 IMPORTAR RESPALDO');
-  console.log('📄 Nombre:', file.name);
-  console.log('📦 Tamaño:', (file.size/1024).toFixed(1), 'KB');
-  console.log('🏷️ MIME:', file.type || '(vacío)');
-
+  console.log('📄 Nombre:', file.name, '· Tamaño:', (file.size/1024).toFixed(1), 'KB');
   mostrarAviso('⏳ Analizando archivo...','ok');
-
   try {
     const bytes = new Uint8Array(await file.arrayBuffer());
     const tipo = detectarTipoArchivo(bytes);
-    console.log('🔍 Tipo detectado por magic bytes:', tipo);
-
+    console.log('🔍 Tipo detectado:', tipo);
     let texto = '';
     let payload = null;
 
     if(tipo === 'zip'){
-      console.log('→ Procesando como .docx (ZIP)…');
-      if(!window.JSZip){
-        alert('⚠️ Este archivo es un .docx real pero falta la librería JSZip. Recarga la página.');
-        return;
-      }
+      if(!window.JSZip){ alert('⚠️ Falta la librería JSZip. Recarga la página.'); return; }
       try {
         const z = await JSZip.loadAsync(file);
         const candidatos = Object.keys(z.files).filter(n => /^word\/.*\.xml$/i.test(n));
-        console.log('→ XMLs en el docx:', candidatos);
         for(const nombre of candidatos){
           const xml = await z.file(nombre).async('string');
           payload = extraerPayloadBase64(xml);
-          if(payload) { console.log('✅ Payload encontrado en', nombre); break; }
+          if(payload) break;
         }
         if(!payload){
-          console.log('→ Buscando payload en TODOS los archivos del ZIP…');
           for(const n of Object.keys(z.files)){
             const f = z.files[n]; if(f.dir) continue;
-            try {
-              const content = await f.async('string');
-              payload = extraerPayloadBase64(content);
-              if(payload){ console.log('✅ Payload en', n); break; }
-            } catch(e){}
+            try { const content = await f.async('string'); payload = extraerPayloadBase64(content); if(payload) break; } catch(e){}
           }
         }
-      } catch(e){
-        console.warn('Fallo procesando ZIP:', e);
-      }
+      } catch(e){ console.warn('ZIP fallo:', e); }
     }
-    else if(tipo === 'ole2'){
-      console.log('→ Procesando como .doc binario (OLE2)…');
-      texto = extraerTextoDeOLE2(bytes);
-      payload = extraerPayloadBase64(texto);
-    }
-    else if(tipo === 'rtf'){
-      console.log('→ Procesando como RTF…');
-      texto = bytesATexto(bytes, 'texto');
-      texto = extraerTextoDeRTF(texto);
-      payload = extraerPayloadBase64(texto);
-    }
+    else if(tipo === 'ole2'){ texto = extraerTextoDeOLE2(bytes); payload = extraerPayloadBase64(texto); }
+    else if(tipo === 'rtf'){ texto = bytesATexto(bytes, 'texto'); texto = extraerTextoDeRTF(texto); payload = extraerPayloadBase64(texto); }
     else {
-      console.log('→ Procesando como texto/HTML/JSON…');
       texto = bytesATexto(bytes, tipo);
-
       const trimmed = texto.replace(/^\uFEFF/, '').trim();
       if(trimmed.startsWith('{')){
         try {
           const jp = JSON.parse(trimmed);
-          if(jp && (jp.entregasDiariasDetallado || jp.estadoSesion || jp.usuario)){
-            console.log('✅ JSON puro detectado');
-            payload = jp;
-          }
-        } catch(e){ console.log('→ No es JSON puro:', e.message); }
+          if(jp && (jp.entregasDiariasDetallado || jp.estadoSesion || jp.usuario)){ payload = jp; }
+        } catch(e){}
       }
-
-      if(!payload){
-        payload = extraerPayloadBase64(texto);
-      }
+      if(!payload) payload = extraerPayloadBase64(texto);
     }
 
     if(payload){
-      console.log('🎯 Payload válido. Aplicando…');
       const ok = await aplicarRespaldo(payload);
       if(ok){
-        console.log('✅ Respaldo aplicado. Recargando UI…');
         try { if(typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage(); } catch(e){}
         alert('✅ Respaldo restaurado correctamente.\n\nLa página se recargará para mostrar los datos.');
         setTimeout(() => location.reload(), 500);
         return;
-      } else {
-        console.warn('⚠️ aplicarRespaldo devolvió false (usuario canceló)');
-        mostrarAviso('⚠️ Importación cancelada','error');
-        return;
-      }
+      } else { mostrarAviso('⚠️ Importación cancelada','error'); return; }
     }
 
-    console.warn('❌ No se encontró payload COLSERLOG estructurado');
     if(!texto && tipo !== 'zip'){
-      alert('❌ No se pudo leer el archivo.\n\nTipo detectado: ' + tipo + '\n\nSi el archivo es un Word, intenta exportarlo de nuevo desde Colserlog y NO lo abras/guardes en Word antes de importarlo.');
+      alert('❌ No se pudo leer el archivo.\n\nTipo detectado: ' + tipo);
       return;
     }
-
     const cT = texto ? extraerCodigosDeTexto(texto) : [];
     let im = [];
-    if(tipo === 'zip' && window.JSZip){
-      try { im = await extraerImagenesDeDocx(file); } catch(e){}
-    } else if(texto){
-      im = extraerImagenesDeDocHTML(texto);
-    }
+    if(tipo === 'zip' && window.JSZip){ try { im = await extraerImagenesDeDocx(file); } catch(e){} }
+    else if(texto){ im = extraerImagenesDeDocHTML(texto); }
     let cI = [];
-    if(im.length && window.ZXing){
-      mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok');
-      cI = await decodificarCodigosDeImagenes(im, (a,t,n) => mostrarAviso(`🔍 ${a}/${t}`,'ok'));
-    }
-    const s = new Set();
-    cT.forEach(c => s.add(c));
-    cI.forEach(c => s.add(c));
+    if(im.length && window.ZXing){ mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok'); cI = await decodificarCodigosDeImagenes(im, (a,t,n) => mostrarAviso(`🔍 ${a}/${t}`,'ok')); }
+    const s = new Set(); cT.forEach(c => s.add(c)); cI.forEach(c => s.add(c));
     const cs = Array.from(s);
-
     if(!cs.length){
-      alert('❌ No se encontraron datos de respaldo COLSERLOG en el archivo.\n\n' +
-            '📋 Diagnóstico:\n' +
-            '• Tipo detectado: ' + tipo + '\n' +
-            '• Archivo: ' + file.name + '\n' +
-            '• Tamaño: ' + (file.size/1024).toFixed(1) + ' KB\n\n' +
-            '💡 Recomendación:\n' +
-            'Vuelve a exportar desde Colserlog y descarga el archivo .json (opción "JSON puro").\n' +
-            'Ese formato NO se corrompe al abrir/guardar en Word.');
+      alert('❌ No se encontraron datos de respaldo COLSERLOG en el archivo.\n\n💡 Recomendación: exporta y usa el archivo .json.');
       return;
     }
-
-    let mR = `📥 ${cs.length} código(s) encontrados:\n\n`;
-    if(cT.length) mR += `• ${cT.length} en texto\n`;
-    if(cI.length) mR += `• ${cI.length} en imágenes\n`;
-    mR += `\n¿Cargar al banco de códigos?`;
-    if(!confirm(mR)) return;
+    if(!confirm(`📥 ${cs.length} código(s) encontrados. ¿Cargar al banco?`)) return;
     const {agregados, yaEstaban} = cargarCodigosAlBanco(cs);
     let mF = `✅ ${agregados} agregado(s).`;
     if(yaEstaban > 0) mF += `\n⚠️ ${yaEstaban} ya estaban.`;
     alert(mF);
-
   } catch(e){
-    console.error('❌ Error al procesar el archivo:', e);
-    alert('❌ Error al procesar el archivo:\n\n' + e.message + '\n\nRevisa la consola (F12) para más detalles.');
+    console.error('Error:', e);
+    alert('❌ Error al procesar: ' + e.message);
   } finally {
     console.groupEnd();
     event.target.value = '';
@@ -3171,7 +3073,7 @@ function descargarWord(nombre,html){
   document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),5000);
 }
 
-window.exportarDiaAWord = async function(){
+window.exportarDiaAWord = function(){
   if(!visitas.length){ alert('No hay visitas hoy.'); return; }
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const e=contadores['Entregado']||0, n=totalVisitas-e;
@@ -3184,7 +3086,7 @@ window.exportarDiaAWord = async function(){
   h+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>`;
   const vcw=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
   if(vcw.length){
-    const ids=[]; vcw.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); }); const df=await obtenerFotosDB(ids);
+    const ids=[]; vcw.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); }); const df = getFotosSync(ids);
     const tot=vcw.reduce((s,v)=>s+v.fotos.length,0);
     h+=`<h3>📸 Evidencia Fotográfica (${tot})</h3><table><thead><tr><th style="width:8%">#</th><th style="width:15%">Visita</th><th style="width:20%">Código</th><th style="width:22%">Estado</th><th>Foto</th></tr></thead><tbody>`;
     vcw.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,i)=>{ const d=df[foto.id]; if(!d) return; const cs=foto.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; h+=`<tr><td>${i+1}</td><td>#${nv}</td><td style="font-family:monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="font-size:7pt;">${v.estado||'—'}${cs}</td><td><img src="${d}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td></tr>`; }); });
@@ -3231,7 +3133,7 @@ window.verEstadoAlmacenamiento = async function(){
   const nC=todas.filter(f=>f.censurada).length;
   let lS=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i), v=localStorage.getItem(k); lS+=(k.length+(v?.length||0)); } }catch(e){}
   let est; if(navigator.storage && navigator.storage.estimate){ try{ est=await navigator.storage.estimate(); }catch(e){} }
-  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   ├─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
+  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   ├─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n   ├─ Censuradas: ${nC}\n   └─ Cache en memoria: ${cacheFotos.size}\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
   if(est) m+=`🌐 Navegador:\n   ├─ Usado: ${(est.usage/1024/1024).toFixed(2)} MB\n   └─ Cuota: ${(est.quota/1024/1024).toFixed(0)} MB\n`;
   m+=`\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}`;
   alert(m);
@@ -3250,6 +3152,7 @@ window.vaciarTodasLasFotos = async function(){
   const t=await contarFotosDB(); if(!t){ alert('ℹ️ No hay fotos.'); return; }
   if(!confirm(`⚠️ Se eliminarán TODAS las ${t} fotos.`)) return;
   const todas=await obtenerTodasLasFotosDB(); await eliminarFotosMultiples(todas.map(f=>f.id));
+  cacheFotos.clear();
   alert('✅ Todas las fotos eliminadas');
 };
 
@@ -3355,7 +3258,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -3373,7 +3276,6 @@ document.addEventListener('input', (e) => {
   }
 });
 
-// FIX #5: Sincronización inicial ANTES de que el módulo 1 decida mostrar modal
 window.addEventListener('load', async ()=>{
   try {
     sincronizarFotosNube = (localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true');
@@ -3383,6 +3285,10 @@ window.addEventListener('load', async ()=>{
   } catch(e){}
 
   try{ await abrirFotosDB(); console.log('✅ IndexedDB listo'); }catch(e){ console.warn('IndexedDB:', e); }
+
+  // ⚡ PRECARGAR FOTOS EN CACHÉ para poder imprimir de forma SÍNCRONA
+  try { await precargarFotosEnCache(); } catch(e){ console.warn('precargarFotos:', e); }
+
   const ta=document.getElementById('toggleAutoCensura'); if(ta) ta.checked=autoCensuraActiva;
   cargarTiemposBase();
   if(cargarEstadoCompleto() && visitas.length){ renderizarTabla(); actualizarDashboard(); }
