@@ -408,37 +408,37 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
   </div>
   <div class="acciones-bar">
     <span id="indicadorGuardado">✓ Guardado</span>
-    <button class="btn-darkmode" onclick="toggleDarkMode()" id="btnDarkMode" title="Modo oscuro">🌙</button>
-    <button class="btn-pwa" onclick="instalarPWA()" id="btnInstalarPWA" style="display:none;" title="Instalar app">📲</button>
-    <button class="btn-logout" onclick="cerrarSesion()" id="btnCerrarSesion" title="Cerrar sesión" style="display:none;">🚪</button>
+    <button type="button" class="btn-darkmode" onclick="toggleDarkMode()" id="btnDarkMode" title="Modo oscuro">🌙</button>
+    <button type="button" class="btn-pwa" onclick="instalarPWA()" id="btnInstalarPWA" style="display:none;" title="Instalar app">📲</button>
+    <button type="button" class="btn-logout" onclick="cerrarSesion()" id="btnCerrarSesion" title="Cerrar sesión" style="display:none;">🚪</button>
   </div>
 </div>
 
-<div id="modalPWA"><div class="pwa-content"><div class="pwa-icon">📲</div><h3>Instalar Colserlog</h3><div id="pwaInstrucciones"></div><button onclick="document.getElementById('modalPWA').classList.remove('visible')">Entendido</button></div></div>
+<div id="modalPWA"><div class="pwa-content"><div class="pwa-icon">📲</div><h3>Instalar Colserlog</h3><div id="pwaInstrucciones"></div><button type="button" onclick="document.getElementById('modalPWA').classList.remove('visible')">Entendido</button></div></div>
 
 <div id="modalUsuario">
   <div class="modal-content">
     <h2 id="tituloModalUser">👤 Bienvenido</h2>
     <p id="subtituloModalUser">Inicia sesión o regístrate para guardar tus visitas.</p>
     <div class="tabs-user">
-      <button id="tabLogin" class="activo" onclick="cambiarTabUser('login')">🔑 Iniciar sesión</button>
-      <button id="tabRegistro" onclick="cambiarTabUser('registro')">✨ Registrarse</button>
+      <button type="button" id="tabLogin" class="activo" onclick="cambiarTabUser('login')">🔑 Iniciar sesión</button>
+      <button type="button" id="tabRegistro" onclick="cambiarTabUser('registro')">✨ Registrarse</button>
     </div>
     <div id="formLogin">
       <input type="text" id="loginNombre" placeholder="Usuario" maxlength="40" autocomplete="username">
       <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="current-password">
-      <button onclick="hacerLogin()">🔓 Entrar</button>
+      <button type="button" onclick="hacerLogin()">🔓 Entrar</button>
     </div>
     <div id="formRegistro" style="display:none;">
       <input type="text" id="regNombre" placeholder="Nombre de usuario (mín. 3)" maxlength="40" autocomplete="username">
       <input type="password" id="regPassword" placeholder="Contraseña (mín. 4 caracteres)" autocomplete="new-password">
       <input type="password" id="regPassword2" placeholder="Repetir contraseña" autocomplete="new-password">
-      <button onclick="hacerRegistro()">✨ Crear cuenta</button>
+      <button type="button" onclick="hacerRegistro()">✨ Crear cuenta</button>
     </div>
     <div id="msjErrorUser" class="msj-error-user"></div>
     <div id="msjInfoUser" class="msj-info-user"></div>
     <div id="listaUsuariosGuardados"></div>
-    <button class="secundario" onclick="olvidarUsuariosLocales()" style="margin-top:15px;font-size:.8em;">🗑️ Olvidar usuarios de este dispositivo</button>
+    <button type="button" class="secundario" onclick="olvidarUsuariosLocales()" style="margin-top:15px;font-size:.8em;">🗑️ Olvidar usuarios de este dispositivo</button>
   </div>
 </div>
 
@@ -455,12 +455,12 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 
 <div id="modalFoto" class="modal-foto">
   <div class="modal-foto-content">
-    <button class="modal-foto-cerrar" onclick="cerrarModalFoto()">✕</button>
+    <button type="button" class="modal-foto-cerrar" onclick="cerrarModalFoto()">✕</button>
     <img id="modalFotoImg" src="" alt="Foto de evidencia">
     <div class="modal-foto-nav">
-      <button onclick="navegarFoto(-1)">◀</button>
+      <button type="button" onclick="navegarFoto(-1)">◀</button>
       <span id="modalFotoContador">1 / 1</span>
-      <button onclick="navegarFoto(1)">▶</button>
+      <button type="button" onclick="navegarFoto(1)">▶</button>
     </div>
     <a id="modalFotoDescargar" class="btn-descargar-foto" download>💾 Descargar</a>
   </div>
@@ -511,14 +511,14 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
   <h1>📦 Reporte Diario de Ruta · Colserlog</h1>
 
   <nav class="tabs-nav" id="tabsNav">
-    <button class="tab-btn active" data-tab="inicio" onclick="cambiarTab('inicio')">🏠 Inicio</button>
-    <button class="tab-btn" data-tab="tiempos" onclick="cambiarTab('tiempos')">⏱️ Tiempos</button>
-    <button class="tab-btn" data-tab="banco" onclick="cambiarTab('banco')">📥 Banco</button>
-    <button class="tab-btn" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita</button>
-    <button class="tab-btn" data-tab="historial" onclick="cambiarTab('historial')">📋 Historial</button>
-    <button class="tab-btn" data-tab="informes" onclick="cambiarTab('informes')">📊 Informes</button>
-    <button class="tab-btn" data-tab="nube" onclick="cambiarTab('nube')">☁️ Nube</button>
-    <button class="tab-btn" data-tab="ajustes" onclick="cambiarTab('ajustes')">⚙️ Ajustes</button>
+    <button type="button" class="tab-btn active" data-tab="inicio" onclick="cambiarTab('inicio')">🏠 Inicio</button>
+    <button type="button" class="tab-btn" data-tab="tiempos" onclick="cambiarTab('tiempos')">⏱️ Tiempos</button>
+    <button type="button" class="tab-btn" data-tab="banco" onclick="cambiarTab('banco')">📥 Banco</button>
+    <button type="button" class="tab-btn" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita</button>
+    <button type="button" class="tab-btn" data-tab="historial" onclick="cambiarTab('historial')">📋 Historial</button>
+    <button type="button" class="tab-btn" data-tab="informes" onclick="cambiarTab('informes')">📊 Informes</button>
+    <button type="button" class="tab-btn" data-tab="nube" onclick="cambiarTab('nube')">☁️ Nube</button>
+    <button type="button" class="tab-btn" data-tab="ajustes" onclick="cambiarTab('ajustes')">⚙️ Ajustes</button>
   </nav>
 
   <div class="tab-panel active" data-tab="inicio">
@@ -532,27 +532,27 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
       </div>
       <canvas id="graficaInforme"></canvas>
       <div class="btn-group no-print" style="margin-top:10px;">
-        <button class="btn-imprimir" id="btnImprimirDiario">🖨️ Informe completo</button>
-        <button class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 WhatsApp</button>
+        <button type="button" class="btn-imprimir" id="btnImprimirDiario">🖨️ Informe completo</button>
+        <button type="button" class="btn-whatsapp" onclick="compartirDiaWhatsApp()">💬 WhatsApp</button>
       </div>
       <div class="btn-group no-print" style="margin-top:8px;">
-        <button class="btn-informe" onclick="imprimirAlbumFotografico()">📸 Álbum fotográfico</button>
-        <button class="btn-informe" onclick="copiarResumenPortapapeles('dia')">📋 Copiar resumen</button>
+        <button type="button" class="btn-informe" onclick="imprimirAlbumFotografico()">📸 Álbum fotográfico</button>
+        <button type="button" class="btn-informe" onclick="copiarResumenPortapapeles('dia')">📋 Copiar resumen</button>
       </div>
     </div>
 
     <div class="section no-print">
       <h2>📋 Detalle de Visitas del Día</h2>
       <div class="filtros-visitas">
-        <button class="filtro-btn active" data-filtro="todas" onclick="filtrarVistaDia('todas')">Todas <span id="cnt-todas">(0)</span></button>
-        <button class="filtro-btn" data-filtro="entregados" onclick="filtrarVistaDia('entregados')">✅ Entregados <span id="cnt-entregados">(0)</span></button>
-        <button class="filtro-btn" data-filtro="no-entregados" onclick="filtrarVistaDia('no-entregados')">❌ No Entregados <span id="cnt-no-entregados">(0)</span></button>
+        <button type="button" class="filtro-btn active" data-filtro="todas" onclick="filtrarVistaDia('todas')">Todas <span id="cnt-todas">(0)</span></button>
+        <button type="button" class="filtro-btn" data-filtro="entregados" onclick="filtrarVistaDia('entregados')">✅ Entregados <span id="cnt-entregados">(0)</span></button>
+        <button type="button" class="filtro-btn" data-filtro="no-entregados" onclick="filtrarVistaDia('no-entregados')">❌ No Entregados <span id="cnt-no-entregados">(0)</span></button>
       </div>
       <div class="busqueda-box" style="margin-bottom:12px;">
         <label style="margin-top:0;">🔍 Buscar por guía / código:</label>
         <div class="input-group">
           <input type="text" id="busquedaDia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);renderizarVistaDia();" autocomplete="off">
-          <button class="btn-buscar-limpiar" onclick="limpiarBusquedaDia()">✖</button>
+          <button type="button" class="btn-buscar-limpiar" onclick="limpiarBusquedaDia()">✖</button>
         </div>
         <p id="contadorBusquedaDia" class="contador-busqueda"></p>
       </div>
@@ -562,12 +562,12 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     <div class="section no-print">
       <h2>⚡ Acceso Rápido</h2>
       <div class="quick-actions">
-        <button onclick="cambiarTab('tiempos')">⏱️ Tiempos Base</button>
-        <button onclick="cambiarTab('banco')">📥 Banco de Códigos</button>
-        <button onclick="cambiarTab('visita')">📝 Registrar Visita</button>
-        <button onclick="cambiarTab('historial')">📋 Detalle de Visitas</button>
-        <button onclick="cambiarTab('informes')">📈 Informes</button>
-        <button onclick="cambiarTab('nube')">☁️ Sincronización</button>
+        <button type="button" onclick="cambiarTab('tiempos')">⏱️ Tiempos Base</button>
+        <button type="button" onclick="cambiarTab('banco')">📥 Banco de Códigos</button>
+        <button type="button" onclick="cambiarTab('visita')">📝 Registrar Visita</button>
+        <button type="button" onclick="cambiarTab('historial')">📋 Detalle de Visitas</button>
+        <button type="button" onclick="cambiarTab('informes')">📈 Informes</button>
+        <button type="button" onclick="cambiarTab('nube')">☁️ Sincronización</button>
       </div>
     </div>
   </div>
@@ -580,7 +580,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <label>Fin de carga del carro:</label><input type="time" id="finCarga">
         <label>Hora de salida de la empresa:</label><input type="time" id="salidaEmpresa">
         <label>Hora de llegada a la primera entrega:</label><input type="time" id="primeraEntrega">
-        <button onclick="calcularTiemposBase()">Confirmar Tiempos de Salida</button>
+        <button type="button" onclick="calcularTiemposBase()">Confirmar Tiempos de Salida</button>
       </div>
       <div id="resumenTiempos" class="result-box" style="display:none;"></div>
     </div>
@@ -592,27 +592,27 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
       <p style="font-size:.85em;color:var(--text-secondary);text-align:center;margin-top:0;">Carga primero todos los códigos de barras que llevarás hoy.</p>
       <label>Escribe o escanea un código:</label>
       <div class="input-group">
-        <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosBanco');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
-        <button class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
-        <button class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
+        <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" autocomplete="off" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosBanco');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
+        <button type="button" class="btn-escaneo" onclick="iniciarEscaneo('banco')">📷</button>
+        <button type="button" class="btn-agregar-codigo" onclick="agregarCodigoBanco()">➕</button>
       </div>
       <div class="contador-digitos" id="contadorDigitosBanco"></div>
       <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
       <div id="lectorQRBanco"><div class="escaneo-mensaje">🔍 Escaneando al banco... apunta a cada código</div></div>
-      <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button></div>
-      <button class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
+      <div style="text-align:center;margin-top:5px;"><button type="button" class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneoBanco">Cancelar escaneo</button></div>
+      <button type="button" class="btn-informe" style="margin-top:15px;" onclick="toggleCargaMasiva()">📋 Carga masiva (pegar lista)</button>
       <div id="cargaMasivaContenedor" style="display:none;">
         <label>Pega los códigos (uno por línea, o separados por coma/;):</label>
         <textarea id="cargaMasivaTexto" placeholder="123456789012&#10;098765432109&#10;111222333444" style="min-height:120px;"></textarea>
         <div class="btn-group" style="margin-top:8px;">
-          <button class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
-          <button class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
+          <button type="button" class="btn-guardar" onclick="procesarCargaMasiva()">✅ Procesar lista</button>
+          <button type="button" class="btn-cancelar" onclick="toggleCargaMasiva()">✖ Cancelar</button>
         </div>
       </div>
       <label style="margin-top:15px;">Códigos en el banco:</label>
       <div id="listaBanco" class="lista-codigos"></div>
       <div id="contadorBanco" class="contador-banco"></div>
-      <div class="btn-group" style="margin-top:10px;"><button class="btn-cancelar" onclick="vaciarBanco()">🗑️ Vaciar banco</button></div>
+      <div class="btn-group" style="margin-top:10px;"><button type="button" class="btn-cancelar" onclick="vaciarBanco()">🗑️ Vaciar banco</button></div>
     </div>
   </div>
 
@@ -620,25 +620,25 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     <div class="section no-print">
       <h2>3. Registrar Nueva Visita</h2>
       <label>Hora de llegada al cliente:</label>
-      <div class="input-group"><input type="time" id="llegadaCliente"><button class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button></div>
+      <div class="input-group"><input type="time" id="llegadaCliente"><button type="button" class="btn-ahora" onclick="marcarLlegada()">📥 Llegada ahora</button></div>
       <label>Hora de salida del cliente:</label>
-      <div class="input-group"><input type="time" id="salidaCliente"><button class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button></div>
+      <div class="input-group"><input type="time" id="salidaCliente"><button type="button" class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button></div>
       <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
       <div class="input-group">
-        <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código" inputmode="numeric" oninput="filtrarSoloDigitos(this);buscarCodigosBanco();" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}" autocomplete="off">
-        <button class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
+        <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código" inputmode="numeric" autocomplete="off" oninput="filtrarSoloDigitos(this);buscarCodigosBanco();" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}">
+        <button type="button" class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
       </div>
       <div id="resultadosBusquedaCodigo"></div>
       <label style="margin-top:15px;">O agrega manualmente / escanea un código nuevo:</label>
       <div class="input-group">
-        <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosVisita');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
-        <button class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
-        <button class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
+        <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" autocomplete="off" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosVisita');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
+        <button type="button" class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
+        <button type="button" class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
       </div>
       <div class="contador-digitos" id="contadorDigitosVisita"></div>
       <div class="hint-codigo">Formato requerido: <span class="badge">12 dígitos numéricos</span></div>
       <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando... apunta a cada código</div></div>
-      <div style="text-align:center;margin-top:5px;"><button class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
+      <div style="text-align:center;margin-top:5px;"><button type="button" class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
       <label style="margin-top:15px;">📦 Códigos seleccionados para esta visita:</label>
       <div id="listaCodigosPendientes" class="lista-codigos"></div>
       <div id="contadorCodigos" class="contador-codigos"></div>
@@ -735,7 +735,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         </div>
       </div>
       <div id="contadorFotos" class="contador-fotos"></div>
-      <button onclick="registrarVisita()" style="background:var(--gray-8);">📋 Guardar Visita (manual)</button>
+      <button type="button" onclick="registrarVisita()" style="background:var(--gray-8);">📋 Guardar Visita (manual)</button>
       <p style="font-size:.78rem;color:var(--text-secondary);text-align:center;margin-top:8px;">💡 Tip: al guardar, <strong>todos los campos se limpian</strong> listos para la siguiente visita.</p>
     </div>
   </div>
@@ -745,7 +745,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
       <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
       <div class="busqueda-box no-print">
         <label>🔍 Buscar por guía / código:</label>
-        <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." inputmode="numeric" oninput="filtrarSoloDigitos(this);filtrarVisitas();"><button class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
+        <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe el código..." inputmode="numeric" autocomplete="off" oninput="filtrarSoloDigitos(this);filtrarVisitas();"><button type="button" class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
         <p id="contadorBusqueda" class="contador-busqueda"></p>
       </div>
       <div style="overflow-x:auto;">
@@ -772,9 +772,9 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     </div>
     <div class="section" id="seccionInforme" style="display:none;">
       <div class="no-print" style="text-align:right;margin-bottom:10px;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;">
-        <button class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto;padding:10px 20px;">🖨️ Imprimir</button>
-        <button class="btn-whatsapp" onclick="compartirInformeMensualVisible()" style="width:auto;padding:10px 20px;">💬 WhatsApp</button>
-        <button class="btn-cancelar" onclick="ocultarInforme()" style="width:auto;padding:10px 20px;">❌ Cerrar</button>
+        <button type="button" class="btn-imprimir" onclick="imprimirInformeMensual()" style="width:auto;padding:10px 20px;">🖨️ Imprimir</button>
+        <button type="button" class="btn-whatsapp" onclick="compartirInformeMensualVisible()" style="width:auto;padding:10px 20px;">💬 WhatsApp</button>
+        <button type="button" class="btn-cancelar" onclick="ocultarInforme()" style="width:auto;padding:10px 20px;">❌ Cerrar</button>
       </div>
       <div id="informeContenedor"></div>
     </div>
@@ -793,29 +793,29 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div>
       </div>
       <div class="btn-group" style="margin-top:10px;">
-        <button class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
-        <button class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
+        <button type="button" class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar ahora</button>
+        <button type="button" class="btn-nube" onclick="cargarDeNube()">⬇️ Traer de la nube</button>
       </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-cancelar" onclick="mostrarDiagnosticoNube()">🔍 Diagnóstico</button>
-        <button class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
+        <button type="button" class="btn-cancelar" onclick="mostrarDiagnosticoNube()">🔍 Diagnóstico</button>
+        <button type="button" class="btn-reiniciar" onclick="compactarHistorial()">🗜️ Compactar historial</button>
       </div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>💾 Respaldo y Restauración (Word)</h3>
       <div class="btn-group" style="margin-top:10px;">
-        <button class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
-        <button class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
+        <button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Exportar TODO a Word</button>
+        <button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar desde Word</button>
       </div>
       <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/json" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>📄 Exportar / Compartir informes</h3>
       <div class="btn-group">
-        <button class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día</button>
-        <button class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
-        <button class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Historial</button>
+        <button type="button" class="btn-imprimir" onclick="exportarDiaAWord()">📄 Día</button>
+        <button type="button" class="btn-imprimir" onclick="exportarMesAWord()">📄 Mes</button>
+        <button type="button" class="btn-imprimir" onclick="exportarHistorialCompletoAWord()">📄 Historial</button>
       </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-whatsapp" onclick="compartirHistorialWhatsApp()">💬 Historial por WhatsApp</button>
+        <button type="button" class="btn-whatsapp" onclick="compartirHistorialWhatsApp()">💬 Historial por WhatsApp</button>
       </div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <label>📅 Mes y año para el informe:</label>
@@ -824,8 +824,8 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <input type="number" id="anioInforme" min="2020" max="2100" style="max-width:110px;">
       </div>
       <div class="btn-group" style="margin-top:10px;">
-        <button class="btn-informe" onclick="generarInformeMensual()">📊 Generar Informe Mensual</button>
-        <button class="btn-whatsapp" onclick="compartirMesWhatsApp()">💬 Mes por WhatsApp</button>
+        <button type="button" class="btn-informe" onclick="generarInformeMensual()">📊 Generar Informe Mensual</button>
+        <button type="button" class="btn-whatsapp" onclick="compartirMesWhatsApp()">💬 Mes por WhatsApp</button>
       </div>
     </div>
   </div>
@@ -834,13 +834,13 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
     <div class="section no-print">
       <h2>6. Control de Sesión</h2>
       <div class="btn-group">
-        <button class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
-        <button class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
-        <button class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
-        <button class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
+        <button type="button" class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
+        <button type="button" class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
+        <button type="button" class="btn-eliminar" onclick="reiniciarSesion()">🗑️ Reiniciar Sesión</button>
+        <button type="button" class="btn-eliminar-todo" onclick="eliminarTodo()">🔥 Eliminar Todo</button>
       </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-reiniciar" onclick="cerrarSesion()" style="background:var(--sys-red);">🚪 Cerrar Sesión</button>
+        <button type="button" class="btn-reiniciar" onclick="cerrarSesion()" style="background:var(--sys-red);">🚪 Cerrar Sesión</button>
       </div>
       <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3 style="font-size:.95em;margin-top:5px;">🛡️ Privacidad y censura automática</h3>
@@ -849,17 +849,17 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <div class="switch"><input type="checkbox" id="toggleAutoCensura" onchange="toggleAutoCensura()" checked><span class="slider"></span></div>
       </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-informe" onclick="preCargarModelos()">⚙️ Pre-cargar modelos de detección</button>
+        <button type="button" class="btn-informe" onclick="preCargarModelos()">⚙️ Pre-cargar modelos de detección</button>
       </div>
       <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;line-height:1.4;">Los modelos se cargan la primera vez que tomas una foto (~15&nbsp;MB). Después quedan en caché del navegador y funcionan sin internet.</p>
       <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3 style="font-size:.95em;margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
       <div class="btn-group">
-        <button class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
-        <button class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Eliminar antiguas</button>
+        <button type="button" class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
+        <button type="button" class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Eliminar antiguas</button>
       </div>
       <div class="btn-group" style="margin-top:8px;">
-        <button class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas las fotos</button>
+        <button type="button" class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas las fotos</button>
       </div>
     </div>
   </div>
@@ -888,7 +888,19 @@ catch(e) { console.error('❌ Error Firebase:', e); actualizarEstadoNube('❌ Er
 function actualizarEstadoNube(txt,tipo='ok'){ const el=document.getElementById('estadoNube'); if(!el)return; el.textContent=txt; el.className='estado-nube '+tipo; }
 window.actualizarEstadoNube = actualizarEstadoNube;
 
-function slugify(txt){ return (txt||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
+// ═══════════════════════════════════════════════════════════════
+// FIX #3: slugify con fallback determinista para evitar colisiones
+// ═══════════════════════════════════════════════════════════════
+function slugify(txt){
+  const s = (txt||'').toString().toLowerCase().normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^a-z0-9]+/g,'-')
+    .replace(/^-|-$/g,'');
+  if(s) return s;
+  let h = 0; const raw = (txt||'').toString();
+  for(let i=0;i<raw.length;i++) h = ((h<<5) - h + raw.charCodeAt(i)) | 0;
+  return 'u-' + (h>>>0).toString(36);
+}
 function getUsuarioActual(){ try{ return (localStorage.getItem(CLAVE_USUARIO_LOCAL)||'').trim()||null; }catch{ return null; } }
 function setUsuarioActual(n){ try{ localStorage.setItem(CLAVE_USUARIO_LOCAL, n.trim()); }catch(e){} }
 function refUsuario(){ const u=getUsuarioActual(); if(!u||!db)return null; return doc(db,'colserlog_usuarios',CODIGO_GRUPO,'mensajeros', slugify(u)||'sin-nombre'); }
@@ -928,7 +940,13 @@ function cargarDarkMode(){ let p=null; try{ p=localStorage.getItem(CLAVE_DARK_MO
 window.cargarDarkMode = cargarDarkMode;
 
 let deferredPrompt = null;
-function crearIconoPWA(){ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient></defs><rect width="512" height="512" rx="96" fill="url(#g)"/><text x="256" y="330" font-size="240" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold">C</text></svg>`; return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg))); }
+// ═══════════════════════════════════════════════════════════════
+// FIX #1: crearIconoPWA sin unescape/encodeURIComponent (deprecados)
+// ═══════════════════════════════════════════════════════════════
+function crearIconoPWA(){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient></defs><rect width="512" height="512" rx="96" fill="url(#g)"/><text x="256" y="330" font-size="240" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold">C</text></svg>`;
+  return 'data:image/svg+xml;base64,' + btoa(svg);
+}
 function inyectarManifest(){
   const iconoURL=crearIconoPWA();
   const manifest={ name:'Colserlog - Reporte de Entregas', short_name:'Colserlog', description:'Registro de visitas y entregas', start_url:location.pathname+location.search, scope:'./', display:'standalone', orientation:'portrait', background_color:'#0a84ff', theme_color:'#0a84ff', lang:'es', icons:[{src:iconoURL,sizes:'192x192',type:'image/svg+xml',purpose:'any'},{src:iconoURL,sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:iconoURL,sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}] };
@@ -948,9 +966,15 @@ window.instalarPWA = async function(){
   modal.classList.add('visible');
 };
 
+// ═══════════════════════════════════════════════════════════════
+// FIX #10: hashPassword rechaza contextos inseguros (file://, http://)
+// ═══════════════════════════════════════════════════════════════
 async function hashPassword(p){
-  try{ const buf=await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p)); return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join(''); }
-  catch(e){ let h=5381; for(let i=0;i<p.length;i++) h=((h<<5)+h+p.charCodeAt(i))|0; return 'fb_'+(h>>>0).toString(16); }
+  if(!window.isSecureContext || !crypto || !crypto.subtle){
+    throw new Error('Se requiere HTTPS para iniciar sesión de forma segura. Abre la app por https:// o localhost.');
+  }
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 function getUsuariosRegistrados(){ try{ return JSON.parse(localStorage.getItem(CLAVE_USUARIOS_REGISTRADOS)||'[]'); }catch{ return []; } }
 function guardarUsuariosRegistrados(l){ try{ localStorage.setItem(CLAVE_USUARIOS_REGISTRADOS, JSON.stringify(l)); }catch(e){} }
@@ -984,7 +1008,10 @@ window.hacerRegistro = async function(){
   if(p1!==p2) return mostrarErrorUser('Las contraseñas no coinciden.');
   if(buscarUsuario(n)) return mostrarErrorUser('Ese usuario ya existe. Inicia sesión.');
 
-  const hash=await hashPassword(p1);
+  let hash;
+  try { hash = await hashPassword(p1); }
+  catch(e){ return mostrarErrorUser(e.message); }
+
   const lista=getUsuariosRegistrados();
   lista.push({nombre:n.trim(),hash,fechaRegistro:new Date().toISOString()});
   guardarUsuariosRegistrados(lista);
@@ -999,7 +1026,8 @@ window.hacerRegistro = async function(){
   if (ref) {
     try {
       const payload = construirPayload();
-      await Promise.race([ setDoc(ref, { ...payload, nombre: n.trim(), grupo: CODIGO_GRUPO, fechaRegistro: new Date().toISOString(), cuentaCreada: true }, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000)) ]);
+      const p = setDoc(ref, { ...payload, nombre: n.trim(), grupo: CODIGO_GRUPO, fechaRegistro: new Date().toISOString(), cuentaCreada: true }, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
+      await Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000)) ]);
     } catch(e) {  }
   }
 
@@ -1036,7 +1064,9 @@ window.hacerLogin = async function(){
         return mostrarErrorUser('Usuario no encontrado. Verifica el nombre o regístrate.');
       }
     }
-    const h = await hashPassword(p);
+    let h;
+    try { h = await hashPassword(p); }
+    catch(e){ return mostrarErrorUser(e.message); }
     if(h !== user.hash) return mostrarErrorUser('Contraseña incorrecta.');
     guardarCuentaEnNube(user.nombre, user.hash).catch(() => {});
     mostrarInfoUser('✅ Credenciales correctas. Cargando datos...');
@@ -1066,7 +1096,8 @@ async function iniciarSesionConUsuario(nombre){
   tareas.push(migrarDatosAntiguosSiExisten(nombre).catch(e => { return false; }));
   let snapData = null;
   if(ref){
-    tareas.push(Promise.race([ getDoc(ref), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]).then(snap => { snapData = snap; return true; }).catch(e => { return false; }));
+    const p = getDoc(ref).catch(err => { console.warn('getDoc bg:', err); return null; });
+    tareas.push(Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]).then(snap => { snapData = snap; return true; }).catch(e => { return false; }));
   }
   const [migro] = await Promise.all(tareas);
 
@@ -1079,7 +1110,8 @@ async function iniciarSesionConUsuario(nombre){
   } else if(ref && (!snapData || !snapData.exists || !snapData.exists())){
     try {
       const payload = construirPayload();
-      await Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]);
+      const p = setDoc(ref, payload, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
+      await Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]);
     } catch(e){  }
   }
 
@@ -1109,7 +1141,8 @@ window.cerrarSesion = async function(){
       const ref = refUsuario();
       if (ref) {
         const payload = construirPayload();
-        Promise.race([ setDoc(ref, payload, { merge: true }), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => {}).catch(e => {});
+        const p = setDoc(ref, payload, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
+        Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => {}).catch(e => {});
       }
     }
   } catch(e){}
@@ -1149,16 +1182,25 @@ function renderizarListaUsuarios(){
   const p=document.createElement('p'); p.style.marginTop='15px'; p.style.fontSize='0.8em'; p.style.color='var(--text-muted)'; p.style.textAlign='left'; p.textContent='👥 Usuarios:';
   c.appendChild(p);
   us.slice().reverse().forEach(u=>{
-    const b=document.createElement('button'); b.textContent='👤 '+u.nombre; b.style.width='100%';
+    const b=document.createElement('button'); b.type='button'; b.textContent='👤 '+u.nombre; b.style.width='100%';
     b.onclick=()=>{ document.getElementById('loginNombre').value=u.nombre; window.cambiarTabUser('login'); document.getElementById('loginPassword').focus(); };
     c.appendChild(b);
   });
 }
+// ═══════════════════════════════════════════════════════════════
+// FIX #6: mostrarModalUsuario no borra campos si el modal ya está visible
+// ═══════════════════════════════════════════════════════════════
 function mostrarModalUsuario(){
-  const m=document.getElementById('modalUsuario'); if(!m)return;
-  window.cambiarTabUser('login');
-  ['loginNombre','loginPassword','regNombre','regPassword','regPassword2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  renderizarListaUsuarios(); m.classList.add('visible');
+  const m = document.getElementById('modalUsuario');
+  if(!m) return;
+  if(!m.classList.contains('visible')){
+    window.cambiarTabUser('login');
+    ['loginPassword','regPassword','regPassword2'].forEach(id=>{
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+  }
+  renderizarListaUsuarios();
+  m.classList.add('visible');
   setTimeout(()=>document.getElementById('loginNombre')?.focus(),200);
 }
 window.mostrarModalUsuario = mostrarModalUsuario;
@@ -1200,7 +1242,8 @@ window.sincronizarConNube = function(){
       if(size>950000){ actualizarEstadoNube('⚠️ Auto-sync pausada. Compacta historial.','error'); guardadoEnProgreso=false; return; }
       actualizarEstadoNube('⏳ Subiendo...','loading');
       ultimaVersionLocal=payload.version;
-      await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 20s')),20000)) ]);
+      const p = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
+      await Promise.race([ p, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 20s')),20000)) ]);
       intentosSync=0;
       actualizarEstadoNube('☁️ Sincronizado '+new Date().toLocaleTimeString(),'ok');
     }catch(e){ intentosSync++; actualizarEstadoNube('❌ '+e.message,'error'); }
@@ -1239,12 +1282,14 @@ window.forzarSincronizacion = async function(){
   try{
     guardadoEnProgreso=true;
     actualizarEstadoNube(`⏳ Subiendo ${kb} KB...`,'loading');
-    await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
+    const p1 = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
+    await Promise.race([ p1, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
     intentosSync=0; actualizarEstadoNube('✅ Subido','ok'); return true;
   }catch(e1){
     try{
       actualizarEstadoNube('⏳ Reintentando...','loading');
-      await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
+      const p2 = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
+      await Promise.race([ p2, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
       actualizarEstadoNube('✅ Subido (reintento)','ok'); return true;
     }catch(e2){
       actualizarEstadoNube('❌ '+e2.message,'error');
@@ -1908,12 +1953,19 @@ window.capturarFoto = async function(event){
   }
 };
 
+// ═══════════════════════════════════════════════════════════════
+// FIX #7: renderizarGaleriaFotos lee IndexedDB una sola vez
+// ═══════════════════════════════════════════════════════════════
 async function renderizarGaleriaFotos(){
-  const c=document.getElementById('galeriaFotosVisita'); const ct=document.getElementById('contadorFotos'); if(!c) return;
-  c.innerHTML='';
-  if(fotosPendientes.length > 0){
-    const ids = fotosPendientes.map(f=>f.id);
-    const datos = await obtenerFotosDB(ids);
+  const c = document.getElementById('galeriaFotosVisita');
+  const ct = document.getElementById('contadorFotos');
+  if(!c) return;
+  c.innerHTML = '';
+
+  let datos = {};
+  if(fotosPendientes.length){
+    const ids = fotosPendientes.map(f => f.id);
+    datos = await obtenerFotosDB(ids);
     const validos = fotosPendientes.filter(f => datos[f.id]);
     if(validos.length !== fotosPendientes.length){
       console.warn(`🧹 Eliminando ${fotosPendientes.length - validos.length} foto(s) huérfana(s)`);
@@ -1921,23 +1973,48 @@ async function renderizarGaleriaFotos(){
       guardarEstadoCompleto();
     }
   }
-  if(fotosPendientes.length===0){ const v=document.createElement('div'); v.className='galeria-vacia'; v.textContent='Sin fotos. Pulsa 📷 o 🖼️ para agregar.'; c.appendChild(v); if(ct) ct.textContent=''; return; }
-  const ids=fotosPendientes.map(f=>f.id); const datos=await obtenerFotosDB(ids);
-  fotosPendientes.forEach((f,i)=>{
-    const w=document.createElement('div'); w.className='foto-thumb';
-    const img=document.createElement('img'); img.src=datos[f.id]||''; img.alt=`Foto ${i+1}`;
-    img.onclick=async ()=>{ const foto=await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto],0); };
+
+  if(fotosPendientes.length === 0){
+    const v = document.createElement('div');
+    v.className = 'galeria-vacia';
+    v.textContent = 'Sin fotos. Pulsa 📷 o 🖼️ para agregar.';
+    c.appendChild(v);
+    if(ct) ct.textContent = '';
+    return;
+  }
+
+  fotosPendientes.forEach((f, i) => {
+    const w = document.createElement('div');
+    w.className = 'foto-thumb';
+    const img = document.createElement('img');
+    img.src = datos[f.id] || '';
+    img.alt = `Foto ${i + 1}`;
+    img.onclick = async () => { const foto = await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto], 0); };
     w.appendChild(img);
     if(f.censurada){
-      const b=document.createElement('span'); b.className='badge-censura';
-      const partes=[]; if(f.rostros) partes.push('👤'+f.rostros); if(f.vehiculos) partes.push('🚗'+f.vehiculos);
-      b.textContent='🛡️ '+(partes.join(' ')); w.appendChild(b);
+      const b = document.createElement('span');
+      b.className = 'badge-censura';
+      const partes = [];
+      if(f.rostros) partes.push('👤' + f.rostros);
+      if(f.vehiculos) partes.push('🚗' + f.vehiculos);
+      b.textContent = '🛡️ ' + (partes.join(' '));
+      w.appendChild(b);
     }
-    const b=document.createElement('button'); b.type='button'; b.className='btn-eliminar-foto'; b.textContent='✕'; b.title='Eliminar';
-    b.onclick=async (e)=>{ e.stopPropagation(); if(!confirm('¿Eliminar esta foto?'))return; await eliminarFotoDB(f.id); fotosPendientes.splice(i,1); await renderizarGaleriaFotos(); guardarEstadoCompleto(); };
-    w.appendChild(b); c.appendChild(w);
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'btn-eliminar-foto';
+    b.textContent = '✕';
+    b.title = 'Eliminar';
+    b.onclick = async (e) => { e.stopPropagation(); if(!confirm('¿Eliminar esta foto?')) return; await eliminarFotoDB(f.id); fotosPendientes.splice(i, 1); await renderizarGaleriaFotos(); guardarEstadoCompleto(); };
+    w.appendChild(b);
+    c.appendChild(w);
   });
-  if(ct){ const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`; ct.classList.toggle('alerta', total>1500); }
+
+  if(ct){
+    const total = fotosPendientes.reduce((s, f) => s + (f.tamanoKB || 0), 0);
+    ct.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`;
+    ct.classList.toggle('alerta', total > 1500);
+  }
 }
 
 function codigosEnVisitas(){ const s=new Set(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); }); return s; }
@@ -2060,8 +2137,8 @@ function renderizarTabla(){
     else { const sp=document.createElement('span'); sp.className='sin-fotos'; sp.textContent='—'; tdF.appendChild(sp); }
     tr.appendChild(tdF);
     const tdA=document.createElement('td'); tdA.className='no-print'; const dv=document.createElement('div'); dv.className='acciones-btn';
-    if(ed){ const bg=document.createElement('button'); bg.textContent='💾'; bg.className='btn-guardar-edicion'; bg.onclick=()=>guardarEdicion(indexOriginal); dv.appendChild(bg); const bc=document.createElement('button'); bc.textContent='❌'; bc.className='btn-cancelar-edicion'; bc.onclick=()=>{ filaEditando=null; renderizarTabla(); }; dv.appendChild(bc); }
-    else { const be=document.createElement('button'); be.textContent='✏️'; be.className='btn-editar'; be.onclick=()=>{ filaEditando=indexOriginal; renderizarTabla(); }; dv.appendChild(be); const bd=document.createElement('button'); bd.textContent='🗑️'; bd.className='btn-eliminar-fila'; bd.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; dv.appendChild(bd); }
+    if(ed){ const bg=document.createElement('button'); bg.type='button'; bg.textContent='💾'; bg.className='btn-guardar-edicion'; bg.onclick=()=>guardarEdicion(indexOriginal); dv.appendChild(bg); const bc=document.createElement('button'); bc.type='button'; bc.textContent='❌'; bc.className='btn-cancelar-edicion'; bc.onclick=()=>{ filaEditando=null; renderizarTabla(); }; dv.appendChild(bc); }
+    else { const be=document.createElement('button'); be.type='button'; be.textContent='✏️'; be.className='btn-editar'; be.onclick=()=>{ filaEditando=indexOriginal; renderizarTabla(); }; dv.appendChild(be); const bd=document.createElement('button'); bd.type='button'; bd.textContent='🗑️'; bd.className='btn-eliminar-fila'; bd.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) eliminarVisita(indexOriginal); }; dv.appendChild(bd); }
     tdA.appendChild(dv); tr.appendChild(tdA); t.appendChild(tr);
   });
 }
@@ -2321,6 +2398,7 @@ function esperarImagenesCargadas(contenedor){
    Ejecuta `window.print()` y espera al evento `afterprint` (o fallback)
    para restaurar el DOM de forma segura en todos los navegadores.
    ═══════════════════════════════════════════════════════════════ */
+// FIX #8: imprimirYLimpiar restaura correctamente el modo oscuro tras imprimir
 function imprimirYLimpiar(area, clases, estabanDark){
   return new Promise((resolve) => {
     let terminado = false;
@@ -2329,7 +2407,8 @@ function imprimirYLimpiar(area, clases, estabanDark){
       terminado = true;
       document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
       clases.forEach(c => document.body.classList.remove(c));
-      if(estabanDark) document.body.classList.remove('theme-switching');
+      document.body.classList.remove('theme-switching');
+      if(estabanDark && typeof window.cargarDarkMode === 'function') window.cargarDarkMode();
       if(area){ area.innerHTML=''; area.style.display='none'; }
       window.removeEventListener('afterprint', finalizar);
       resolve();
@@ -2557,7 +2636,6 @@ window.imprimirInformeMensual = async ()=>{
   area.innerHTML='';
   const wrap=document.createElement('div'); wrap.className='reporte-diario';
   const codigoDoc=`MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-  // Hash real (antes era la cadena "PENDIENTE")
   const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
   const hash=await sha256(JSON.stringify({u:usuario, t:Date.now(), informe:clon.innerHTML.length}));
   wrap.innerHTML=generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)+generarPanelAuditoria(hash)+clon.innerHTML+generarPieAuditoria();
@@ -2643,8 +2721,6 @@ async function crearObjetoRespaldo(){
 
 /* ═══════════════════════════════════════════════════════════════
    🔐 BASE64 MODERNO (UTF-8 seguro, maneja payloads grandes)
-   Antes se usaba btoa(unescape(encodeURIComponent(s))) que
-   fallaba silenciosamente con archivos grandes.
    ═══════════════════════════════════════════════════════════════ */
 function b64EncodeUnicode(str){
   try{
@@ -2704,7 +2780,6 @@ window.descargarRespaldoWord = async function(){
 window.descargarRespaldoLocal = ()=>window.descargarRespaldoWord();
 function extraerCodigosDeTexto(t){ const c=new Set(); const re=/(?:^|[^\d])(\d{12})(?!\d)/g; let m; while((m=re.exec(t))!==null) c.add(m[1]); return Array.from(c); }
 function extraerPayloadBase64(t){
-  // Acepta cualquier combinación de <br>, saltos, espacios y tags HTML
   const m=t.match(/---COLSERLOG-DATA-START---([\s\S]*?)---COLSERLOG-DATA-END---/);
   if(!m) return null;
   const raw = m[1].replace(/<[^>]*>/g,'').replace(/[\s]/g,'').replace(/[^A-Za-z0-9+/=]/g,'');
@@ -2744,14 +2819,11 @@ window.cargarRespaldoDesdeArchivo = async function(event){
     const esDocx=/\.docx$/i.test(file.name)||(file.type&&file.type.includes('openxmlformats'));
     let texto=''; if(!esDocx) texto=await file.text();
 
-    // 1) Intento de payload COLSERLOG
     if(texto){ const r=extraerPayloadBase64(texto); if(r){ const ok=await aplicarRespaldo(r); if(ok){ alert('✅ Respaldo restaurado desde .doc. Recargando...'); setTimeout(()=>location.reload(),800); return; } } }
     if(esDocx){ const tp=await extraerTextoPlanoDeDocx(file); if(tp){ const r=extraerPayloadBase64(tp); if(r){ const ok=await aplicarRespaldo(r); if(ok){ alert('✅ Respaldo .docx restaurado. Recargando...'); setTimeout(()=>location.reload(),800); } return; } } }
 
-    // 2) JSON plano
     if(texto){ let jp=null; try{ jp=JSON.parse(texto); }catch(e){} if(jp && (jp.entregasDiariasDetallado||jp.estadoSesion)){ const ok=await aplicarRespaldo(jp); if(ok){ alert('✅ JSON restaurado. Recargando...'); setTimeout(()=>location.reload(),800); } return; } }
 
-    // 3) Extracción de códigos (texto + imágenes)
     const cT=texto?extraerCodigosDeTexto(texto):[];
     let im=[]; if(esDocx){ try{ im=await extraerImagenesDeDocx(file); }catch(e){} } else if(texto) im=extraerImagenesDeDocHTML(texto);
     let cI=[]; if(im.length && window.ZXing){ mostrarAviso(`🔍 Leyendo ${im.length} imagen(es)...`,'ok'); cI=await decodificarCodigosDeImagenes(im,(a,t,n)=>mostrarAviso(`🔍 ${a}/${t}`,'ok')); }
@@ -2976,10 +3048,19 @@ document.addEventListener('input', (e) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// FIX #5: Sincronización inicial ANTES de que el módulo 1 decida mostrar modal
+// ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', async ()=>{
+  // Asegura que el proxy de fotos nube esté sincronizado en localStorage
+  try {
+    sincronizarFotosNube = (localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true');
+    const tf = document.getElementById('toggleFotosNube');
+    if(tf) tf.checked = sincronizarFotosNube;
+    localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube ? 'true' : 'false');
+  } catch(e){}
+
   try{ await abrirFotosDB(); console.log('✅ IndexedDB listo'); }catch(e){ console.warn('IndexedDB:', e); }
-  const tf=document.getElementById('toggleFotosNube'); if(tf) tf.checked=sincronizarFotosNube;
-  try{ localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){}
   const ta=document.getElementById('toggleAutoCensura'); if(ta) ta.checked=autoCensuraActiva;
   cargarTiemposBase();
   if(cargarEstadoCompleto() && visitas.length){ renderizarTabla(); actualizarDashboard(); }
