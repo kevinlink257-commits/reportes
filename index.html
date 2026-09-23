@@ -232,6 +232,7 @@ body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;transition:transform .2s var(--ease)}
 .foto-thumb img:hover{transform:scale(1.04)}
 .foto-thumb .btn-eliminar-foto{position:absolute;top:4px;right:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,69,58,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center}
+.foto-thumb .badge-censura{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.75);color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.65rem;font-weight:700;letter-spacing:.02em;pointer-events:none;display:flex;align-items:center;gap:3px}
 .btn-foto{background:var(--sys-purple);margin-top:10px;padding:12px;font-size:.9rem}
 .btn-foto.btn-galeria{background:var(--sys-teal)}.btn-foto.btn-galeria:hover{background:#2ba7bd}
 .btn-foto:hover{background:#a03dd0}
@@ -321,13 +322,23 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 .rd-fecha-emision-print{text-align:right;font-size:8pt;color:#333;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #ccc}
 .rd-fecha-emision-print strong{color:#1c1c1e}
 
+/* Modal de procesamiento de fotos */
+#modalProcesando{position:fixed;inset:0;background:rgba(0,0,0,.85);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:none;align-items:center;justify-content:center;z-index:100010;padding:20px}
+#modalProcesando.visible{display:flex}
+.procesando-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:30px;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-lg);animation:aparecer .3s var(--ease-out)}
+.procesando-content .spinner{width:60px;height:60px;border:5px solid var(--border-light);border-top-color:var(--sys-blue);border-radius:50%;margin:0 auto 18px;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.procesando-content h3{color:var(--text-heading);margin:0 0 8px 0;font-size:1.15rem}
+.procesando-content p{color:var(--text-secondary);font-size:.88rem;margin:0;line-height:1.5}
+.procesando-content .paso{font-size:.75rem;color:var(--text-muted);margin-top:10px;font-style:italic}
+
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#fafafa!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#1c1c1e!important;--text-muted:#555!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-sm:transparent!important;--shadow-md:transparent!important;--shadow-lg:transparent!important;--table-header-bg:#1c1c1e!important;--table-header-color:#fff!important;}
   @page{size:A4 portrait;margin:12mm 10mm 16mm 10mm}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9.5pt;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important;border:none!important;background:#fff!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor>.no-print{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor>.no-print,#modalProcesando{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:190mm;margin:0 auto;overflow:visible!important}
@@ -435,6 +446,15 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 
 <div id="avisoDuplicado"></div>
 
+<div id="modalProcesando">
+  <div class="procesando-content">
+    <div class="spinner"></div>
+    <h3>🛡️ Protegiendo la imagen…</h3>
+    <p id="procesandoTitulo">Analizando contenido…</p>
+    <div class="paso" id="procesandoPaso">Cargando módulos de detección…</div>
+  </div>
+</div>
+
 <div id="modalFoto" class="modal-foto">
   <div class="modal-foto-content">
     <button class="modal-foto-cerrar" onclick="cerrarModalFoto()">✕</button>
@@ -473,6 +493,10 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <li><span class="tag-ok">Aviso de visita</span> en la puerta</li>
         <li><span class="tag-ok">Local cerrado</span> con su letrero</li>
       </ul>
+    </div>
+    <div class="reglas-bloque" style="background:rgba(10,132,255,.12);border-left-color:var(--sys-blue);color:#0a4d9e;">
+      <h4>🛡️ Censura automática activada:</h4>
+      <p style="margin:4px 0 0 0;line-height:1.4;">El sistema <strong>detecta y pixela automáticamente</strong> rostros y vehículos (carros, motos, buses, camiones) antes de guardar la foto. Aun así, <strong>respeta las reglas</strong>: evita capturar aquello que no necesitas.</p>
     </div>
     <label class="reglas-chk" id="lblReglasChk">
       <input type="checkbox" id="chkAceptoReglas" onchange="toggleBotonCamara(); this.parentNode.classList.toggle('activo', this.checked);">
@@ -657,7 +681,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 
       <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(opcional · máx. 20 fotos)</span>:</label>
       <div class="aviso-reglas-inline">
-        ⚠️ <strong>Protege la privacidad:</strong> nunca fotografíes rostros de niños, adultos sin permiso, el interior de la vivienda, documentos ni placas.
+        ⚠️ <strong>Protección automática:</strong> el sistema detecta y pixela rostros y vehículos automáticamente. Aun así, <strong>respeta las reglas y evita capturar personas o interiores</strong>.
       </div>
 
       <details class="rules-seccion">
@@ -821,6 +845,16 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         <button class="btn-reiniciar" onclick="cerrarSesion()" style="background:var(--sys-red);">🚪 Cerrar Sesión</button>
       </div>
       <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
+      <h3 style="font-size:.95em;margin-top:5px;">🛡️ Privacidad y censura automática</h3>
+      <div class="toggle-wrapper" style="margin-top:8px;">
+        <label class="toggle-label" for="toggleAutoCensura">🛡️ Censurar rostros y vehículos<span class="toggle-sub">Detecta y pixela rostros, carros, motos, buses y camiones antes de guardar</span></label>
+        <div class="switch"><input type="checkbox" id="toggleAutoCensura" onchange="toggleAutoCensura()" checked><span class="slider"></span></div>
+      </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn-informe" onclick="preCargarModelos()">⚙️ Pre-cargar modelos de detección</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;line-height:1.4;">Los modelos se cargan la primera vez que tomas una foto (~15&nbsp;MB). Después quedan en caché del navegador y funcionan sin internet.</p>
+      <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3 style="font-size:.95em;margin-top:5px;">🧹 Gestión de fotos (IndexedDB)</h3>
       <div class="btn-group">
         <button class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Ver almacenamiento</button>
@@ -846,6 +880,7 @@ const CLAVE_USUARIOS_REGISTRADOS = "colserlog_usuarios_registrados";
 const CLAVE_DARK_MODE = "colserlog_dark_mode";
 const CLAVE_FOTOS_NUBE = "syncFotosNube";
 const CLAVE_FOTOS_NUBE_PROXY = "clave_fotos_nube_proxy";
+const CLAVE_AUTO_CENSURA = "colserlog_auto_censura";
 
 let db, syncActivo = false, guardadoPendiente = null, ultimaVersionLocal = 0, syncAutomaticoActivo = true, unsubscribeEscucha = null, intentosSync = 0, guardadoEnProgreso = false;
 
@@ -1211,7 +1246,6 @@ window.forzarSincronizacion = async function(){
   }catch(e1){
     try{
       actualizarEstadoNube('⏳ Reintentando...','loading');
-      /* ✅ CORRECCIÓN: se agrega {merge:true} para permitir deleteField() */
       await Promise.race([ setDoc(ref,payload,{merge:true}), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
       actualizarEstadoNube('✅ Subido (reintento)','ok'); return true;
     }catch(e2){
@@ -1310,6 +1344,7 @@ const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompl
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=900; const FOTO_JPEG_QUALITY=0.65; const CLAVE_FOTOS_NUBE='syncFotosNube';
 const CLAVE_BORRADOR='colserlog_borrador';
+const CLAVE_AUTO_CENSURA='colserlog_auto_censura';
 
 const DESCRIPCIONES_RECOMENDADAS={
   'Entregado':'Paquete entregado en la dirección indicada. Recibido por el cliente, quien firmó la guía correspondiente. Producto verificado en buen estado y sin novedades.',
@@ -1349,6 +1384,231 @@ function actualizarContadorDigitos(i,idc){ const el=document.getElementById(idc)
 function validarCodigo(c){ if(!c) return 'Código vacío'; if(!/^\d+$/.test(c)) return 'Solo números'; if(c.length!==LONGITUD_CODIGO) return `Debe tener ${LONGITUD_CODIGO} dígitos (tiene ${c.length})`; return null; }
 window.filtrarSoloDigitos = filtrarSoloDigitos; window.actualizarContadorDigitos = actualizarContadorDigitos;
 
+/* ═══════════════════════════════════════════════════════════════
+   🛡️ DETECCIÓN Y CENSURA AUTOMÁTICA (rostros + vehículos)
+   ═══════════════════════════════════════════════════════════════ */
+const CDN_TFJS       = 'https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
+const CDN_COCO       = 'https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
+const CDN_FACEAPI    = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js';
+const FACEAPI_MODEL  = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model';
+
+const CLASES_VEHICULO = ['car','truck','bus','motorcycle','bicycle','train','boat'];
+
+let autoCensuraActiva = true;
+try { const p = localStorage.getItem(CLAVE_AUTO_CENSURA); if(p !== null) autoCensuraActiva = p === '1'; } catch(e){}
+
+let _modelosCargados = false;
+let _cargandoModelos = null;
+let _cocoModel = null;
+
+function cargarScript(src){
+  return new Promise((resolve, reject) => {
+    const existente = document.querySelector(`script[src="${src}"]`);
+    if(existente){
+      if(existente.dataset.cargado === '1'){ resolve(); return; }
+      existente.addEventListener('load', () => resolve(), { once:true });
+      existente.addEventListener('error', () => reject(new Error('Error cargando '+src)), { once:true });
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onload = () => { s.dataset.cargado = '1'; resolve(); };
+    s.onerror = () => reject(new Error('No se pudo cargar: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+async function cargarModelosDeteccion(onProgreso){
+  if(_modelosCargados) return true;
+  if(_cargandoModelos) return _cargandoModelos;
+
+  _cargandoModelos = (async () => {
+    try {
+      onProgreso?.('Cargando TensorFlow.js…');
+      await cargarScript(CDN_TFJS);
+
+      onProgreso?.('Cargando detector de rostros…');
+      await cargarScript(CDN_FACEAPI);
+      if(!window.faceapi) throw new Error('face-api no disponible');
+      await window.faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODEL);
+
+      onProgreso?.('Cargando detector de vehículos…');
+      await cargarScript(CDN_COCO);
+      if(!window.cocoSsd) throw new Error('coco-ssd no disponible');
+      _cocoModel = await window.cocoSsd.load({ base: 'lite_mobilenet_v2' });
+
+      _modelosCargados = true;
+      console.log('✅ Modelos de detección listos');
+      return true;
+    } catch(e) {
+      console.error('❌ Error cargando modelos:', e);
+      _cargandoModelos = null;
+      throw e;
+    }
+  })();
+
+  return _cargandoModelos;
+}
+
+window.toggleAutoCensura = function(){
+  const t = document.getElementById('toggleAutoCensura');
+  if(!t) return;
+  autoCensuraActiva = !!t.checked;
+  try { localStorage.setItem(CLAVE_AUTO_CENSURA, autoCensuraActiva ? '1' : '0'); } catch(e){}
+  mostrarAviso(autoCensuraActiva ? '🛡️ Censura automática activada' : '⚠️ Censura automática desactivada', autoCensuraActiva ? 'ok' : 'error');
+};
+
+window.preCargarModelos = async function(){
+  if(_modelosCargados){ mostrarAviso('✅ Modelos ya cargados','ok'); return; }
+  const modal = document.getElementById('modalProcesando');
+  const titulo = document.getElementById('procesandoTitulo');
+  const paso = document.getElementById('procesandoPaso');
+  if(titulo) titulo.textContent = 'Preparando modelos…';
+  if(modal) modal.classList.add('visible');
+  const onP = (msg) => { if(paso) paso.textContent = msg; };
+  try {
+    await cargarModelosDeteccion(onP);
+    onP('✅ Listos');
+    await new Promise(r => setTimeout(r, 400));
+    mostrarAviso('✅ Modelos cargados correctamente','ok');
+  } catch(e){
+    onP('❌ ' + e.message);
+    mostrarAviso('⚠️ No se pudieron cargar los modelos','error');
+    await new Promise(r => setTimeout(r, 800));
+  } finally {
+    if(modal) modal.classList.remove('visible');
+  }
+};
+
+function cargarImagenParaDeteccion(src){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('No se pudo cargar la imagen para detección'));
+    img.src = src;
+  });
+}
+
+function pixelarRegion(ctx, x, y, w, h, tamano){
+  const canvas = ctx.canvas;
+  const sx = Math.max(0, Math.floor(x));
+  const sy = Math.max(0, Math.floor(y));
+  const sw = Math.min(canvas.width - sx, Math.ceil(w));
+  const sh = Math.min(canvas.height - sy, Math.ceil(h));
+  if(sw <= 1 || sh <= 1) return;
+
+  let imagen;
+  try { imagen = ctx.getImageData(sx, sy, sw, sh); }
+  catch(e){ return; }
+
+  const data = imagen.data;
+  const bs = Math.max(6, Math.floor(tamano));
+  for (let by = 0; by < sh; by += bs) {
+    for (let bx = 0; bx < sw; bx += bs) {
+      let r = 0, g = 0, b = 0, count = 0;
+      const yMax = Math.min(by + bs, sh);
+      const xMax = Math.min(bx + bs, sw);
+      for (let yy = by; yy < yMax; yy++) {
+        for (let xx = bx; xx < xMax; xx++) {
+          const i = (yy * sw + xx) * 4;
+          r += data[i]; g += data[i + 1]; b += data[i + 2]; count++;
+        }
+      }
+      if (!count) continue;
+      r = Math.round(r / count); g = Math.round(g / count); b = Math.round(b / count);
+      for (let yy = by; yy < yMax; yy++) {
+        for (let xx = bx; xx < xMax; xx++) {
+          const i = (yy * sw + xx) * 4;
+          data[i] = r; data[i + 1] = g; data[i + 2] = b;
+        }
+      }
+    }
+  }
+  ctx.putImageData(imagen, sx, sy);
+}
+
+async function detectarYCensurar(dataUrl, onProgreso){
+  const resultado = { dataUrl, rostros: 0, vehiculos: 0, aplicado: false, error: null };
+
+  if(!autoCensuraActiva){ return resultado; }
+
+  try { await cargarModelosDeteccion(onProgreso); }
+  catch(e){ resultado.error = 'Modelos no disponibles: ' + e.message; return resultado; }
+
+  let img;
+  try { img = await cargarImagenParaDeteccion(dataUrl); }
+  catch(e){ resultado.error = 'No se pudo abrir la imagen'; return resultado; }
+
+  const canvas = document.createElement('canvas');
+  canvas.width = img.naturalWidth || img.width;
+  canvas.height = img.naturalHeight || img.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+
+  const detecciones = [];
+
+  // --- Rostros ---
+  onProgreso?.('Analizando rostros…');
+  try {
+    const caras = await window.faceapi.detectAllFaces(
+      img,
+      new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 })
+    );
+    caras.forEach(c => {
+      const b = c.box;
+      detecciones.push({ tipo: 'rostro', x: b.x, y: b.y, w: b.width, h: b.height, score: c.score || 0 });
+    });
+    resultado.rostros = caras.length;
+  } catch(e){ console.warn('Face detection fallo:', e); }
+
+  // --- Vehículos ---
+  onProgreso?.('Analizando vehículos…');
+  try {
+    const objetos = await _cocoModel.detect(img, 20, 0.4);
+    objetos.forEach(o => {
+      if (!CLASES_VEHICULO.includes(o.class)) return;
+      const [x, y, w, h] = o.bbox;
+      detecciones.push({ tipo: 'vehiculo', clase: o.class, x, y, w, h, score: o.score });
+    });
+    resultado.vehiculos = objetos.filter(o => CLASES_VEHICULO.includes(o.class)).length;
+  } catch(e){ console.warn('COCO-SSD fallo:', e); }
+
+  if (detecciones.length === 0) {
+    resultado.aplicado = true;
+    return resultado;
+  }
+
+  // --- Aplicar pixelado ---
+  onProgreso?.('Aplicando censura…');
+  const tamPixel = Math.max(10, Math.round(Math.min(canvas.width, canvas.height) / 60));
+
+  detecciones.forEach(d => {
+    const pad = Math.max(d.w, d.h) * 0.10;
+    const rx = d.x - pad;
+    const ry = d.y - pad;
+    const rw = d.w + pad * 2;
+    const rh = d.h + pad * 2;
+    pixelarRegion(ctx, rx, ry, rw, rh, tamPixel);
+  });
+
+  try {
+    resultado.dataUrl = canvas.toDataURL('image/jpeg', FOTO_JPEG_QUALITY);
+    resultado.aplicado = true;
+  } catch(e) {
+    resultado.error = 'No se pudo exportar la imagen censurada';
+    resultado.dataUrl = dataUrl;
+    return resultado;
+  }
+
+  return resultado;
+}
+window.detectarYCensurar = detectarYCensurar;
+
+/* ═══════════════════════════════════════════════════════════════
+   📸 IndexedDB (fotos)
+   ═══════════════════════════════════════════════════════════════ */
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
 
 function abrirFotosDB(){
@@ -1584,28 +1844,71 @@ window.capturarFoto = async function(event){
     input.value=''; return;
   }
 
-  mostrarAviso('⏳ Procesando foto...', 'ok');
+  const modal = document.getElementById('modalProcesando');
+  const paso = document.getElementById('procesandoPaso');
+  const titulo = document.getElementById('procesandoTitulo');
+  const onP = (msg) => { if(paso) paso.textContent = msg; };
+  if(titulo) titulo.textContent = 'Procesando imagen…';
+  if(modal) modal.classList.add('visible');
 
   try {
+    onP('Comprimiendo imagen…');
     const b64 = await comprimirImagen(file);
     if(!b64 || !b64.startsWith('data:image/')) throw new Error('La imagen comprimida no es válida');
-    const kb = Math.round((b64.length * 0.75) / 1024);
+
+    let dataFinal = b64;
+    let censura = { rostros:0, vehiculos:0, aplicado:false, error:null };
+
+    if(autoCensuraActiva){
+      if(titulo) titulo.textContent = '🛡️ Protegiendo la imagen…';
+      try {
+        censura = await detectarYCensurar(b64, onP);
+        if(censura.error) console.warn('Censura error:', censura.error);
+        dataFinal = censura.dataUrl || b64;
+      } catch(e){
+        console.warn('Fallo censura, guardando original:', e);
+      }
+    } else {
+      onP('Censura desactivada, guardando original…');
+    }
+
+    const kb = Math.round((dataFinal.length * 0.75) / 1024);
     const id = 'foto_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
 
-    await guardarFotoDB(id, b64, { tamanoKB: kb, fecha: new Date().toISOString() });
+    await guardarFotoDB(id, dataFinal, {
+      tamanoKB: kb,
+      fecha: new Date().toISOString(),
+      censurada: !!(censura.rostros || censura.vehiculos),
+      rostros: censura.rostros || 0,
+      vehiculos: censura.vehiculos || 0
+    });
 
-    fotosPendientes.push({ id, tamanoKB: kb, fecha: new Date().toISOString() });
+    fotosPendientes.push({
+      id, tamanoKB: kb, fecha: new Date().toISOString(),
+      censurada: !!(censura.rostros || censura.vehiculos),
+      rostros: censura.rostros || 0,
+      vehiculos: censura.vehiculos || 0
+    });
     await renderizarGaleriaFotos();
     guardarEstadoCompleto();
     beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
-    mostrarAviso(`✅ Foto agregada (${kb} KB)`, 'ok');
+
+    let msg = `✅ Foto agregada (${kb} KB)`;
+    if(censura.rostros || censura.vehiculos){
+      const partes = [];
+      if(censura.rostros) partes.push(`${censura.rostros} rostro${censura.rostros>1?'s':''}`);
+      if(censura.vehiculos) partes.push(`${censura.vehiculos} vehículo${censura.vehiculos>1?'s':''}`);
+      msg = `🛡️ Censurado: ${partes.join(' + ')} · ${kb} KB`;
+    }
+    mostrarAviso(msg, 'ok');
   } catch(e) {
     console.error('❌ Error capturando foto:', e);
     const msg = (e && e.message) ? e.message : 'Error desconocido al procesar foto';
     mostrarAviso('⚠️ ' + msg, 'error');
     beepError();
   } finally {
+    if(modal) modal.classList.remove('visible');
     input.value = '';
   }
 };
@@ -1630,6 +1933,11 @@ async function renderizarGaleriaFotos(){
     const img=document.createElement('img'); img.src=datos[f.id]||''; img.alt=`Foto ${i+1}`;
     img.onclick=async ()=>{ const foto=await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto],0); };
     w.appendChild(img);
+    if(f.censurada){
+      const b=document.createElement('span'); b.className='badge-censura';
+      const partes=[]; if(f.rostros) partes.push('👤'+f.rostros); if(f.vehiculos) partes.push('🚗'+f.vehiculos);
+      b.textContent='🛡️ '+(partes.join(' ')); w.appendChild(b);
+    }
     const b=document.createElement('button'); b.type='button'; b.className='btn-eliminar-foto'; b.textContent='✕'; b.title='Eliminar';
     b.onclick=async (e)=>{ e.stopPropagation(); if(!confirm('¿Eliminar esta foto?'))return; await eliminarFotoDB(f.id); fotosPendientes.splice(i,1); await renderizarGaleriaFotos(); guardarEstadoCompleto(); };
     w.appendChild(b); c.appendChild(w);
@@ -1913,7 +2221,7 @@ window.registrarVisita = ()=>{
   const codigos=codigosPendientes.length?[...codigosPendientes]:[''];
   const t=calcularMinutos(l,s);
   const hr=new Date().toISOString();
-  const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha}));
+  const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}));
   codigos.forEach(co=>{ visitas.push({ llegada:l, salida:s, tiempo:t, estado:es, codigo:co, descripcion:desc, horaRegistro:hr, grupo:codigos.length>1?hr:null, fotos:fv }); });
   ultimoEstadoUsado=es;
   cancelarEscaneo();
@@ -2066,6 +2374,7 @@ window.imprimirReporteDiario = async function(){
   const horas=Math.floor(totalMinutosVisitas/60), mins=totalMinutosVisitas%60;
   const cUnicos=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean)).size;
   const tFotos=visitas.reduce((s,v)=>s+(Array.isArray(v.fotos)?v.fotos.length:0),0);
+  const tCensuradas=visitas.reduce((s,v)=>s+((Array.isArray(v.fotos)?v.fotos:[]).filter(f=>f.censurada).length),0);
   const chartEstados=generarChartEstadosHorizontal(820,520);
   const chartDona=generarChartDona(500,520);
   const iC=localStorage.getItem('tiempoBase_inicioCarga')||'—';
@@ -2082,7 +2391,7 @@ window.imprimirReporteDiario = async function(){
   let html=`
     <div class="reporte-diario">
       ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
-      ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos})}
+      ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos, 'Fotos censuradas':tCensuradas})}
       <header class="rd-header">
         <h1>Reporte Diario de Entregas</h1>
         <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
@@ -2122,8 +2431,8 @@ window.imprimirReporteDiario = async function(){
   html+=`<section class="rd-visitas"><h3 class="rd-section-title">📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:4%">#</th><th style="width:8%">Llegada</th><th style="width:8%">Salida</th><th style="width:7%">Tiempo</th><th style="width:15%">Código</th><th style="width:18%">Estado</th><th style="width:5%">📸</th><th>Descripción</th></tr></thead><tbody>`;
   if(!visitas.length){ html+=`<tr><td colspan="8" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas registradas</td></tr>`; }
   else{
-    visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; html+=`<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf:'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`; });
-    html+=`<tr class="rd-total"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${tFotos} foto(s)</strong></td></tr>`;
+    visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; const nCens=(v.fotos||[]).filter(f=>f.censurada).length; html+=`<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`; });
+    html+=`<tr class="rd-total"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${tFotos} foto(s)${tCensuradas?` · ${tCensuradas} censurada(s)`:''}</strong></td></tr>`;
   }
   html+=`</tbody></table></section>`;
   if(bancoCodigos.length){
@@ -2136,13 +2445,13 @@ window.imprimirReporteDiario = async function(){
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
     const df=await obtenerFotosDB(ids);
     const planas=[];
-    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length }); }); });
+    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
     const FPP=25; const totalP=Math.ceil(planas.length/FPP);
-    html+=`<section class="rd-fotos-section"><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''})</h3><p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
+    html+=`<section class="rd-fotos-section"><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length} foto${planas.length!==1?'s':''}${tCensuradas?` · ${tCensuradas} con censura`:''})</h3><p class="rd-nota">Fotos tomadas durante las visitas del día. ${planas.length>FPP?`Se distribuyen en ${totalP} páginas.`:''}</p>`;
     for(let p=0;p<planas.length;p+=FPP){
       const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
       html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP} (fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length})</div><div class="rd-fotos-grid">`;
-      fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${f.codigo}</span>`:'Sin código'}</div></div>`; });
+      fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${f.codigo}</span>`:'Sin código'}${cs}</div></div>`; });
       html+=`</div></div>`;
     }
     html+=`</section>`;
@@ -2177,14 +2486,15 @@ window.imprimirAlbumFotografico = async function(){
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
     const df=await obtenerFotosDB(ids);
     const planas=[];
-    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada }); }); });
+    vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, descripcion:v.descripcion, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
     if(!planas.length){ alert('⚠️ No se pudieron cargar las fotos.'); return; }
     const FPP=12; const totalP=Math.ceil(planas.length/FPP);
     const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     const hash=await sha256(JSON.stringify({u:usuario, t:planas.length, f:fechaLocalISO()}));
+    const tCens=planas.filter(p=>p.censurada).length;
     let html=`<div class="reporte-diario">
       ${generarEncabezadoCorporativo('Álbum Fotográfico · Evidencia de Entregas', codigoDoc)}
-      ${generarPanelAuditoria(hash, {'Total fotos':planas.length, 'Total páginas':totalP, 'Visitas con foto':vCF.length})}
+      ${generarPanelAuditoria(hash, {'Total fotos':planas.length, 'Total páginas':totalP, 'Visitas con foto':vCF.length, 'Fotos censuradas':tCens})}
       <header class="rd-header">
         <h1>Álbum Fotográfico de Evidencias</h1>
         <div class="rd-subtitle">Registro visual de entregas del día</div>
@@ -2199,7 +2509,7 @@ window.imprimirAlbumFotografico = async function(){
     for(let p=0;p<planas.length;p+=FPP){
       const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
       html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div><div class="rd-album-grid">`;
-      fp.forEach(f=>{ html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}</div></div>`; });
+      fp.forEach(f=>{ const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ ${[f.rostros?`👤${f.rostros}`:'',f.vehiculos?`🚗${f.vehiculos}`:''].filter(Boolean).join(' ')}</span>`:''; html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}${cs}</div></div>`; });
       html+=`</div></div>`;
     }
     html+=generarPieAuditoria()+'</div>';
@@ -2242,7 +2552,7 @@ function construirTextoDia(){
   let t=`📦 *COLSERLOG - Reporte Diario*\n━━━━━━━━━━━━━━━━━\n👤 *Mensajero:* ${u}\n📅 *Fecha:* ${f}\n\n📊 *RESUMEN DEL DÍA*\n✅ Entregados: *${e}*\n❌ No entregados: *${n}*\n📦 Total visitas: *${totalVisitas}*\n⏱️ Promedio: *${p} min*\n🎯 Efectividad: *${ef}%*\n🕒 Tiempo total: *${Math.floor(totalMinutosVisitas/60)}h ${totalMinutosVisitas%60}m*\n\n`;
   const ev=Object.entries(contadores).filter(([k,v])=>v>0);
   if(ev.length){ t+=`📈 *DISTRIBUCIÓN POR ESTADO*\n`; ev.forEach(([k,v])=>{ const pp=totalVisitas>0?((v/totalVisitas)*100).toFixed(0):0; t+=`• ${k}: ${v} (${pp}%)\n`; }); t+=`\n`; }
-  if(visitas.length){ t+=`📋 *DETALLE DE VISITAS* (${visitas.length})\n`; visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; t+=`${i+1}. ${v.codigo||'Sin código'} · ${v.estado}${nf?' 📸'+nf:''}\n`; }); }
+  if(visitas.length){ t+=`📋 *DETALLE DE VISITAS* (${visitas.length})\n`; visitas.forEach((v,i)=>{ const nf=Array.isArray(v.fotos)?v.fotos.length:0; const nc=(v.fotos||[]).filter(f=>f.censurada).length; t+=`${i+1}. ${v.codigo||'Sin código'} · ${v.estado}${nf?' 📸'+nf+(nc?' 🛡️'+nc:''):''}\n`; }); }
   t+=`\n_Generado por Colserlog_`;
   return t;
 }
@@ -2300,7 +2610,7 @@ async function crearObjetoRespaldo(){
   try{ e=JSON.parse(localStorage.getItem('estadoSesion')||'null'); }catch(e2){}
   try{ en=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e2){}
   const obj={ version:8, usuario:u, fecha_respaldo:new Date().toISOString(), estadoSesion:e, entregasDiariasDetallado:en, tiemposBase:{ inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga:localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||'' } };
-  try{ const tf=await obtenerTodasLasFotosDB(); if(tf.length) obj.fotosIndexedDB=tf.map(f=>({ id:f.id, data:f.data, fecha:f.fecha, tamanoKB:f.tamanoKB })); }catch(e2){}
+  try{ const tf=await obtenerTodasLasFotosDB(); if(tf.length) obj.fotosIndexedDB=tf.map(f=>({ id:f.id, data:f.data, fecha:f.fecha, tamanoKB:f.tamanoKB, censurada:f.censurada, rostros:f.rostros, vehiculos:f.vehiculos })); }catch(e2){}
   return obj;
 }
 function b64EncodeUnicode(s){ try{ return btoa(unescape(encodeURIComponent(s))); }catch(e){ return ''; } }
@@ -2329,7 +2639,7 @@ window.descargarRespaldoWord = async function(){
   h+=`<h3>📋 Visitas Registradas (${lv.length})</h3>`;
   if(!lv.length) h+=`<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
   else{ h+=`<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`; lv.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; }); h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`; }
-  if(r.fotosIndexedDB && r.fotosIndexedDB.length) h+=`<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s).</em></p>`;
+  if(r.fotosIndexedDB && r.fotosIndexedDB.length){ const nC=r.fotosIndexedDB.filter(f=>f.censurada).length; h+=`<h3>📸 Fotos incluidas</h3><p style="text-align:center;color:#666;"><em>${r.fotosIndexedDB.length} foto(s)${nC?` · ${nC} censurada(s) con 🛡️`:''}.</em></p>`; }
   h+=`<h3>📈 Distribución por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
   Object.keys(cR).forEach(k=>{ const c=cR[k]||0; if(!c) return; const p=tV>0?((c/tV)*100).toFixed(1):'0.0'; h+=`<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`; });
   h+=`</tbody></table>`;
@@ -2352,7 +2662,7 @@ async function aplicarRespaldo(r){
   localStorage.setItem('entregasDiariasDetallado', JSON.stringify(hF));
   if(r.estadoSesion){ if(r.estadoSesion.visitas){ r.estadoSesion.visitas=r.estadoSesion.visitas.map(v=>({...v, codigo:(v.codigo||'').replace(/\D/g,'').slice(0,12), fotos:Array.isArray(v.fotos)?v.fotos:[]})); } if(r.estadoSesion.bancoCodigos) r.estadoSesion.bancoCodigos=r.estadoSesion.bancoCodigos.filter(c=>/^\d{12}$/.test(c)); localStorage.setItem('estadoSesion', JSON.stringify(r.estadoSesion)); }
   if(r.tiemposBase){ for(const k in r.tiemposBase){ if(r.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, r.tiemposBase[k]); } }
-  if(Array.isArray(r.fotosIndexedDB) && r.fotosIndexedDB.length){ let rst=0; for(const f of r.fotosIndexedDB){ try{ await guardarFotoDB(f.id,f.data,{tamanoKB:f.tamanoKB,fecha:f.fecha}); rst++; }catch(e){} } }
+  if(Array.isArray(r.fotosIndexedDB) && r.fotosIndexedDB.length){ let rst=0; for(const f of r.fotosIndexedDB){ try{ await guardarFotoDB(f.id,f.data,{tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}); rst++; }catch(e){} } }
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
   return true;
 }
@@ -2409,7 +2719,7 @@ window.exportarDiaAWord = async function(){
     const ids=[]; vcw.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); }); const df=await obtenerFotosDB(ids);
     const tot=vcw.reduce((s,v)=>s+v.fotos.length,0);
     h+=`<h3>📸 Evidencia Fotográfica (${tot})</h3><table><thead><tr><th style="width:8%">#</th><th style="width:15%">Visita</th><th style="width:20%">Código</th><th style="width:22%">Estado</th><th>Foto</th></tr></thead><tbody>`;
-    vcw.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,i)=>{ const d=df[foto.id]; if(!d) return; h+=`<tr><td>${i+1}</td><td>#${nv}</td><td style="font-family:monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="font-size:7pt;">${v.estado||'—'}</td><td><img src="${d}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td></tr>`; }); });
+    vcw.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,i)=>{ const d=df[foto.id]; if(!d) return; const cs=foto.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; h+=`<tr><td>${i+1}</td><td>#${nv}</td><td style="font-family:monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="font-size:7pt;">${v.estado||'—'}${cs}</td><td><img src="${d}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td></tr>`; }); });
     h+=`</tbody></table>`;
   }
   h+=`<div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
@@ -2450,10 +2760,12 @@ window.exportarHistorialCompletoAWord = function(){
 window.verEstadoAlmacenamiento = async function(){
   const tf=await contarFotosDB(); const todas=await obtenerTodasLasFotosDB();
   const tKB=todas.reduce((s,f)=>s+(f.tamanoKB||Math.round((f.data?.length||0)*0.75/1024)),0);
+  const nC=todas.filter(f=>f.censurada).length;
   let lS=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i), v=localStorage.getItem(k); lS+=(k.length+(v?.length||0)); } }catch(e){}
   let est; if(navigator.storage && navigator.storage.estimate){ try{ est=await navigator.storage.estimate(); }catch(e){} }
-  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   └─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
+  let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   ├─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
   if(est) m+=`🌐 Navegador:\n   ├─ Usado: ${(est.usage/1024/1024).toFixed(2)} MB\n   └─ Cuota: ${(est.quota/1024/1024).toFixed(0)} MB\n`;
+  m+=`\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}`;
   alert(m);
 };
 window.eliminarFotosAntiguas = async function(){
@@ -2575,7 +2887,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -2597,6 +2909,8 @@ window.addEventListener('load', async ()=>{
   try{ await abrirFotosDB(); console.log('✅ IndexedDB listo'); }catch(e){ console.warn('IndexedDB:', e); }
   const tf=document.getElementById('toggleFotosNube'); if(tf) tf.checked=sincronizarFotosNube;
   try{ localStorage.setItem('clave_fotos_nube_proxy', sincronizarFotosNube?'true':'false'); }catch(e){}
+  // Inicializar toggle de auto-censura
+  const ta=document.getElementById('toggleAutoCensura'); if(ta) ta.checked=autoCensuraActiva;
   cargarTiemposBase();
   if(cargarEstadoCompleto() && visitas.length){ renderizarTabla(); actualizarDashboard(); }
   const teniaBorrador = restaurarBorrador();
