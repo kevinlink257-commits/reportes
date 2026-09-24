@@ -874,6 +874,9 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 
 <div id="areaImpresion" style="display:none"></div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     MÓDULO 1: FIREBASE + AUTENTICACIÓN + SINCRONIZACIÓN
+     ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -1377,6 +1380,9 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     MÓDULO 2: APP COMPLETA (visitas, fotos, informes, impresión robusta)
+     ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
@@ -1465,17 +1471,14 @@ async function cargarModelosDeteccion(onProgreso){
     try {
       onProgreso?.('Cargando TensorFlow.js…');
       await cargarScript(CDN_TFJS);
-
       onProgreso?.('Cargando detector de rostros…');
       await cargarScript(CDN_FACEAPI);
       if(!window.faceapi) throw new Error('face-api no disponible');
       await window.faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODEL);
-
       onProgreso?.('Cargando detector de vehículos…');
       await cargarScript(CDN_COCO);
       if(!window.cocoSsd) throw new Error('coco-ssd no disponible');
       _cocoModel = await window.cocoSsd.load({ base: 'lite_mobilenet_v2' });
-
       _modelosCargados = true;
       console.log('✅ Modelos de detección listos');
       return true;
@@ -1536,11 +1539,9 @@ function pixelarRegion(ctx, x, y, w, h, tamano){
   const sw = Math.min(canvas.width - sx, Math.ceil(w));
   const sh = Math.min(canvas.height - sy, Math.ceil(h));
   if(sw <= 1 || sh <= 1) return;
-
   let imagen;
   try { imagen = ctx.getImageData(sx, sy, sw, sh); }
   catch(e){ return; }
-
   const data = imagen.data;
   const bs = Math.max(6, Math.floor(tamano));
   for (let by = 0; by < sh; by += bs) {
@@ -1569,65 +1570,37 @@ function pixelarRegion(ctx, x, y, w, h, tamano){
 
 async function detectarYCensurar(dataUrl, onProgreso){
   const resultado = { dataUrl, rostros: 0, vehiculos: 0, aplicado: false, error: null };
-
   if(!autoCensuraActiva){ return resultado; }
-
   try { await cargarModelosDeteccion(onProgreso); }
   catch(e){ resultado.error = 'Modelos no disponibles: ' + e.message; return resultado; }
-
   let img;
   try { img = await cargarImagenParaDeteccion(dataUrl); }
   catch(e){ resultado.error = 'No se pudo abrir la imagen'; return resultado; }
-
   const canvas = document.createElement('canvas');
   canvas.width = img.naturalWidth || img.width;
   canvas.height = img.naturalHeight || img.height;
   const ctx = canvas.getContext('2d');
   ctx.drawImage(img, 0, 0);
-
   const detecciones = [];
-
   onProgreso?.('Analizando rostros…');
   try {
-    const caras = await window.faceapi.detectAllFaces(
-      img,
-      new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 })
-    );
-    caras.forEach(c => {
-      const b = c.box;
-      detecciones.push({ tipo: 'rostro', x: b.x, y: b.y, w: b.width, h: b.height, score: c.score || 0 });
-    });
+    const caras = await window.faceapi.detectAllFaces(img, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 }));
+    caras.forEach(c => { const b = c.box; detecciones.push({ tipo: 'rostro', x: b.x, y: b.y, w: b.width, h: b.height, score: c.score || 0 }); });
     resultado.rostros = caras.length;
   } catch(e){ console.warn('Face detection fallo:', e); }
-
   onProgreso?.('Analizando vehículos…');
   try {
     const objetos = await _cocoModel.detect(img, 20, 0.4);
-    objetos.forEach(o => {
-      if (!CLASES_VEHICULO.includes(o.class)) return;
-      const [x, y, w, h] = o.bbox;
-      detecciones.push({ tipo: 'vehiculo', clase: o.class, x, y, w, h, score: o.score });
-    });
+    objetos.forEach(o => { if (!CLASES_VEHICULO.includes(o.class)) return; const [x, y, w, h] = o.bbox; detecciones.push({ tipo: 'vehiculo', clase: o.class, x, y, w, h, score: o.score }); });
     resultado.vehiculos = objetos.filter(o => CLASES_VEHICULO.includes(o.class)).length;
   } catch(e){ console.warn('COCO-SSD fallo:', e); }
-
-  if (detecciones.length === 0) {
-    resultado.aplicado = true;
-    return resultado;
-  }
-
+  if (detecciones.length === 0) { resultado.aplicado = true; return resultado; }
   onProgreso?.('Aplicando censura…');
   const tamPixel = Math.max(10, Math.round(Math.min(canvas.width, canvas.height) / 60));
-
   detecciones.forEach(d => {
     const pad = Math.max(d.w, d.h) * 0.10;
-    const rx = d.x - pad;
-    const ry = d.y - pad;
-    const rw = d.w + pad * 2;
-    const rh = d.h + pad * 2;
-    pixelarRegion(ctx, rx, ry, rw, rh, tamPixel);
+    pixelarRegion(ctx, d.x - pad, d.y - pad, d.w + pad * 2, d.h + pad * 2, tamPixel);
   });
-
   try {
     resultado.dataUrl = canvas.toDataURL('image/jpeg', FOTO_JPEG_QUALITY);
     resultado.aplicado = true;
@@ -1636,7 +1609,6 @@ async function detectarYCensurar(dataUrl, onProgreso){
     resultado.dataUrl = dataUrl;
     return resultado;
   }
-
   return resultado;
 }
 window.detectarYCensurar = detectarYCensurar;
@@ -1646,10 +1618,6 @@ window.detectarYCensurar = detectarYCensurar;
    ═══════════════════════════════════════════════════════════════ */
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
 
-// ═══════════════════════════════════════════════════════════════
-// CACHE DE FOTOS: permite construir el informe SIN await,
-// garantizando que window.print() se ejecute dentro del gesto del usuario.
-// ═══════════════════════════════════════════════════════════════
 const cacheFotos = new Map();
 
 async function precargarFotosEnCache(){
@@ -1657,29 +1625,20 @@ async function precargarFotosEnCache(){
     const todas = await obtenerTodasLasFotosDB();
     cacheFotos.clear();
     todas.forEach(f => cacheFotos.set(f.id, f.data));
-    console.log(`📸 Cache fotos: ${todas.length} entradas (${(todas.reduce((s,f)=>s+(f.data?.length||0),0)/1024/1024).toFixed(2)} MB)`);
-  } catch(e){
-    console.warn('precargarFotosEnCache falló:', e);
-  }
+    console.log(`📸 Cache fotos: ${todas.length} entradas`);
+  } catch(e){ console.warn('precargarFotosEnCache falló:', e); }
 }
-function getFotoDataUrlSync(id){ return cacheFotos.get(id) || null; }
-function getFotosSync(ids){
-  const out = {};
-  ids.forEach(id => { const d = cacheFotos.get(id); if(d) out[id] = d; });
-  return out;
-}
+function getFotosSync(ids){ const out = {}; ids.forEach(id => { const d = cacheFotos.get(id); if(d) out[id] = d; }); return out; }
 window.precargarFotosEnCache = precargarFotosEnCache;
 
 function abrirFotosDB(){
   return new Promise((resolve, reject) => {
     if(fotosDB){ resolve(fotosDB); return; }
-    if(!window.indexedDB){ reject(new Error('IndexedDB no soportado en este navegador')); return; }
+    if(!window.indexedDB){ reject(new Error('IndexedDB no soportado')); return; }
     let req;
     try { req = indexedDB.open(DB_NOMBRE, DB_VERSION); }
     catch(e) { reject(new Error('No se pudo abrir IndexedDB: ' + (e.message||''))); return; }
-    req.onupgradeneeded = (e) => {
-      try { const db = e.target.result; if(!db.objectStoreNames.contains(STORE_FOTOS)) db.createObjectStore(STORE_FOTOS, {keyPath:'id'}); } catch(err) {}
-    };
+    req.onupgradeneeded = (e) => { try { const db = e.target.result; if(!db.objectStoreNames.contains(STORE_FOTOS)) db.createObjectStore(STORE_FOTOS, {keyPath:'id'}); } catch(err) {} };
     req.onsuccess = (e) => { fotosDB = e.target.result; resolve(fotosDB); };
     req.onerror = () => reject(req.error || new Error('Error abriendo IndexedDB'));
     req.onblocked = () => reject(new Error('IndexedDB bloqueado. Cierra otras pestañas.'));
@@ -1694,7 +1653,7 @@ async function guardarFotoDB(id, dataUrl, meta={}){
     let tx;
     try { tx = db.transaction(STORE_FOTOS, 'readwrite'); }
     catch(e) { done(false, new Error('No se pudo abrir transacción: ' + (e.message||''))); return; }
-    tx.onabort = () => done(false, tx.error || new Error('Transacción abortada (cuota excedida).'));
+    tx.onabort = () => done(false, tx.error || new Error('Transacción abortada'));
     tx.onerror = () => done(false, tx.error || new Error('Error en transacción IndexedDB'));
     tx.oncomplete = () => { cacheFotos.set(id, dataUrl); done(true); };
     try {
@@ -1728,16 +1687,9 @@ function getWeekNumber(d){ const dt=new Date(d.getFullYear(),d.getMonth(),d.getD
 function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=new Date(d.getTime()-off*60*1000); return l.toISOString().split('T')[0]; }
 function esDarkMode(){ return document.body.classList.contains('dark'); }
 
-// ═══════════════════════════════════════════════════════════════
-// HASH SÍNCRONO para el panel de auditoría (FNV-1a + djb2)
-// Permite que las funciones de impresión NO usen await.
-// ═══════════════════════════════════════════════════════════════
 function hashSync(texto){
   let h1 = 0x811c9dc5;
-  for(let i = 0; i < texto.length; i++){
-    h1 ^= texto.charCodeAt(i);
-    h1 = (h1 * 0x01000193) >>> 0;
-  }
+  for(let i = 0; i < texto.length; i++){ h1 ^= texto.charCodeAt(i); h1 = (h1 * 0x01000193) >>> 0; }
   let h2 = 5381;
   for(let i = 0; i < texto.length; i++) h2 = ((h2 << 5) + h2 + texto.charCodeAt(i)) | 0;
   return `${h1.toString(16).padStart(8,'0').toUpperCase()}-${(h2>>>0).toString(16).padStart(8,'0').toUpperCase()}-${texto.length.toString(16).toUpperCase()}`;
@@ -1844,10 +1796,7 @@ window.toggleFotosNube = function(){ const t=document.getElementById('toggleFoto
 
 function comprimirImagen(file, maxDim=FOTO_MAX_DIM, quality=FOTO_JPEG_QUALITY){
   return new Promise((resolve, reject) => {
-    if(!file || !file.type || !file.type.startsWith('image/')){
-      reject(new Error('El archivo no es una imagen válida'));
-      return;
-    }
+    if(!file || !file.type || !file.type.startsWith('image/')){ reject(new Error('El archivo no es una imagen válida')); return; }
     const esHEIC = /heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name||'');
     const reader = new FileReader();
     reader.onerror = () => reject(new Error('No se pudo leer el archivo desde el dispositivo'));
@@ -1855,11 +1804,8 @@ function comprimirImagen(file, maxDim=FOTO_MAX_DIM, quality=FOTO_JPEG_QUALITY){
       const dataUrl = e.target.result;
       const img = new Image();
       img.onerror = () => {
-        if(esHEIC){
-          reject(new Error('Formato HEIC no soportado. En iPhone: Ajustes → Cámara → Formatos → "Más compatible" (JPG).'));
-        } else {
-          reject(new Error('No se pudo decodificar la imagen. Prueba con otra foto o formato JPG.'));
-        }
+        if(esHEIC){ reject(new Error('Formato HEIC no soportado. En iPhone: Ajustes → Cámara → Formatos → "Más compatible" (JPG).')); }
+        else { reject(new Error('No se pudo decodificar la imagen. Prueba con otra foto o formato JPG.')); }
       };
       img.onload = () => {
         try {
@@ -1875,9 +1821,7 @@ function comprimirImagen(file, maxDim=FOTO_MAX_DIM, quality=FOTO_JPEG_QUALITY){
           ctx.fillRect(0, 0, width, height);
           ctx.drawImage(img, 0, 0, width, height);
           const finalizar = (dataUrlFinal) => {
-            if(!dataUrlFinal || typeof dataUrlFinal !== 'string' || !dataUrlFinal.startsWith('data:image/')){
-              reject(new Error('El canvas no generó una imagen válida')); return;
-            }
+            if(!dataUrlFinal || typeof dataUrlFinal !== 'string' || !dataUrlFinal.startsWith('data:image/')){ reject(new Error('El canvas no generó una imagen válida')); return; }
             resolve(dataUrlFinal);
           };
           if(typeof canvas.toBlob === 'function'){
@@ -1904,19 +1848,9 @@ window.capturarFoto = async function(event){
   const input = event.target;
   const file = input.files && input.files[0];
   if(!file){ input.value=''; return; }
-
-  if(fotosPendientes.length >= MAX_FOTOS_POR_VISITA){
-    mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos por visita`, 'error');
-    beepError(); input.value=''; return;
-  }
-  if(!file.type || !file.type.startsWith('image/')){
-    mostrarAviso('⚠️ Solo se permiten imágenes (JPG, PNG, WEBP)', 'error');
-    input.value=''; return;
-  }
-  if(file.size > 15*1024*1024){
-    mostrarAviso(`⚠️ Imagen muy grande (${(file.size/1024/1024).toFixed(1)} MB, máx 15 MB)`, 'error');
-    input.value=''; return;
-  }
+  if(fotosPendientes.length >= MAX_FOTOS_POR_VISITA){ mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos por visita`, 'error'); beepError(); input.value=''; return; }
+  if(!file.type || !file.type.startsWith('image/')){ mostrarAviso('⚠️ Solo se permiten imágenes (JPG, PNG, WEBP)', 'error'); input.value=''; return; }
+  if(file.size > 15*1024*1024){ mostrarAviso(`⚠️ Imagen muy grande (${(file.size/1024/1024).toFixed(1)} MB, máx 15 MB)`, 'error'); input.value=''; return; }
 
   const modal = document.getElementById('modalProcesando');
   const paso = document.getElementById('procesandoPaso');
@@ -1929,46 +1863,25 @@ window.capturarFoto = async function(event){
     onP('Comprimiendo imagen…');
     const b64 = await comprimirImagen(file);
     if(!b64 || !b64.startsWith('data:image/')) throw new Error('La imagen comprimida no es válida');
-
     let dataFinal = b64;
     let censura = { rostros:0, vehiculos:0, aplicado:false, error:null };
-
     if(autoCensuraActiva){
       if(titulo) titulo.textContent = '🛡️ Protegiendo la imagen…';
       try {
         censura = await detectarYCensurar(b64, onP);
         if(censura.error) console.warn('Censura error:', censura.error);
         dataFinal = censura.dataUrl || b64;
-      } catch(e){
-        console.warn('Fallo censura, guardando original:', e);
-      }
-    } else {
-      onP('Censura desactivada, guardando original…');
-    }
-
+      } catch(e){ console.warn('Fallo censura, guardando original:', e); }
+    } else { onP('Censura desactivada, guardando original…'); }
     const kb = Math.round((dataFinal.length * 0.75) / 1024);
     const id = 'foto_' + Date.now() + '_' + Math.random().toString(36).slice(2,8);
-
-    await guardarFotoDB(id, dataFinal, {
-      tamanoKB: kb,
-      fecha: new Date().toISOString(),
-      censurada: !!(censura.rostros || censura.vehiculos),
-      rostros: censura.rostros || 0,
-      vehiculos: censura.vehiculos || 0
-    });
+    await guardarFotoDB(id, dataFinal, { tamanoKB: kb, fecha: new Date().toISOString(), censurada: !!(censura.rostros || censura.vehiculos), rostros: censura.rostros || 0, vehiculos: censura.vehiculos || 0 });
     cacheFotos.set(id, dataFinal);
-
-    fotosPendientes.push({
-      id, tamanoKB: kb, fecha: new Date().toISOString(),
-      censurada: !!(censura.rostros || censura.vehiculos),
-      rostros: censura.rostros || 0,
-      vehiculos: censura.vehiculos || 0
-    });
+    fotosPendientes.push({ id, tamanoKB: kb, fecha: new Date().toISOString(), censurada: !!(censura.rostros || censura.vehiculos), rostros: censura.rostros || 0, vehiculos: censura.vehiculos || 0 });
     await renderizarGaleriaFotos();
     guardarEstadoCompleto();
     beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
-
     let msg = `✅ Foto agregada (${kb} KB)`;
     if(censura.rostros || censura.vehiculos){
       const partes = [];
@@ -1993,7 +1906,6 @@ async function renderizarGaleriaFotos(){
   const ct = document.getElementById('contadorFotos');
   if(!c) return;
   c.innerHTML = '';
-
   let datos = {};
   if(fotosPendientes.length){
     const ids = fotosPendientes.map(f => f.id);
@@ -2005,7 +1917,6 @@ async function renderizarGaleriaFotos(){
       guardarEstadoCompleto();
     }
   }
-
   if(fotosPendientes.length === 0){
     const v = document.createElement('div');
     v.className = 'galeria-vacia';
@@ -2014,7 +1925,6 @@ async function renderizarGaleriaFotos(){
     if(ct) ct.textContent = '';
     return;
   }
-
   fotosPendientes.forEach((f, i) => {
     const w = document.createElement('div');
     w.className = 'foto-thumb';
@@ -2041,7 +1951,6 @@ async function renderizarGaleriaFotos(){
     w.appendChild(b);
     c.appendChild(w);
   });
-
   if(ct){
     const total = fotosPendientes.reduce((s, f) => s + (f.tamanoKB || 0), 0);
     ct.textContent = `📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`;
@@ -2219,9 +2128,7 @@ window.renderizarVistaDia = function(){
   if(busq) filtradas = filtradas.filter(({v}) => (v.codigo||'').toLowerCase().includes(busq));
   if(cb){
     const etiqueta = filtroVistaDia === 'todas' ? 'Todas' : filtroVistaDia === 'entregados' ? 'Entregados' : 'No entregados';
-    cb.textContent = busq
-      ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}`
-      : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
+    cb.textContent = busq ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}` : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
   }
   if(!filtradas.length){ lista.innerHTML = '<div class="sin-resultados">📭 No hay visitas para mostrar</div>'; return; }
   let html = `<table class="tabla-visitas-dia"><thead><tr>
@@ -2414,16 +2321,148 @@ function generarChartDona(ancho,alto){
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   🖨️ IMPRESIÓN SÍNCRONA (compatible con iOS Safari y Chrome Android)
-   La clave: window.print() debe llamarse sin await previo.
-   Para lograrlo usamos hashSync + cacheFotos (ambos síncronos).
+   🖨️ IMPRESIÓN ROBUSTA (navegador + PWA standalone iOS/Android)
+   Estrategia en 3 capas:
+   1. window.print() inmediato (preserva gesto del usuario)
+   2. iframe oculto con iframe.contentWindow.print() (iOS PWA)
+   3. Reabrir en navegador externo con auto-impresión
    ═══════════════════════════════════════════════════════════════ */
+
+function esModoStandalone(){
+  try {
+    return window.matchMedia('(display-mode: standalone)').matches
+        || window.matchMedia('(display-mode: fullscreen)').matches
+        || window.matchMedia('(display-mode: minimal-ui)').matches
+        || window.navigator.standalone === true
+        || document.referrer.includes('android-app://');
+  } catch(e){ return false; }
+}
+window.esModoStandalone = esModoStandalone;
+
+function esIOS(){
+  return /iPhone|iPad|iPod/i.test(navigator.userAgent)
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function obtenerHTMLParaIframe(contenidoHTML){
+  const estilos = Array.from(document.querySelectorAll('style')).map(s => s.outerHTML).join('\n');
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    ${estilos}
+    <style>
+      body{background:#fff!important;color:#000!important;margin:0!important;padding:12mm 10mm!important}
+      body.dark{background:#fff!important}
+      @page{size:A4 portrait;margin:12mm 10mm}
+      .modo-impresion>.no-print{display:none!important}
+    </style>
+    </head><body class="modo-impresion modo-reporte-diario">
+    ${contenidoHTML}
+    </body></html>`;
+}
+
+function imprimirViaIframe(contenidoHTML){
+  return new Promise((resolve) => {
+    console.log('🖨️ Fallback: imprimiendo vía iframe…');
+    const ifr = document.createElement('iframe');
+    ifr.setAttribute('aria-hidden', 'true');
+    ifr.style.cssText = 'position:fixed;right:0;bottom:0;width:1px;height:1px;border:0;opacity:0;pointer-events:none;';
+    document.body.appendChild(ifr);
+
+    const html = obtenerHTMLParaIframe(contenidoHTML);
+    const doc = ifr.contentWindow.document;
+    doc.open();
+    doc.write(html);
+    doc.close();
+
+    const limpiar = () => { try { document.body.removeChild(ifr); } catch(e){} resolve(true); };
+
+    const esperarImagenes = () => {
+      const imgs = doc.querySelectorAll('img');
+      if(!imgs.length) return Promise.resolve();
+      return Promise.all(Array.from(imgs).map(img => new Promise(res => {
+        if(img.complete && img.naturalWidth > 0) return res();
+        const to = setTimeout(res, 3000);
+        img.onload = () => { clearTimeout(to); res(); };
+        img.onerror = () => { clearTimeout(to); res(); };
+      })));
+    };
+
+    setTimeout(async () => {
+      try { await esperarImagenes(); } catch(e){}
+      setTimeout(() => {
+        try {
+          ifr.contentWindow.focus();
+          ifr.contentWindow.print();
+          console.log('✅ iframe.print() ejecutado');
+        } catch(e) { console.error('❌ iframe.print() falló:', e); }
+        setTimeout(limpiar, 2500);
+      }, 300);
+    }, 300);
+  });
+}
+
+function intentarPrintDirecto(){
+  return new Promise((resolve) => {
+    let disparado = false;
+    const marcar = () => { disparado = true; };
+    window.addEventListener('afterprint', marcar, { once: true });
+    try {
+      console.log('🖨️ Ejecutando window.print() (síncrono)…');
+      window.print();
+    } catch(e) { console.error('print() lanzó excepción:', e); }
+    setTimeout(() => {
+      window.removeEventListener('afterprint', marcar);
+      resolve(disparado);
+    }, 1500);
+  });
+}
+
+function abrirEnNavegadorParaImprimir(){
+  try {
+    sessionStorage.setItem('colserlog_auto_print', '1');
+    sessionStorage.setItem('colserlog_auto_print_ts', String(Date.now()));
+  } catch(e){}
+  const aviso = '⚠️ En modo aplicación instalada, iOS no permite imprimir directamente.\n\n' +
+                '✅ Se abrirá la app en Safari/Chrome y la impresión se activará automáticamente.\n\n' +
+                '💡 Consejo: para imprimir informes grandes, abre siempre la app desde el navegador (https://…) en lugar del ícono de inicio.';
+  alert(aviso);
+  try { window.open(location.href, '_blank'); }
+  catch(e){ location.href = location.href; }
+}
+
+async function ejecutarImpresion(contenidoHTML, clasesExtra){
+  const standalone = esModoStandalone();
+  const ios = esIOS();
+  console.log(`🖨️ Imprimiendo · standalone=${standalone} · iOS=${ios}`);
+
+  prepararAreaImpresion(contenidoHTML, clasesExtra);
+
+  const ok = await intentarPrintDirecto();
+  if(ok){ console.log('✅ Impresión exitosa (capa 1)'); finalizarImpresion(); return; }
+
+  console.warn('⚠️ window.print() no disparó afterprint. Activando fallback…');
+
+  if(standalone || ios){
+    try {
+      await imprimirViaIframe(contenidoHTML);
+      finalizarImpresion();
+      console.log('✅ Impresión vía iframe completada (capa 2)');
+      return;
+    } catch(e){ console.error('❌ iframe falló:', e); }
+    finalizarImpresion();
+    abrirEnNavegadorParaImprimir();
+    return;
+  }
+
+  console.log('ℹ️ No se detectó standalone. El usuario pudo haber cancelado.');
+  finalizarImpresion();
+}
+
 function prepararAreaImpresion(html, clasesExtra){
-  let area=document.getElementById('areaImpresion');
-  if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
+  let area = document.getElementById('areaImpresion');
+  if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
   area.innerHTML = html;
   area.style.display = 'block';
-  // Marcar dark antes de añadir clases para poder restaurar
   _estabaDarkAlImprimir = document.body.classList.contains('dark');
   if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching');
   document.body.classList.add('modo-impresion','modo-reporte-diario');
@@ -2435,17 +2474,16 @@ function finalizarImpresion(){
   document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
   document.body.classList.remove('theme-switching');
   const area = document.getElementById('areaImpresion');
-  if(area){ area.innerHTML=''; area.style.display='none'; }
+  if(area){ area.innerHTML = ''; area.style.display = 'none'; }
   if(_estabaDarkAlImprimir && typeof window.cargarDarkMode === 'function'){
     try { window.cargarDarkMode(); } catch(e){}
   }
   _estabaDarkAlImprimir = false;
 }
 
-// Listener global único para limpiar tras imprimir
 window.addEventListener('afterprint', finalizarImpresion);
 
-window.imprimirReporteDiario = function(){
+window.imprimirReporteDiario = async function(){
   try {
     if(!visitas.length){ if(!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return; }
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
@@ -2473,40 +2511,39 @@ window.imprimirReporteDiario = function(){
     const payloadHash = JSON.stringify({u:usuario, f:fechaLocalISO(), v:visitas.map(v=>({l:v.llegada,s:v.salida,c:v.codigo,e:v.estado})), t:totalVisitas, m:totalMinutosVisitas});
     const hash = hashSync(payloadHash);
 
-    let html=`
-      <div class="reporte-diario">
-        ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
-        ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos, 'Fotos censuradas':tCensuradas})}
-        <header class="rd-header">
-          <h1>Reporte Diario de Entregas</h1>
-          <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
-          <div class="rd-info">
-            <div><strong>Mensajero:</strong> ${usuario}</div>
-            <div><strong>Fecha de ruta:</strong> ${fecha}</div>
-            <div><strong>Generado:</strong> ${horaGen}</div>
-          </div>
-        </header>
-        <section class="rd-kpis">
-          <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
-          <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entregados</div><div class="rd-kpi-valor">${noEnt}</div></div>
-          <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total Visitas</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
-          <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efectividad</div><div class="rd-kpi-valor">${efec}%</div></div>
-          <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
-          <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo Total</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
-          <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Códigos Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
-          <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
-        </section>
-        <section class="rd-charts">
-          <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
-          <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
-        </section>
-        <section class="rd-tiempos">
-          <h3 class="rd-section-title">⏱️ Tiempos Base del Día</h3>
-          <table class="rd-tabla-tiempos">
-            <tr><td><strong>Inicio carga</strong><br>${iC}</td><td><strong>Fin carga</strong><br>${fC}</td><td><strong>Salida empresa</strong><br>${sE}</td><td><strong>Primera entrega</strong><br>${pE}</td></tr>
-            <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
-          </table>
-        </section>`;
+    let html=`<div class="reporte-diario">
+      ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
+      ${generarPanelAuditoria(hash, {'Total visitas':totalVisitas, 'Códigos únicos':cUnicos, 'Fotos evidencia':tFotos, 'Fotos censuradas':tCensuradas})}
+      <header class="rd-header">
+        <h1>Reporte Diario de Entregas</h1>
+        <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
+        <div class="rd-info">
+          <div><strong>Mensajero:</strong> ${usuario}</div>
+          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
+          <div><strong>Generado:</strong> ${horaGen}</div>
+        </div>
+      </header>
+      <section class="rd-kpis">
+        <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
+        <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entregados</div><div class="rd-kpi-valor">${noEnt}</div></div>
+        <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total Visitas</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
+        <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efectividad</div><div class="rd-kpi-valor">${efec}%</div></div>
+        <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
+        <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo Total</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
+        <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Códigos Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
+        <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
+      </section>
+      <section class="rd-charts">
+        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
+        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
+      </section>
+      <section class="rd-tiempos">
+        <h3 class="rd-section-title">⏱️ Tiempos Base del Día</h3>
+        <table class="rd-tabla-tiempos">
+          <tr><td><strong>Inicio carga</strong><br>${iC}</td><td><strong>Fin carga</strong><br>${fC}</td><td><strong>Salida empresa</strong><br>${sE}</td><td><strong>Primera entrega</strong><br>${pE}</td></tr>
+          <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
+        </table>
+      </section>`;
     const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(eCV.length){
       html+=`<section class="rd-estados"><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla rd-tabla-estados"><thead><tr><th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th></tr></thead><tbody>`;
@@ -2527,7 +2564,6 @@ window.imprimirReporteDiario = function(){
     }
     const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
     if(vCF.length){
-      // ⚡ SIN await: usamos cacheFotos en memoria
       const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
       const df = getFotosSync(ids);
       const planas=[];
@@ -2549,17 +2585,7 @@ window.imprimirReporteDiario = function(){
     </section>
     ${generarPieAuditoria()}</div>`;
 
-    prepararAreaImpresion(html, []);
-
-    // ⚡⚡ LLAMADA SÍNCRONA — MISMO GESTO DEL USUARIO ⚡⚡
-    setTimeout(() => {
-      try { window.print(); }
-      catch(err){
-        console.error('print() falló:', err);
-        finalizarImpresion();
-        alert('❌ No se pudo abrir el diálogo de impresión.\n\n' + (err.message || ''));
-      }
-    }, 50);
+    await ejecutarImpresion(html, []);
 
   } catch(err){
     console.error('Error al preparar el informe:', err);
@@ -2568,7 +2594,7 @@ window.imprimirReporteDiario = function(){
   }
 };
 
-window.imprimirAlbumFotografico = function(){
+window.imprimirAlbumFotografico = async function(){
   try {
     const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
     if(!vCF.length){ alert('⚠️ No hay fotos registradas hoy.'); return; }
@@ -2607,12 +2633,7 @@ window.imprimirAlbumFotografico = function(){
     }
     html+=generarPieAuditoria()+'</div>';
 
-    prepararAreaImpresion(html, ['modo-album']);
-
-    setTimeout(() => {
-      try { window.print(); }
-      catch(err){ console.error('print() falló:', err); finalizarImpresion(); alert('❌ No se pudo imprimir: ' + (err.message||'')); }
-    }, 50);
+    await ejecutarImpresion(html, ['modo-album']);
 
   } catch(err){
     console.error('Error al preparar el álbum:', err);
@@ -2621,7 +2642,7 @@ window.imprimirAlbumFotografico = function(){
   }
 };
 
-window.imprimirInformeMensual = function(){
+window.imprimirInformeMensual = async function(){
   try {
     const ic=document.getElementById('informeContenedor');
     if(!ic||!ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe mensual.'); return; }
@@ -2629,25 +2650,13 @@ window.imprimirInformeMensual = function(){
     const codigoDoc=`MEN-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'—';
     const hash=hashSync(JSON.stringify({u:usuario, t:Date.now(), informe:clon.innerHTML.length}));
-    const wrap=document.createElement('div');
-    wrap.className='reporte-diario';
-    wrap.innerHTML=generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)+generarPanelAuditoria(hash)+clon.innerHTML+generarPieAuditoria();
-
-    let area=document.getElementById('areaImpresion');
-    if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); }
-    area.innerHTML='';
-    area.appendChild(wrap);
-    area.style.display='block';
-
-    _estabaDarkAlImprimir = document.body.classList.contains('dark');
-    if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching');
-    document.body.classList.add('modo-impresion','modo-reporte-diario');
-
-    setTimeout(() => {
-      try { window.print(); }
-      catch(err){ console.error('print() falló:', err); finalizarImpresion(); alert('❌ No se pudo imprimir: ' + (err.message||'')); }
-    }, 50);
-
+    const html=`<div class="reporte-diario">
+      ${generarEncabezadoCorporativo('Informe Mensual de Entregas', codigoDoc)}
+      ${generarPanelAuditoria(hash)}
+      ${clon.innerHTML}
+      ${generarPieAuditoria()}
+    </div>`;
+    await ejecutarImpresion(html, []);
   } catch(err){
     console.error('Error al preparar el informe mensual:', err);
     finalizarImpresion();
@@ -2773,9 +2782,7 @@ function b64EncodeUnicode(str){
     const bytes = new TextEncoder().encode(str);
     let bin = '';
     const CHUNK = 0x8000;
-    for(let i = 0; i < bytes.length; i += CHUNK){
-      bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK));
-    }
+    for(let i = 0; i < bytes.length; i += CHUNK){ bin += String.fromCharCode.apply(null, bytes.subarray(i, i + CHUNK)); }
     return btoa(bin);
   }catch(e){ console.error('b64EncodeUnicode error:', e); return ''; }
 }
@@ -3135,7 +3142,7 @@ window.verEstadoAlmacenamiento = async function(){
   let est; if(navigator.storage && navigator.storage.estimate){ try{ est=await navigator.storage.estimate(); }catch(e){} }
   let m=`💾 ESTADO DE ALMACENAMIENTO\n━━━━━━━━━━━━━━━━━━━\n\n📸 Fotos IndexedDB: ${tf}\n   ├─ Tamaño: ${(tKB/1024).toFixed(2)} MB\n   ├─ Censuradas: ${nC}\n   └─ Cache en memoria: ${cacheFotos.size}\n\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n   └─ Uso: ${((lS/1024/5000)*100).toFixed(1)}%\n\n`;
   if(est) m+=`🌐 Navegador:\n   ├─ Usado: ${(est.usage/1024/1024).toFixed(2)} MB\n   └─ Cuota: ${(est.quota/1024/1024).toFixed(0)} MB\n`;
-  m+=`\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}`;
+  m+=`\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}\n🖨️ Modo: ${esModoStandalone()?'PWA standalone':'Navegador'}`;
   alert(m);
 };
 window.eliminarFotosAntiguas = async function(){
@@ -3258,7 +3265,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -3276,6 +3283,30 @@ document.addEventListener('input', (e) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════
+// AUTO-IMPRESIÓN tras reabrir en navegador externo (iOS PWA)
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener('load', () => {
+  try {
+    const flag = sessionStorage.getItem('colserlog_auto_print');
+    const ts = parseInt(sessionStorage.getItem('colserlog_auto_print_ts') || '0', 10);
+    if(flag === '1' && (Date.now() - ts) < 30000){
+      sessionStorage.removeItem('colserlog_auto_print');
+      sessionStorage.removeItem('colserlog_auto_print_ts');
+      console.log('🖨️ Auto-impresión activada tras reabrir en navegador externo');
+      setTimeout(() => {
+        if(typeof window.imprimirReporteDiario === 'function'){
+          try { window.imprimirReporteDiario(); }
+          catch(e){ console.error('Auto-print falló:', e); }
+        }
+      }, 1200);
+    } else {
+      sessionStorage.removeItem('colserlog_auto_print');
+      sessionStorage.removeItem('colserlog_auto_print_ts');
+    }
+  } catch(e){}
+});
+
 window.addEventListener('load', async ()=>{
   try {
     sincronizarFotosNube = (localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true');
@@ -3285,8 +3316,6 @@ window.addEventListener('load', async ()=>{
   } catch(e){}
 
   try{ await abrirFotosDB(); console.log('✅ IndexedDB listo'); }catch(e){ console.warn('IndexedDB:', e); }
-
-  // ⚡ PRECARGAR FOTOS EN CACHÉ para poder imprimir de forma SÍNCRONA
   try { await precargarFotosEnCache(); } catch(e){ console.warn('precargarFotos:', e); }
 
   const ta=document.getElementById('toggleAutoCensura'); if(ta) ta.checked=autoCensuraActiva;
