@@ -208,7 +208,7 @@ body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
 .modal-content p{color:var(--text-secondary);font-size:.9rem;text-align:center;margin:0 0 20px 0}
 .modal-content input{font-size:16px;padding:14px}
 .modal-content button{margin-top:16px;padding:14px;font-size:1rem;background:var(--sys-blue)}
-.modal-content button.secundario{background:var(--gray-5);font-size:.88rem}
+.modal-content button.secundario{background:var(--gray-5);font-size:.88em}
 #listaUsuariosGuardados{margin-top:12px}
 #listaUsuariosGuardados button{background:var(--bg-section);color:var(--text-primary);margin-top:6px;padding:12px;font-size:.9rem;text-align:left;border:1px solid var(--border-main);border-radius:var(--radius-sm)}
 .tabs-user{display:flex;gap:6px;background:var(--bg-section);padding:5px;border-radius:var(--radius-md);margin-bottom:16px}
@@ -874,6 +874,9 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 
 <div id="areaImpresion" style="display:none"></div>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     SCRIPT 1 · Firebase + Autenticación + Sincronización
+     ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
@@ -887,23 +890,21 @@ const CLAVE_FOTOS_NUBE = "syncFotosNube";
 const CLAVE_FOTOS_NUBE_PROXY = "clave_fotos_nube_proxy";
 const CLAVE_AUTO_CENSURA = "colserlog_auto_censura";
 
-let db, syncActivo = false, guardadoPendiente = null, ultimaVersionLocal = 0, syncAutomaticoActivo = true, unsubscribeEscucha = null, intentosSync = 0, guardadoEnProgreso = false;
+let db, syncActivo=false, guardadoPendiente=null, ultimaVersionLocal=0, syncAutomaticoActivo=true,
+    unsubscribeEscucha=null, intentosSync=0, guardadoEnProgreso=false;
 
 try { const app = initializeApp(firebaseConfig); db = initializeFirestore(app, { experimentalForceLongPolling:true, useFetchStreams:false }); console.log('✅ Firebase listo'); }
-catch(e) { console.error('❌ Error Firebase:', e); actualizarEstadoNube('❌ Error de configuración', 'error'); }
+catch(e){ console.error('❌ Error Firebase:', e); actualizarEstadoNube('❌ Error de configuración','error'); }
 
 function actualizarEstadoNube(txt,tipo='ok'){ const el=document.getElementById('estadoNube'); if(!el)return; el.textContent=txt; el.className='estado-nube '+tipo; }
 window.actualizarEstadoNube = actualizarEstadoNube;
 
 function slugify(txt){
-  const s = (txt||'').toString().toLowerCase().normalize('NFD')
-    .replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9]+/g,'-')
-    .replace(/^-|-$/g,'');
+  const s=(txt||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
   if(s) return s;
-  let h = 0; const raw = (txt||'').toString();
-  for(let i=0;i<raw.length;i++) h = ((h<<5) - h + raw.charCodeAt(i)) | 0;
-  return 'u-' + (h>>>0).toString(36);
+  let h=0; const raw=(txt||'').toString();
+  for(let i=0;i<raw.length;i++) h=((h<<5)-h+raw.charCodeAt(i))|0;
+  return 'u-'+(h>>>0).toString(36);
 }
 function getUsuarioActual(){ try{ return (localStorage.getItem(CLAVE_USUARIO_LOCAL)||'').trim()||null; }catch{ return null; } }
 function setUsuarioActual(n){ try{ localStorage.setItem(CLAVE_USUARIO_LOCAL, n.trim()); }catch(e){} }
@@ -911,56 +912,65 @@ function refUsuario(){ const u=getUsuarioActual(); if(!u||!db)return null; retur
 window.refUsuario = refUsuario;
 window.getUsuarioActual = getUsuarioActual;
 
-async function guardarCuentaEnNube(nombre, hash) {
-  if (!db) return false;
-  try {
-    const slug = slugify(nombre) || 'sin-nombre';
-    const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
-    await setDoc(ref, { nombre: nombre.trim(), hash: hash, fechaRegistro: new Date().toISOString(), ultimaSesion: new Date().toISOString() }, { merge: true });
+async function guardarCuentaEnNube(nombre, hash){
+  if(!db) return false;
+  try{
+    const slug=slugify(nombre)||'sin-nombre';
+    const ref=doc(db,'colserlog_usuarios',CODIGO_GRUPO,'cuentas',slug);
+    await setDoc(ref,{ nombre:nombre.trim(), hash, fechaRegistro:new Date().toISOString(), ultimaSesion:new Date().toISOString() },{ merge:true });
     return true;
-  } catch(e) { return false; }
+  }catch(e){ console.warn('guardarCuentaEnNube:', e); return false; }
 }
-
-async function buscarCuentaEnNube(nombre) {
-  if (!db) return null;
-  try {
-    const slug = slugify(nombre) || 'sin-nombre';
-    const ref = doc(db, 'colserlog_usuarios', CODIGO_GRUPO, 'cuentas', slug);
-    const snap = await getDoc(ref);
-    if (snap.exists()) return snap.data();
-    return null;
-  } catch(e) { return null; }
+async function buscarCuentaEnNube(nombre){
+  if(!db) return null;
+  try{
+    const slug=slugify(nombre)||'sin-nombre';
+    const snap=await getDoc(doc(db,'colserlog_usuarios',CODIGO_GRUPO,'cuentas',slug));
+    return snap.exists()?snap.data():null;
+  }catch(e){ console.warn('buscarCuentaEnNube:', e); return null; }
 }
 
 function aplicarDarkMode(activo){
   document.body.classList.add('theme-switching');
   document.body.classList.toggle('dark', activo);
-  const btn=document.getElementById('btnDarkMode'); if(btn){ btn.textContent = activo?'☀️':'🌙'; btn.title = activo?'Modo claro':'Modo oscuro'; }
-  const meta=document.querySelector('meta[name="theme-color"]'); if(meta) meta.content = activo?'#121212':'#0a84ff';
+  const btn=document.getElementById('btnDarkMode');
+  if(btn){ btn.textContent=activo?'☀️':'🌙'; btn.title=activo?'Modo claro':'Modo oscuro'; }
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.content=activo?'#121212':'#0a84ff';
   requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.remove('theme-switching')));
 }
-window.toggleDarkMode = function(){ const a=!document.body.classList.contains('dark'); aplicarDarkMode(a); try{ localStorage.setItem(CLAVE_DARK_MODE, a?'1':'0'); }catch(e){} setTimeout(()=>{ if(typeof window.recargarGraficas==='function') window.recargarGraficas(); },100); };
-function cargarDarkMode(){ let p=null; try{ p=localStorage.getItem(CLAVE_DARK_MODE); }catch(e){} if(p===null){ aplicarDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); } else aplicarDarkMode(p==='1'); }
+window.toggleDarkMode=function(){
+  const a=!document.body.classList.contains('dark');
+  aplicarDarkMode(a);
+  try{ localStorage.setItem(CLAVE_DARK_MODE, a?'1':'0'); }catch(e){}
+  setTimeout(()=>{ if(typeof window.recargarGraficas==='function') window.recargarGraficas(); },100);
+};
+function cargarDarkMode(){ let p=null; try{ p=localStorage.getItem(CLAVE_DARK_MODE); }catch(e){}
+  if(p===null) aplicarDarkMode(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  else aplicarDarkMode(p==='1');
+}
 window.cargarDarkMode = cargarDarkMode;
 
-let deferredPrompt = null;
+let deferredPrompt=null;
 function crearIconoPWA(){
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient></defs><rect width="512" height="512" rx="96" fill="url(#g)"/><text x="256" y="330" font-size="240" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold">C</text></svg>`;
-  return 'data:image/svg+xml;base64,' + btoa(svg);
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a84ff"/><stop offset="1" stop-color="#bf5af2"/></linearGradient></defs><rect width="512" height="512" rx="96" fill="url(#g)"/><text x="256" y="330" font-size="240" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-weight="bold">C</text></svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(svg);
 }
 function inyectarManifest(){
   const iconoURL=crearIconoPWA();
   const manifest={ name:'Colserlog - Reporte de Entregas', short_name:'Colserlog', description:'Registro de visitas y entregas', start_url:location.pathname+location.search, scope:'./', display:'standalone', orientation:'portrait', background_color:'#0a84ff', theme_color:'#0a84ff', lang:'es', icons:[{src:iconoURL,sizes:'192x192',type:'image/svg+xml',purpose:'any'},{src:iconoURL,sizes:'512x512',type:'image/svg+xml',purpose:'any'},{src:iconoURL,sizes:'512x512',type:'image/svg+xml',purpose:'maskable'}] };
-  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'}); const url=URL.createObjectURL(blob);
-  const link=document.getElementById('manifestLink'); if(link) link.href=url;
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.getElementById('manifestLink');
+  if(link){ link.href=url; link.onload=()=>URL.revokeObjectURL(url); }
   const apple=document.getElementById('appleIcon'); if(apple) apple.href=iconoURL;
 }
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt=e; const btn=document.getElementById('btnInstalarPWA'); if(btn) btn.style.display='inline-block'; });
-window.addEventListener('appinstalled', ()=>{ deferredPrompt=null; const btn=document.getElementById('btnInstalarPWA'); if(btn) btn.style.display='none'; if(typeof window.mostrarAviso==='function') window.mostrarAviso('✅ App instalada','ok'); });
+window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferredPrompt=e; const b=document.getElementById('btnInstalarPWA'); if(b) b.style.display='inline-block'; });
+window.addEventListener('appinstalled', ()=>{ deferredPrompt=null; const b=document.getElementById('btnInstalarPWA'); if(b) b.style.display='none'; if(typeof window.mostrarAviso==='function') window.mostrarAviso('✅ App instalada','ok'); });
 window.instalarPWA = async function(){
-  if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted' && typeof window.mostrarAviso==='function') window.mostrarAviso('🎉 Instalando app...','ok'); deferredPrompt=null; const btn=document.getElementById('btnInstalarPWA'); if(btn) btn.style.display='none'; return; }
-  const modal=document.getElementById('modalPWA'); const cont=document.getElementById('pwaInstrucciones');
-  const esIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent); const esAndroid=/Android/i.test(navigator.userAgent);
+  if(deferredPrompt){ deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; if(outcome==='accepted'&&typeof window.mostrarAviso==='function') window.mostrarAviso('🎉 Instalando app...','ok'); deferredPrompt=null; const b=document.getElementById('btnInstalarPWA'); if(b) b.style.display='none'; return; }
+  const modal=document.getElementById('modalPWA'), cont=document.getElementById('pwaInstrucciones');
+  const esIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent), esAndroid=/Android/i.test(navigator.userAgent);
   if(esIOS) cont.innerHTML=`<p>En <strong>Safari</strong>:</p><ol><li>Toca <strong>Compartir</strong> ⬆️</li><li>Selecciona <strong>"Añadir a pantalla de inicio"</strong></li><li>Toca <strong>"Añadir"</strong></li></ol>`;
   else if(esAndroid) cont.innerHTML=`<p>En <strong>Chrome</strong>:</p><ol><li>Toca <strong>⋮</strong></li><li>Selecciona <strong>"Instalar app"</strong></li><li>Confirma</li></ol>`;
   else cont.innerHTML=`<p>Busca el ícono de <strong>instalar</strong> en la barra de direcciones.</p>`;
@@ -968,11 +978,10 @@ window.instalarPWA = async function(){
 };
 
 async function hashPassword(p){
-  if(!window.isSecureContext || !crypto || !crypto.subtle){
-    throw new Error('Se requiere HTTPS para iniciar sesión de forma segura. Abre la app por https:// o localhost.');
-  }
+  if(!window.isSecureContext || !crypto || !crypto.subtle)
+    throw new Error('Se requiere HTTPS para iniciar sesión de forma segura.');
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 function getUsuariosRegistrados(){ try{ return JSON.parse(localStorage.getItem(CLAVE_USUARIOS_REGISTRADOS)||'[]'); }catch{ return []; } }
 function guardarUsuariosRegistrados(l){ try{ localStorage.setItem(CLAVE_USUARIOS_REGISTRADOS, JSON.stringify(l)); }catch(e){} }
@@ -1013,149 +1022,162 @@ window.hacerRegistro = async function(){
   const lista=getUsuariosRegistrados();
   lista.push({nombre:n.trim(),hash,fechaRegistro:new Date().toISOString()});
   guardarUsuariosRegistrados(lista);
-
   mostrarInfoUser('⏳ Creando cuenta...');
-  guardarCuentaEnNube(n.trim(), hash).catch(e => {});
-
+  guardarCuentaEnNube(n.trim(), hash).catch(()=>{});
   setUsuarioActual(n.trim());
   actualizarBarraUsuario();
 
   const ref = refUsuario();
-  if (ref) {
-    try {
+  if(ref){
+    try{
       const payload = construirPayload();
-      const p = setDoc(ref, { ...payload, nombre: n.trim(), grupo: CODIGO_GRUPO, fechaRegistro: new Date().toISOString(), cuentaCreada: true }, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
-      await Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 10s')), 10000)) ]);
-    } catch(e) {  }
+      await Promise.race([
+        setDoc(ref, { ...payload, nombre:n.trim(), grupo:CODIGO_GRUPO, fechaRegistro:new Date().toISOString(), cuentaCreada:true }, { merge:true }),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT 10s')),10000))
+      ]);
+    }catch(e){ console.warn('setDoc registro:', e); }
   }
 
   mostrarInfoUser('✅ Cuenta creada. Iniciando sesión...');
-  await new Promise(r => setTimeout(r, 200));
+  await new Promise(r=>setTimeout(r,200));
   await iniciarSesionConUsuario(n.trim());
 };
 
 window.hacerLogin = async function(){
   ocultarErrorUser(); ocultarInfoUser();
-  const n = (document.getElementById('loginNombre').value||'').trim();
-  const p = (document.getElementById('loginPassword').value||'');
-  if(!n || !p) return mostrarErrorUser('Completa usuario y contraseña.');
+  const n=(document.getElementById('loginNombre').value||'').trim();
+  const p=(document.getElementById('loginPassword').value||'');
+  if(!n||!p) return mostrarErrorUser('Completa usuario y contraseña.');
 
   const btns = document.querySelectorAll('#formLogin button');
-  btns.forEach(b => b.disabled = true);
+  btns.forEach(b=>b.disabled=true);
 
-  try {
+  try{
     let user = buscarUsuario(n);
     if(!user){
       mostrarInfoUser('🔍 Buscando en la nube...');
-      actualizarEstadoNube('⏳ Buscando usuario...', 'loading');
-      const nubeUser = await Promise.race([ buscarCuentaEnNube(n), new Promise(r => setTimeout(() => r(null), 8000)) ]);
+      actualizarEstadoNube('⏳ Buscando usuario...','loading');
+      const nubeUser = await Promise.race([
+        buscarCuentaEnNube(n),
+        new Promise(r=>setTimeout(()=>r(null),8000))
+      ]);
       if(nubeUser){
         const lista = getUsuariosRegistrados();
-        const idx = lista.findIndex(u => u.nombre.toLowerCase() === nubeUser.nombre.toLowerCase());
-        if(idx === -1){ lista.push({ nombre: nubeUser.nombre, hash: nubeUser.hash, fechaRegistro: nubeUser.fechaRegistro }); } else { lista[idx].hash = nubeUser.hash; }
+        const idx = lista.findIndex(u=>u.nombre.toLowerCase()===nubeUser.nombre.toLowerCase());
+        if(idx===-1) lista.push({ nombre:nubeUser.nombre, hash:nubeUser.hash, fechaRegistro:nubeUser.fechaRegistro });
+        else lista[idx].hash = nubeUser.hash;
         guardarUsuariosRegistrados(lista);
         user = nubeUser;
         mostrarInfoUser('✅ Cuenta recuperada de la nube.');
-      } else {
+      }else{
         ocultarInfoUser();
-        actualizarEstadoNube('❌ Usuario no encontrado', 'error');
+        actualizarEstadoNube('❌ Usuario no encontrado','error');
         return mostrarErrorUser('Usuario no encontrado. Verifica el nombre o regístrate.');
       }
     }
     let h;
-    try { h = await hashPassword(p); }
-    catch(e){ return mostrarErrorUser(e.message); }
-    if(h !== user.hash) return mostrarErrorUser('Contraseña incorrecta.');
-    guardarCuentaEnNube(user.nombre, user.hash).catch(() => {});
+    try{ h = await hashPassword(p); }catch(e){ return mostrarErrorUser(e.message); }
+    if(h!==user.hash) return mostrarErrorUser('Contraseña incorrecta.');
+    guardarCuentaEnNube(user.nombre, user.hash).catch(()=>{});
     mostrarInfoUser('✅ Credenciales correctas. Cargando datos...');
-    await new Promise(r => setTimeout(r, 100));
+    await new Promise(r=>setTimeout(r,100));
     await iniciarSesionConUsuario(user.nombre);
   } finally {
-    btns.forEach(b => b.disabled = false);
+    btns.forEach(b=>b.disabled=false);
   }
 };
 
 async function iniciarSesionConUsuario(nombre){
   const anterior = getUsuarioActual();
   if(anterior && anterior !== nombre){
-    try { window.sincronizarConNube(); } catch(e){}
-    await new Promise(r => setTimeout(r, 300));
+    try{ window.sincronizarConNube(); }catch(e){}
+    await new Promise(r=>setTimeout(r,300));
     limpiarTodoLocalStorage();
-    if(typeof window.cancelarEscaneo === 'function') try{ window.cancelarEscaneo(); }catch(e){}
+    if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
   }
-
   setUsuarioActual(nombre);
   actualizarBarraUsuario();
   document.getElementById('modalUsuario').classList.remove('visible');
-  actualizarEstadoNube('⏳ Cargando tus datos...', 'loading');
+  actualizarEstadoNube('⏳ Cargando tus datos...','loading');
 
   const ref = refUsuario();
   const tareas = [];
-  tareas.push(migrarDatosAntiguosSiExisten(nombre).catch(e => { return false; }));
+  tareas.push(migrarDatosAntiguosSiExisten(nombre).catch(()=>false));
+
   let snapData = null;
   if(ref){
-    const p = getDoc(ref).catch(err => { console.warn('getDoc bg:', err); return null; });
-    tareas.push(Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]).then(snap => { snapData = snap; return true; }).catch(e => { return false; }));
+    // FIX: no se traga el error dentro de getDoc
+    const p = getDoc(ref).then(snap=>{ snapData=snap; return true; })
+                        .catch(err=>{ console.warn('getDoc falló:', err); return false; });
+    tareas.push(Promise.race([
+      p,
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT 8s')),8000))
+    ]).catch(()=>false));
   }
   const [migro] = await Promise.all(tareas);
 
   if(!migro && snapData && snapData.exists && snapData.exists()){
     const d = snapData.data();
-    if(d.estadoSesion){ localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion)); }
-    if(d.entregasDiariasDetallado){ localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado)); }
-    if(d.tiemposBase){ for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, d.tiemposBase[k]); } }
+    if(d.estadoSesion) localStorage.setItem('estadoSesion', JSON.stringify(d.estadoSesion));
+    if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado', JSON.stringify(d.entregasDiariasDetallado));
+    if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k, d.tiemposBase[k]); }
     if(d.version) ultimaVersionLocal = d.version;
   } else if(ref && (!snapData || !snapData.exists || !snapData.exists())){
-    try {
-      const payload = construirPayload();
-      const p = setDoc(ref, payload, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
-      await Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('TIMEOUT 8s')), 8000)) ]);
-    } catch(e){  }
+    try{
+      await Promise.race([
+        setDoc(ref, construirPayload(), { merge:true }),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('TIMEOUT 8s')),8000))
+      ]);
+    }catch(e){ console.warn('setDoc inicial:', e); }
   }
 
   syncActivo = true;
   iniciarEscucha();
-  if(typeof window.recargarUIDesdeStorage === 'function') window.recargarUIDesdeStorage();
-  actualizarEstadoNube('☁️ Conectado como ' + nombre, 'ok');
-  if(typeof window.mostrarAviso === 'function') window.mostrarAviso('✅ Bienvenido, ' + nombre, 'ok');
+  if(typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage();
+  actualizarEstadoNube('☁️ Conectado como '+nombre,'ok');
+  if(typeof window.mostrarAviso==='function') window.mostrarAviso('✅ Bienvenido, '+nombre,'ok');
   mostrarBotonCerrarSesion(true);
 
   try{
     const tgl = document.getElementById('toggleFotosNube');
-    if(tgl){ tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE) === 'true'; localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked ? 'true' : 'false'); }
+    if(tgl){
+      tgl.checked = localStorage.getItem(CLAVE_FOTOS_NUBE)==='true';
+      localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, tgl.checked?'true':'false');
+    }
   }catch(e){}
 }
 
-function mostrarBotonCerrarSesion(visible){ const btn = document.getElementById('btnCerrarSesion'); if(btn) btn.style.display = visible ? 'inline-block' : 'none'; }
+function mostrarBotonCerrarSesion(v){ const b=document.getElementById('btnCerrarSesion'); if(b) b.style.display = v?'inline-block':'none'; }
 
 window.cerrarSesion = async function(){
   const usuario = getUsuarioActual();
   if(!usuario){ mostrarModalUsuario(); return; }
-  if(!confirm('🚪 ¿Cerrar sesión de "' + usuario + '"?\n\n✅ Tus datos se guardarán en la nube\n✅ Podrás volver a entrar cuando quieras')){ return; }
+  if(!confirm('🚪 ¿Cerrar sesión de "'+usuario+'"?\n\n✅ Tus datos se guardarán en la nube\n✅ Podrás volver a entrar cuando quieras')) return;
 
-  actualizarEstadoNube('⏳ Guardando en segundo plano...', 'loading');
-  try {
-    if (db) {
+  actualizarEstadoNube('⏳ Guardando en segundo plano...','loading');
+  try{
+    if(db){
       const ref = refUsuario();
-      if (ref) {
-        const payload = construirPayload();
-        const p = setDoc(ref, payload, { merge: true }).catch(err => { console.warn('setDoc bg:', err); });
-        Promise.race([ p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout bg')), 4000)) ]).then(() => {}).catch(e => {});
+      if(ref){
+        const p = setDoc(ref, construirPayload(), { merge:true })
+          .catch(err=>{ console.warn('setDoc cerrarSesion:', err); throw err; });
+        Promise.race([ p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout bg')),4000)) ])
+          .catch(e=>console.warn('sync en cierre falló:', e.message));
       }
     }
-  } catch(e){}
+  }catch(e){}
 
-  if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha = null; }
-  syncActivo = false;
-  if(typeof window.cancelarEscaneo === 'function') try{ window.cancelarEscaneo(); }catch(e){}
+  if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
+  syncActivo=false;
+  if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
 
   limpiarTodoLocalStorage();
   try{ localStorage.removeItem(CLAVE_USUARIO_LOCAL); }catch(e){}
   actualizarBarraUsuario();
-  if(typeof window.reiniciarUIOffline === 'function') window.reiniciarUIOffline();
+  if(typeof window.reiniciarUIOffline==='function') window.reiniciarUIOffline();
   mostrarBotonCerrarSesion(false);
-  actualizarEstadoNube('🚪 Sesión cerrada', 'loading');
-  if(typeof window.mostrarAviso === 'function') window.mostrarAviso('🚪 Sesión cerrada', 'ok');
+  actualizarEstadoNube('🚪 Sesión cerrada','loading');
+  if(typeof window.mostrarAviso==='function') window.mostrarAviso('🚪 Sesión cerrada','ok');
   mostrarModalUsuario();
 };
 
@@ -1165,8 +1187,20 @@ window.olvidarUsuariosLocales = function(){
   renderizarListaUsuarios();
   mostrarInfoUser('Usuarios locales borrados. Inicia sesión con tus credenciales.');
 };
-function limpiarTodoLocalStorage(){ try{ localStorage.removeItem('estadoSesion'); localStorage.removeItem('entregasDiariasDetallado'); localStorage.removeItem('colserlog_borrador'); for(let i=localStorage.length-1;i>=0;i--){ const k=localStorage.key(i); if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k); } }catch(e){} }
+
+function limpiarTodoLocalStorage(){
+  try{
+    localStorage.removeItem('estadoSesion');
+    localStorage.removeItem('entregasDiariasDetallado');
+    localStorage.removeItem('colserlog_borrador');
+    for(let i=localStorage.length-1;i>=0;i--){
+      const k=localStorage.key(i);
+      if(k&&k.startsWith('tiempoBase_')) localStorage.removeItem(k);
+    }
+  }catch(e){}
+}
 window.limpiarTodoLocalStorage = limpiarTodoLocalStorage;
+
 function actualizarBarraUsuario(){
   const u=getUsuarioActual();
   const s=document.getElementById('infoUsuario'), a=document.getElementById('avatarUsuario'), t=document.getElementById('tituloUsuarioHistorial');
@@ -1177,22 +1211,22 @@ function actualizarBarraUsuario(){
 function renderizarListaUsuarios(){
   const c=document.getElementById('listaUsuariosGuardados'); if(!c)return; c.innerHTML='';
   const us=getUsuariosRegistrados(); if(!us.length)return;
-  const p=document.createElement('p'); p.style.marginTop='15px'; p.style.fontSize='0.8em'; p.style.color='var(--text-muted)'; p.style.textAlign='left'; p.textContent='👥 Usuarios:';
+  const p=document.createElement('p');
+  p.style.cssText='margin-top:15px;font-size:.8em;color:var(--text-muted);text-align:left';
+  p.textContent='👥 Usuarios:';
   c.appendChild(p);
   us.slice().reverse().forEach(u=>{
-    const b=document.createElement('button'); b.type='button'; b.textContent='👤 '+u.nombre; b.style.width='100%';
+    const b=document.createElement('button');
+    b.type='button'; b.textContent='👤 '+u.nombre; b.style.width='100%';
     b.onclick=()=>{ document.getElementById('loginNombre').value=u.nombre; window.cambiarTabUser('login'); document.getElementById('loginPassword').focus(); };
     c.appendChild(b);
   });
 }
 function mostrarModalUsuario(){
-  const m = document.getElementById('modalUsuario');
-  if(!m) return;
+  const m = document.getElementById('modalUsuario'); if(!m) return;
   if(!m.classList.contains('visible')){
     window.cambiarTabUser('login');
-    ['loginPassword','regPassword','regPassword2'].forEach(id=>{
-      const el = document.getElementById(id); if(el) el.value = '';
-    });
+    ['loginPassword','regPassword','regPassword2'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   }
   renderizarListaUsuarios();
   m.classList.add('visible');
@@ -1202,7 +1236,7 @@ window.mostrarModalUsuario = mostrarModalUsuario;
 
 window.cambiarUsuario = async function(){
   const u=getUsuarioActual();
-  if(u){ if(!confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos de "'+u+'".')) return; try { window.sincronizarConNube(); } catch(e){} await new Promise(r => setTimeout(r, 400)); }
+  if(u){ if(!confirm('🔄 ¿Cambiar de usuario?\n\nSe guardarán los datos de "'+u+'".')) return; try{ window.sincronizarConNube(); }catch(e){} await new Promise(r=>setTimeout(r,400)); }
   if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
   syncActivo=false;
   if(typeof window.cancelarEscaneo==='function') try{ window.cancelarEscaneo(); }catch(e){}
@@ -1219,11 +1253,23 @@ function construirPayload(){
   let e=null, en={};
   try{ e=JSON.parse(localStorage.getItem('estadoSesion')||'null'); }catch(e2){}
   try{ en=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e2){}
-  const p={ nombre:usuario, grupo:CODIGO_GRUPO, tiemposBase:{ inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'', finCarga:localStorage.getItem('tiempoBase_finCarga')||'', salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'', primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||'' }, ultimaActualizacion:serverTimestamp(), dispositivo:navigator.userAgent.slice(0,80), version:Date.now() };
+  const p={
+    nombre:usuario, grupo:CODIGO_GRUPO,
+    tiemposBase:{
+      inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'',
+      finCarga:localStorage.getItem('tiempoBase_finCarga')||'',
+      salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'',
+      primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||''
+    },
+    ultimaActualizacion:serverTimestamp(),
+    dispositivo:navigator.userAgent.slice(0,80),
+    version:Date.now()
+  };
   p.estadoSesion = e===null ? deleteField() : e;
   p.entregasDiariasDetallado = (en && Object.keys(en).length>0) ? en : deleteField();
   return p;
 }
+
 window.sincronizarConNube = function(){
   if(!syncActivo || !syncAutomaticoActivo || !db) return;
   const ref=refUsuario(); if(!ref) return;
@@ -1237,19 +1283,27 @@ window.sincronizarConNube = function(){
       if(size>950000){ actualizarEstadoNube('⚠️ Auto-sync pausada. Compacta historial.','error'); guardadoEnProgreso=false; return; }
       actualizarEstadoNube('⏳ Subiendo...','loading');
       ultimaVersionLocal=payload.version;
-      const p = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
-      await Promise.race([ p, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 20s')),20000)) ]);
+      await Promise.race([
+        setDoc(ref,payload,{merge:true}),
+        new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 20s')),20000))
+      ]);
       intentosSync=0;
       actualizarEstadoNube('☁️ Sincronizado '+new Date().toLocaleTimeString(),'ok');
-    }catch(e){ intentosSync++; actualizarEstadoNube('❌ '+e.message,'error'); }
-    finally{ guardadoEnProgreso=false; guardadoPendiente=null; }
+    }catch(e){
+      intentosSync++;
+      actualizarEstadoNube('❌ '+(e.message||'error'),'error');
+    }finally{
+      guardadoEnProgreso=false; guardadoPendiente=null;
+    }
   }, delay);
 };
+
 function iniciarEscucha(){
   if(!db) return;
   if(unsubscribeEscucha){ try{ unsubscribeEscucha(); }catch(e){} unsubscribeEscucha=null; }
-  const ref=refUsuario(); if(!ref){ actualizarEstadoNube('⚠️ Esperando usuario','loading'); return; }
-  unsubscribeEscucha=onSnapshot(ref, (snap)=>{
+  const ref=refUsuario();
+  if(!ref){ actualizarEstadoNube('⚠️ Esperando usuario','loading'); return; }
+  unsubscribeEscucha=onSnapshot(ref, snap=>{
     if(!snap.exists()){ actualizarEstadoNube('☁️ Conectado · Sin datos remotos aún','ok'); return; }
     const d=snap.data();
     if(guardadoPendiente || guardadoEnProgreso) return;
@@ -1257,65 +1311,103 @@ function iniciarEscucha(){
     const rv=d.version||0; if(rv && rv<ultimaVersionLocal) return;
     ultimaVersionLocal=rv;
     let cambios=false;
-    if(d.estadoSesion===undefined){ if(localStorage.getItem('estadoSesion')!==null){ localStorage.removeItem('estadoSesion'); cambios=true; } }
-    else { const le=localStorage.getItem('estadoSesion'); const re=JSON.stringify(d.estadoSesion); if(le!==re){ localStorage.setItem('estadoSesion',re); cambios=true; } }
-    if(d.entregasDiariasDetallado===undefined){ if(localStorage.getItem('entregasDiariasDetallado')!==null) localStorage.removeItem('entregasDiariasDetallado'); }
-    else { const lh=localStorage.getItem('entregasDiariasDetallado'); const rh=JSON.stringify(d.entregasDiariasDetallado||{}); if(lh!==rh) localStorage.setItem('entregasDiariasDetallado',rh); }
-    if(d.tiemposBase){ ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(k=>{ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); else localStorage.removeItem('tiempoBase_'+k); }); }
+    if(d.estadoSesion===undefined){
+      if(localStorage.getItem('estadoSesion')!==null){ localStorage.removeItem('estadoSesion'); cambios=true; }
+    }else{
+      const le=localStorage.getItem('estadoSesion'); const re=JSON.stringify(d.estadoSesion);
+      if(le!==re){ localStorage.setItem('estadoSesion',re); cambios=true; }
+    }
+    if(d.entregasDiariasDetallado===undefined){
+      if(localStorage.getItem('entregasDiariasDetallado')!==null) localStorage.removeItem('entregasDiariasDetallado');
+    }else{
+      const lh=localStorage.getItem('entregasDiariasDetallado');
+      const rh=JSON.stringify(d.entregasDiariasDetallado||{});
+      if(lh!==rh) localStorage.setItem('entregasDiariasDetallado',rh);
+    }
+    if(d.tiemposBase){
+      ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(k=>{
+        if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]);
+        else localStorage.removeItem('tiempoBase_'+k);
+      });
+    }
     actualizarEstadoNube('🔄 Actualizado '+new Date().toLocaleTimeString(),'ok');
     if(cambios && typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage();
-  }, (err)=>{ actualizarEstadoNube('❌ Sin conexión: '+err.message,'error'); });
+  }, err=>{ actualizarEstadoNube('❌ Sin conexión: '+err.message,'error'); });
 }
+
 window.forzarSincronizacion = async function(){
   if(!db){ alert('Firebase no configurado.'); return false; }
-  const ref=refUsuario(); if(!ref){ alert('Primero selecciona usuario.'); return false; }
+  const ref=refUsuario();
+  if(!ref){ alert('Primero selecciona usuario.'); return false; }
   actualizarEstadoNube('⏳ Preparando...','loading');
   const payload=construirPayload();
-  const size=new Blob([JSON.stringify(payload)]).size; const kb=(size/1024).toFixed(1);
-  if(size>950000){ actualizarEstadoNube('❌ Datos muy grandes.','error'); alert(`❌ ${kb} KB > 1000 KB.\n\nPulsa "🗜️ Compactar historial".`); return false; }
+  const size=new Blob([JSON.stringify(payload)]).size;
+  const kb=(size/1024).toFixed(1);
+  if(size>950000){
+    actualizarEstadoNube('❌ Datos muy grandes.','error');
+    alert(`❌ ${kb} KB > 1000 KB.\n\nPulsa "🗜️ Compactar historial".`);
+    return false;
+  }
   ultimaVersionLocal=payload.version;
   try{
     guardadoEnProgreso=true;
     actualizarEstadoNube(`⏳ Subiendo ${kb} KB...`,'loading');
-    const p1 = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
-    await Promise.race([ p1, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
-    intentosSync=0; actualizarEstadoNube('✅ Subido','ok'); return true;
+    await Promise.race([
+      setDoc(ref,payload,{merge:true}),
+      new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000))
+    ]);
+    intentosSync=0;
+    actualizarEstadoNube('✅ Subido','ok');
+    return true;
   }catch(e1){
     try{
       actualizarEstadoNube('⏳ Reintentando...','loading');
-      const p2 = setDoc(ref,payload,{merge:true}).catch(err => { console.warn('setDoc bg:', err); });
-      await Promise.race([ p2, new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
-      actualizarEstadoNube('✅ Subido (reintento)','ok'); return true;
+      await Promise.race([
+        setDoc(ref,payload,{merge:true}),
+        new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000))
+      ]);
+      actualizarEstadoNube('✅ Subido (reintento)','ok');
+      return true;
     }catch(e2){
-      actualizarEstadoNube('❌ '+e2.message,'error');
+      actualizarEstadoNube('❌ '+(e2.message||'error'),'error');
       let m='❌ No se pudo sincronizar.\n\n';
       if(e2.code==='permission-denied') m+='🔒 Reglas de Firestore bloqueando.';
       else if(e2.message.includes('TIMEOUT')) m+='⏱️ Conexión lenta o documento grande.';
       else m+='Error: '+(e2.code||'')+' '+e2.message;
-      alert(m); return false;
+      alert(m);
+      return false;
     }
-  } finally{ guardadoEnProgreso=false; }
+  }finally{ guardadoEnProgreso=false; }
 };
+
 window.cargarDeNube = async function(){
   if(!db){ alert('Firebase no configurado.'); return; }
-  const ref=refUsuario(); if(!ref){ alert('Primero selecciona usuario.'); return; }
+  const ref=refUsuario();
+  if(!ref){ alert('Primero selecciona usuario.'); return; }
   if(!confirm('⚠️ Reemplazará datos locales. ¿Continuar?')) return;
   actualizarEstadoNube('⏳ Descargando...','loading');
   try{
-    const snap=await Promise.race([ getDoc(ref), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000)) ]);
+    const snap=await Promise.race([
+      getDoc(ref),
+      new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 15s')),15000))
+    ]);
     if(!snap.exists()){ actualizarEstadoNube('⚠️ No hay datos en la nube','error'); return; }
     const d=snap.data();
-    if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion)); else localStorage.removeItem('estadoSesion');
-    if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado)); else localStorage.removeItem('entregasDiariasDetallado');
+    if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion));
+    else localStorage.removeItem('estadoSesion');
+    if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado));
+    else localStorage.removeItem('entregasDiariasDetallado');
     if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); }
     if(d.version) ultimaVersionLocal=d.version;
     actualizarEstadoNube('✅ Descargados. Recargando...','ok');
     setTimeout(()=>location.reload(),1500);
-  }catch(e){ actualizarEstadoNube('❌ '+e.message,'error'); }
+  }catch(e){ actualizarEstadoNube('❌ '+(e.message||'error'),'error'); }
 };
+
 window.mostrarDiagnosticoNube = async function(){
   if(!db){ alert('❌ Firebase no configurado.'); return; }
-  const ref=refUsuario(); if(!ref){ alert('⚠️ Selecciona usuario.'); return; }
+  const ref=refUsuario();
+  if(!ref){ alert('⚠️ Selecciona usuario.'); return; }
   const u=getUsuarioActual()||'(sin usuario)';
   const payload=construirPayload();
   const estadoStr=localStorage.getItem('estadoSesion')||'null';
@@ -1323,39 +1415,80 @@ window.mostrarDiagnosticoNube = async function(){
   const size=new Blob([JSON.stringify(payload)]).size;
   const sizeE=new Blob([estadoStr]).size;
   const sizeH=new Blob([histStr]).size;
-  const nV=(payload.estadoSesion?.visitas)?payload.estadoSesion.visitas.length:0;
-  const nB=(payload.estadoSesion?.bancoCodigos)?payload.estadoSesion.bancoCodigos.length:0;
+  const nV=payload.estadoSesion?.visitas?.length||0;
+  const nB=payload.estadoSesion?.bancoCodigos?.length||0;
   const nD=Object.keys(payload.entregasDiariasDetallado||{}).length;
   let m=`🔍 DIAGNÓSTICO\n━━━━━━━━━━━━━━━━━\n\n👤 Usuario: ${u}\n📦 Payload: ${(size/1024).toFixed(1)} KB / 1000 KB\n   ├─ Estado: ${(sizeE/1024).toFixed(1)} KB\n   └─ Historial: ${(sizeH/1024).toFixed(1)} KB\n\n📊 Contenido:\n   ├─ Visitas: ${nV}\n   ├─ Banco: ${nB}\n   └─ Días: ${nD}\n\n`;
   if(size>900000) m+='❌ CRÍTICO.\n'; else if(size>500000) m+='⚠️ Grande.\n'; else m+='✅ OK.\n';
   const t0=Date.now();
-  try{ const snap=await Promise.race([ getDoc(ref), new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 10s')),10000)) ]); m+=`✅ Responde en ${Date.now()-t0} ms\n📄 Doc: ${snap.exists()?'existe':'NO existe'}`; if(snap.exists()){ const d=snap.data(); m+=`\n📦 Nube: ${(new Blob([JSON.stringify(d)]).size/1024).toFixed(1)} KB`; } }
-  catch(e){ m+=`❌ NO responde: ${e.message}`; }
+  try{
+    const snap=await Promise.race([
+      getDoc(ref),
+      new Promise((_,r)=>setTimeout(()=>r(new Error('TIMEOUT 10s')),10000))
+    ]);
+    m+=`✅ Responde en ${Date.now()-t0} ms\n📄 Doc: ${snap.exists()?'existe':'NO existe'}`;
+    if(snap.exists()){ const d=snap.data(); m+=`\n📦 Nube: ${(new Blob([JSON.stringify(d)]).size/1024).toFixed(1)} KB`; }
+  }catch(e){ m+=`❌ NO responde: ${e.message}`; }
   alert(m);
 };
-window.toggleSyncAutomatico = function(){ const t=document.getElementById('toggleSync'); if(!t)return; syncAutomaticoActivo=t.checked; try{ localStorage.setItem('syncAutomaticoFirebase',syncAutomaticoActivo); }catch(e){} actualizarEstadoNube(syncAutomaticoActivo?'✅ Sync activada':'⚠️ Sync pausada',syncAutomaticoActivo?'ok':'error'); };
+
+window.toggleSyncAutomatico = function(){
+  const t=document.getElementById('toggleSync'); if(!t)return;
+  syncAutomaticoActivo=t.checked;
+  try{ localStorage.setItem('syncAutomaticoFirebase',syncAutomaticoActivo); }catch(e){}
+  actualizarEstadoNube(syncAutomaticoActivo?'✅ Sync activada':'⚠️ Sync pausada', syncAutomaticoActivo?'ok':'error');
+};
+
 async function migrarDatosAntiguosSiExisten(nombre){
   if(!db) return false;
-  try{ const refV=doc(db,'colserlog_usuarios',CODIGO_GRUPO); const snap=await getDoc(refV); if(!snap.exists()) return false; if(snap.data()._migrado) return false; if(!confirm('📦 Datos antiguos. ¿Importar?')){ await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true}); return false; } const d=snap.data(); const refN=refUsuario(); await setDoc(refN,{ nombre, grupo:CODIGO_GRUPO, estadoSesion:d.estadoSesion||deleteField(), entregasDiariasDetallado:d.entregasDiariasDetallado||{}, tiemposBase:d.tiemposBase||{}, migradoDe:CODIGO_GRUPO, fechaMigracion:new Date().toISOString(), version:Date.now() },{merge:true}); await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true}); if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion)); if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado)); if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); } alert('✅ Datos importados.'); return true; }
-  catch(e){ return false; }
+  try{
+    const refV=doc(db,'colserlog_usuarios',CODIGO_GRUPO);
+    const snap=await getDoc(refV);
+    if(!snap.exists()) return false;
+    if(snap.data()._migrado) return false;
+    if(!confirm('📦 Datos antiguos. ¿Importar?')){
+      await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true});
+      return false;
+    }
+    const d=snap.data();
+    const refN=refUsuario();
+    await setDoc(refN,{
+      nombre, grupo:CODIGO_GRUPO,
+      estadoSesion:d.estadoSesion||deleteField(),
+      entregasDiariasDetallado:d.entregasDiariasDetallado||{},
+      tiemposBase:d.tiemposBase||{},
+      migradoDe:CODIGO_GRUPO,
+      fechaMigracion:new Date().toISOString(),
+      version:Date.now()
+    },{merge:true});
+    await setDoc(refV,{_migrado:true,_migradoPor:nombre,_fechaMigracion:new Date().toISOString()},{merge:true});
+    if(d.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(d.estadoSesion));
+    if(d.entregasDiariasDetallado) localStorage.setItem('entregasDiariasDetallado',JSON.stringify(d.entregasDiariasDetallado));
+    if(d.tiemposBase) for(const k in d.tiemposBase){ if(d.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,d.tiemposBase[k]); }
+    alert('✅ Datos importados.');
+    return true;
+  }catch(e){ console.warn('migrar:', e); return false; }
 }
 
 window.cambiarTab = function(tab){
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.dataset.tab === tab));
-  if(tab === 'historial' && typeof window.renderizarTabla === 'function') window.renderizarTabla();
-  if(tab === 'inicio' && typeof window.recargarGraficas === 'function') window.recargarGraficas();
-  if(tab === 'inicio' && typeof window.renderizarVistaDia === 'function') window.renderizarVistaDia();
-  try { localStorage.setItem('colserlog_tab_actual', tab); }catch(e){}
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.dataset.tab===tab));
+  if(tab==='historial' && typeof window.renderizarTabla==='function') window.renderizarTabla();
+  if(tab==='inicio' && typeof window.recargarGraficas==='function') window.recargarGraficas();
+  if(tab==='inicio' && typeof window.renderizarVistaDia==='function') window.renderizarVistaDia();
+  try{ localStorage.setItem('colserlog_tab_actual', tab); }catch(e){}
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
 window.addEventListener('load', ()=>{
-  inyectarManifest(); cargarDarkMode();
-  const pref=localStorage.getItem('syncAutomaticoFirebase'); syncAutomaticoActivo = pref===null?true:pref==='true';
+  inyectarManifest();
+  cargarDarkMode();
+  const pref=localStorage.getItem('syncAutomaticoFirebase');
+  syncAutomaticoActivo = pref===null?true:pref==='true';
   const tgl=document.getElementById('toggleSync'); if(tgl) tgl.checked=syncAutomaticoActivo;
   const sinc=()=>{ try{ const t=document.getElementById('toggleFotosNube'); localStorage.setItem(CLAVE_FOTOS_NUBE_PROXY, (t&&t.checked)?'true':'false'); }catch(e){} };
-  sinc(); document.getElementById('toggleFotosNube')?.addEventListener('change', sinc);
+  sinc();
+  document.getElementById('toggleFotosNube')?.addEventListener('change', sinc);
   window.addEventListener('online', ()=>{ actualizarEstadoNube('🌐 Conexión restaurada...','loading'); setTimeout(()=>window.sincronizarConNube&&window.sincronizarConNube(),1000); });
   window.addEventListener('offline', ()=>actualizarEstadoNube('📴 Sin conexión','loading'));
   ['loginNombre','loginPassword'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); window.hacerLogin(); } }));
@@ -1363,26 +1496,55 @@ window.addEventListener('load', ()=>{
 
   try{
     const tabGuardada = localStorage.getItem('colserlog_tab_actual');
-    if(tabGuardada && document.querySelector(`.tab-btn[data-tab="${tabGuardada}"]`)){ window.cambiarTab(tabGuardada); }
+    if(tabGuardada && document.querySelector(`.tab-btn[data-tab="${tabGuardada}"]`)) window.cambiarTab(tabGuardada);
   }catch(e){}
 
   setTimeout(()=>{
     actualizarBarraUsuario();
     const u=getUsuarioActual();
-    if(!u){ actualizarEstadoNube('⚠️ Esperando selección de usuario','loading'); mostrarModalUsuario(); }
-    else { const ex=buscarUsuario(u); if(!ex && getUsuariosRegistrados().length>0){ try{ localStorage.removeItem(CLAVE_USUARIO_LOCAL); }catch(e){} actualizarBarraUsuario(); mostrarModalUsuario(); } else { syncActivo=true; actualizarEstadoNube('☁️ Conectando como '+u+'...','loading'); iniciarEscucha(); } }
+    if(!u){
+      actualizarEstadoNube('⚠️ Esperando selección de usuario','loading');
+      mostrarModalUsuario();
+    } else {
+      const ex=buscarUsuario(u);
+      if(!ex && getUsuariosRegistrados().length>0){
+        try{ localStorage.removeItem(CLAVE_USUARIO_LOCAL); }catch(e){}
+        actualizarBarraUsuario();
+        mostrarModalUsuario();
+      } else {
+        syncActivo=true;
+        actualizarEstadoNube('☁️ Conectando como '+u+'...','loading');
+        iniciarEscucha();
+      }
+    }
     const btn=document.getElementById('btnInstalarPWA');
-    if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true){ if(btn) btn.style.display='none'; } else { if(btn) btn.style.display='inline-block'; }
+    if(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true){
+      if(btn) btn.style.display='none';
+    } else {
+      if(btn) btn.style.display='inline-block';
+    }
   },500);
 });
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════════
+     SCRIPT 2 · UI, visitas, fotos, informes, censura, respaldo
+     ═══════════════════════════════════════════════════════════════ -->
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=900; const FOTO_JPEG_QUALITY=0.65; const CLAVE_FOTOS_NUBE='syncFotosNube';
 const CLAVE_BORRADOR='colserlog_borrador';
 const CLAVE_AUTO_CENSURA='colserlog_auto_censura';
+
+/* ✅ MEJORA 1: helper de escape HTML para prevenir XSS */
+function escapeHtml(t){
+  if(t===null||t===undefined) return '';
+  return String(t)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+window.escapeHtml = escapeHtml;
 
 const DESCRIPCIONES_RECOMENDADAS={
   'Entregado':'Paquete entregado en la dirección indicada. Recibido por el cliente, quien firmó la guía correspondiente. Producto verificado en buen estado y sin novedades.',
@@ -1989,7 +2151,7 @@ function renderizarTabla(){
     tr.appendChild(Object.assign(document.createElement('td'),{textContent:indexOriginal+1}));
     tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.llegada}));
     tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.salida}));
-    tr.appendChild(Object.assign(document.createElement('td'),{innerHTML:`<strong>${v.tiempo} min</strong>`}));
+    tr.appendChild(Object.assign(document.createElement('td'),{innerHTML:`<strong>${Number(v.tiempo)||0} min</strong>`}));
     const tdC=document.createElement('td');
     if(ed){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; inp.setAttribute('inputmode','numeric'); inp.setAttribute('maxlength','12'); inp.addEventListener('input',()=>{ const l=(inp.value||'').replace(/\D/g,'').slice(0,12); if(inp.value!==l) inp.value=l; }); tdC.appendChild(inp); }
     else tdC.textContent=v.codigo||'';
@@ -2038,10 +2200,18 @@ window.filtrarVistaDia = function(filtro){
   renderizarVistaDia();
 };
 window.limpiarBusquedaDia = function(){ const i = document.getElementById('busquedaDia'); if(i){ i.value=''; i.focus(); } renderizarVistaDia(); guardarBorrador(); };
+
+/* ✅ MEJORA 2: renderizarVistaDia con debounce + DOM API (previene XSS) */
+let _renderVistaTimer = null;
 window.renderizarVistaDia = function(){
+  clearTimeout(_renderVistaTimer);
+  _renderVistaTimer = setTimeout(_renderizarVistaDiaAhora, 120);
+};
+function _renderizarVistaDiaAhora(){
   const lista = document.getElementById('listaVisitasDia');
   if(!lista) return;
-  const cntEnt = visitas.filter(v => v.estado === 'Entregado').length;
+
+  const cntEnt   = visitas.filter(v=>v.estado==='Entregado').length;
   const cntNoEnt = visitas.length - cntEnt;
   const elT = document.getElementById('cnt-todas');
   const elE = document.getElementById('cnt-entregados');
@@ -2049,35 +2219,70 @@ window.renderizarVistaDia = function(){
   if(elT) elT.textContent = `(${visitas.length})`;
   if(elE) elE.textContent = `(${cntEnt})`;
   if(elN) elN.textContent = `(${cntNoEnt})`;
+
   const busq = (document.getElementById('busquedaDia')?.value||'').trim().toLowerCase();
   const cb = document.getElementById('contadorBusquedaDia');
-  let filtradas = visitas.map((v,i) => ({v, i}));
-  if(filtroVistaDia === 'entregados') filtradas = filtradas.filter(({v}) => v.estado === 'Entregado');
-  else if(filtroVistaDia === 'no-entregados') filtradas = filtradas.filter(({v}) => v.estado !== 'Entregado');
-  if(busq) filtradas = filtradas.filter(({v}) => (v.codigo||'').toLowerCase().includes(busq));
+
+  let filtradas = visitas.map((v,i)=>({v,i}));
+  if(filtroVistaDia==='entregados') filtradas = filtradas.filter(({v})=>v.estado==='Entregado');
+  else if(filtroVistaDia==='no-entregados') filtradas = filtradas.filter(({v})=>v.estado!=='Entregado');
+  if(busq) filtradas = filtradas.filter(({v})=>(v.codigo||'').toLowerCase().includes(busq));
+
   if(cb){
-    const etiqueta = filtroVistaDia === 'todas' ? 'Todas' : filtroVistaDia === 'entregados' ? 'Entregados' : 'No entregados';
-    cb.textContent = busq ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}` : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
+    const etiqueta = filtroVistaDia==='todas' ? 'Todas'
+                  : filtroVistaDia==='entregados' ? 'Entregados'
+                  : 'No entregados';
+    cb.textContent = busq
+      ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}`
+      : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
   }
-  if(!filtradas.length){ lista.innerHTML = '<div class="sin-resultados">📭 No hay visitas para mostrar</div>'; return; }
-  let html = `<table class="tabla-visitas-dia"><thead><tr>
-    <th style="width:5%">#</th><th style="width:10%">Llegada</th><th style="width:10%">Salida</th>
-    <th style="width:10%">Tiempo</th><th style="width:22%">Guía / Código</th>
-    <th style="width:18%">Estado</th><th>Descripción</th>
-  </tr></thead><tbody>`;
-  filtradas.forEach(({v, i}) => {
-    const esEnt = v.estado === 'Entregado';
-    html += `<tr>
-      <td>${i + 1}</td><td>${v.llegada || '—'}</td><td>${v.salida || '—'}</td>
-      <td><strong>${v.tiempo || 0} min</strong></td>
-      <td style="font-family:'Courier New',monospace;font-size:.75rem;font-weight:700;">${v.codigo || '—'}</td>
-      <td><span class="badge-ent ${esEnt?'ok':'no'}">${v.estado || '—'}</span></td>
-      <td class="desc">${v.descripcion || '—'}</td>
-    </tr>`;
+
+  if(!filtradas.length){
+    lista.innerHTML = '<div class="sin-resultados">📭 No hay visitas para mostrar</div>';
+    return;
+  }
+
+  const tabla = document.createElement('table');
+  tabla.className = 'tabla-visitas-dia';
+  const thead = document.createElement('thead');
+  thead.innerHTML = '<tr><th style="width:5%">#</th><th style="width:10%">Llegada</th><th style="width:10%">Salida</th><th style="width:10%">Tiempo</th><th style="width:22%">Guía / Código</th><th style="width:18%">Estado</th><th>Descripción</th></tr>';
+  tabla.appendChild(thead);
+  const tbody = document.createElement('tbody');
+
+  filtradas.forEach(({v,i})=>{
+    const tr = document.createElement('tr');
+    const add = (txt, extra={}) => {
+      const td = document.createElement('td');
+      if(extra.style) td.setAttribute('style', extra.style);
+      if(extra.className) td.className = extra.className;
+      if(extra.html!==undefined) td.innerHTML = extra.html;
+      else td.textContent = txt;
+      tr.appendChild(td);
+    };
+    add(String(i+1));
+    add(v.llegada || '—');
+    add(v.salida  || '—');
+    add(null, { html: `<strong>${Number(v.tiempo)||0} min</strong>` });
+    add(v.codigo || '—', { style:"font-family:'Courier New',monospace;font-size:.75rem;font-weight:700;" });
+
+    const esEnt = v.estado==='Entregado';
+    const tdEstado = document.createElement('td');
+    const span = document.createElement('span');
+    span.className = 'badge-ent '+(esEnt?'ok':'no');
+    span.textContent = v.estado || '—';
+    tdEstado.appendChild(span);
+    tr.appendChild(tdEstado);
+
+    const tdDesc = document.createElement('td');
+    tdDesc.className = 'desc';
+    tdDesc.textContent = v.descripcion || '—';
+    tr.appendChild(tdDesc);
+
+    tbody.appendChild(tr);
   });
-  html += `</tbody></table>`;
-  lista.innerHTML = html;
-};
+  tabla.appendChild(tbody);
+  lista.replaceChildren(tabla);
+}
 
 function actualizarDashboard(){
   const e=contadores['Entregado']||0, n=totalVisitas-e, p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
@@ -2244,10 +2449,6 @@ function generarChartDona(ancho,alto){
 
 /* ═══════════════════════════════════════════════════════════════
    🖨️ IMPRESIÓN ROBUSTA (navegador + PWA standalone iOS)
-   
-   En iOS PWA window.print() NO funciona (Apple lo bloquea).
-   Solución: mostrar modal con botón <a target="_blank"> a Safari
-   con ?auto_print=1, y auto-imprimir cuando se abra allí.
    ═══════════════════════════════════════════════════════════════ */
 
 function esModoStandalone(){
@@ -2265,12 +2466,9 @@ function esDispositivoIOS(){
 }
 window.esDispositivoIOS = esDispositivoIOS;
 
-function esIOSPWA(){
-  return esDispositivoIOS() && esModoStandalone();
-}
+function esIOSPWA(){ return esDispositivoIOS() && esModoStandalone(); }
 window.esIOSPWA = esIOSPWA;
 
-// iOS 16.4+ sí soporta window.print() en PWA
 function iosSoportaPrintEnPWA(){
   const m = navigator.userAgent.match(/OS (\d+)[._](\d+)/);
   if(!m) return false;
@@ -2281,6 +2479,7 @@ function iosSoportaPrintEnPWA(){
   return false;
 }
 
+/* ✅ MEJORA 3: ya NO se añade modo-reporte-diario por defecto */
 function prepararAreaImpresion(html, clasesExtra){
   let area = document.getElementById('areaImpresion');
   if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
@@ -2288,29 +2487,25 @@ function prepararAreaImpresion(html, clasesExtra){
   area.style.display = 'block';
   _estabaDarkAlImprimir = document.body.classList.contains('dark');
   if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching');
-  document.body.classList.add('modo-impresion','modo-reporte-diario');
-  (clasesExtra||[]).forEach(c => document.body.classList.add(c));
+  document.body.classList.add('modo-impresion');
+  (clasesExtra||[]).forEach(c=>document.body.classList.add(c));
   return area;
 }
 
 function finalizarImpresion(){
-  document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album');
-  document.body.classList.remove('theme-switching');
+  document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album','theme-switching');
   const area = document.getElementById('areaImpresion');
-  if(area){ area.innerHTML = ''; area.style.display = 'none'; }
+  if(area){ area.innerHTML=''; area.style.display='none'; }
   if(_estabaDarkAlImprimir && typeof window.cargarDarkMode === 'function'){
-    try { window.cargarDarkMode(); } catch(e){}
+    try{ window.cargarDarkMode(); }catch(e){}
   }
   _estabaDarkAlImprimir = false;
 }
 
-// Modal de ayuda para iOS PWA: no se puede imprimir desde app instalada
 function mostrarModalImpresionIOSPWA(){
-  // Evitar duplicados
   const existente = document.getElementById('modalImpresionIOS');
   if(existente) try { document.body.removeChild(existente); } catch(e){}
 
-  // Construir URL con ?auto_print=1
   let safariUrl;
   try {
     const url = new URL(location.href);
@@ -2356,28 +2551,21 @@ function mostrarModalImpresionIOSPWA(){
     try { document.body.removeChild(modal); } catch(e){}
   });
 
-  // El <a target="_blank"> de iOS PWA abre Safari (siempre)
   const btnSafari = modal.querySelector('#btnAbrirSafariImprimir');
   if(btnSafari) btnSafari.addEventListener('click', () => {
-    // Se cierra el modal un momento después de abrir Safari
     setTimeout(() => { try { document.body.removeChild(modal); } catch(e){} }, 800);
   });
 }
 
-// ═══════════════════════════════════════════════════════════════
-// Enrutador de impresión: decide qué hacer según el entorno
-// ═══════════════════════════════════════════════════════════════
 function ejecutarImpresion(html, clasesExtra){
   const iosPWA = esIOSPWA();
   const soporteNativo = !iosPWA || iosSoportaPrintEnPWA();
 
-  // iOS PWA sin soporte nativo → modal con opción Safari
   if(!soporteNativo){
     mostrarModalImpresionIOSPWA();
     return;
   }
 
-  // Todos los demás: preparar y llamar print() SÍNCRONO
   prepararAreaImpresion(html, clasesExtra);
 
   let limpio = false;
@@ -2394,8 +2582,6 @@ function ejecutarImpresion(html, clasesExtra){
   }
 
   if(iosPWA){
-    // En iOS PWA el afterprint a veces no dispara aunque sí imprima.
-    // Esperamos 1.5s: si no disparó, ofrecemos abrir en Safari.
     setTimeout(() => {
       if(!limpio){
         window.removeEventListener('afterprint', limpiar);
@@ -2405,15 +2591,14 @@ function ejecutarImpresion(html, clasesExtra){
       }
     }, 1500);
   } else {
-    // Limpieza de respaldo a los 2 minutos si afterprint no dispara
     setTimeout(limpio ? ()=>{} : limpiar, 120000);
   }
 }
 window.ejecutarImpresion = ejecutarImpresion;
 
-// ═══════════════════════════════════════════════════════════════
-// 1) Informe Diario — SÍNCRONO
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   1) Informe Diario
+   ═══════════════════════════════════════════════════════════════ */
 window.imprimirReporteDiario = function(){
   try {
     if(!visitas.length && !_autoPrintMode){
@@ -2451,9 +2636,9 @@ window.imprimirReporteDiario = function(){
         <h1>Reporte Diario de Entregas</h1>
         <div class="rd-subtitle">Registro detallado de visitas y evidencias fotográficas</div>
         <div class="rd-info">
-          <div><strong>Mensajero:</strong> ${usuario}</div>
-          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
-          <div><strong>Generado:</strong> ${horaGen}</div>
+          <div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div>
+          <div><strong>Fecha de ruta:</strong> ${escapeHtml(fecha)}</div>
+          <div><strong>Generado:</strong> ${escapeHtml(horaGen)}</div>
         </div>
       </header>
       <section class="rd-kpis">
@@ -2481,7 +2666,7 @@ window.imprimirReporteDiario = function(){
     const eCV = Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(eCV.length){
       html += `<section class="rd-estados"><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla"><thead><tr><th style="text-align:left;width:45%">Estado</th><th style="width:15%">Cantidad</th><th style="width:15%">Porcentaje</th><th style="width:25%">Barra</th></tr></thead><tbody>`;
-      eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); html += `<tr><td style="text-align:left;">${k}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td><div style="background:#e8e8ed;border-radius:2px;overflow:hidden;height:9px;"><div style="background:#0a84ff;height:100%;width:${bw}%;"></div></div></td></tr>`; });
+      eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); html += `<tr><td style="text-align:left;">${escapeHtml(k)}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td><div style="background:#e8e8ed;border-radius:2px;overflow:hidden;height:9px;"><div style="background:#0a84ff;height:100%;width:${bw}%;"></div></div></td></tr>`; });
       html += `<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>100%</strong></td><td></td></tr></tbody></table></section>`;
     }
 
@@ -2491,7 +2676,7 @@ window.imprimirReporteDiario = function(){
       visitas.forEach((v,i)=>{
         const nf = Array.isArray(v.fotos)?v.fotos.length:0;
         const nCens = (v.fotos||[]).filter(f=>f.censurada).length;
-        html += `<tr><td>${i+1}</td><td>${v.llegada||'—'}</td><td>${v.salida||'—'}</td><td>${v.tiempo} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="text-align:left;font-size:7.5pt;">${v.estado||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td style="text-align:left;font-size:7pt;">${v.descripcion||'—'}</td></tr>`;
+        html += `<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||'—'}</td><td>${escapeHtml(v.salida)||'—'}</td><td>${Number(v.tiempo)||0} min</td><td style="font-family:'Courier New',monospace;font-size:7.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="text-align:left;font-size:7.5pt;">${escapeHtml(v.estado)||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td style="text-align:left;font-size:7pt;">${escapeHtml(v.descripcion)||'—'}</td></tr>`;
       });
       html += `<tr class="rd-total"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${tFotos} foto(s)${tCensuradas?` · ${tCensuradas} censurada(s)`:''}</strong></td></tr>`;
     }
@@ -2514,20 +2699,21 @@ window.imprimirReporteDiario = function(){
       for(let p=0;p<planas.length;p+=FPP){
         const fp = planas.slice(p,p+FPP); const np = Math.floor(p/FPP)+1;
         html += `<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Evidencia fotográfica · Página ${np} de ${totalP}</div><div class="rd-fotos-grid">`;
-        fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; html += `<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${f.codigo}</span>`:'Sin código'}${cs}</div></div>`; });
+        fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; html += `<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><strong>${cap}</strong><br>${f.codigo?`<span style="font-family:'Courier New',monospace;">${escapeHtml(f.codigo)}</span>`:'Sin código'}${cs}</div></div>`; });
         html += `</div></div>`;
       }
       html += `</section>`;
     }
 
     html += `<section class="rd-firmas">
-      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero responsable</div><div class="rd-firma-nombre">${usuario}</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
+      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero responsable</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
       <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor de operaciones</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
       <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor / Revisor</div><div class="rd-firma-nombre">______________________</div><div class="rd-firma-detalle">C.C.: ______________<br>Fecha y hora: __________</div></div>
     </section>
     ${generarPieAuditoria()}</div>`;
 
-    ejecutarImpresion(html, []);
+    /* ✅ MEJORA 3b: se pasa explícitamente 'modo-reporte-diario' */
+    ejecutarImpresion(html, ['modo-reporte-diario']);
 
   } catch(err){
     console.error('Error al preparar el informe:', err);
@@ -2536,9 +2722,9 @@ window.imprimirReporteDiario = function(){
   }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 2) Álbum Fotográfico — SÍNCRONO
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   2) Álbum Fotográfico
+   ═══════════════════════════════════════════════════════════════ */
 window.imprimirAlbumFotografico = function(){
   try {
     const vCF = visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
@@ -2564,9 +2750,9 @@ window.imprimirAlbumFotografico = function(){
         <h1>Álbum Fotográfico de Evidencias</h1>
         <div class="rd-subtitle">Registro visual de entregas del día</div>
         <div class="rd-info">
-          <div><strong>Mensajero:</strong> ${usuario}</div>
-          <div><strong>Fecha de ruta:</strong> ${fecha}</div>
-          <div><strong>Generado:</strong> ${horaGen}</div>
+          <div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div>
+          <div><strong>Fecha de ruta:</strong> ${escapeHtml(fecha)}</div>
+          <div><strong>Generado:</strong> ${escapeHtml(horaGen)}</div>
           <div><strong>Total fotos:</strong> ${planas.length}</div>
           <div><strong>Páginas:</strong> ${totalP}</div>
         </div>
@@ -2574,11 +2760,12 @@ window.imprimirAlbumFotografico = function(){
     for(let p=0;p<planas.length;p+=FPP){
       const fp = planas.slice(p,p+FPP); const np = Math.floor(p/FPP)+1;
       html += `<div class="rd-album-page"><div class="rd-album-page-header">📸 Página ${np} de ${totalP} · fotos ${p+1}–${Math.min(p+FPP,planas.length)} de ${planas.length}</div><div class="rd-album-grid">`;
-      fp.forEach(f=>{ const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ ${[f.rostros?`👤${f.rostros}`:'',f.vehiculos?`🚗${f.vehiculos}`:''].filter(Boolean).join(' ')}</span>`:''; html += `<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${f.codigo}</span><br>`:''}<span style="color:#555;">${f.estado||''}</span>${f.hora?`<br>🕐 ${f.hora}`:''}${cs}</div></div>`; });
+      fp.forEach(f=>{ const cs=f.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ ${[f.rostros?`👤${f.rostros}`:'',f.vehiculos?`🚗${f.vehiculos}`:''].filter(Boolean).join(' ')}</span>`:''; html += `<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto visita ${f.numVisita}"><div class="rd-album-caption"><strong>Visita #${f.numVisita}</strong> · Foto ${f.idxFoto}/${f.totalFotosVisita}<br>${f.codigo?`🔖 <span style="font-family:'Courier New',monospace;">${escapeHtml(f.codigo)}</span><br>`:''}<span style="color:#555;">${escapeHtml(f.estado)||''}</span>${f.hora?`<br>🕐 ${escapeHtml(f.hora)}`:''}${cs}</div></div>`; });
       html += `</div></div>`;
     }
     html += generarPieAuditoria()+'</div>';
 
+    /* ✅ MEJORA 3b: solo modo-album (sin modo-reporte-diario) */
     ejecutarImpresion(html, ['modo-album']);
 
   } catch(err){
@@ -2588,9 +2775,9 @@ window.imprimirAlbumFotografico = function(){
   }
 };
 
-// ═══════════════════════════════════════════════════════════════
-// 3) Informe Mensual — SÍNCRONO
-// ═══════════════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════════════════
+   3) Informe Mensual
+   ═══════════════════════════════════════════════════════════════ */
 window.imprimirInformeMensual = function(){
   try {
     const ic = document.getElementById('informeContenedor');
@@ -2605,7 +2792,8 @@ window.imprimirInformeMensual = function(){
       ${clon.innerHTML}
       ${generarPieAuditoria()}
     </div>`;
-    ejecutarImpresion(html, []);
+    /* ✅ MEJORA 3b: informe mensual con modo-reporte-diario */
+    ejecutarImpresion(html, ['modo-reporte-diario']);
   } catch(err){
     console.error('Error al preparar el informe mensual:', err);
     finalizarImpresion();
@@ -2617,8 +2805,8 @@ function generarEncabezadoCorporativo(tituloDoc, codigoDoc){
   const ahora = new Date();
   const fechaISO = fechaLocalISO(ahora);
   const horaStr = ahora.toLocaleTimeString('es');
-  const titulo = tituloDoc ? `<div style="text-align:center;font-size:9pt;font-weight:bold;color:#333;margin-bottom:4px;">${tituloDoc}</div>` : '';
-  const codigo = codigoDoc ? `<div style="text-align:center;font-size:7.5pt;color:#666;margin-bottom:4px;">Código: ${codigoDoc}</div>` : '';
+  const titulo = tituloDoc ? `<div style="text-align:center;font-size:9pt;font-weight:bold;color:#333;margin-bottom:4px;">${escapeHtml(tituloDoc)}</div>` : '';
+  const codigo = codigoDoc ? `<div style="text-align:center;font-size:7.5pt;color:#666;margin-bottom:4px;">Código: ${escapeHtml(codigoDoc)}</div>` : '';
   return `${titulo}${codigo}<div class="rd-fecha-emision-print">
     <strong>Fecha de emisión:</strong> ${fechaISO} · ${horaStr}
   </div>`;
@@ -2632,14 +2820,14 @@ function generarPanelAuditoria(hash, datosExtra={}){
   return `<div class="rd-audit-panel">
     <div class="rd-audit-panel-title">📋 Registro de Auditoría — Metadatos del Documento</div>
     <div class="rd-audit-grid">
-      <div><strong>Generado por:</strong> ${u}</div>
-      <div><strong>Fecha y hora:</strong> ${ahora.toLocaleString('es')}</div>
-      <div><strong>Zona horaria:</strong> ${Intl.DateTimeFormat().resolvedOptions().timeZone}</div>
+      <div><strong>Generado por:</strong> ${escapeHtml(u)}</div>
+      <div><strong>Fecha y hora:</strong> ${escapeHtml(ahora.toLocaleString('es'))}</div>
+      <div><strong>Zona horaria:</strong> ${escapeHtml(Intl.DateTimeFormat().resolvedOptions().timeZone)}</div>
       <div><strong>Dispositivo:</strong> ${dispositivo} · ${plataforma}</div>
       <div><strong>Plataforma:</strong> ${plataforma}</div>
-      ${Object.entries(datosExtra).map(([k,v])=>`<div><strong>${k}:</strong> ${v}</div>`).join('')}
+      ${Object.entries(datosExtra).map(([k,v])=>`<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</div>`).join('')}
     </div>
-    <code class="rd-audit-hash"><strong>Hash de verificación:</strong> ${hash}</code>
+    <code class="rd-audit-hash"><strong>Hash de verificación:</strong> ${escapeHtml(hash)}</code>
   </div>`;
 }
 function generarPieAuditoria(){
@@ -2647,7 +2835,7 @@ function generarPieAuditoria(){
   const ahora = new Date();
   return `<div class="rd-footer">
     <div class="rd-confidencial">Documento confidencial — Uso exclusivo interno y auditoría</div>
-    <div>Generado por <strong>${u}</strong> el ${ahora.toLocaleString('es')}</div>
+    <div>Generado por <strong>${escapeHtml(u)}</strong> el ${escapeHtml(ahora.toLocaleString('es'))}</div>
     <div>Este documento contiene información sujeta a reserva. Su reproducción no autorizada está prohibida.</div>
   </div>`;
 }
@@ -2767,29 +2955,29 @@ window.descargarRespaldoWord = async function(){
 
   let h = '';
   h += `<h1>📦 Respaldo Completo Colserlog</h1>`;
-  h += `<h2>👤 Mensajero: ${u}</h2>`;
-  h += `<div class="header-info">Respaldo generado el ${fB}</div>`;
+  h += `<h2>👤 Mensajero: ${escapeHtml(u)}</h2>`;
+  h += `<div class="header-info">Respaldo generado el ${escapeHtml(fB)}</div>`;
   h += `<div style="margin:8px 0 16px 0;padding:8px;border:2px dashed #c0392b;background:#fff8f8;">`;
   h += `<p style="text-align:center;font-size:9pt;color:#c0392b;font-weight:bold;margin:0 0 4px 0;">⚠️ NO MODIFICAR ESTA SECCIÓN — Datos del respaldo</p>`;
   h += `<p style="text-align:center;font-size:7pt;color:#666;margin:0 0 6px 0;">Si mueves o borras esta línea, el respaldo no se podrá importar.</p>`;
   h += `<p style="word-break:break-all;font-family:'Courier New',monospace;font-size:5pt;color:#333;text-align:left;margin:0;line-height:1.1;">`;
   h += `${PAYLOAD_START}${b64}${PAYLOAD_END}`;
   h += `</p></div>`;
-  h += `<h3>⏱️ Tiempos Base del Día</h3><table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${tb.inicioCarga||'—'}</td><td>${tb.finCarga||'—'}</td><td>${tb.salidaEmpresa||'—'}</td><td>${tb.primeraEntrega||'—'}</td></tr></tbody></table>`;
+  h += `<h3>⏱️ Tiempos Base del Día</h3><table><thead><tr><th>Inicio carga</th><th>Fin carga</th><th>Salida empresa</th><th>Primera entrega</th></tr></thead><tbody><tr><td>${escapeHtml(tb.inicioCarga)||'—'}</td><td>${escapeHtml(tb.finCarga)||'—'}</td><td>${escapeHtml(tb.salidaEmpresa)||'—'}</td><td>${escapeHtml(tb.primeraEntrega)||'—'}</td></tr></tbody></table>`;
   h += `<h3>📊 Resumen del Día</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${ent}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${tV-ent}</div></td><td><div class="kpi-label">Total Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Prom. Visita</div><div class="kpi-valor">${pv} min</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Tiempo Total</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table>`;
   h += `<h3>📥 Banco de Códigos (${banco.length})</h3>`;
   if(!banco.length) h += `<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
   else {
     h += `<table><thead><tr><th>#</th><th>Código</th><th>Estado</th></tr></thead><tbody>`;
     const us = new Set(lv.map(v => (v.codigo||'').trim()).filter(Boolean));
-    banco.forEach((c,i) => { h += `<tr><td>${i+1}</td><td>${c}</td><td>${us.has(c)?'✓ Usado':'Disponible'}</td></tr>`; });
+    banco.forEach((c,i) => { h += `<tr><td>${i+1}</td><td>${escapeHtml(c)}</td><td>${us.has(c)?'✓ Usado':'Disponible'}</td></tr>`; });
     h += `</tbody></table>`;
   }
   h += `<h3>📋 Visitas Registradas (${lv.length})</h3>`;
   if(!lv.length) h += `<p style="text-align:center;color:#888;"><em>Sin visitas.</em></p>`;
   else {
     h += `<table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
-    lv.forEach((v,i) => { h += `<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo||0} min</td><td>${v.codigo||'—'}</td><td>${v.estado||''}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
+    lv.forEach((v,i) => { h += `<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||''}</td><td>${escapeHtml(v.salida)||''}</td><td>${Number(v.tiempo)||0} min</td><td>${escapeHtml(v.codigo)||'—'}</td><td>${escapeHtml(v.estado)||''}</td><td class="descripcion-col">${escapeHtml(v.descripcion)||'—'}</td></tr>`; });
     h += `<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${tM} min</strong></td><td colspan="3"><strong>${tV} visita(s)</strong></td></tr></tbody></table>`;
   }
   if(r.fotosIndexedDB && r.fotosIndexedDB.length){
@@ -2800,7 +2988,7 @@ window.descargarRespaldoWord = async function(){
   Object.keys(cR).forEach(k => {
     const c = cR[k]||0; if(!c) return;
     const p = tV > 0 ? ((c/tV)*100).toFixed(1) : '0.0';
-    h += `<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${p}%</td></tr>`;
+    h += `<tr><td style="text-align:left;">${escapeHtml(k)}</td><td>${c}</td><td>${p}%</td></tr>`;
   });
   h += `</tbody></table>`;
   if(fH.length){
@@ -3010,7 +3198,7 @@ window.cargarRespaldoDesdeArchivo = async function(event){
 };
 function descargarWord(nombre,html){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'';
-  const full=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${nombre}</title><style>@page{size:A4 portrait;margin:1cm}body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#333}h1{color:#1c1c1e;font-size:16pt;text-align:center;margin:3px 0}h2{color:#1c1c1e;font-size:12pt;text-align:center;margin:3px 0;border-bottom:2px solid #1c1c1e;padding-bottom:4px}h3{color:#1c1c1e;font-size:11pt;margin:10px 0 4px 0;border-bottom:1px solid #0a84ff;padding-bottom:2px}.usuario-header{text-align:center;font-size:10pt;font-weight:bold;color:#1c1c1e;margin-bottom:6px}table{width:100%;border-collapse:collapse;margin:6px 0;font-size:8pt;page-break-inside:auto}th{background:#1c1c1e;color:#fff;padding:4px 5px;border:1px solid #000;text-align:center;font-size:8pt}td{padding:3px 5px;border:1px solid #bbb;text-align:center;font-size:8pt}tr{page-break-inside:avoid}thead{display:table-header-group}tr:nth-child(even) td{background:#f8f9fa}.total-row td{background:#e8f8f5!important;font-weight:bold;border-top:2px solid #30d158}.kpis{width:100%;margin:10px 0;border-collapse:separate;border-spacing:4px;page-break-inside:avoid}.kpis td{border:1px solid #ccc;background:#f8f9fa;padding:6px;text-align:center;width:25%}.kpi-label{font-size:7pt;color:#666;text-transform:uppercase}.kpi-valor{font-size:12pt;font-weight:bold;color:#1c1c1e}.firma{margin-top:40px}.firma table td{border:none;border-top:1px solid #000;padding-top:5px;width:40%;font-size:9pt;text-align:center}.header-info{text-align:center;font-size:8pt;color:#777;margin-bottom:10px}.descripcion-col{text-align:left;font-size:7.5pt;max-width:150px}</style></head><body><div class="usuario-header">👤 Mensajero: ${u}</div>${html}</body></html>`;
+  const full=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${escapeHtml(nombre)}</title><style>@page{size:A4 portrait;margin:1cm}body{font-family:Calibri,Arial,sans-serif;font-size:10pt;color:#333}h1{color:#1c1c1e;font-size:16pt;text-align:center;margin:3px 0}h2{color:#1c1c1e;font-size:12pt;text-align:center;margin:3px 0;border-bottom:2px solid #1c1c1e;padding-bottom:4px}h3{color:#1c1c1e;font-size:11pt;margin:10px 0 4px 0;border-bottom:1px solid #0a84ff;padding-bottom:2px}.usuario-header{text-align:center;font-size:10pt;font-weight:bold;color:#1c1c1e;margin-bottom:6px}table{width:100%;border-collapse:collapse;margin:6px 0;font-size:8pt;page-break-inside:auto}th{background:#1c1c1e;color:#fff;padding:4px 5px;border:1px solid #000;text-align:center;font-size:8pt}td{padding:3px 5px;border:1px solid #bbb;text-align:center;font-size:8pt}tr{page-break-inside:avoid}thead{display:table-header-group}tr:nth-child(even) td{background:#f8f9fa}.total-row td{background:#e8f8f5!important;font-weight:bold;border-top:2px solid #30d158}.kpis{width:100%;margin:10px 0;border-collapse:separate;border-spacing:4px;page-break-inside:avoid}.kpis td{border:1px solid #ccc;background:#f8f9fa;padding:6px;text-align:center;width:25%}.kpi-label{font-size:7pt;color:#666;text-transform:uppercase}.kpi-valor{font-size:12pt;font-weight:bold;color:#1c1c1e}.firma{margin-top:40px}.firma table td{border:none;border-top:1px solid #000;padding-top:5px;width:40%;font-size:9pt;text-align:center}.header-info{text-align:center;font-size:8pt;color:#777;margin-bottom:10px}.descripcion-col{text-align:left;font-size:7.5pt;max-width:150px}</style></head><body><div class="usuario-header">👤 Mensajero: ${escapeHtml(u)}</div>${html}</body></html>`;
   const blob=new Blob(['\ufeff',full],{type:'application/msword'}); const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download=nombre.endsWith('.doc')?nombre:nombre+'.doc';
   document.body.appendChild(a); a.click(); document.body.removeChild(a); setTimeout(()=>URL.revokeObjectURL(url),5000);
@@ -3020,18 +3208,18 @@ window.exportarDiaAWord = function(){
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const e=contadores['Entregado']||0, n=totalVisitas-e;
   const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
-  let h=`<h1>📦 Reporte Diario</h1><h2>${f}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${e}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${n}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${totalVisitas}</div></td><td><div class="kpi-label">Promedio</div><div class="kpi-valor">${p} min</div></td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
-  visitas.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${v.llegada||''}</td><td>${v.salida||''}</td><td>${v.tiempo} min</td><td>${v.codigo||'—'}</td><td>${v.estado}</td><td class="descripcion-col">${v.descripcion||'—'}</td></tr>`; });
+  let h=`<h1>📦 Reporte Diario</h1><h2>${escapeHtml(f)}</h2><div class="header-info">Generado ${escapeHtml(new Date().toLocaleString('es'))}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${e}</div></td><td><div class="kpi-label">No Entregados</div><div class="kpi-valor">${n}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${totalVisitas}</div></td><td><div class="kpi-label">Promedio</div><div class="kpi-valor">${p} min</div></td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Estado</th><th>Descripción</th></tr></thead><tbody>`;
+  visitas.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||''}</td><td>${escapeHtml(v.salida)||''}</td><td>${Number(v.tiempo)||0} min</td><td>${escapeHtml(v.codigo)||'—'}</td><td>${escapeHtml(v.estado)||''}</td><td class="descripcion-col">${escapeHtml(v.descripcion)||'—'}</td></tr>`; });
   h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${totalMinutosVisitas} min</strong></td><td colspan="3"><strong>${totalVisitas} visitas</strong></td></tr></tbody></table>`;
   h+=`<h3>📈 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
-  for(const k in contadores){ const c=contadores[k]; if(!c) continue; const pp=totalVisitas>0?((c/totalVisitas)*100).toFixed(1):0; h+=`<tr><td style="text-align:left;">${k}</td><td>${c}</td><td>${pp}%</td></tr>`; }
+  for(const k in contadores){ const c=contadores[k]; if(!c) continue; const pp=totalVisitas>0?((c/totalVisitas)*100).toFixed(1):0; h+=`<tr><td style="text-align:left;">${escapeHtml(k)}</td><td>${c}</td><td>${pp}%</td></tr>`; }
   h+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td></tr></tbody></table>`;
   const vcw=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
   if(vcw.length){
     const ids=[]; vcw.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); }); const df = getFotosSync(ids);
     const tot=vcw.reduce((s,v)=>s+v.fotos.length,0);
     h+=`<h3>📸 Evidencia Fotográfica (${tot})</h3><table><thead><tr><th style="width:8%">#</th><th style="width:15%">Visita</th><th style="width:20%">Código</th><th style="width:22%">Estado</th><th>Foto</th></tr></thead><tbody>`;
-    vcw.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,i)=>{ const d=df[foto.id]; if(!d) return; const cs=foto.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; h+=`<tr><td>${i+1}</td><td>#${nv}</td><td style="font-family:monospace;font-size:7.5pt;">${v.codigo||'—'}</td><td style="font-size:7pt;">${v.estado||'—'}${cs}</td><td><img src="${d}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td></tr>`; }); });
+    vcw.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,i)=>{ const d=df[foto.id]; if(!d) return; const cs=foto.censurada?`<br><span style="color:#c0392b;font-weight:bold;">🛡️ Censurada</span>`:''; h+=`<tr><td>${i+1}</td><td>#${nv}</td><td style="font-family:monospace;font-size:7.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="font-size:7pt;">${escapeHtml(v.estado)||'—'}${cs}</td><td><img src="${d}" style="max-width:55mm;max-height:55mm;border:1px solid #ccc;"></td></tr>`; }); });
     h+=`</tbody></table>`;
   }
   h+=`<div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
@@ -3047,8 +3235,8 @@ window.exportarMesAWord = function(){
   let tE=0,tV=0,tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
   fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1), pV=tV>0?Math.round(tM/tV):0, ef=tV>0?((tE/tV)*100).toFixed(1):0;
-  let html=`<h1>📦 Informe Mensual</h1><h2>${cap} ${a}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${fm.length}</div></td></tr></table><h3>📋 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
-  for(const e in cm){ const c=cm[e]; if(!c) continue; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${e}</td><td>${c}</td><td>${pp}%</td></tr>`; }
+  let html=`<h1>📦 Informe Mensual</h1><h2>${escapeHtml(cap)} ${a}</h2><div class="header-info">Generado ${escapeHtml(new Date().toLocaleString('es'))}</div><h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Efectividad</div><div class="kpi-valor">${ef}%</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${fm.length}</div></td></tr></table><h3>📋 Por Estado</h3><table><thead><tr><th>Estado</th><th>Cantidad</th><th>%</th></tr></thead><tbody>`;
+  for(const e in cm){ const c=cm[e]; if(!c) continue; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${escapeHtml(e)}</td><td>${c}</td><td>${pp}%</td></tr>`; }
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td>100%</td></tr></tbody></table><h3>📆 Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
   fm.forEach(f=>{ const d=h[f]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td><strong>${tE}</strong></td><td><strong>${tV-tE}</strong></td><td><strong>${Math.floor(tM/60)}h ${tM%60}m</strong></td></tr></tbody></table><div class="firma"><table><tr><td>Firma Mensajero</td><td>Firma Supervisor</td></tr></table></div>`;
@@ -3059,8 +3247,8 @@ window.exportarHistorialCompletoAWord = function(){
   if(!f.length){ alert('No hay historial.'); return; }
   let tE=0,tV=0,tM=0; const pm={};
   f.forEach(k=>{ const d=h[k]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; const [y,m]=k.split('-'); const key=`${y}-${m}`; if(!pm[key]) pm[key]={vis:0,ent:0,min:0,dias:0}; pm[key].vis+=d.totalVisitas||0; pm[key].ent+=d.contadores?.['Entregado']||0; pm[key].min+=d.totalMinutos||0; pm[key].dias+=1; });
-  let html=`<h1>📦 Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><div class="header-info">Generado ${new Date().toLocaleString('es')}</div><h3>📊 Totales</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${f.length}</div></td><td><div class="kpi-label">Tiempo</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table><h3>📅 Por Mes</h3><table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
-  Object.keys(pm).sort().forEach(k=>{ const d=pm[k]; const [y,m]=k.split('-'); const nm=new Date(y,m-1,1).toLocaleString('es',{month:'long',year:'numeric'}); const p=d.dias>0?(d.ent/d.dias).toFixed(1):0; html+=`<tr><td style="text-align:left;">${nm}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${p}</td></tr>`; });
+  let html=`<h1>📦 Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><div class="header-info">Generado ${escapeHtml(new Date().toLocaleString('es'))}</div><h3>📊 Totales</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${tE}</div></td><td><div class="kpi-label">Visitas</div><div class="kpi-valor">${tV}</div></td><td><div class="kpi-label">Días</div><div class="kpi-valor">${f.length}</div></td><td><div class="kpi-label">Tiempo</div><div class="kpi-valor">${Math.floor(tM/60)}h ${tM%60}m</div></td></tr></table><h3>📅 Por Mes</h3><table><thead><tr><th>Mes</th><th>Días</th><th>Visitas</th><th>Entregados</th><th>No Entreg.</th><th>Prom. Diario</th></tr></thead><tbody>`;
+  Object.keys(pm).sort().forEach(k=>{ const d=pm[k]; const [y,m]=k.split('-'); const nm=new Date(y,m-1,1).toLocaleString('es',{month:'long',year:'numeric'}); const p=d.dias>0?(d.ent/d.dias).toFixed(1):0; html+=`<tr><td style="text-align:left;">${escapeHtml(nm)}</td><td>${d.dias}</td><td>${d.vis}</td><td>${d.ent}</td><td>${d.vis-d.ent}</td><td>${p}</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${f.length}</strong></td><td><strong>${tV}</strong></td><td><strong>${tE}</strong></td><td><strong>${tV-tE}</strong></td><td><strong>${(tE/f.length).toFixed(1)}</strong></td></tr></tbody></table><h3>📆 Detalle Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>No Entregados</th><th>Tiempo</th></tr></thead><tbody>`;
   f.forEach(k=>{ const d=h[k]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${k.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
   html+=`</tbody></table>`;
@@ -3135,8 +3323,8 @@ window.generarInformeMensual = ()=>{
   let tE=0,tV=0,tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
   fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1), pV=tV>0?Math.round(tM/tV):0, ef=tV>0?((tE/tV)*100).toFixed(1):0;
-  let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${u}</div><h2>Periodo: ${cap} ${a}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${new Date().toLocaleString('es')}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${pD}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${pV} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(tM/60)}h ${tM%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${tV-tE}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
-  Object.keys(cm).forEach(e=>{ const c=cm[e]; if(!c) return; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${e}</td><td>${c}</td><td>${pp}%</td></tr>`; });
+  let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-size:13px;color:var(--text-heading);font-weight:bold;margin:5px 0;">👤 Mensajero: ${escapeHtml(u)}</div><h2>Periodo: ${escapeHtml(cap)} ${a}</h2><div style="font-size:11px;color:var(--text-muted);">Generado ${escapeHtml(new Date().toLocaleString('es'))}</div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div><div class="informe-kpi"><div class="label">Prom Diario</div><div class="valor">${pD}</div></div><div class="informe-kpi"><div class="label">Prom Visita</div><div class="valor">${pV} min</div></div><div class="informe-kpi"><div class="label">Tiempo Total</div><div class="valor">${Math.floor(tM/60)}h ${tM%60}m</div></div><div class="informe-kpi"><div class="label">No Entreg.</div><div class="valor">${tV-tE}</div></div></div></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📋 Por Estado</h3><table class="informe-tabla"><thead><tr><th>Estado</th><th>Cant</th><th>%</th></tr></thead><tbody>`;
+  Object.keys(cm).forEach(e=>{ const c=cm[e]; if(!c) return; const pp=tV>0?((c/tV)*100).toFixed(1):0; html+=`<tr><td style="text-align:left;">${escapeHtml(e)}</td><td>${c}</td><td>${pp}%</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td>100%</td></tr></tbody></table></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entreg</th><th>No Ent</th><th>Tiempo</th></tr></thead><tbody>`;
   fm.forEach(f=>{ const d=h[f]; const e=d.contadores?.['Entregado']||0; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${e}</td><td>${(d.totalVisitas||0)-e}</td><td>${Math.floor((d.totalMinutos||0)/60)}h ${(d.totalMinutos||0)%60}m</td></tr>`; });
   html+=`<tr class="total-row"><td><strong>TOTAL</strong></td><td><strong>${tV}</strong></td><td><strong>${tE}</strong></td><td><strong>${tV-tE}</strong></td><td><strong>${Math.floor(tM/60)}h ${tM%60}m</strong></td></tr></tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
@@ -3193,7 +3381,7 @@ window.compactarHistorial = function(){
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
 };
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
@@ -3210,21 +3398,15 @@ document.addEventListener('input', (e) => {
   }
 });
 
-// ═══════════════════════════════════════════════════════════════
-// AUTO-IMPRESIÓN: cuando la app se abre desde Safari con ?auto_print=1
-// ═══════════════════════════════════════════════════════════════
 window.addEventListener('load', () => {
   try {
     const params = new URLSearchParams(location.search);
     if(params.get('auto_print') !== '1') return;
-    // Limpiar el parámetro de la URL
     try {
       const clean = location.pathname + location.hash;
       history.replaceState({}, document.title, clean);
     } catch(e){}
-    // Si seguimos en iOS PWA, no se puede imprimir. Abortar.
     if(esIOSPWA()){ console.warn('⚠️ auto_print: aún en iOS PWA, abortar'); return; }
-    // Marcar modo auto-print (evita confirmaciones)
     _autoPrintMode = true;
     console.log('🖨️ Auto-impresión activada tras abrir en Safari');
     setTimeout(() => {
