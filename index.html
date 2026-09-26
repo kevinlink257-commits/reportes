@@ -11,10 +11,16 @@
 <title>Colserlog · Reporte de Entregas</title>
 <link rel="manifest" id="manifestLink">
 <link rel="apple-touch-icon" id="appleIcon">
+<!-- Librerías externas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+<!-- Jspreadsheet CE para tabla dinámica -->
+<script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/index.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/jspreadsheet.min.css" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css" />
 <style>
 :root{
   --sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;
@@ -556,7 +562,8 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
         </div>
         <p id="contadorBusquedaDia" class="contador-busqueda"></p>
       </div>
-      <div id="listaVisitasDia"></div>
+      <!-- Contenedor para la tabla dinámica tipo Excel -->
+      <div id="tablaVisitasExcel" style="width:100%; min-height:300px;"></div>
     </div>
 
     <div class="section no-print">
@@ -881,7 +888,7 @@ body.dark .badge-ent.ok{color:#70dd8a}body.dark .badge-ent.no{color:#ff8a80}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
 import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, deleteField } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
-const firebaseConfig = { apiKey:"AIzaSyCINy28c8Ga2V1VWPzPXfvcOaEpbrnKnyk", authDomain:"colserlog-65de5.firebaseapp.com", projectId:"colserlog-65de5", storageBucket:"colserlog-65de5.firebasestorage.app", messagingSenderId:"593319427038", appId:"1:593319427038:web:dddae0742e979b5640bb4f" };
+const firebaseConfig = { apiKey:"AIzaSyCINy28c8Ga2V1VWPzPXfvcOaEpbrnKnyk", authDomain:"colserlog-65de9.firebaseapp.com", projectId:"colserlog-65de9", storageBucket:"colserlog-65de9.firebasestorage.app", messagingSenderId:"593319427038", appId:"1:593319427038:web:dddae0742e979b5640bb4f" };
 const CODIGO_GRUPO = "data-archi";
 const CLAVE_USUARIO_LOCAL = "colserlog_usuario_actual";
 const CLAVE_USUARIOS_REGISTRADOS = "colserlog_usuarios_registrados";
@@ -1106,7 +1113,6 @@ async function iniciarSesionConUsuario(nombre){
 
   let snapData = null;
   if(ref){
-    // FIX: no se traga el error dentro de getDoc
     const p = getDoc(ref).then(snap=>{ snapData=snap; return true; })
                         .catch(err=>{ console.warn('getDoc falló:', err); return false; });
     tareas.push(Promise.race([
@@ -1709,13 +1715,13 @@ async function detectarYCensurar(dataUrl, onProgreso){
   const detecciones = [];
   onProgreso?.('Analizando rostros…');
   try {
-    const caras = await window.faceapi.detectAllFaces(img, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.45 }));
+    const caras = await window.faceapi.detectAllFaces(img, new window.faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.5 }));
     caras.forEach(c => { const b = c.box; detecciones.push({ x: b.x, y: b.y, w: b.width, h: b.height }); });
     resultado.rostros = caras.length;
   } catch(e){ console.warn('Face detection fallo:', e); }
   onProgreso?.('Analizando vehículos…');
   try {
-    const objetos = await _cocoModel.detect(img, 20, 0.4);
+    const objetos = await _cocoModel.detect(img, 20, 0.5);
     objetos.forEach(o => { if (!CLASES_VEHICULO.includes(o.class)) return; const [x, y, w, h] = o.bbox; detecciones.push({ x, y, w, h }); });
     resultado.vehiculos = objetos.filter(o => CLASES_VEHICULO.includes(o.class)).length;
   } catch(e){ console.warn('COCO-SSD fallo:', e); }
@@ -1798,6 +1804,7 @@ let fotosPendientes=[]; let modalFotosActual={lista:[],indice:0};
 let sincronizarFotosNube=false; try{ sincronizarFotosNube=localStorage.getItem(CLAVE_FOTOS_NUBE)==='true'; }catch(e){}
 let _estabaDarkAlImprimir = false;
 let _autoPrintMode = false;
+let spreadsheetVisitas = null; // Instancia de Jspreadsheet
 
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; const [a,b]=h1.split(':').map(Number); const [c,d]=h2.split(':').map(Number); let m1=a*60+b, m2=c*60+d; if(m2<m1) m2+=1440; return m2-m1; }
@@ -2201,16 +2208,18 @@ window.filtrarVistaDia = function(filtro){
 };
 window.limpiarBusquedaDia = function(){ const i = document.getElementById('busquedaDia'); if(i){ i.value=''; i.focus(); } renderizarVistaDia(); guardarBorrador(); };
 
-/* ✅ MEJORA 2: renderizarVistaDia con debounce + DOM API (previene XSS) */
+/* ✅ MEJORA: renderizarVistaDia con Jspreadsheet (tabla dinámica tipo Excel) */
 let _renderVistaTimer = null;
 window.renderizarVistaDia = function(){
   clearTimeout(_renderVistaTimer);
-  _renderVistaTimer = setTimeout(_renderizarVistaDiaAhora, 120);
+  _renderVistaTimer = setTimeout(_renderizarVistaDiaExcel, 200);
 };
-function _renderizarVistaDiaAhora(){
-  const lista = document.getElementById('listaVisitasDia');
-  if(!lista) return;
 
+function _renderizarVistaDiaExcel(){
+  const contenedor = document.getElementById('tablaVisitasExcel');
+  if(!contenedor) return;
+
+  // Actualizar contadores de filtros
   const cntEnt   = visitas.filter(v=>v.estado==='Entregado').length;
   const cntNoEnt = visitas.length - cntEnt;
   const elT = document.getElementById('cnt-todas');
@@ -2220,68 +2229,95 @@ function _renderizarVistaDiaAhora(){
   if(elE) elE.textContent = `(${cntEnt})`;
   if(elN) elN.textContent = `(${cntNoEnt})`;
 
+  // Preparar datos para la tabla
   const busq = (document.getElementById('busquedaDia')?.value||'').trim().toLowerCase();
+  let datos = visitas.map((v, i) => [
+    i + 1,
+    v.llegada || '',
+    v.salida || '',
+    (Number(v.tiempo) || 0) + ' min',
+    v.codigo || '',
+    v.estado || '',
+    v.descripcion || '',
+    (v.fotos && v.fotos.length) ? v.fotos.length : 0
+  ]);
+
+  // Aplicar filtros
+  if(filtroVistaDia === 'entregados') datos = datos.filter(d => d[5] === 'Entregado');
+  else if(filtroVistaDia === 'no-entregados') datos = datos.filter(d => d[5] !== 'Entregado');
+  if(busq) datos = datos.filter(d => (d[4] || '').toLowerCase().includes(busq));
+
+  // Actualizar contador de búsqueda
   const cb = document.getElementById('contadorBusquedaDia');
-
-  let filtradas = visitas.map((v,i)=>({v,i}));
-  if(filtroVistaDia==='entregados') filtradas = filtradas.filter(({v})=>v.estado==='Entregado');
-  else if(filtroVistaDia==='no-entregados') filtradas = filtradas.filter(({v})=>v.estado!=='Entregado');
-  if(busq) filtradas = filtradas.filter(({v})=>(v.codigo||'').toLowerCase().includes(busq));
-
   if(cb){
-    const etiqueta = filtroVistaDia==='todas' ? 'Todas'
-                  : filtroVistaDia==='entregados' ? 'Entregados'
-                  : 'No entregados';
+    const etiqueta = filtroVistaDia === 'todas' ? 'Todas' : filtroVistaDia === 'entregados' ? 'Entregados' : 'No entregados';
     cb.textContent = busq
-      ? `🔎 ${filtradas.length} resultado(s) de "${busq}" en ${etiqueta}`
-      : `Mostrando: ${etiqueta} — ${filtradas.length} visita(s)`;
+      ? `🔎 ${datos.length} resultado(s) de "${busq}" en ${etiqueta}`
+      : `Mostrando: ${etiqueta} — ${datos.length} visita(s)`;
   }
 
-  if(!filtradas.length){
-    lista.innerHTML = '<div class="sin-resultados">📭 No hay visitas para mostrar</div>';
-    return;
+  // Si ya existe una instancia, destruirla y recrearla
+  if(spreadsheetVisitas){
+    try { spreadsheetVisitas.destroy(); } catch(e){}
+    spreadsheetVisitas = null;
   }
 
-  const tabla = document.createElement('table');
-  tabla.className = 'tabla-visitas-dia';
-  const thead = document.createElement('thead');
-  thead.innerHTML = '<tr><th style="width:5%">#</th><th style="width:10%">Llegada</th><th style="width:10%">Salida</th><th style="width:10%">Tiempo</th><th style="width:22%">Guía / Código</th><th style="width:18%">Estado</th><th>Descripción</th></tr>';
-  tabla.appendChild(thead);
-  const tbody = document.createElement('tbody');
+  // Limpiar contenedor
+  contenedor.innerHTML = '';
 
-  filtradas.forEach(({v,i})=>{
-    const tr = document.createElement('tr');
-    const add = (txt, extra={}) => {
-      const td = document.createElement('td');
-      if(extra.style) td.setAttribute('style', extra.style);
-      if(extra.className) td.className = extra.className;
-      if(extra.html!==undefined) td.innerHTML = extra.html;
-      else td.textContent = txt;
-      tr.appendChild(td);
-    };
-    add(String(i+1));
-    add(v.llegada || '—');
-    add(v.salida  || '—');
-    add(null, { html: `<strong>${Number(v.tiempo)||0} min</strong>` });
-    add(v.codigo || '—', { style:"font-family:'Courier New',monospace;font-size:.75rem;font-weight:700;" });
+  // Crear tabla Jspreadsheet
+  spreadsheetVisitas = jspreadsheet(contenedor, {
+    data: datos,
+    columns: [
+      { type: 'numeric', title: '#', width: 50, readOnly: true },
+      { type: 'text', title: 'Llegada', width: 80, readOnly: true },
+      { type: 'text', title: 'Salida', width: 80, readOnly: true },
+      { type: 'text', title: 'Tiempo', width: 80, readOnly: true },
+      { type: 'text', title: 'Guía / Código', width: 150 },
+      { type: 'dropdown', title: 'Estado', width: 180, source: ESTADOS },
+      { type: 'text', title: 'Descripción', width: 250 },
+      { type: 'numeric', title: '📸', width: 50, readOnly: true }
+    ],
+    minDimensions: [8, 0],
+    allowInsertColumn: false,
+    allowDeleteColumn: false,
+    allowRenameColumn: false,
+    allowInsertRow: false,
+    allowDeleteRow: true,
+    columnSorting: true,
+    columnDrag: false,
+    columnResize: true,
+    tableOverflow: true,
+    tableWidth: '100%',
+    tableHeight: '400px',
+    pagination: 50,
+    paginationOptions: [25, 50, 100, 200],
+    search: true,
+    onchange: function(instance, cell, col, row, val) {
+      // Sincronizar cambios con los datos de la aplicación
+      const index = row;
+      if(index < 0 || index >= visitas.length) return;
 
-    const esEnt = v.estado==='Entregado';
-    const tdEstado = document.createElement('td');
-    const span = document.createElement('span');
-    span.className = 'badge-ent '+(esEnt?'ok':'no');
-    span.textContent = v.estado || '—';
-    tdEstado.appendChild(span);
-    tr.appendChild(tdEstado);
+      if(col === 4) { // Código
+        const codigoLimpio = val.replace(/\D/g, '').slice(0, 12);
+        if(codigoLimpio.length === 12){
+          visitas[index].codigo = codigoLimpio;
+          if(!bancoCodigos.includes(codigoLimpio)) bancoCodigos.push(codigoLimpio);
+        }
+      } else if(col === 5) { // Estado
+        visitas[index].estado = val;
+      } else if(col === 6) { // Descripción
+        visitas[index].descripcion = val;
+      }
 
-    const tdDesc = document.createElement('td');
-    tdDesc.className = 'desc';
-    tdDesc.textContent = v.descripcion || '—';
-    tr.appendChild(tdDesc);
-
-    tbody.appendChild(tr);
+      // Recalcular estadísticas y guardar
+      recalcularEstadisticas();
+      guardarEstadoCompleto();
+    },
+    onselection: function(instance, x1, y1, x2, y2) {},
+    onopen: function(instance, cell, col, row) {},
+    onclose: function(instance, cell, col, row) {}
   });
-  tabla.appendChild(tbody);
-  lista.replaceChildren(tabla);
 }
 
 function actualizarDashboard(){
@@ -2386,7 +2422,14 @@ window.iniciarEscaneo = function(modo){
     escaneoActivo=true;
     if(html5QrCode){ try{ html5QrCode.clear(); }catch(e){} html5QrCode=null; }
     html5QrCode=new Html5Qrcode(divId);
-    const cfg={ fps:6, qrbox:{ width:Math.min(window.innerWidth*0.8,300), height:Math.min(window.innerHeight*0.25,120) }, aspectRatio:1.5, disableFlip:true, formatsToSupport:[Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13] };
+    const cfg={
+      fps: 5,
+      qrbox: { width: Math.min(window.innerWidth * 0.8, 300), height: Math.min(window.innerHeight * 0.25, 120) },
+      aspectRatio: 1.5,
+      disableFlip: true,
+      useBarCodeDetectorIfSupported: false,
+      formatsToSupport: [Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.CODE_39]
+    };
     html5QrCode.start({ facingMode:'environment' }, cfg, (txt)=>{
       if(!escaneoActivo || sesionEscaneoYaAgrego) return;
       const orig=String(txt||'').trim(); const cod=orig.replace(/\D/g,''); if(!cod||cod.length!==12) return;
@@ -2479,7 +2522,6 @@ function iosSoportaPrintEnPWA(){
   return false;
 }
 
-/* ✅ MEJORA 3: ya NO se añade modo-reporte-diario por defecto */
 function prepararAreaImpresion(html, clasesExtra){
   let area = document.getElementById('areaImpresion');
   if(!area){ area = document.createElement('div'); area.id = 'areaImpresion'; document.body.appendChild(area); }
@@ -2557,7 +2599,21 @@ function mostrarModalImpresionIOSPWA(){
   });
 }
 
-function ejecutarImpresion(html, clasesExtra){
+async function esperarImagenesCargadas(area){
+  const imgs = area.querySelectorAll('img');
+  if(!imgs.length) return;
+  const promesas = Array.from(imgs).map(img => {
+    if(img.complete && img.naturalWidth > 0) return Promise.resolve();
+    return new Promise(resolve => {
+      img.onload = resolve;
+      img.onerror = resolve;
+      setTimeout(resolve, 3000);
+    });
+  });
+  await Promise.all(promesas);
+}
+
+async function ejecutarImpresion(html, clasesExtra){
   const iosPWA = esIOSPWA();
   const soporteNativo = !iosPWA || iosSoportaPrintEnPWA();
 
@@ -2566,7 +2622,8 @@ function ejecutarImpresion(html, clasesExtra){
     return;
   }
 
-  prepararAreaImpresion(html, clasesExtra);
+  const area = prepararAreaImpresion(html, clasesExtra);
+  await esperarImagenesCargadas(area);
 
   let limpio = false;
   const limpiar = () => { if(limpio) return; limpio = true; finalizarImpresion(); };
@@ -2591,7 +2648,7 @@ function ejecutarImpresion(html, clasesExtra){
       }
     }, 1500);
   } else {
-    setTimeout(limpio ? ()=>{} : limpiar, 120000);
+    setTimeout(limpio ? ()=>{} : limpiar, 60000);
   }
 }
 window.ejecutarImpresion = ejecutarImpresion;
@@ -2599,7 +2656,7 @@ window.ejecutarImpresion = ejecutarImpresion;
 /* ═══════════════════════════════════════════════════════════════
    1) Informe Diario
    ═══════════════════════════════════════════════════════════════ */
-window.imprimirReporteDiario = function(){
+window.imprimirReporteDiario = async function(){
   try {
     if(!visitas.length && !_autoPrintMode){
       if(!confirm('⚠️ No hay visitas registradas hoy.\n¿Imprimir de todas formas?')) return;
@@ -2628,6 +2685,12 @@ window.imprimirReporteDiario = function(){
     const minT = (iC!=='—'&&pE!=='—') ? calcularMinutos(iC,pE) : 0;
     const codigoDoc = `RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     const hash = hashSync(JSON.stringify({u:usuario, f:fechaLocalISO(), t:totalVisitas, m:totalMinutosVisitas}));
+
+    // Precargar fotos que falten
+    const idsNecesarios = [];
+    visitas.forEach(v => { if(Array.isArray(v.fotos)) v.fotos.forEach(f => { if(f.id) idsNecesarios.push(f.id); }); });
+    const idsFaltantes = idsNecesarios.filter(id => !cacheFotos.has(id));
+    if(idsFaltantes.length){ try { await obtenerFotosDB(idsFaltantes); } catch(e){ console.warn('No se pudieron precargar fotos:', e); } }
 
     let html = `<div class="reporte-diario">
       ${generarEncabezadoCorporativo('Reporte Diario de Entregas · Ruta Urbana', codigoDoc)}
@@ -2712,8 +2775,7 @@ window.imprimirReporteDiario = function(){
     </section>
     ${generarPieAuditoria()}</div>`;
 
-    /* ✅ MEJORA 3b: se pasa explícitamente 'modo-reporte-diario' */
-    ejecutarImpresion(html, ['modo-reporte-diario']);
+    await ejecutarImpresion(html, ['modo-reporte-diario']);
 
   } catch(err){
     console.error('Error al preparar el informe:', err);
@@ -2725,7 +2787,7 @@ window.imprimirReporteDiario = function(){
 /* ═══════════════════════════════════════════════════════════════
    2) Álbum Fotográfico
    ═══════════════════════════════════════════════════════════════ */
-window.imprimirAlbumFotografico = function(){
+window.imprimirAlbumFotografico = async function(){
   try {
     const vCF = visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
     if(!vCF.length){ alert('⚠️ No hay fotos registradas hoy.'); return; }
@@ -2734,6 +2796,8 @@ window.imprimirAlbumFotografico = function(){
     const fecha = ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     const horaGen = ahora.toLocaleTimeString('es');
     const ids = []; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
+    const idsFaltantes = ids.filter(id => !cacheFotos.has(id));
+    if(idsFaltantes.length){ try { await obtenerFotosDB(idsFaltantes); } catch(e){} }
     const df = getFotosSync(ids);
     const planas = [];
     vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({ dataUrl:df[foto.id], numVisita:nv, codigo:v.codigo, estado:v.estado, idxFoto:idx+1, totalFotosVisita:v.fotos.length, hora:v.llegada, censurada:foto.censurada, rostros:foto.rostros||0, vehiculos:foto.vehiculos||0 }); }); });
@@ -2765,8 +2829,7 @@ window.imprimirAlbumFotografico = function(){
     }
     html += generarPieAuditoria()+'</div>';
 
-    /* ✅ MEJORA 3b: solo modo-album (sin modo-reporte-diario) */
-    ejecutarImpresion(html, ['modo-album']);
+    await ejecutarImpresion(html, ['modo-album']);
 
   } catch(err){
     console.error('Error al preparar el álbum:', err);
@@ -2778,7 +2841,7 @@ window.imprimirAlbumFotografico = function(){
 /* ═══════════════════════════════════════════════════════════════
    3) Informe Mensual
    ═══════════════════════════════════════════════════════════════ */
-window.imprimirInformeMensual = function(){
+window.imprimirInformeMensual = async function(){
   try {
     const ic = document.getElementById('informeContenedor');
     if(!ic || !ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe mensual.'); return; }
@@ -2792,8 +2855,7 @@ window.imprimirInformeMensual = function(){
       ${clon.innerHTML}
       ${generarPieAuditoria()}
     </div>`;
-    /* ✅ MEJORA 3b: informe mensual con modo-reporte-diario */
-    ejecutarImpresion(html, ['modo-reporte-diario']);
+    await ejecutarImpresion(html, ['modo-reporte-diario']);
   } catch(err){
     console.error('Error al preparar el informe mensual:', err);
     finalizarImpresion();
@@ -2888,7 +2950,8 @@ function abrirWhatsApp(texto){
   if(!texto){ alert('⚠️ No hay datos.'); return; }
   const L=4000; let tf=texto, tr=false;
   if(texto.length>L){ tf=texto.substring(0,L-100)+`\n\n_... (mensaje truncado)_`; tr=true; }
-  window.open(`https://wa.me/?text=${encodeURIComponent(tf)}`,'_blank');
+  const w = window.open(`https://wa.me/?text=${encodeURIComponent(tf)}`,'_blank','noopener,noreferrer');
+  if(w) w.opener = null;
   if(tr){ setTimeout(()=>{ if(confirm('⚠️ Mensaje largo. ¿Copiar texto completo al portapapeles?')) copiarAlPortapapeles(texto); },500); }
 }
 async function copiarAlPortapapeles(txt){
@@ -3385,6 +3448,7 @@ function diagnosticar(){
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:', faltan); else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
+  if(typeof jspreadsheet==='undefined') console.error('❌ Jspreadsheet no cargó'); else console.log('✅ Jspreadsheet OK');
   console.log(`🖨️ Entorno: iOS=${esDispositivoIOS()} · PWA=${esModoStandalone()} · iOS PWA=${esIOSPWA()} · Soporte nativo print=${!esIOSPWA() || iosSoportaPrintEnPWA()}`);
 }
 document.addEventListener('touchstart', function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart', ua); }, { once:true });
