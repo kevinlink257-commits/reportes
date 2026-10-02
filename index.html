@@ -60,10 +60,15 @@ body.dark .btn-informe{background:var(--gray-5)}body.dark .btn-informe:hover{bac
 .result-box{background:rgba(48,209,88,.08);border-left:3px solid var(--sys-green);padding:14px;margin-top:12px;border-radius:var(--radius-md);color:var(--text-primary)}
 body.dark .result-box{background:rgba(48,209,88,.1)}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
-@media(min-width:640px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
-.stat-card{background:var(--bg-card);border:1px solid var(--border-light);padding:16px;text-align:center;border-radius:var(--radius-md);color:var(--text-secondary);font-size:.85rem;font-weight:500;transition:all .2s var(--ease)}
+@media(min-width:480px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:720px){.stats-grid{grid-template-columns:repeat(6,1fr)}}
+.stat-card{background:var(--bg-card);border:1px solid var(--border-light);padding:14px 10px;text-align:center;border-radius:var(--radius-md);color:var(--text-secondary);font-size:.75rem;font-weight:500;transition:all .2s var(--ease)}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
-.stat-card span{display:block;font-size:1.75rem;font-weight:700;color:var(--sys-red);margin-top:4px;letter-spacing:-.03em}
+.stat-card span{display:block;font-size:1.5rem;font-weight:700;color:var(--sys-red);margin-top:4px;letter-spacing:-.03em}
+.stat-card.ok span{color:var(--sys-green)}
+.stat-card.link span{color:var(--sys-teal)}
+.stat-card.total span{color:var(--sys-blue)}
+.stat-card.prom span{color:var(--sys-purple)}
 .economic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
 @media(min-width:640px){.economic-grid{grid-template-columns:repeat(4,1fr)}}
 .economic-card{background:var(--bg-card);border:2px solid var(--border-light);padding:18px 14px;text-align:center;border-radius:var(--radius-md);color:var(--text-secondary);font-size:.78rem;font-weight:600;transition:all .2s var(--ease);text-transform:uppercase;letter-spacing:.04em}
@@ -89,14 +94,16 @@ tbody tr:hover{background:var(--bg-section)}
 .tabla-dia td.col-dir{text-align:left;white-space:normal;max-width:220px;min-width:180px;font-size:.75rem;line-height:1.35;word-break:break-word}
 .tabla-dia td.col-desc{text-align:left;white-space:normal;max-width:240px;min-width:200px;font-size:.72rem;color:var(--text-secondary);line-height:1.35;word-break:break-word}
 .tabla-dia td.col-precio{font-weight:700;color:var(--sys-green);white-space:nowrap}
-.tabla-dia td.col-estado{white-space:normal;max-width:150px;min-width:120px;font-size:.72rem;line-height:1.35}
+.tabla-dia td.col-estado{white-space:normal;max-width:180px;min-width:140px;font-size:.72rem;line-height:1.35}
 .tabla-dia tr:hover{background:var(--bg-section)}
 .tabla-dia tbody tr:nth-child(even){background:rgba(0,0,0,.015)}
 body.dark .tabla-dia tbody tr:nth-child(even){background:rgba(255,255,255,.02)}
 .badge-estado{display:inline-block;padding:3px 9px;border-radius:var(--radius-pill);font-size:.68rem;font-weight:700;white-space:nowrap;line-height:1.3}
 .badge-estado.ok{background:rgba(48,209,88,.15);color:#1e8449}
+.badge-estado.link{background:rgba(64,200,224,.18);color:#0e5f6f}
 .badge-estado.no{background:rgba(255,69,58,.13);color:#a02015}
 body.dark .badge-estado.ok{color:#70dd8a}
+body.dark .badge-estado.link{color:#7fdcf0}
 body.dark .badge-estado.no{color:#ff8a80}
 .acciones-btn{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
 .acciones-btn button{width:auto;padding:6px 10px;font-size:.75rem;margin:0;border-radius:var(--radius-sm)}
@@ -360,12 +367,10 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 .firma-controles{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap}
 .firma-controles button{width:auto;padding:10px 20px;font-size:.85rem;margin:0}
 .firma-preview{max-width:200px;max-height:70px;border:1px solid var(--border-light);border-radius:var(--radius-sm);margin-top:8px;background:#fff;padding:4px}
-.informe-empresa-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1c1c1e;padding-bottom:10px;margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.informe-empresa-header .logo-section{display:flex;align-items:center;gap:12px}
-.informe-empresa-header .logo-placeholder{width:60px;height:60px;background:linear-gradient(135deg,#0a84ff,#bf5af2);border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:1.6rem}
-.informe-empresa-header .empresa-datos{font-size:8pt;color:#333;line-height:1.5}
-.informe-empresa-header .empresa-datos strong{color:#1c1c1e}
-.informe-empresa-header .doc-info{text-align:right;font-size:8pt;color:#555;line-height:1.5}
+.info-empresarial-header{border-bottom:2px solid #1c1c1e;padding-bottom:8px;margin-bottom:10px;font-size:8pt;color:#333;line-height:1.55}
+.info-empresarial-header .emp-line{margin:2px 0}
+.info-empresarial-header .emp-line strong{color:#1c1c1e}
+.info-empresarial-header .doc-info-emp{text-align:right;font-size:8pt;color:#555;line-height:1.55;margin-top:6px}
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#fafafa!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#1c1c1e!important;--text-muted:#555!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-sm:transparent!important;--shadow-md:transparent!important;--shadow-lg:transparent!important;--table-header-bg:#1c1c1e!important;--table-header-color:#fff!important;}
   @page{size:A4 portrait;margin:10mm 8mm 12mm 8mm}
@@ -378,11 +383,15 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
   body.modo-reporte-diario #areaImpresion{font-size:9pt!important;width:100%;max-width:194mm}
   body.modo-reporte-diario .reporte-diario{width:100%;max-width:194mm;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1c1e}
+  .info-empresarial-header{border-bottom:2px solid #1c1c1e!important;padding-bottom:6px;margin-bottom:8px;font-size:8pt;color:#333;line-height:1.5;page-break-inside:avoid}
+  .info-empresarial-header .emp-line{margin:1px 0;color:#333!important}
+  .info-empresarial-header .emp-line strong{color:#1c1c1e!important}
+  .info-empresarial-header .doc-info-emp{text-align:right;font-size:8pt;color:#555!important;line-height:1.5;margin-top:5px}
   .rd-header{text-align:center;border-bottom:2px solid #1c1c1e;padding-bottom:8px;margin-bottom:10px;page-break-inside:avoid;page-break-after:avoid}
   .rd-header h1{color:#1c1c1e!important;font-size:14pt;margin:0 0 5px 0;text-align:center;letter-spacing:-.5px;font-weight:900}
   .rd-header .rd-subtitle{font-size:9.5pt;color:#555;font-weight:bold;margin:3px 0}
   .rd-info{display:flex;justify-content:space-around;font-size:8.5pt;color:#333;flex-wrap:wrap;gap:5px;margin-top:5px}
-  .rd-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:10px;page-break-inside:avoid}
+  .rd-kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:10px;page-break-inside:avoid}
   .rd-kpi{border:1.2px solid #999!important;border-radius:3px;padding:6px 4px;text-align:center;background:#f8f9fa!important;page-break-inside:avoid}
   .rd-kpi-label{font-size:7pt;color:#666;text-transform:uppercase;margin-bottom:3px;letter-spacing:.3px;font-weight:700}
   .rd-kpi-valor{font-size:13pt;font-weight:900;color:#1c1c1e;letter-spacing:-.5px}
@@ -394,6 +403,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
   .rd-kpi.gris{border-color:#95a5a6!important;background:#f2f4f4!important}.rd-kpi.gris .rd-kpi-valor{color:#566573}
   .rd-kpi.cyan{border-color:#17a2b8!important;background:#e3f7fa!important}.rd-kpi.cyan .rd-kpi-valor{color:#0e5f6f}
   .rd-kpi.dark{border-color:#1c1c1e!important;background:#e8ebee!important}.rd-kpi.dark .rd-kpi-valor{color:#1c1c1e}
+  .rd-kpi.teal{border-color:#16a085!important;background:#e8f8f5!important}.rd-kpi.teal .rd-kpi-valor{color:#0e6251}
   .rd-charts{display:grid;grid-template-columns:1.5fr 1fr;gap:6px;margin-bottom:10px;page-break-inside:avoid;width:100%;max-width:194mm;overflow:hidden}
   .rd-chart-box{border:1px solid #999!important;border-radius:3px;padding:3px;background:#fff!important;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:48mm}
   .rd-chart-box img{width:100%;height:auto;max-height:64mm;object-fit:contain;display:block}
@@ -588,10 +598,11 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
     <div class="section">
       <h2>📊 Informe del Día</h2>
       <div class="stats-grid">
-        <div class="stat-card">Entregados: <span id="c-entregados">0</span></div>
-        <div class="stat-card">No Entregados: <span id="c-noentregados">0</span></div>
-        <div class="stat-card">Total Visitas: <span id="c-total">0</span></div>
-        <div class="stat-card">Promedio por visita: <span id="c-promedio">0 min</span></div>
+        <div class="stat-card ok">✅ Entregados: <span id="c-entregados">0</span></div>
+        <div class="stat-card link">🔗 Link Pago: <span id="c-linkpago">0</span></div>
+        <div class="stat-card">❌ No Entregados: <span id="c-noentregados">0</span></div>
+        <div class="stat-card total">📦 Total Visitas: <span id="c-total">0</span></div>
+        <div class="stat-card prom">⏱️ Promedio: <span id="c-promedio">0 min</span></div>
       </div>
       <h2 style="margin-top:20px;">💰 Resumen Económico</h2>
       <div class="economic-grid">
@@ -715,29 +726,6 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <label>Estado del paquete:</label>
       <select id="estadoPaquete" onchange="alCambiarEstado()">
         <option value="">-- Seleccione --</option>
-        <option value="Entregado">Entregado</option>
-        <option value="Rechazado">Rechazado</option>
-        <option value="Dirección Errónea">Dirección errónea</option>
-        <option value="Dirección incompleta">Dirección incompleta</option>
-        <option value="Coordinado con Cliente">Coordinado con el Cliente</option>
-        <option value="No está en casa">No está en casa</option>
-        <option value="Pasa después (Sin dinero)">Pasa después (Sin dinero)</option>
-        <option value="No lo conocen">No lo conocen</option>
-        <option value="Programo para otro día">Programo para otro día</option>
-        <option value="Dejar en oficina principal">Dejar en oficina principal</option>
-        <option value="Pertenece a otra ciudad">Pertenece a otra ciudad</option>
-        <option value="Cerrado local comercial">Cerrado local comercial</option>
-        <option value="No visita tiempo">No visita tiempo</option>
-        <option value="Casa totalmente cerrada">Casa totalmente cerrada</option>
-        <option value="Oficina principal">Oficina principal</option>
-        <option value="Se trasladó">Se trasladó</option>
-        <option value="Exige ver el producto">Exige ver el producto</option>
-        <option value="Destinatario no recibe sábados">Destinatario no recibe sábados</option>
-        <option value="Restricciones en el tránsito reparto urbano">Restricciones tránsito</option>
-        <option value="No coincide la mercancía física con lo escrito en la orden de compra">No coincide mercancía</option>
-        <option value="Mercancía se abrió en reparto no entregada">Mercancía abierta</option>
-        <option value="Flete mal liquidado">Flete mal liquidado</option>
-        <option value="Cerrados en horas hábiles">Cerrados en horas hábiles</option>
       </select>
       <label>📝 Descripción detallada:</label>
       <textarea id="descripcionVisita" placeholder="Al seleccionar un estado se autocompletará..." style="min-height:90px;"></textarea>
@@ -784,7 +772,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <p id="contadorBusqueda" class="contador-busqueda"></p>
       </div>
       <div class="tabla-scroll">
-        <table style="min-width:1200px;">
+        <table style="min-width:1400px;">
           <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th><th>Descripción</th><th>📸</th><th>✍️</th><th class="no-print">Acciones</th></tr></thead>
           <tbody id="cuerpoTabla"></tbody>
         </table>
@@ -1240,7 +1228,62 @@ window.addEventListener('load', ()=>{
 
 <!-- SCRIPT 2: App principal -->
 <script type="module">
-const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
+/* ✅ Estados numerados — 00 (link pago) + 02 (entregado normal) cuentan como efectividad */
+const ESTADOS_INFO = [
+  { num:'00', desc:'Entregado por link de pago' },
+  { num:'01', desc:'Destinatario no se encuentra' },
+  { num:'02', desc:'Entregado' },
+  { num:'03', desc:'Cerrado en horas hábiles' },
+  { num:'04', desc:'Destinatario fija fecha y hora de recibo para el día siguiente' },
+  { num:'05', desc:'Destinatario no recibe en día sábado' },
+  { num:'06', desc:'Destinatario no tenía plata para cancelar, regresar mañana' },
+  { num:'10', desc:'Restricción en el tránsito reparto urbano' },
+  { num:'13', desc:'Entrega no efectuada' },
+  { num:'20', desc:'Destinatario no pagará' },
+  { num:'21', desc:'Mercancía debe ser entregada en otra dirección' },
+  { num:'22', desc:'Para entregar en bodega receptora' },
+  { num:'23', desc:'Ausencia de guía del número de orden de compra' },
+  { num:'24', desc:'No coincide la mercancía física con lo descrito en la orden de compra' },
+  { num:'27', desc:'Destinatario exige presencia representante del remitente' },
+  { num:'28', desc:'Destinatario exige inventario de mercancías' },
+  { num:'30', desc:'Mercancía entregada, guía retenida por el destinatario' },
+  { num:'31', desc:'No conocen destinatario en dirección destino' },
+  { num:'32', desc:'Destinatario exige documento anexo a guía' },
+  { num:'33', desc:'Dirección destinatario incompleta' },
+  { num:'34', desc:'Dirección destinataria no existe' },
+  { num:'35', desc:'Destinatario se trasladó' },
+  { num:'36', desc:'Dirección de destino corresponde a otra ciudad' },
+  { num:'41', desc:'Entrega no efectuada, reciben portería o celadores' },
+  { num:'44', desc:'Destinatario se rehúsa a recibir' },
+  { num:'45', desc:'Retención por orden del remitente' },
+  { num:'58', desc:'Mercancía se averió en reparto, no entregada' },
+  { num:'63', desc:'Flete mal liquidado' },
+  { num:'65', desc:'Caja sellada buen estado, faltante de unidades internas' },
+  { num:'69', desc:'Mercancía entregada, destinatario devuelve unidades internas o faltantes' },
+  { num:'81', desc:'Coordinar entrega' },
+  { num:'84', desc:'Faltantes de unidades en regional destino' },
+  { num:'86', desc:'Mercancía con orden de compra vencida' },
+  { num:'89', desc:'Guía no trae carta porte, factura o remisión' },
+  { num:'90', desc:'Mercancía entregada con nota de faltante interno' },
+  { num:'91', desc:'Destinatario fija fecha y hora de recibo mayor al día siguiente' }
+];
+
+const ESTADOS = ESTADOS_INFO.map(e => `${e.num} · ${e.desc}`);
+const ESTADO_ENTREGADO = '02 · Entregado';
+const ESTADO_ENTREGADO_LINK = '00 · Entregado por link de pago';
+
+function esEstadoEntregado(estado){ return estado === ESTADO_ENTREGADO || estado === ESTADO_ENTREGADO_LINK; }
+function esEstadoEntregadoLink(estado){ return estado === ESTADO_ENTREGADO_LINK; }
+
+/* Suma de entregados (normales + link pago) en un objeto de contadores */
+function contarEntregadosEnContadores(c){
+  if(!c) return 0;
+  return (c[ESTADO_ENTREGADO]||0) + (c[ESTADO_ENTREGADO_LINK]||0);
+}
+function contarEntregadosActuales(){
+  return (contadores[ESTADO_ENTREGADO]||0) + (contadores[ESTADO_ENTREGADO_LINK]||0);
+}
+
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=1200; const FOTO_JPEG_QUALITY=0.75;
 const CLAVE_BORRADOR='colserlog_borrador';
@@ -1254,30 +1297,43 @@ const DATOS_EMPRESA = {
 function escapeHtml(t){ if(t===null||t===undefined) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 window.escapeHtml = escapeHtml;
 
-const DESCRIPCIONES_RECOMENDADAS={
-  'Entregado':'Envío entregado exitosamente al destinatario. El cliente verificó el contenido, firmó la guía y confirmó que el paquete llegó en perfectas condiciones.',
-  'Rechazado':'El destinatario manifestó su decisión de NO recibir el envío. Se le informó el procedimiento de devolución a bodega central.',
-  'Dirección Errónea':'La dirección registrada en la guía NO corresponde a ninguna ubicación física verificable en el sector.',
-  'Dirección incompleta':'La dirección suministrada carece de información esencial que impide ubicar al destinatario.',
-  'Coordinado con Cliente':'Se estableció comunicación con el destinatario. Se acordó nueva fecha y horario para la entrega.',
-  'No está en casa':'Se visitó la dirección en horario hábil sin obtener respuesta. Se dejó aviso de visita.',
-  'Pasa después (Sin dinero)':'El destinatario informó que no cuenta con los recursos económicos disponibles en el momento.',
-  'No lo conocen':'En la dirección visitada, los residentes manifiestan NO conocer al destinatario registrado.',
-  'Programo para otro día':'El destinatario solicitó expresamente reprogramar la entrega para otra fecha.',
-  'Dejar en oficina principal':'Por instrucción del destinatario, el envío será dejado en la oficina principal para retiro personal.',
-  'Pertenece a otra ciudad':'El envío corresponde a una ciudad diferente a la zona de reparto asignada.',
-  'Cerrado local comercial':'El establecimiento comercial se encontraba cerrado al momento de la visita.',
-  'No visita tiempo':'Por limitaciones de tiempo operativo, NO se logró visitar al destinatario.',
-  'Casa totalmente cerrada':'La vivienda se encontraba completamente cerrada. No hubo respuesta a llamados.',
-  'Oficina principal':'El paquete fue dejado en la oficina principal por disposición operativa o a solicitud del cliente.',
-  'Se trasladó':'El destinatario se ha mudado de la dirección registrada según información suministrada por residentes actuales.',
-  'Exige ver el producto':'El destinatario exige verificar el contenido del paquete antes de firmar el recibido.',
-  'Destinatario no recibe sábados':'El destinatario ha manifestado que NO recibe envíos los días sábados.',
-  'Restricciones en el tránsito reparto urbano':'Se presentaron restricciones viales que impidieron el acceso al punto de entrega.',
-  'No coincide la mercancía física con lo escrito en la orden de compra':'La mercancía física NO coincide con la descripción en la orden de compra.',
-  'Mercancía se abrió en reparto no entregada':'Durante el traslado, la mercancía presentó apertura, deterioro o faltantes.',
-  'Flete mal liquidado':'El flete asociado al envío presenta ERROR en su liquidación según revisión administrativa.',
-  'Cerrados en horas hábiles':'El establecimiento se encontraba cerrado dentro del horario comercial habitual.'
+const DESCRIPCIONES_RECOMENDADAS = {
+  '00 · Entregado por link de pago':'Envío entregado al destinatario mediante pago realizado por link digital. El destinatario confirmó el pago y recibió el paquete en perfectas condiciones.',
+  '01 · Destinatario no se encuentra':'Se visitó la dirección indicada en la guía y el destinatario no se encontraba en el momento. Se indagó con vecinos o residentes sin obtener respuesta positiva.',
+  '02 · Entregado':'Envío entregado exitosamente al destinatario. El cliente verificó el contenido, firmó la guía y confirmó que el paquete llegó en perfectas condiciones.',
+  '03 · Cerrado en horas hábiles':'El establecimiento o residencia se encontraba cerrado dentro del horario comercial habitual. No hubo respuesta al llamado.',
+  '04 · Destinatario fija fecha y hora de recibo para el día siguiente':'El destinatario solicitó reprogramar la entrega para el día siguiente en un horario específico. Se dejó constancia del acuerdo.',
+  '05 · Destinatario no recibe en día sábado':'El destinatario manifestó expresamente que no recibe envíos los días sábados. Se debe reprogramar en día hábil.',
+  '06 · Destinatario no tenía plata para cancelar, regresar mañana':'El destinatario manifestó no contar con el dinero para cancelar el valor del envío. Solicitó regresar al día siguiente.',
+  '10 · Restricción en el tránsito reparto urbano':'Se presentaron restricciones viales o de tránsito urbano (pico y placa, manifestaciones, vías cerradas) que impidieron el acceso al punto de entrega.',
+  '13 · Entrega no efectuada':'No se logró efectuar la entrega por causas no especificadas en los demás códigos. Se requiere revisión operativa.',
+  '20 · Destinatario no pagará':'El destinatario manifestó su decisión de no pagar el valor del envío (flete contraentrega o similar). Se debe devolver la mercancía.',
+  '21 · Mercancía debe ser entregada en otra dirección':'El destinatario indicó una nueva dirección para la entrega. Se requiere actualización de datos y nueva programación.',
+  '22 · Para entregar en bodega receptora':'El envío debe ser entregado en la bodega receptora indicada, no directamente al destinatario final.',
+  '23 · Ausencia de guía del número de orden de compra':'El paquete no trae la guía con el número de orden de compra correspondiente. No se puede verificar la trazabilidad.',
+  '24 · No coincide la mercancía física con lo descrito en la orden de compra':'La mercancía física entregada no coincide con la descripción registrada en la orden de compra. Se debe revisar con bodega.',
+  '27 · Destinatario exige presencia representante del remitente':'El destinatario exige la presencia de un representante autorizado del remitente para recibir el envío.',
+  '28 · Destinatario exige inventario de mercancías':'El destinatario solicita realizar inventario detallado de las mercancías antes de firmar el recibido.',
+  '30 · Mercancía entregada, guía retenida por el destinatario':'La mercancía fue entregada al destinatario pero este retuvo la guía firmada. Se debe gestionar la recuperación del documento.',
+  '31 · No conocen destinatario en dirección destino':'En la dirección indicada, los residentes manifiestan no conocer al destinatario registrado en la guía.',
+  '32 · Destinatario exige documento anexo a guía':'El destinatario exige un documento adicional anexo a la guía (factura, remisión, certificado) que no fue entregado.',
+  '33 · Dirección destinatario incompleta':'La dirección suministrada carece de información esencial (número, barrio, punto de referencia) que impide ubicar al destinatario.',
+  '34 · Dirección destinataria no existe':'La dirección registrada en la guía no corresponde a ninguna ubicación física verificable en el sector.',
+  '35 · Destinatario se trasladó':'El destinatario se mudó de la dirección registrada según información suministrada por los residentes actuales.',
+  '36 · Dirección de destino corresponde a otra ciudad':'El envío corresponde a una ciudad diferente a la zona de reparto asignada. Se debe redirigir.',
+  '41 · Entrega no efectuada, reciben portería o celadores':'La entrega no se pudo efectuar directamente al destinatario; fue recibida por portería o celadores del edificio o conjunto.',
+  '44 · Destinatario se rehúsa a recibir':'El destinatario manifestó su decisión de NO recibir el envío. Se debe devolver a bodega central.',
+  '45 · Retención por orden del remitente':'El remitente ordenó la retención del envío. No debe entregarse hasta nueva instrucción.',
+  '58 · Mercancía se averió en reparto, no entregada':'Durante el traslado o reparto, la mercancía sufrió daños o averías, por lo que no fue entregada.',
+  '63 · Flete mal liquidado':'El flete asociado al envío presenta un error en su liquidación según revisión administrativa.',
+  '65 · Caja sellada buen estado, faltante de unidades internas':'La caja llegó sellada y en buen estado exterior, pero al verificar internamente faltan unidades.',
+  '69 · Mercancía entregada, destinatario devuelve unidades internas o faltantes':'La mercancía fue entregada, pero el destinatario devolvió unidades internas o reportó faltantes.',
+  '81 · Coordinar entrega':'Se requiere coordinar la entrega con el destinatario, remitente o área correspondiente antes de realizarla.',
+  '84 · Faltantes de unidades en regional destino':'En la regional de destino se detectaron faltantes de unidades respecto a lo despachado.',
+  '86 · Mercancía con orden de compra vencida':'La orden de compra asociada al envío se encuentra vencida. No se puede procesar la entrega sin actualización.',
+  '89 · Guía no trae carta porte, factura o remisión':'La guía del envío no incluye la carta porte, factura o remisión obligatoria para la entrega.',
+  '90 · Mercancía entregada con nota de faltante interno':'La mercancía fue entregada al destinatario dejando nota expresa de faltante interno.',
+  '91 · Destinatario fija fecha y hora de recibo mayor al día siguiente':'El destinatario fijó fecha y hora de recibo para un plazo mayor al día siguiente. Se debe reprogramar.'
 };
 
 function esDescripcionSugerida(t){ if(!t)return false; const x=t.trim(); return Object.values(DESCRIPCIONES_RECOMENDADAS).some(d=>d===x); }
@@ -1292,7 +1348,6 @@ function actualizarContadorDigitos(i,idc){ const el=document.getElementById(idc)
 function validarCodigo(c){ if(!c) return 'Código vacío'; if(!/^\d+$/.test(c)) return 'Solo números'; if(c.length!==LONGITUD_CODIGO) return `Debe tener ${LONGITUD_CODIGO} dígitos (tiene ${c.length})`; return null; }
 window.filtrarSoloDigitos = filtrarSoloDigitos; window.actualizarContadorDigitos = actualizarContadorDigitos;
 
-/* ESTADO GLOBAL */
 let contadores={}; ESTADOS.forEach(e=>contadores[e]=0);
 let totalMinutosVisitas=0, totalVisitas=0, visitas=[];
 let miGrafico=null, miGraficoPromedios=null, miGraficoSemana=null, miGraficoMes=null;
@@ -1308,7 +1363,7 @@ let censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:
 
 function calcularTotalesPrecios(){
   let totalGeneral=0, totalEntregado=0, totalNoEntregado=0, cantEntregado=0, cantNoEntregado=0;
-  visitas.forEach(v=>{ const p=Number(v.precio)||0; totalGeneral+=p; if(v.estado==='Entregado'){ totalEntregado+=p; cantEntregado++; } else { totalNoEntregado+=p; cantNoEntregado++; } });
+  visitas.forEach(v=>{ const p=Number(v.precio)||0; totalGeneral+=p; if(esEstadoEntregado(v.estado)){ totalEntregado+=p; cantEntregado++; } else { totalNoEntregado+=p; cantNoEntregado++; } });
   return { totalGeneral, totalEntregado, totalNoEntregado, cantEntregado, cantNoEntregado };
 }
 window.calcularTotalesPrecios = calcularTotalesPrecios;
@@ -1332,7 +1387,6 @@ function beepError(){ try{ const ctx=new (window.AudioContext||window.webkitAudi
 function beepOk(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15); o.start(); o.stop(ctx.currentTime+0.15); setTimeout(()=>ctx.close(),400); }catch(e){} }
 function mostrarIndicadorGuardado(){ const el=document.getElementById('indicadorGuardado'); if(!el) return; el.textContent='✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); el.classList.add('visible'); clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.classList.remove('visible'); },2500); }
 
-/* BORRADOR */
 function guardarBorrador(){
   try{
     const b={ llegadaCliente:document.getElementById('llegadaCliente')?.value||'', salidaCliente:document.getElementById('salidaCliente')?.value||'', estadoPaquete:document.getElementById('estadoPaquete')?.value||'', descripcionVisita:document.getElementById('descripcionVisita')?.value||'', busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'', busquedaDia:document.getElementById('busquedaDia')?.value||'', busquedaGuia:document.getElementById('busquedaGuia')?.value||'', direccionVisita:document.getElementById('direccionVisita')?.value||'', precioVisita:document.getElementById('precioVisita')?.value||'', codigoBanco:document.getElementById('codigoBanco')?.value||'', direccionBanco:document.getElementById('direccionBanco')?.value||'', precioBanco:document.getElementById('precioBanco')?.value||'', timestamp:Date.now() };
@@ -1359,7 +1413,6 @@ window.addEventListener('beforeunload',()=>{ if(typeof window._guardarEstadoSile
 window.addEventListener('pagehide',()=>{ if(typeof window._guardarEstadoSilencioso==='function') window._guardarEstadoSilencioso(); guardarBorrador(); });
 document.addEventListener('visibilitychange',()=>{ if(document.hidden){ if(typeof window._guardarEstadoSilencioso==='function') window._guardarEstadoSilencioso(); guardarBorrador(); } });
 
-/* IndexedDB */
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
 const cacheFotos=new Map();
 
@@ -1395,7 +1448,6 @@ async function contarFotosDB(){ return withDB(db => new Promise((res)=>{ const r
 async function obtenerTodasLasFotosDB(){ return withDB(db => new Promise((res)=>{ const r = db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).getAll(); r.onsuccess = () => res(r.result||[]); r.onerror = () => res([]); })); }
 window.precargarFotosEnCache = precargarFotosEnCache;
 
-/* Modal foto */
 window.abrirModalFoto = function(lista,indice){ if(!lista||!lista.length) return; modalFotosActual.lista=lista; modalFotosActual.indice=indice||0; actualizarModalFoto(); document.getElementById('modalFoto').classList.add('visible'); };
 function actualizarModalFoto(){ const {lista,indice}=modalFotosActual; const f=lista[indice]; if(!f) return; const img=document.getElementById('modalFotoImg'); img.src=f.data||f; document.getElementById('modalFotoContador').textContent=`${indice+1} / ${lista.length}`; const l=document.getElementById('modalFotoDescargar'); l.href=f.data||f; l.download=`foto_visita_${(f.id||Date.now())}.jpg`; const n=document.querySelector('.modal-foto-nav'); if(n) n.style.display=lista.length>1?'flex':'none'; }
 window.navegarFoto = function(dir){ const t=modalFotosActual.lista.length; if(t<=1) return; modalFotosActual.indice=(modalFotosActual.indice+dir+t)%t; actualizarModalFoto(); };
@@ -1404,7 +1456,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') cerrarModalFoto(
 document.getElementById('modalFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalFoto') cerrarModalFoto(); });
 window.verFotosVisita = async function(index){ const v=visitas[index]; if(!v||!v.fotos||!v.fotos.length) return; const ids=v.fotos.map(f=>f.id||f).filter(Boolean); const datos=await obtenerFotosDB(ids); const lista=ids.map(id=>({id,data:datos[id]})).filter(f=>f.data); if(!lista.length){ mostrarAviso('⚠️ No se pudieron cargar las fotos','error'); return; } abrirModalFoto(lista,0); };
 
-/* Reglas foto */
 let modoFotoPendiente='camara';
 window.abrirModalReglasFoto = function(modo){ modoFotoPendiente=modo==='galeria'?'galeria':'camara'; const m=document.getElementById('modalReglasFoto'); const chk=document.getElementById('chkAceptoReglas'); const btn=document.getElementById('btnAbrirCamara'); const lbl=document.getElementById('lblReglasChk'); if(chk) chk.checked=false; if(lbl) lbl.classList.remove('activo'); if(btn){ btn.disabled=true; btn.textContent=modoFotoPendiente==='galeria'?'🖼️ Abrir galería':'📷 Abrir cámara'; } if(m) m.classList.add('visible'); };
 window.cerrarModalReglasFoto = function(){ const m=document.getElementById('modalReglasFoto'); if(m) m.classList.remove('visible'); };
@@ -1414,7 +1465,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ const m=documen
 document.getElementById('modalReglasFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalReglasFoto') cerrarModalReglasFoto(); });
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE,sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy',sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
-/* Compresión */
 function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){
   return new Promise((resolve,reject)=>{
     if(!file||!file.type||!file.type.startsWith('image/')){ reject(new Error('Archivo no válido')); return; }
@@ -1466,9 +1516,7 @@ window.capturarFoto = async function(event){
     onP('Comprimiendo imagen…', 20);
     const b64=await comprimirImagen(file);
     onP('Imagen comprimida', 60);
-    // ✅ CENSURA AUTOMÁTICA DESACTIVADA: se guarda la imagen tal cual, sin análisis IA
     const dataFinal=b64;
-    const censura={rostros:0,vehiculos:0,aplicado:false,error:null};
     onP('Recordatorio: usa 🖐️ para censurar manualmente si es necesario', 90);
     const kb=Math.round((dataFinal.length*0.75)/1024);
     const id='foto_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
@@ -1510,7 +1558,6 @@ async function renderizarGaleriaFotos(){
   if(ct){ const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`; ct.classList.toggle('alerta',total>2000); }
 }
 
-/* CENSURA MANUAL */
 window.abrirModalCensura = async function(fotoId){
   const foto = await obtenerFotoDB(fotoId);
   if(!foto || !foto.data){ mostrarAviso('⚠️ Foto no encontrada','error'); return; }
@@ -1666,7 +1713,6 @@ setTimeout(() => {
   }
 }, 1000);
 
-/* BANCO */
 function codigosEnVisitas(){ const s=new Set(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); }); return s; }
 
 window.agregarCodigoBanco = function(){
@@ -1896,11 +1942,10 @@ function motivoDuplicado(c){ if(!c) return null; if(codigosPendientes.includes(c
 window.actualizarPlaceholderDescripcion = function(){
   const s=document.getElementById('estadoPaquete'), t=document.getElementById('descripcionVisita');
   if(!s||!t) return;
-  const ph={ 'Entregado':'Registre quién recibió y si firmó la guía...','Rechazado':'Registre el motivo del rechazo...','Dirección Errónea':'Indique por qué la dirección no existe...','Dirección incompleta':'Indique qué datos faltan...','Coordinado con Cliente':'Indique fecha y hora acordada...','No está en casa':'Indique si dejó aviso de visita...','Pasa después (Sin dinero)':'Indique cuándo el cliente tendrá efectivo...','No lo conocen':'Indique con quién validó...','Programo para otro día':'Indique nueva fecha acordada...','Dejar en oficina principal':'Indique quién autorizó...','Pertenece a otra ciudad':'Indique la ciudad correcta...','Cerrado local comercial':'Indique el horario en que estaba cerrado...','No visita tiempo':'Indique por qué no se alcanzó...','Casa totalmente cerrada':'Indique a qué hora se visitó...','Oficina principal':'Indique dónde quedó el paquete...','Se trasladó':'Indique quién confirmó la mudanza...','Exige ver el producto':'Indique qué producto exigía ver...','Destinatario no recibe sábados':'Indique la fecha hábil acordada...','Restricciones en el tránsito reparto urbano':'Indique el tipo de restricción...','No coincide la mercancía física con lo escrito en la orden de compra':'Indique qué diferencia encontró...','Mercancía se abrió en reparto no entregada':'Indique el estado del paquete...','Flete mal liquidado':'Indique el monto correcto o error...','Cerrados en horas hábiles':'Indique el horario de apertura...' };
-  t.placeholder=ph[s.value]||'Al seleccionar un estado se autocompletará...';
+  if(s.value){ t.placeholder = 'Describa detalles del estado "' + s.value + '"...'; }
+  else { t.placeholder = 'Al seleccionar un estado se autocompletará...'; }
 };
 
-/* Estado persistente */
 let guardandoEstado=false;
 function guardarEstadoCompleto(){
   if(guardandoEstado) return;
@@ -2017,10 +2062,16 @@ function renderizarTabla(){
     if(ed){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.cssText='width:140px;padding:6px;font-size:.85rem;margin:0;'; inp.setAttribute('inputmode','numeric'); inp.setAttribute('maxlength','12'); inp.addEventListener('input',()=>{ const l=(inp.value||'').replace(/\D/g,'').slice(0,12); if(inp.value!==l) inp.value=l; }); tdC.appendChild(inp); }
     else tdC.textContent=v.codigo||'—';
     tr.appendChild(tdC);
-    const tdDir=document.createElement('td'); tdDir.className='descripcion-cell'; tdDir.textContent=v.direccion||'—'; tr.appendChild(tdDir);
-    const tdPre=document.createElement('td'); tdPre.textContent=v.precio?formatCOP(v.precio):'—'; tdPre.style.fontWeight='600'; tdPre.style.color=v.precio?'var(--sys-green)':'var(--text-muted)'; tr.appendChild(tdPre);
+    const tdDir=document.createElement('td'); tdDir.className='descripcion-cell'; 
+    if(ed){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.direccion||''; inp.id=`edit-direccion-${indexOriginal}`; inp.style.cssText='width:200px;padding:6px;font-size:.8rem;margin:0;'; inp.placeholder='Dirección'; tdDir.appendChild(inp); }
+    else tdDir.textContent=v.direccion||'—';
+    tr.appendChild(tdDir);
+    const tdPre=document.createElement('td'); 
+    if(ed){ const inp=document.createElement('input'); inp.type='number'; inp.value=v.precio||''; inp.id=`edit-precio-${indexOriginal}`; inp.style.cssText='width:110px;padding:6px;font-size:.8rem;margin:0;'; inp.placeholder='Precio'; inp.min='0'; inp.step='1000'; inp.setAttribute('inputmode','numeric'); tdPre.appendChild(inp); }
+    else { tdPre.textContent=v.precio?formatCOP(v.precio):'—'; tdPre.style.fontWeight='600'; tdPre.style.color=v.precio?'var(--sys-green)':'var(--text-muted)'; }
+    tr.appendChild(tdPre);
     const tdE=document.createElement('td');
-    if(ed){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; sel.style.cssText='padding:6px;font-size:.8rem;margin:0;min-width:130px;'; ESTADOS.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===v.estado) op.selected=true; sel.appendChild(op); }); tdE.appendChild(sel); }
+    if(ed){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; sel.style.cssText='padding:6px;font-size:.8rem;margin:0;min-width:200px;'; ESTADOS.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===v.estado) op.selected=true; sel.appendChild(op); }); tdE.appendChild(sel); }
     else tdE.textContent=v.estado;
     tr.appendChild(tdE);
     const tdD=document.createElement('td'); tdD.className='descripcion-cell';
@@ -2046,12 +2097,23 @@ window.filtrarVisitas = ()=>{ if(filaEditando!==null) filaEditando=null; renderi
 window.limpiarBusqueda = ()=>{ const i=document.getElementById('busquedaGuia'); if(i) i.value=''; renderizarTabla(); i?.focus(); guardarBorrador(); };
 window.guardarEdicion = (index)=>{
   const ic=document.getElementById(`edit-codigo-${index}`), se=document.getElementById(`edit-estado-${index}`), de=document.getElementById(`edit-desc-${index}`);
+  const dirInp=document.getElementById(`edit-direccion-${index}`), preInp=document.getElementById(`edit-precio-${index}`);
   if(!ic||!se) return;
   const nc=ic.value.trim();
-  if(nc){ const e=validarCodigo(nc); if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); return; } if(nc!==(visitas[index].codigo||'')){ const ex=visitas.some((v,i)=>i!==index && (v.codigo||'').trim()===nc); if(ex){ mostrarAviso('⚠️ Ya existe','error'); beepError(); return; } if(!bancoContiene(nc)) bancoCodigos.push({codigo:nc,direccion:'',precio:0}); } }
+  if(nc){ 
+    const e=validarCodigo(nc); 
+    if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); return; } 
+    if(nc!==(visitas[index].codigo||'')){ 
+      const ex=visitas.some((v,i)=>i!==index && (v.codigo||'').trim()===nc); 
+      if(ex){ mostrarAviso('⚠️ Ya existe','error'); beepError(); return; } 
+      if(!bancoContiene(nc)) bancoCodigos.push({codigo:nc,direccion:'',precio:0}); 
+    } 
+  }
   visitas[index].codigo=nc;
   visitas[index].estado=se.value;
   visitas[index].descripcion=de?de.value.trim():(visitas[index].descripcion||'');
+  if(dirInp) visitas[index].direccion=dirInp.value.trim();
+  if(preInp) visitas[index].precio=parseFloat(preInp.value)||0;
   filaEditando=null;
   recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   guardarEstadoCompleto();
@@ -2074,7 +2136,7 @@ window.renderizarVistaDia = function(){ clearTimeout(_renderVistaTimer); _render
 function _renderizarVistaDiaExcel(){
   const contenedor=document.getElementById('tablaVisitasExcel');
   if(!contenedor) return;
-  const cntEnt=visitas.filter(v=>v.estado==='Entregado').length;
+  const cntEnt=visitas.filter(v=>esEstadoEntregado(v.estado)).length;
   const cntNoEnt=visitas.length-cntEnt;
   const elT=document.getElementById('cnt-todas'), elE=document.getElementById('cnt-entregados'), elN=document.getElementById('cnt-no-entregados');
   if(elT) elT.textContent=`(${visitas.length})`;
@@ -2084,8 +2146,8 @@ function _renderizarVistaDiaExcel(){
   const busqLower = busq.toLowerCase();
   let datos = visitas.map((v,i)=>({ v, idxOriginal: i }))
     .filter(({v}) => {
-      if(filtroVistaDia === 'entregados' && v.estado !== 'Entregado') return false;
-      if(filtroVistaDia === 'no-entregados' && v.estado === 'Entregado') return false;
+      if(filtroVistaDia === 'entregados' && !esEstadoEntregado(v.estado)) return false;
+      if(filtroVistaDia === 'no-entregados' && esEstadoEntregado(v.estado)) return false;
       if(busqLower){
         const cod=(v.codigo||'').toLowerCase(); const dir=(v.direccion||'').toLowerCase(); const est=(v.estado||'').toLowerCase(); const desc=(v.descripcion||'').toLowerCase();
         return cod.includes(busqLower) || dir.includes(busqLower) || est.includes(busqLower) || desc.includes(busqLower);
@@ -2105,8 +2167,9 @@ function _renderizarVistaDiaExcel(){
   }
   let html = '<table class="tabla-dia"><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Guía / Código</th><th>Dirección</th><th>Precio</th><th>Estado</th><th>Descripción</th><th>📸</th></tr></thead><tbody>';
   datos.forEach(({v, idxOriginal}) => {
-    const esEntregado = v.estado === 'Entregado';
-    const badgeClass = esEntregado ? 'badge-estado ok' : 'badge-estado no';
+    const esLink = esEstadoEntregadoLink(v.estado);
+    const esEnt = esEstadoEntregado(v.estado);
+    const badgeClass = esLink ? 'badge-estado link' : (esEnt ? 'badge-estado ok' : 'badge-estado no');
     const nFotos = Array.isArray(v.fotos) ? v.fotos.length : 0;
     const precio = Number(v.precio) || 0;
     html += '<tr>' + `<td>${idxOriginal + 1}</td>` + `<td>${escapeHtml(v.llegada) || '—'}</td>` + `<td>${escapeHtml(v.salida) || '—'}</td>` + `<td><strong>${Number(v.tiempo)||0} min</strong></td>` + `<td class="col-codigo">${escapeHtml(v.codigo) || '—'}</td>` + `<td class="col-dir">${escapeHtml(v.direccion) || '—'}</td>` + `<td class="col-precio">${precio ? formatCOP(precio) : '—'}</td>` + `<td class="col-estado"><span class="${badgeClass}">${escapeHtml(v.estado) || '—'}</span></td>` + `<td class="col-desc">${escapeHtml(v.descripcion) || '—'}</td>` + `<td>${nFotos > 0 ? '📸 ' + nFotos : '—'}</td>` + '</tr>';
@@ -2116,11 +2179,15 @@ function _renderizarVistaDiaExcel(){
 }
 
 function actualizarDashboard(){
-  const e=contadores['Entregado']||0, n=totalVisitas-e, p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
-  document.getElementById('c-entregados').innerText=e;
-  document.getElementById('c-noentregados').innerText=n;
-  document.getElementById('c-total').innerText=totalVisitas;
-  document.getElementById('c-promedio').innerText=p+' min';
+  const totalEnt=contarEntregadosActuales();
+  const entLink=contadores[ESTADO_ENTREGADO_LINK]||0;
+  const n=totalVisitas-totalEnt;
+  const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
+  const elEnt=document.getElementById('c-entregados'); if(elEnt) elEnt.innerText=totalEnt;
+  const elLink=document.getElementById('c-linkpago'); if(elLink) elLink.innerText=entLink;
+  const elNo=document.getElementById('c-noentregados'); if(elNo) elNo.innerText=n;
+  const elTot=document.getElementById('c-total'); if(elTot) elTot.innerText=totalVisitas;
+  const elProm=document.getElementById('c-promedio'); if(elProm) elProm.innerText=p+' min';
   const t = calcularTotalesPrecios();
   const ecoTotal = document.getElementById('eco-total'); const ecoEntregado = document.getElementById('eco-entregado'); const ecoNoEntregado = document.getElementById('eco-noentregado'); const ecoCantidad = document.getElementById('eco-cantidad');
   if(ecoTotal) ecoTotal.textContent = formatCOP(t.totalGeneral);
@@ -2130,16 +2197,16 @@ function actualizarDashboard(){
   renderizarGrafica();
   if(typeof window.renderizarVistaDia==='function') window.renderizarVistaDia();
 }
-function coloresGrafica(){ return esDarkMode()?['#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffd60a','#bf5af2','#40c8e0','#ff375f','#30d158','#ffd60a','#ff9f0a','#0a84ff','#5e5ce6','#ff375f','#5e5ce6','#40c8e0']:['#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffcc00','#bf5af2','#40c8e0','#ff375f','#248a3d','#ffb340','#ff6b00','#007aff','#5e5ce6','#ff2d55','#4a3fa3','#17a2b8']; }
+function coloresGrafica(){ return esDarkMode()?['#40c8e0','#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffd60a','#bf5af2','#ff375f','#30d158','#ffd60a','#ff9f0a','#0a84ff','#5e5ce6','#ff375f','#5e5ce6','#40c8e0']:['#40c8e0','#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffcc00','#bf5af2','#ff375f','#248a3d','#ffb340','#ff6b00','#007aff','#5e5ce6','#ff2d55','#4a3fa3','#17a2b8']; }
 function renderizarGrafica(){ const c=document.getElementById('graficaInforme'); if(!c||typeof Chart==='undefined') return; const ctx=c.getContext('2d'); if(miGrafico) miGrafico.destroy(); const tc=esDarkMode()?'#f5f5f7':'#1c1c1e'; miGrafico=new Chart(ctx,{type:'bar',data:{labels:Object.keys(contadores),datasets:[{label:'Cantidad',data:Object.values(contadores),backgroundColor:coloresGrafica(),borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:tc},grid:{color:esDarkMode()?'#2c2c2e':'#e8e8ed'}},x:{ticks:{color:tc},grid:{display:false}}},plugins:{legend:{display:false}}}}); }
 function calcularPromedios(){
   const h=cargarHistorialDetallado(); const f=Object.keys(h).sort();
   if(!f.length) return {promedioDia:0,promedioSemana:0,promedioMes:0};
-  let t=0; for(const k of f) t+=h[k].contadores?.['Entregado']||0;
+  let t=0; for(const k of f) t+=contarEntregadosEnContadores(h[k].contadores);
   const pD=t/f.length;
-  const sem={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const s=d.getFullYear()+'-'+String(getWeekNumber(d)).padStart(2,'0'); sem[s]=(sem[s]||0)+(h[k].contadores?.['Entregado']||0); }
+  const sem={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const s=d.getFullYear()+'-'+String(getWeekNumber(d)).padStart(2,'0'); sem[s]=(sem[s]||0)+contarEntregadosEnContadores(h[k].contadores); }
   const pS=Object.values(sem).reduce((a,b)=>a+b,0)/(Object.keys(sem).length||1);
-  const mes={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); mes[m]=(mes[m]||0)+(h[k].contadores?.['Entregado']||0); }
+  const mes={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const m=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); mes[m]=(mes[m]||0)+contarEntregadosEnContadores(h[k].contadores); }
   const pM=Object.values(mes).reduce((a,b)=>a+b,0)/(Object.keys(mes).length||1);
   return {promedioDia:pD,promedioSemana:pS,promedioMes:pM};
 }
@@ -2156,8 +2223,8 @@ function actualizarGraficaPromedios(){
 function actualizarInformesSemanalesMensuales(){
   const h=cargarHistorialDetallado(); const f=Object.keys(h).sort(); if(!f.length) return;
   const tc=esDarkMode()?'#f5f5f7':'#1c1c1e';
-  const sem={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const s=d.getFullYear()+' · Sem '+String(getWeekNumber(d)).padStart(2,'0'); sem[s]=(sem[s]||0)+(h[k].contadores?.['Entregado']||0); }
-  const mes={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const m=d.toLocaleString('es',{month:'long',year:'numeric'}); mes[m]=(mes[m]||0)+(h[k].contadores?.['Entregado']||0); }
+  const sem={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const s=d.getFullYear()+' · Sem '+String(getWeekNumber(d)).padStart(2,'0'); sem[s]=(sem[s]||0)+contarEntregadosEnContadores(h[k].contadores); }
+  const mes={}; for(const k of f){ const d=new Date(k+'T00:00:00'); const m=d.toLocaleString('es',{month:'long',year:'numeric'}); mes[m]=(mes[m]||0)+contarEntregadosEnContadores(h[k].contadores); }
   const cs=document.getElementById('graficaSemana'); if(cs && typeof Chart!=='undefined'){ const ctx=cs.getContext('2d'); if(miGraficoSemana) miGraficoSemana.destroy(); miGraficoSemana=new Chart(ctx,{type:'bar',data:{labels:Object.keys(sem),datasets:[{label:'Semana',data:Object.values(sem),backgroundColor:'#0a84ff',borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{ticks:{color:tc},grid:{color:esDarkMode()?'#2c2c2e':'#e8e8ed'}},x:{ticks:{color:tc},grid:{display:false}}}}}); }
   const cm=document.getElementById('graficaMes'); if(cm && typeof Chart!=='undefined'){ const ctx=cm.getContext('2d'); if(miGraficoMes) miGraficoMes.destroy(); miGraficoMes=new Chart(ctx,{type:'bar',data:{labels:Object.keys(mes),datasets:[{label:'Mes',data:Object.values(mes),backgroundColor:'#30d158',borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{ticks:{color:tc},grid:{color:esDarkMode()?'#2c2c2e':'#e8e8ed'}},x:{ticks:{color:tc},grid:{display:false}}}}}); }
 }
@@ -2315,7 +2382,7 @@ function generarChartEstadosHorizontal(ancho,alto){
   const mi=220, md=70, mt=48, mb=30; const aw=ancho-mi-md, ah=alto-mt-mb;
   ctx.fillStyle='#1c1c1e'; ctx.font='bold 17px Helvetica'; ctx.textAlign='left'; ctx.fillText('Distribución por Estado',20,30);
   const mx=Math.max(...ent.map(([,v])=>v),1); const n=ent.length; const fh=ah/n; const bh=Math.min(fh*0.7,32);
-  const col=['#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffcc00','#bf5af2','#40c8e0','#ff375f','#248a3d','#ffb340','#ff6b00','#007aff','#5e5ce6','#ff2d55','#4a3fa3','#17a2b8'];
+  const col=['#40c8e0','#30d158','#ff453a','#ff9f0a','#0a84ff','#8e8e93','#ffcc00','#bf5af2','#40c8e0','#ff375f','#248a3d','#ffb340','#ff6b00','#007aff','#5e5ce6','#ff2d55','#4a3fa3','#17a2b8'];
   ctx.strokeStyle='#e8e8ed'; ctx.lineWidth=1;
   for(let i=0;i<=4;i++){ const x=mi+(aw*i/4); ctx.beginPath(); ctx.moveTo(x,mt); ctx.lineTo(x,mt+ah); ctx.stroke(); ctx.fillStyle='#8e8e93'; ctx.font='10px Helvetica'; ctx.textAlign='center'; ctx.fillText(Math.round(mx*i/4),x,mt+ah+14); }
   ctx.strokeStyle='#999'; ctx.beginPath(); ctx.moveTo(mi,mt); ctx.lineTo(mi,mt+ah); ctx.stroke();
@@ -2326,7 +2393,7 @@ function generarChartDona(ancho,alto){
   const c=document.createElement('canvas'); c.width=ancho; c.height=alto;
   const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,ancho,alto);
   ctx.fillStyle='#1c1c1e'; ctx.font='bold 15px Helvetica'; ctx.textAlign='center'; ctx.fillText('Entregados vs No Entregados',ancho/2,26);
-  const e=contadores['Entregado']||0; const n=totalVisitas-e; const t=e+n;
+  const e=contarEntregadosActuales(); const n=totalVisitas-e; const t=e+n;
   if(!t){ ctx.fillStyle='#999'; ctx.font='14px Helvetica'; ctx.fillText('Sin datos',ancho/2,alto/2); return c.toDataURL('image/png'); }
   const cx=ancho/2, cy=alto/2+10, rE=Math.min(ancho,alto-90)/2-30, rI=rE*0.6;
   const seg=[{v:e,c:'#30d158'},{v:n,c:'#ff453a'}];
@@ -2349,6 +2416,28 @@ window.esDispositivoIOS = esDispositivoIOS;
 function esIOSPWA(){ return esDispositivoIOS()&&esModoStandalone(); }
 window.esIOSPWA = esIOSPWA;
 function iosSoportaPrintEnPWA(){ const m=navigator.userAgent.match(/OS (\d+)[._](\d+)/); if(!m) return false; const major=parseInt(m[1],10), minor=parseInt(m[2],10); if(major>16) return true; if(major===16 && minor>=4) return true; return false; }
+
+function headerEmpresarialHTML(tituloDoc, codigoDoc, fecha, horaGen){
+  return `<div class="info-empresarial-header">
+    <div class="emp-line"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong></div>
+    <div class="emp-line">NIT: ${DATOS_EMPRESA.colserlog.nit} · Dirección: ${DATOS_EMPRESA.colserlog.direccion}</div>
+    <div class="emp-line">Tel: ${DATOS_EMPRESA.colserlog.telefono} · Email: ${DATOS_EMPRESA.colserlog.email} · Web: ${DATOS_EMPRESA.colserlog.web}</div>
+    <div class="emp-line" style="margin-top:6px;border-top:1px solid #ccc;padding-top:6px;">
+      <strong>${DATOS_EMPRESA.colvanes.nombre}</strong> — NIT: ${DATOS_EMPRESA.colvanes.nit} · ${DATOS_EMPRESA.colvanes.direccion} · Tel: ${DATOS_EMPRESA.colvanes.telefono} · ${DATOS_EMPRESA.colvanes.email}
+    </div>
+    <div class="emp-line">
+      <strong>${DATOS_EMPRESA.envia.nombre}</strong> — NIT: ${DATOS_EMPRESA.envia.nit} · ${DATOS_EMPRESA.envia.direccion} · Tel: ${DATOS_EMPRESA.envia.telefono}
+    </div>
+    <div class="doc-info-emp">
+      <strong>${tituloDoc}</strong><br>
+      Código: ${codigoDoc}<br>
+      Fecha: ${fecha}<br>
+      Generado: ${horaGen}
+    </div>
+  </div>`;
+}
+window.headerEmpresarialHTML = headerEmpresarialHTML;
+
 function prepararAreaImpresion(html,clasesExtra){ let area=document.getElementById('areaImpresion'); if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); } area.innerHTML=html; area.style.display='block'; _estabaDarkAlImprimir=document.body.classList.contains('dark'); if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching'); document.body.classList.add('modo-impresion'); (clasesExtra||[]).forEach(c=>document.body.classList.add(c)); return area; }
 function finalizarImpresion(){ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album','theme-switching'); const area=document.getElementById('areaImpresion'); if(area){ area.innerHTML=''; area.style.display='none'; } if(_estabaDarkAlImprimir && typeof window.cargarDarkMode==='function'){ try{ window.cargarDarkMode(); }catch(e){} } _estabaDarkAlImprimir=false; }
 function mostrarModalImpresionIOSPWA(){
@@ -2383,7 +2472,10 @@ window.imprimirReporteDiario = async function(){
     const ahora=new Date();
     const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
     const horaGen=ahora.toLocaleTimeString('es');
-    const ent=contadores['Entregado']||0, noEnt=totalVisitas-ent;
+    const entNorm=contadores[ESTADO_ENTREGADO]||0;
+    const entLink=contadores[ESTADO_ENTREGADO_LINK]||0;
+    const ent=entNorm+entLink;
+    const noEnt=totalVisitas-ent;
     const prom=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
     const efec=totalVisitas>0?((ent/totalVisitas)*100).toFixed(1):'0.0';
     const horas=Math.floor(totalMinutosVisitas/60), mins=totalMinutosVisitas%60;
@@ -2399,7 +2491,7 @@ window.imprimirReporteDiario = async function(){
     const idsFaltantes=idsNecesarios.filter(id=>!cacheFotos.has(id));
     if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
     const T = calcularTotalesPrecios();
-    let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div><div class="doc-info"><strong>Reporte Diario</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div></div><div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;"><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div></div><header class="rd-header"><h1>Reporte Diario de Entregas</h1><div class="rd-subtitle">Registro detallado de visitas y evidencias</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entreg.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr><tr><td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td><td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td><td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td></tr></table></section><section class="rd-charts"><div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div><div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div></section><section class="rd-tiempos"><h3 class="rd-section-title">⏱️ Tiempos Base</h3><table class="rd-tabla-tiempos"><tr><td><strong>Inicio</strong><br>${iC}</td><td><strong>Fin</strong><br>${fC}</td><td><strong>Salida</strong><br>${sE}</td><td><strong>1ª entrega</strong><br>${pE}</td></tr><tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr></table></section>`;
+    let html=`<div class="reporte-diario">${headerEmpresarialHTML('Reporte Diario de Entregas', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Reporte Diario de Entregas</h1><div class="rd-subtitle">Registro detallado de visitas y evidencias</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link Pago</div><div class="rd-kpi-valor">${entLink}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entreg.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">✅ Normales</div><div class="rd-kpi-valor">${entNorm}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr><tr><td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td><td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td><td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td></tr></table></section><section class="rd-charts"><div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div><div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div></section><section class="rd-tiempos"><h3 class="rd-section-title">⏱️ Tiempos Base</h3><table class="rd-tabla-tiempos"><tr><td><strong>Inicio</strong><br>${iC}</td><td><strong>Fin</strong><br>${fC}</td><td><strong>Salida</strong><br>${sE}</td><td><strong>1ª entrega</strong><br>${pE}</td></tr><tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr></table></section>`;
     const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(eCV.length){
       html+=`<section><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla"><thead><tr><th style="text-align:left;width:35%">Estado</th><th style="width:12%">Cant.</th><th style="width:12%">%</th><th style="width:15%">Valor</th><th style="width:26%">Barra</th></tr></thead><tbody>`;
@@ -2413,7 +2505,7 @@ window.imprimirReporteDiario = async function(){
         const nf=Array.isArray(v.fotos)?v.fotos.length:0;
         const nCens=(v.fotos||[]).filter(f=>f.censurada).length;
         const precio=Number(v.precio)||0;
-        const colorPrecio = v.estado==='Entregado' ? '#1e8449' : (precio>0?'#a02015':'#666');
+        const colorPrecio = esEstadoEntregado(v.estado) ? '#1e8449' : (precio>0?'#a02015':'#666');
         html+=`<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||'—'}</td><td>${escapeHtml(v.salida)||'—'}</td><td>${Number(v.tiempo)||0}</td><td style="font-family:'Courier New',monospace;font-size:6.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.direccion)||'—'}</td><td style="font-weight:700;color:${colorPrecio};">${precio?formatCOP(precio):'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.estado)||'—'}</td><td style="font-weight:bold;color:${nf>0?'#248a3d':'#999'};">${nf>0?nf+(nCens?'🛡️':''):'—'}</td><td>${v.firma?'✅':'—'}</td><td style="text-align:left;font-size:5.5pt;">${escapeHtml(v.descripcion)||'—'}</td></tr>`;
       });
       html+=`<tr class="rd-total"><td colspan="4"><strong>TOTAL</strong></td><td colspan="2"></td><td style="color:#1a5276;"><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>${tFotos}</strong></td><td><strong>${visitas.filter(v=>v.firma).length}</strong></td><td></td></tr>`;
@@ -2464,6 +2556,7 @@ window.imprimirAlbumFotografico = async function(){
     const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
     const ahora=new Date();
     const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const horaGen=ahora.toLocaleTimeString('es');
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
     const idsFaltantes=ids.filter(id=>!cacheFotos.has(id));
     if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
@@ -2473,7 +2566,7 @@ window.imprimirAlbumFotografico = async function(){
     if(!planas.length){ alert('⚠️ No se pudieron cargar fotos.'); return; }
     const FPP=12; const totalP=Math.ceil(planas.length/FPP);
     const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-    let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}</div></div><div class="doc-info"><strong>Álbum Fotográfico</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}</div></div><header class="rd-header"><h1>Álbum Fotográfico</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fotos:</strong> ${planas.length}</div><div><strong>Páginas:</strong> ${totalP}</div></div></header>`;
+    let html=`<div class="reporte-diario">${headerEmpresarialHTML('Álbum Fotográfico', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Álbum Fotográfico</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fotos:</strong> ${planas.length}</div><div><strong>Páginas:</strong> ${totalP}</div></div></header>`;
     for(let p=0;p<planas.length;p+=FPP){
       const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
       html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Pág. ${np}/${totalP}</div><div class="rd-album-grid">`;
@@ -2489,8 +2582,13 @@ window.imprimirInformeMensual = async function(){
   try{
     const ic=document.getElementById('informeContenedor');
     if(!ic||!ic.innerHTML.trim()){ alert('⚠️ Primero genera un informe.'); return; }
+    const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
+    const ahora=new Date();
+    const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    const horaGen=ahora.toLocaleTimeString('es');
+    const codigoDoc=`INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     const clon=ic.cloneNode(true);
-    const html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}</div></div><div class="doc-info"><strong>Informe Mensual</strong></div></div>${clon.innerHTML}<div class="rd-footer"><div class="rd-confidencial">Documento confidencial</div></div></div>`;
+    const html=`<div class="reporte-diario">${headerEmpresarialHTML('Informe Mensual', codigoDoc, fecha, horaGen)}${clon.innerHTML}<div class="rd-footer"><div class="rd-confidencial">Documento confidencial</div><div>${DATOS_EMPRESA.colserlog.nombre} · NIT ${DATOS_EMPRESA.colserlog.nit}</div></div></div>`;
     await ejecutarImpresion(html,['modo-reporte-diario']);
   }catch(err){ finalizarImpresion(); alert('❌ Error.'); }
 };
@@ -2502,7 +2600,10 @@ window.generarInformeEmpresarial = async function(){
   const ahora=new Date();
   const fecha=ahora.toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const horaGen=ahora.toLocaleTimeString('es');
-  const ent=contadores['Entregado']||0, noEnt=totalVisitas-ent;
+  const entNorm=contadores[ESTADO_ENTREGADO]||0;
+  const entLink=contadores[ESTADO_ENTREGADO_LINK]||0;
+  const ent=entNorm+entLink;
+  const noEnt=totalVisitas-ent;
   const efec=totalVisitas>0?((ent/totalVisitas)*100).toFixed(1):'0.0';
   const cUnicos=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean)).size;
   const tFotos=visitas.reduce((s,v)=>s+(Array.isArray(v.fotos)?v.fotos.length:0),0);
@@ -2514,13 +2615,60 @@ window.generarInformeEmpresarial = async function(){
   const idsNecesarios=[]; visitas.forEach(v=>{ if(Array.isArray(v.fotos)) v.fotos.forEach(f=>{ if(f.id) idsNecesarios.push(f.id); }); });
   const idsFaltantes=idsNecesarios.filter(id=>!cacheFotos.has(id));
   if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
-  let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div><div class="doc-info"><strong>Informe Empresarial</strong><br>Código: INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div></div><div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;"><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div></div><header class="rd-header"><h1>Informe Empresarial Detallado</h1><div class="rd-subtitle">Trazabilidad completa</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">💰 Valor Total</div><div class="rd-kpi-valor">${formatCOP(T.totalGeneral)}</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">📍 Dir.</div><div class="rd-kpi-valor">${visitasConDireccion}</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr><tr><td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td><td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td><td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td></tr></table></section><section class="rd-tiempos"><h3 class="rd-section-title">📊 Gestión</h3><table class="rd-tabla-tiempos"><tr><td><strong>Con precio</strong><br>${visitasConPrecio}</td><td><strong>Fotos</strong><br>${tFotos}</td><td><strong>Censuradas</strong><br>${tCensuradas}</td><td><strong>Con firma</strong><br>${visitasConFirma}</td></tr></table></section>`;
+  const codigoDoc=`INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+  let html=`<div class="reporte-diario">
+    ${headerEmpresarialHTML('Informe Empresarial Detallado', codigoDoc, fecha, horaGen)}
+    <header class="rd-header">
+      <h1>Informe Empresarial Detallado</h1>
+      <div class="rd-subtitle">Trazabilidad completa</div>
+      <div class="rd-info">
+        <div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div>
+        <div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div>
+      </div>
+    </header>
+    <section class="rd-kpis">
+      <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div>
+      <div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link Pago</div><div class="rd-kpi-valor">${entLink}</div></div>
+      <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div>
+      <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
+      <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div>
+      <div class="rd-kpi naranja"><div class="rd-kpi-label">💰 Valor Total</div><div class="rd-kpi-valor">${formatCOP(T.totalGeneral)}</div></div>
+      <div class="rd-kpi gris"><div class="rd-kpi-label">📍 Dir.</div><div class="rd-kpi-valor">${visitasConDireccion}</div></div>
+      <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
+      <div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div>
+    </section>
+    <section>
+      <h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3>
+      <table class="rd-economic-table">
+        <tr>
+          <td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td>
+          <td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td>
+          <td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td>
+        </tr>
+        <tr>
+          <td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td>
+          <td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td>
+          <td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td>
+        </tr>
+      </table>
+    </section>
+    <section class="rd-tiempos">
+      <h3 class="rd-section-title">📊 Gestión</h3>
+      <table class="rd-tabla-tiempos">
+        <tr>
+          <td><strong>Con precio</strong><br>${visitasConPrecio}</td>
+          <td><strong>Fotos</strong><br>${tFotos}</td>
+          <td><strong>Censuradas</strong><br>${tCensuradas}</td>
+          <td><strong>Con firma</strong><br>${visitasConFirma}</td>
+        </tr>
+      </table>
+    </section>`;
   if(visitas.length){
     html+=`<section><h3 class="rd-section-title">📋 Detalle de Visitas</h3><table class="rd-tabla"><thead><tr><th>#</th><th>Lleg.</th><th>Sal.</th><th>T.</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th><th>📸</th><th>✍️</th></tr></thead><tbody>`;
     visitas.forEach((v,i)=>{
       const nf=Array.isArray(v.fotos)?v.fotos.length:0;
       const precio=Number(v.precio)||0;
-      const colorPrecio = v.estado==='Entregado' ? '#1e8449' : (precio>0?'#a02015':'#666');
+      const colorPrecio = esEstadoEntregado(v.estado) ? '#1e8449' : (precio>0?'#a02015':'#666');
       html+=`<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||'—'}</td><td>${escapeHtml(v.salida)||'—'}</td><td>${Number(v.tiempo)||0}</td><td style="font-family:monospace;font-size:6.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.direccion)||'—'}</td><td style="font-weight:700;color:${colorPrecio};">${precio?formatCOP(precio):'—'}</td><td style="font-size:6pt;">${escapeHtml(v.estado)||'—'}</td><td>${nf>0?nf:'—'}</td><td>${v.firma?'✅':'—'}</td></tr>`;
     });
     html+=`<tr class="rd-total"><td colspan="6"><strong>TOTAL GENERAL</strong></td><td style="color:#1a5276;"><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>${tFotos}</strong></td><td><strong>${visitasConFirma}</strong></td></tr>`;
@@ -2559,11 +2707,14 @@ window.compartirInformeEmpresarialWhatsApp = function(){ const t=construirTextoD
 function construirTextoDia(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const e=contadores['Entregado']||0, n=totalVisitas-e;
+  const entNorm=contadores[ESTADO_ENTREGADO]||0;
+  const entLink=contadores[ESTADO_ENTREGADO_LINK]||0;
+  const e=entNorm+entLink;
+  const n=totalVisitas-e;
   const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
   const ef=totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0;
   const T = calcularTotalesPrecios();
-  let t=`📦 *COLSERLOG - Reporte Diario*\n━━━━━━━━━━━━━━━━━\n👤 *Mensajero:* ${u}\n📅 *Fecha:* ${f}\n\n📊 *RESUMEN*\n✅ Entregados: *${e}*\n❌ No entregados: *${n}*\n📦 Total: *${totalVisitas}*\n⏱️ Promedio: *${p} min*\n🎯 Efectividad: *${ef}%*\n\n💰 *RESUMEN ECONÓMICO*\n📦 Valor total: *${formatCOP(T.totalGeneral)}*\n✅ Valor entregado: *${formatCOP(T.totalEntregado)}*\n❌ Valor no entregado: *${formatCOP(T.totalNoEntregado)}*\n📊 Paquetes entregados: *${T.cantEntregado}* de *${totalVisitas}*\n\n`;
+  let t=`📦 *COLSERLOG - Reporte Diario*\n━━━━━━━━━━━━━━━━━\n👤 *Mensajero:* ${u}\n📅 *Fecha:* ${f}\n\n📊 *RESUMEN*\n✅ Entregados: *${e}*\n   ├─ 🚚 Normales: *${entNorm}*\n   └─ 🔗 Link de pago: *${entLink}*\n❌ No entregados: *${n}*\n📦 Total: *${totalVisitas}*\n⏱️ Promedio: *${p} min*\n🎯 Efectividad: *${ef}%*\n\n💰 *RESUMEN ECONÓMICO*\n📦 Valor total: *${formatCOP(T.totalGeneral)}*\n✅ Valor entregado: *${formatCOP(T.totalEntregado)}*\n❌ Valor no entregado: *${formatCOP(T.totalNoEntregado)}*\n📊 Paquetes entregados: *${T.cantEntregado}* de *${totalVisitas}*\n\n`;
   if(visitas.length){ t+=`📋 *VISITAS*\n`; visitas.forEach((v,i)=>{ t+=`${i+1}. ${v.codigo||'—'} · ${v.estado}${v.precio?' · '+formatCOP(v.precio):''}${v.firma?' ✍️':''}\n`; }); }
   t+=`\n_Generado por Colserlog_`;
   return t;
@@ -2575,17 +2726,17 @@ function construirTextoMes(mes,anio){
   if(!fm.length) return null;
   const nm=new Date(anio,mes-1,1).toLocaleString('es',{month:'long',year:'numeric'});
   const cap=nm.charAt(0).toUpperCase()+nm.slice(1);
-  let tE=0,tV=0;
-  fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; });
-  return `📦 *COLSERLOG - Informe Mensual*\n━━━━━━━━━━━━━━━━━\n👤 ${u}\n📅 ${cap}\n\n✅ Entregados: *${tE}*\n📦 Visitas: *${tV}*\n📆 Días: *${fm.length}*\n📈 Promedio diario: *${(tE/fm.length).toFixed(1)}*\n\n_Generado por Colserlog_`;
+  let tE=0,tV=0,tL=0;
+  fm.forEach(f=>{ const d=h[f]; tE+=contarEntregadosEnContadores(d.contadores); tV+=d.totalVisitas||0; tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0; });
+  return `📦 *COLSERLOG - Informe Mensual*\n━━━━━━━━━━━━━━━━━\n👤 ${u}\n📅 ${cap}\n\n✅ Entregados: *${tE}*\n   └─ 🔗 Link de pago: *${tL}*\n📦 Visitas: *${tV}*\n📆 Días: *${fm.length}*\n📈 Promedio diario: *${(tE/fm.length).toFixed(1)}*\n\n_Generado por Colserlog_`;
 }
 function construirTextoHistorial(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
   const h=cargarHistorialDetallado(); const f=Object.keys(h).sort();
   if(!f.length) return null;
-  let tE=0,tV=0;
-  f.forEach(k=>{ const d=h[k]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; });
-  return `📦 *COLSERLOG - Historial*\n━━━━━━━━━━━━━━━━━\n👤 ${u}\n📆 Total días: *${f.length}*\n✅ Entregados: *${tE}*\n📦 Visitas: *${tV}*\n\n_Generado por Colserlog_`;
+  let tE=0,tV=0,tL=0;
+  f.forEach(k=>{ const d=h[k]; tE+=contarEntregadosEnContadores(d.contadores); tV+=d.totalVisitas||0; tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0; });
+  return `📦 *COLSERLOG - Historial*\n━━━━━━━━━━━━━━━━━\n👤 ${u}\n📆 Total días: *${f.length}*\n✅ Entregados: *${tE}*\n   └─ 🔗 Link de pago: *${tL}*\n📦 Visitas: *${tV}*\n\n_Generado por Colserlog_`;
 }
 function abrirWhatsApp(texto){ if(!texto){ alert('⚠️ No hay datos.'); return; } const L=4000; let tf=texto, tr=false; if(texto.length>L){ tf=texto.substring(0,L-100)+`\n\n_...(truncado)_`; tr=true; } const w=window.open(`https://wa.me/?text=${encodeURIComponent(tf)}`,'_blank','noopener,noreferrer'); if(w) w.opener=null; if(tr){ setTimeout(()=>{ if(confirm('⚠️ Mensaje largo. ¿Copiar completo?')) copiarAlPortapapeles(texto); },500); } }
 async function copiarAlPortapapeles(txt){ try{ if(navigator.clipboard && navigator.clipboard.writeText){ await navigator.clipboard.writeText(txt); mostrarAviso('✅ Copiado','ok'); } else { const ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.left='-9999px'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); mostrarAviso('✅ Copiado','ok'); } }catch(e){ alert('⚠️ No se pudo copiar.'); } }
@@ -2629,7 +2780,7 @@ window.descargarRespaldoWord = async function(){
   h+=`<div class="header-info">Respaldo generado el ${escapeHtml(fB)}</div>`;
   h+=`<div style="margin:8px 0 16px 0;padding:8px;border:2px dashed #c0392b;background:#fff8f8;"><p style="text-align:center;font-size:9pt;color:#c0392b;font-weight:bold;margin:0 0 4px 0;">⚠️ NO MODIFICAR</p><p style="word-break:break-all;font-family:'Courier New',monospace;font-size:5pt;color:#333;margin:0;line-height:1.1;">${PS}${b64}${PE}</p></div>`;
   h+=`<h3>⏱️ Tiempos Base</h3><table><thead><tr><th>Inicio</th><th>Fin</th><th>Salida</th><th>1ª entrega</th></tr></thead><tbody><tr><td>${escapeHtml(tb.inicioCarga)||'—'}</td><td>${escapeHtml(tb.finCarga)||'—'}</td><td>${escapeHtml(tb.salidaEmpresa)||'—'}</td><td>${escapeHtml(tb.primeraEntrega)||'—'}</td></tr></tbody></table>`;
-  h+=`<h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${cR['Entregado']||0}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${tV}</div></td></tr></table>`;
+  h+=`<h3>📊 Resumen</h3><table class="kpis"><tr><td><div class="kpi-label">Entregados</div><div class="kpi-valor">${contarEntregadosEnContadores(cR)}</div></td><td><div class="kpi-label">🔗 Link Pago</div><div class="kpi-valor">${cR[ESTADO_ENTREGADO_LINK]||0}</div></td><td><div class="kpi-label">Total</div><div class="kpi-valor">${tV}</div></td></tr></table>`;
   h+=`<h3>📥 Banco (${banco.length})</h3>`;
   if(!banco.length) h+=`<p style="text-align:center;color:#888;"><em>Sin códigos.</em></p>`;
   else { h+=`<table><thead><tr><th>#</th><th>Código</th><th>Dirección</th><th>Precio</th></tr></thead><tbody>`; const us=new Set(lv.map(v=>(v.codigo||'').trim()).filter(Boolean)); banco.forEach((b,i)=>{ h+=`<tr><td>${i+1}</td><td>${escapeHtml(b.codigo)}${us.has(b.codigo)?' ✓':''}</td><td style="text-align:left;">${escapeHtml(b.direccion)||'—'}</td><td>${b.precio>0?formatCOP(b.precio):'—'}</td></tr>`; }); h+=`</tbody></table>`; }
@@ -2729,9 +2880,11 @@ window.cargarRespaldoDesdeArchivo = async function(event){
 window.exportarDiaAWord = function(){
   if(!visitas.length){ alert('No hay visitas hoy.'); return; }
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const e=contadores['Entregado']||0;
+  const entNorm=contadores[ESTADO_ENTREGADO]||0;
+  const entLink=contadores[ESTADO_ENTREGADO_LINK]||0;
+  const e=entNorm+entLink;
   const T = calcularTotalesPrecios();
-  let h=`<h1>📦 Reporte Diario</h1><h2>${escapeHtml(f)}</h2><h3>💰 Resumen Económico</h3><table><tr><td><strong>Valor Total Paquetes</strong></td><td>${formatCOP(T.totalGeneral)}</td><td><strong>Total Paquetes</strong></td><td>${totalVisitas}</td></tr><tr><td><strong>✅ Valor Entregado</strong></td><td>${formatCOP(T.totalEntregado)}</td><td><strong>✅ Cantidad Entregados</strong></td><td>${T.cantEntregado}</td></tr><tr><td><strong>❌ Valor No Entregado</strong></td><td>${formatCOP(T.totalNoEntregado)}</td><td><strong>❌ Cantidad No Entregados</strong></td><td>${T.cantNoEntregado}</td></tr></table><h3>📊 Resumen General</h3><table><tr><td>Entregados</td><td>${e}</td><td>Total</td><td>${totalVisitas}</td><td>Efectividad</td><td>${totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0}%</td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+  let h=`<h1>📦 Reporte Diario</h1><h2>${escapeHtml(f)}</h2><h3>💰 Resumen Económico</h3><table><tr><td><strong>Valor Total Paquetes</strong></td><td>${formatCOP(T.totalGeneral)}</td><td><strong>Total Paquetes</strong></td><td>${totalVisitas}</td></tr><tr><td><strong>✅ Valor Entregado</strong></td><td>${formatCOP(T.totalEntregado)}</td><td><strong>✅ Cantidad Entregados</strong></td><td>${T.cantEntregado}</td></tr><tr><td><strong>❌ Valor No Entregado</strong></td><td>${formatCOP(T.totalNoEntregado)}</td><td><strong>❌ Cantidad No Entregados</strong></td><td>${T.cantNoEntregado}</td></tr></table><h3>📊 Resumen General</h3><table><tr><td>Entregados</td><td>${e}</td><td>🔗 Link Pago</td><td>${entLink}</td><td>Total</td><td>${totalVisitas}</td><td>Efectividad</td><td>${totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0}%</td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
   visitas.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${escapeHtml(v.codigo)||'—'}</td><td>${escapeHtml(v.direccion)||'—'}</td><td>${v.precio?formatCOP(v.precio):'—'}</td><td>${escapeHtml(v.estado)||''}</td></tr>`; });
   h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td></tr><tr class="total-row"><td colspan="3"><strong>✅ ENTREGADOS</strong></td><td><strong>${formatCOP(T.totalEntregado)}</strong></td><td><strong>${T.cantEntregado}</strong></td></tr></tbody></table>`;
   descargarWord(`Reporte_${fechaLocalISO()}.doc`,h);
@@ -2743,18 +2896,18 @@ window.exportarMesAWord = function(){
   const fm=Object.keys(h).filter(f=>{ const [y,mm]=f.split('-').map(Number); return y===a&&mm===m; }).sort();
   if(!fm.length){ alert('No hay datos.'); return; }
   const nm=new Date(a,m-1,1).toLocaleString('es',{month:'long'}); const cap=nm.charAt(0).toUpperCase()+nm.slice(1);
-  let tE=0,tV=0; fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; });
-  let html=`<h1>📦 Informe Mensual</h1><h2>${escapeHtml(cap)} ${a}</h2><h3>📊 Resumen</h3><table><tr><td>Entregados</td><td>${tE}</td><td>Visitas</td><td>${tV}</td></tr><tr><td>Días</td><td>${fm.length}</td><td>Efectividad</td><td>${tV>0?((tE/tV)*100).toFixed(1):0}%</td></tr></table><h3>📆 Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;
-  fm.forEach(f=>{ const d=h[f]; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${d.contadores?.['Entregado']||0}</td></tr>`; });
+  let tE=0,tV=0,tL=0; fm.forEach(f=>{ const d=h[f]; tE+=contarEntregadosEnContadores(d.contadores); tV+=d.totalVisitas||0; tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0; });
+  let html=`<h1>📦 Informe Mensual</h1><h2>${escapeHtml(cap)} ${a}</h2><h3>📊 Resumen</h3><table><tr><td>Entregados</td><td>${tE}</td><td>🔗 Link Pago</td><td>${tL}</td><td>Visitas</td><td>${tV}</td></tr><tr><td>Días</td><td>${fm.length}</td><td>Efectividad</td><td colspan="3">${tV>0?((tE/tV)*100).toFixed(1):0}%</td></tr></table><h3>📆 Día a Día</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Link Pago</th></tr></thead><tbody>`;
+  fm.forEach(f=>{ const d=h[f]; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td><td>${d.contadores?.[ESTADO_ENTREGADO_LINK]||0}</td></tr>`; });
   html+=`</tbody></table>`;
   descargarWord(`Informe_${cap}_${a}.doc`,html);
 };
 window.exportarHistorialCompletoAWord = function(){
   const h=cargarHistorialDetallado(); const f=Object.keys(h).sort();
   if(!f.length){ alert('No hay historial.'); return; }
-  let tE=0,tV=0; f.forEach(k=>{ const d=h[k]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; });
-  let html=`<h1>📦 Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><h3>📊 Totales</h3><table><tr><td>Entregados</td><td>${tE}</td><td>Visitas</td><td>${tV}</td><td>Días</td><td>${f.length}</td></tr></table><h3>📆 Detalle</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;
-  f.forEach(k=>{ const d=h[k]; html+=`<tr><td>${k.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${d.contadores?.['Entregado']||0}</td></tr>`; });
+  let tE=0,tV=0,tL=0; f.forEach(k=>{ const d=h[k]; tE+=contarEntregadosEnContadores(d.contadores); tV+=d.totalVisitas||0; tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0; });
+  let html=`<h1>📦 Historial Completo</h1><h2>Desde ${f[0].split('-').reverse().join('/')} hasta ${f[f.length-1].split('-').reverse().join('/')}</h2><h3>📊 Totales</h3><table><tr><td>Entregados</td><td>${tE}</td><td>🔗 Link Pago</td><td>${tL}</td><td>Visitas</td><td>${tV}</td><td>Días</td><td>${f.length}</td></tr></table><h3>📆 Detalle</h3><table><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Link Pago</th></tr></thead><tbody>`;
+  f.forEach(k=>{ const d=h[k]; html+=`<tr><td>${k.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td><td>${d.contadores?.[ESTADO_ENTREGADO_LINK]||0}</td></tr>`; });
   html+=`</tbody></table>`;
   descargarWord(`Historial_Completo.doc`,html);
 };
@@ -2821,11 +2974,11 @@ window.generarInformeMensual = ()=>{
   if(!fm.length){ alert('No hay datos.'); return; }
   const nm=new Date(a,m-1,1).toLocaleString('es',{month:'long'}); const cap=nm.charAt(0).toUpperCase()+nm.slice(1);
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'';
-  let tE=0,tV=0,tM=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
-  fm.forEach(f=>{ const d=h[f]; tE+=d.contadores?.['Entregado']||0; tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
+  let tE=0,tV=0,tM=0,tL=0; const cm={}; ESTADOS.forEach(k=>cm[k]=0);
+  fm.forEach(f=>{ const d=h[f]; tE+=contarEntregadosEnContadores(d.contadores); tV+=d.totalVisitas||0; tM+=d.totalMinutos||0; tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0; for(const k in d.contadores){ if(!cm[k]) cm[k]=0; cm[k]+=d.contadores[k]||0; } });
   const pD=(tE/fm.length).toFixed(1), ef=tV>0?((tE/tV)*100).toFixed(1):0;
-  let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-size:13px;font-weight:bold;margin:5px 0;">👤 Mensajero: ${escapeHtml(u)}</div><h2>Periodo: ${escapeHtml(cap)} ${a}</h2></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div></div></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;
-  fm.forEach(f=>{ const d=h[f]; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${d.contadores?.['Entregado']||0}</td></tr>`; });
+  let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-size:13px;font-weight:bold;margin:5px 0;">👤 Mensajero: ${escapeHtml(u)}</div><h2>Periodo: ${escapeHtml(cap)} ${a}</h2></div><div style="margin-bottom:15px;"><h3 style="text-align:left;">📊 Resumen</h3><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">🔗 Link Pago</div><div class="valor">${tL}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Días</div><div class="valor">${fm.length}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div></div></div><div><h3 style="text-align:left;">📆 Día a Día</h3><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th><th>Link Pago</th></tr></thead><tbody>`;
+  fm.forEach(f=>{ const d=h[f]; html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td><td>${d.contadores?.[ESTADO_ENTREGADO_LINK]||0}</td></tr>`; });
   html+=`</tbody></table></div><div class="informe-firma"><div>Firma Mensajero</div><div>Firma Supervisor</div></div>`;
   document.getElementById('informeContenedor').innerHTML=html;
   document.getElementById('informeContenedor').style.display='block';
@@ -2879,13 +3032,26 @@ window.compactarHistorial = function(){
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
 };
 
+function poblarSelectEstados(){
+  const sel = document.getElementById('estadoPaquete');
+  if(!sel) return;
+  while(sel.options.length > 1) sel.remove(1);
+  ESTADOS.forEach(estado => {
+    const opt = document.createElement('option');
+    opt.value = estado;
+    opt.textContent = estado;
+    sel.appendChild(opt);
+  });
+}
+
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','abrirModalCensura','cerrarModalCensura','deshacerUltimaCensura','aplicarCensuraManual'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','abrirModalCensura','cerrarModalCensura','deshacerUltimaCensura','aplicarCensuraManual','headerEmpresarialHTML'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:',faltan);
   else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
   console.log('🖐️ Modo censura: MANUAL (automática desactivada)');
+  console.log('📋 Estados:', ESTADOS.length, '— Entregado normal:', ESTADO_ENTREGADO, '| Link pago:', ESTADO_ENTREGADO_LINK);
 }
 document.addEventListener('touchstart',function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart',ua); },{once:true});
 document.addEventListener('click',(e)=>{ const c=document.getElementById('resultadosBusquedaCodigo'), i=document.getElementById('busquedaCodigoBanco'); if(!c||!i) return; if(!c.contains(e.target) && e.target!==i){ c.innerHTML=''; c.style.display='none'; } });
@@ -2923,6 +3089,8 @@ window.addEventListener('load',async()=>{
   restaurarBorrador();
   await renderizarGaleriaFotos();
   renderizarBanco();
+  poblarSelectEstados();
+  restaurarBorrador();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ document.getElementById(id)?.addEventListener('change',guardarTiemposBase); });
   actualizarGraficaPromedios();
   actualizarInformesSemanalesMensuales();
