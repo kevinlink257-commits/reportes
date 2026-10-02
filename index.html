@@ -15,10 +15,6 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/index.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/jspreadsheet.min.css" type="text/css" />
-<script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.css" type="text/css" />
 <style>
 :root{--sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;--sys-red:#ff453a;--sys-red-dark:#c92c20;--sys-orange:#ff9f0a;--sys-yellow:#ffd60a;--sys-purple:#bf5af2;--sys-teal:#40c8e0;--sys-pink:#ff375f;--sys-indigo:#5e5ce6;--gray-0:#fff;--gray-1:#f5f5f7;--gray-2:#e8e8ed;--gray-3:#d2d2d7;--gray-4:#aeaeb2;--gray-5:#8e8e93;--gray-6:#636366;--gray-7:#48484a;--gray-8:#1c1c1e;--gray-9:#000;--bg-body:var(--gray-1);--bg-container:#fff;--bg-section:#fafafc;--bg-input:#fff;--bg-card:#fff;--bg-table:#fff;--bg-chip:rgba(10,132,255,.08);--bg-chip-used:rgba(48,209,88,.12);--text-primary:#1c1c1e;--text-secondary:#3a3a3c;--text-heading:#1c1c1e;--text-muted:#8e8e93;--border-main:#d2d2d7;--border-light:#e8e8ed;--shadow-sm:0 1px 2px rgba(0,0,0,.04),0 2px 4px rgba(0,0,0,.04);--shadow-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-lg:0 8px 24px rgba(0,0,0,.08),0 16px 48px rgba(0,0,0,.06);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--radius-pill:999px;--ease:cubic-bezier(.4,0,.2,1);--ease-out:cubic-bezier(0,0,.2,1);--table-header-bg:#f5f5f7;--table-header-color:#1c1c1e}
 body.dark{--bg-body:#000;--bg-container:#1c1c1e;--bg-section:#2c2c2e;--bg-input:#2c2c2e;--bg-card:#2c2c2e;--bg-table:#1c1c1e;--bg-chip:rgba(10,132,255,.18);--bg-chip-used:rgba(48,209,88,.18);--text-primary:#f5f5f7;--text-secondary:#d1d1d6;--text-heading:#f5f5f7;--text-muted:#8e8e93;--border-main:#38383a;--border-light:#2c2c2e;--shadow-sm:0 1px 2px rgba(0,0,0,.4),0 2px 4px rgba(0,0,0,.3);--shadow-md:0 2px 8px rgba(0,0,0,.5),0 4px 16px rgba(0,0,0,.4);--shadow-lg:0 8px 24px rgba(0,0,0,.6),0 16px 48px rgba(0,0,0,.5);--table-header-bg:#2c2c2e;--table-header-color:#f5f5f7}
@@ -78,16 +74,49 @@ body.dark .result-box{background:rgba(48,209,88,.1)}
 .economic-card.entregado{border-color:var(--sys-green);background:rgba(48,209,88,.06)}.economic-card.entregado span.eco-valor{color:var(--sys-green-dark)}
 .economic-card.noentregado{border-color:var(--sys-red);background:rgba(255,69,58,.06)}.economic-card.noentregado span.eco-valor{color:var(--sys-red-dark)}
 .economic-card.cantidad{border-color:var(--sys-purple)}.economic-card.cantidad span.eco-valor{color:var(--sys-purple)}
-table{width:100%;border-collapse:collapse;margin-top:16px;background:var(--bg-table);font-size:.85rem;color:var(--text-primary);border-radius:var(--radius-md);overflow:hidden}
-th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);vertical-align:middle;word-break:break-word;color:var(--text-primary)}
-th{background:var(--table-header-bg);color:var(--table-header-color);font-size:.8rem;font-weight:600;letter-spacing:-.01em}
-tbody tr:hover{background:var(--bg-section)}
-.acciones-btn{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.acciones-btn button{width:auto;padding:6px 10px;font-size:.75rem;margin:0;border-radius:var(--radius-sm)}
+/* ===== TABLA RESPONSIVE (con scroll horizontal) ===== */
+.tabla-wrapper{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-md);border:1px solid var(--border-light);background:var(--bg-table);margin-top:16px}
+.tabla-wrapper table{margin-top:0;border-radius:0;min-width:100%}
+.tabla-wrapper::-webkit-scrollbar{height:8px}
+.tabla-wrapper::-webkit-scrollbar-thumb{background:var(--gray-4);border-radius:4px}
+.tabla-visitas-dia{width:100%;border-collapse:collapse;min-width:1100px;font-size:.82rem}
+.tabla-visitas-dia th{background:var(--table-header-bg);color:var(--table-header-color);padding:10px 8px;font-size:.75rem;font-weight:700;text-align:center;border-bottom:1px solid var(--border-light);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+.tabla-visitas-dia td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);color:var(--text-primary);font-size:.82rem;vertical-align:middle}
+.tabla-visitas-dia tr:hover{background:var(--bg-section)}
+.tabla-visitas-dia td.col-codigo{font-family:'Courier New',monospace;font-weight:700;color:var(--sys-blue);white-space:nowrap}
+.tabla-visitas-dia td.col-precio{font-weight:700;color:var(--sys-green);white-space:nowrap}
+.tabla-visitas-dia td.col-desc{text-align:left;font-size:.72rem;color:var(--text-secondary);min-width:220px;max-width:280px;line-height:1.4}
+.tabla-visitas-dia .inline-input{width:100%;padding:6px 8px;margin:0;font-size:.82rem;border-radius:var(--radius-sm);border:1px solid var(--border-main);background:var(--bg-input);color:var(--text-primary)}
+.tabla-visitas-dia .inline-input:focus{border-color:var(--sys-blue);box-shadow:0 0 0 3px rgba(10,132,255,.15);outline:none}
+.tabla-visitas-dia .inline-input.textarea{min-height:42px;resize:vertical;font-family:inherit}
+.tabla-visitas-dia .acciones-inline{display:flex;gap:4px;justify-content:center;flex-wrap:nowrap}
+.tabla-visitas-dia .acciones-inline button{width:32px;height:32px;min-width:32px;padding:0;margin:0;font-size:.9rem;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.btn-guardar-inline{background:var(--sys-green)}
+.btn-editar-inline{background:var(--sys-yellow);color:var(--gray-9)}
+.btn-borrar-inline{background:var(--sys-red)}
+.badge-inline{display:inline-block;padding:3px 8px;border-radius:var(--radius-pill);font-size:.7rem;font-weight:700;white-space:nowrap}
+.badge-inline.ok{background:rgba(48,209,88,.14);color:#1e8449}
+.badge-inline.no{background:rgba(255,69,58,.12);color:#a02015}
+body.dark .badge-inline.ok{color:#70dd8a}
+body.dark .badge-inline.no{color:#ff8a80}
+/* Tabla historial */
+.tabla-historial{width:100%;border-collapse:collapse;min-width:1100px;font-size:.85rem}
+.tabla-historial th{background:var(--table-header-bg);color:var(--table-header-color);padding:10px 8px;font-size:.75rem;font-weight:700;text-align:center;border-bottom:1px solid var(--border-light);white-space:nowrap;text-transform:uppercase;letter-spacing:.03em}
+.tabla-historial td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);color:var(--text-primary);font-size:.82rem;vertical-align:middle;white-space:nowrap}
+.tabla-historial td.col-desc{white-space:normal;text-align:left;font-size:.75rem;color:var(--text-secondary);min-width:200px;max-width:280px;line-height:1.4}
+.tabla-historial tr:hover{background:var(--bg-section)}
+.tabla-historial .acciones-btn{display:flex;gap:6px;justify-content:center;flex-wrap:nowrap}
+.tabla-historial .acciones-btn button{width:auto;padding:6px 10px;font-size:.75rem;margin:0;border-radius:var(--radius-sm);white-space:nowrap}
 .btn-editar{background:var(--sys-yellow);color:var(--gray-9)}.btn-editar:hover{background:#e6c100}
 .btn-guardar-edicion{background:var(--sys-green)}.btn-guardar-edicion:hover{background:var(--sys-green-dark)}
 .btn-eliminar-fila{background:var(--sys-red)}.btn-eliminar-fila:hover{background:var(--sys-red-dark)}
 .btn-cancelar-edicion{background:var(--gray-5)}.btn-cancelar-edicion:hover{background:var(--gray-6)}
+table{width:100%;border-collapse:collapse;background:var(--bg-table);color:var(--text-primary)}
+th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);vertical-align:middle;color:var(--text-primary)}
+th{background:var(--table-header-bg);color:var(--table-header-color);font-size:.8rem;font-weight:600;letter-spacing:-.01em}
+tbody tr:hover{background:var(--bg-section)}
+.acciones-btn{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.acciones-btn button{width:auto;padding:6px 10px;font-size:.75rem;margin:0;border-radius:var(--radius-sm)}
 canvas{margin-top:20px;background:var(--bg-card);padding:14px;border-radius:var(--radius-md);max-width:100%}
 .promedio-card{display:flex;justify-content:space-around;margin-top:12px;font-weight:600;text-align:center;flex-wrap:wrap;gap:10px}
 .promedio-card div{background:var(--bg-card);padding:14px 20px;border-radius:var(--radius-md);border:1px solid var(--border-light);flex:1;min-width:100px;color:var(--text-secondary);font-size:.85rem}
@@ -166,7 +195,6 @@ body.dark .chip-banco.usado .cb-codigo .estado-badge{color:#ff8a80}
 .chip-banco-edit .edit-actions{display:flex;gap:6px;margin-top:8px}
 .chip-banco-edit .edit-actions button{flex:1;padding:8px;font-size:.78rem;margin:0;border-radius:var(--radius-sm)}
 .contador-codigos{font-size:.8rem;color:var(--text-secondary);margin-top:10px;font-weight:600;text-align:right}
-.descripcion-cell{font-size:.75rem;color:var(--text-secondary);max-width:160px}
 #resultadosBusquedaCodigo{display:none;max-height:280px;overflow-y:auto;border:1px solid var(--border-light);border-radius:var(--radius-md);margin-top:6px;background:var(--bg-card);box-shadow:var(--shadow-md)}
 .resultado-codigo{padding:12px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.9rem;gap:8px;color:var(--text-primary);transition:background .15s var(--ease)}
 .resultado-codigo:last-child{border-bottom:none}
@@ -183,7 +211,7 @@ body.dark .chip-banco.usado .cb-codigo .estado-badge{color:#ff8a80}
 @keyframes shake{0%,100%{transform:translateX(-50%) translateY(0)}25%{transform:translateX(-50%) translateY(-4px)}75%{transform:translateX(-50%) translateY(4px)}}
 #contadorUnicos{font-size:.85rem;color:var(--text-heading);margin-top:8px;text-align:center;font-weight:600}
 #contadorUnicos span{color:var(--sys-red)}
-.hint-codigo{font-size:.78rem;color:var(--text-secondary);margin-top:8px;display:flex;align-items:center;gap:6px;justify-content:center}
+.hint-codigo{font-size:.78rem;color:var(--text-secondary);margin-top:8px;display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap}
 .hint-codigo .badge{background:var(--gray-8);color:#fff;padding:3px 10px;border-radius:var(--radius-pill);font-weight:600;font-size:.72rem;letter-spacing:.05em}
 body.dark .hint-codigo .badge{background:var(--gray-5);color:#fff}
 .contador-digitos{font-size:.78rem;text-align:right;color:var(--text-muted);margin-top:6px;font-weight:600}
@@ -255,7 +283,6 @@ body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
 .modal-foto-nav{display:flex;align-items:center;gap:16px;color:#fff;font-weight:600;font-size:1rem}
 .modal-foto-nav button{background:rgba(255,255,255,.18);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;margin:0;padding:0;font-weight:700}
 .btn-descargar-foto{background:var(--sys-green);color:#fff;text-decoration:none;padding:12px 24px;border-radius:var(--radius-md);font-weight:600;font-size:.9rem;display:inline-block}
-/* Modal de censura manual */
 #modalCensura{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:100004;padding:10px}
 #modalCensura.visible{display:flex}
 .censura-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:16px;max-width:95vw;max-height:96vh;width:100%;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:10px;overflow:hidden}
@@ -302,19 +329,7 @@ body.dark .tag-no{color:#ff8a80}body.dark .tag-ok{color:#81e0a0}
 .aviso-reglas-inline{background:linear-gradient(135deg,rgba(255,214,10,.18),rgba(255,159,10,.14));border:1px solid rgba(255,159,10,.5);border-radius:var(--radius-md);padding:12px 14px;margin-top:12px;font-size:.8rem;color:#7a5b0f;line-height:1.5}
 body.dark .aviso-reglas-inline{color:#f5c76a}
 .aviso-reglas-inline strong{color:#c0392b}
-.rules-seccion{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:12px 14px;margin-top:12px}
-.rules-seccion summary{cursor:pointer;font-weight:600;color:var(--text-heading);padding:6px 0;user-select:none;font-size:.92rem;list-style:none}
-.rules-seccion summary::-webkit-details-marker{display:none}
-.rules-seccion summary::before{content:'▶';display:inline-block;transition:transform .2s var(--ease);margin-right:10px;color:var(--sys-blue);font-size:.85rem}
-.rules-seccion[open] summary::before{transform:rotate(90deg)}
-.rules-seccion .rules-body{padding-top:10px;font-size:.83rem;color:var(--text-primary);line-height:1.55}
-.rules-seccion .rules-body h4{color:var(--text-heading);margin:14px 0 6px 0;font-size:.95rem;border-bottom:1px solid var(--border-light);padding-bottom:4px}
-.rules-seccion .rules-body ul{margin:6px 0 6px 22px;padding:0}
-.rules-seccion .rules-body .legal{background:var(--bg-section);padding:10px 12px;border-radius:var(--radius-sm);font-size:.92em;margin-top:8px}
-.rules-check-list{background:var(--bg-section);border-radius:var(--radius-sm);padding:12px 18px;margin-top:8px}
-.rules-check-list li{list-style:none;position:relative;padding-left:28px;margin:8px 0;font-size:.92em}
-.rules-check-list li::before{content:'☐';position:absolute;left:0;top:-1px;font-size:1.15em;color:var(--text-heading)}
-.filtros-visitas{display:flex;gap:6px;overflow-x:auto;background:var(--bg-section);padding:6px;border-radius:var(--radius-md);margin-bottom:12px;border:1px solid var(--border-light)}
+.filtros-visitas{display:flex;gap:6px;overflow-x:auto;background:var(--bg-section);padding:6px;border-radius:var(--radius-md);margin-bottom:12px;border:1px solid var(--border-light);-webkit-overflow-scrolling:touch}
 .filtro-btn{flex:0 0 auto;padding:9px 14px;background:transparent;color:var(--text-secondary);border:none;border-radius:var(--radius-pill);cursor:pointer;font-size:.82em;font-weight:600;white-space:nowrap;margin:0;width:auto;transition:all .2s var(--ease);font-family:inherit}
 .filtro-btn.active{background:var(--bg-container);color:var(--sys-blue);box-shadow:var(--shadow-sm)}
 .filtro-btn[data-filtro="entregados"].active{color:var(--sys-green)}
@@ -359,7 +374,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9pt;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important;border:none!important;background:#fff!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#modalCensura{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.filtros-visitas,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#modalCensura,.quick-actions{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
@@ -613,7 +628,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         </div>
         <p id="contadorBusquedaDia" class="contador-busqueda"></p>
       </div>
-      <div id="tablaVisitasExcel" style="width:100%; min-height:300px;"></div>
+      <div id="tablaVisitasExcel"></div>
     </div>
 
     <div class="section no-print">
@@ -775,8 +790,9 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <div class="input-group"><input type="text" id="busquedaGuia" placeholder="Escribe código o dirección..." autocomplete="off" oninput="filtrarVisitas();"><button type="button" class="btn-buscar-limpiar" onclick="limpiarBusqueda()">✖ Limpiar</button></div>
         <p id="contadorBusqueda" class="contador-busqueda"></p>
       </div>
-      <div style="overflow-x:auto;">
-        <table>
+      <p class="no-print" style="font-size:.72rem;color:var(--text-muted);text-align:center;margin:0 0 8px 0;">↔ Desliza horizontalmente para ver todas las columnas</p>
+      <div class="tabla-wrapper" id="wrapperTablaHistorial">
+        <table class="tabla-historial">
           <thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th><th>Descripción</th><th>📸</th><th>✍️</th><th class="no-print">Acciones</th></tr></thead>
           <tbody id="cuerpoTabla"></tbody>
         </table>
@@ -1235,7 +1251,7 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
-<!-- SCRIPT 2: App principal con censura mejorada -->
+<!-- SCRIPT 2: App principal -->
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
@@ -1301,13 +1317,12 @@ let scanEstabilizador={codigo:null,contador:0,ultimo:0}; let sesionEscaneoYaAgre
 let fotosPendientes=[]; let modalFotosActual={lista:[],indice:0};
 let sincronizarFotosNube=false; try{ sincronizarFotosNube=localStorage.getItem(CLAVE_FOTOS_NUBE)==='true'; }catch(e){}
 let _estabaDarkAlImprimir=false; let _autoPrintMode=false;
-let spreadsheetVisitas=null;
 let autoCensuraActiva=true; try{ const p=localStorage.getItem(CLAVE_AUTO_CENSURA); if(p!==null) autoCensuraActiva=p==='1'; }catch(e){}
 let _modelosCargados=false, _cargandoModelos=null, _cocoModel=null, _ssdModel=null, _tinyModel=null;
 let bancoCodigoEditando=null;
 
 /* Censura manual */
-let censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null };
+let censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null, escala:1 };
 
 function calcularTotalesPrecios(){
   let totalGeneral=0, totalEntregado=0, totalNoEntregado=0, cantEntregado=0, cantNoEntregado=0;
@@ -1335,7 +1350,6 @@ function beepError(){ try{ const ctx=new (window.AudioContext||window.webkitAudi
 function beepOk(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15); o.start(); o.stop(ctx.currentTime+0.15); setTimeout(()=>ctx.close(),400); }catch(e){} }
 function mostrarIndicadorGuardado(){ const el=document.getElementById('indicadorGuardado'); if(!el) return; el.textContent='✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); el.classList.add('visible'); clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.classList.remove('visible'); },2500); }
 
-/* BORRADOR */
 function guardarBorrador(){
   try{
     const b={ llegadaCliente:document.getElementById('llegadaCliente')?.value||'', salidaCliente:document.getElementById('salidaCliente')?.value||'', estadoPaquete:document.getElementById('estadoPaquete')?.value||'', descripcionVisita:document.getElementById('descripcionVisita')?.value||'', busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'', busquedaDia:document.getElementById('busquedaDia')?.value||'', busquedaGuia:document.getElementById('busquedaGuia')?.value||'', direccionVisita:document.getElementById('direccionVisita')?.value||'', precioVisita:document.getElementById('precioVisita')?.value||'', codigoBanco:document.getElementById('codigoBanco')?.value||'', direccionBanco:document.getElementById('direccionBanco')?.value||'', precioBanco:document.getElementById('precioBanco')?.value||'', timestamp:Date.now() };
@@ -1377,7 +1391,6 @@ async function contarFotosDB(){ const db=await abrirFotosDB(); return new Promis
 async function obtenerTodasLasFotosDB(){ const db=await abrirFotosDB(); return new Promise((res)=>{ const r=db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).getAll(); r.onsuccess=()=>res(r.result||[]); r.onerror=()=>res([]); }); }
 window.precargarFotosEnCache = precargarFotosEnCache;
 
-/* Modal foto */
 window.abrirModalFoto = function(lista,indice){ if(!lista||!lista.length) return; modalFotosActual.lista=lista; modalFotosActual.indice=indice||0; actualizarModalFoto(); document.getElementById('modalFoto').classList.add('visible'); };
 function actualizarModalFoto(){ const {lista,indice}=modalFotosActual; const f=lista[indice]; if(!f) return; const img=document.getElementById('modalFotoImg'); img.src=f.data||f; document.getElementById('modalFotoContador').textContent=`${indice+1} / ${lista.length}`; const l=document.getElementById('modalFotoDescargar'); l.href=f.data||f; l.download=`foto_visita_${(f.id||Date.now())}.jpg`; const n=document.querySelector('.modal-foto-nav'); if(n) n.style.display=lista.length>1?'flex':'none'; }
 window.navegarFoto = function(dir){ const t=modalFotosActual.lista.length; if(t<=1) return; modalFotosActual.indice=(modalFotosActual.indice+dir+t)%t; actualizarModalFoto(); };
@@ -1386,7 +1399,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape') cerrarModalFoto(
 document.getElementById('modalFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalFoto') cerrarModalFoto(); });
 window.verFotosVisita = async function(index){ const v=visitas[index]; if(!v||!v.fotos||!v.fotos.length) return; const ids=v.fotos.map(f=>f.id||f).filter(Boolean); const datos=await obtenerFotosDB(ids); const lista=ids.map(id=>({id,data:datos[id]})).filter(f=>f.data); if(!lista.length){ mostrarAviso('⚠️ No se pudieron cargar las fotos','error'); return; } abrirModalFoto(lista,0); };
 
-/* Reglas foto */
 let modoFotoPendiente='camara';
 window.abrirModalReglasFoto = function(modo){ modoFotoPendiente=modo==='galeria'?'galeria':'camara'; const m=document.getElementById('modalReglasFoto'); const chk=document.getElementById('chkAceptoReglas'); const btn=document.getElementById('btnAbrirCamara'); const lbl=document.getElementById('lblReglasChk'); if(chk) chk.checked=false; if(lbl) lbl.classList.remove('activo'); if(btn){ btn.disabled=true; btn.textContent=modoFotoPendiente==='galeria'?'🖼️ Abrir galería':'📷 Abrir cámara'; } if(m) m.classList.add('visible'); };
 window.cerrarModalReglasFoto = function(){ const m=document.getElementById('modalReglasFoto'); if(m) m.classList.remove('visible'); };
@@ -1396,7 +1408,6 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ const m=documen
 document.getElementById('modalReglasFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalReglasFoto') cerrarModalReglasFoto(); });
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE,sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy',sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
-/* Compresión */
 function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){
   return new Promise((resolve,reject)=>{
     if(!file||!file.type||!file.type.startsWith('image/')){ reject(new Error('Archivo no válido')); return; }
@@ -1500,12 +1511,6 @@ async function renderizarGaleriaFotos(){
 
 /* ══════════════════════════════════════════════════════════
    CENSURA AUTOMÁTICA MEJORADA
-   - SSD Mobilenet V1 (más preciso que TinyFaceDetector)
-   - Multi-escala (3 pasadas a diferentes tamaños)
-   - Múltiples pasadas para mayor cobertura
-   - coco-ssd con umbral 0.35 para vehículos
-   - Pixelado agresivo (/40 en vez de /60)
-   - Padding 20% para más margen
    ══════════════════════════════════════════════════════════ */
 const CDN_TFJS='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
 const CDN_COCO='https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
@@ -1581,30 +1586,21 @@ function pixelarRegion(ctx,x,y,w,h,tamano){
   ctx.putImageData(imagen,sx,sy);
 }
 
-/* Detección de rostros con SSD Mobilenet + TinyFaceDetector multi-escala */
 async function detectarRostrosMultiEscala(img, onProgreso){
   const todasDetecciones = [];
-  
-  // Pasada 1: SSD Mobilenet V1 (alta precisión, umbral 0.35)
   try {
     onProgreso?.('Detectando rostros (SSD, alta precisión)…', 35);
     const opts = new window.faceapi.SsdMobilenetv1Options({ minConfidence: 0.35, maxResults: 50 });
     const caras = await window.faceapi.detectAllFaces(img, opts);
-    caras.forEach(c => {
-      const b = c.box;
-      todasDetecciones.push({ x: b.x, y: b.y, w: b.width, h: b.height, tipo: 'face-ssd' });
-    });
+    caras.forEach(c => { const b = c.box; todasDetecciones.push({ x: b.x, y: b.y, w: b.width, h: b.height, tipo: 'face-ssd' }); });
     console.log(`SSD Mobilenet: ${caras.length} rostros`);
   } catch(e){ console.warn('SSD error:', e); }
-  
-  // Pasada 2: TinyFaceDetector a escala original (catch pequeños)
   try {
     onProgreso?.('Detectando rostros pequeños…', 50);
     const optsTiny = new window.faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.35 });
     const caras = await window.faceapi.detectAllFaces(img, optsTiny);
     caras.forEach(c => {
       const b = c.box;
-      // Solo añadir si no se solapa demasiado con las ya detectadas
       const yaExiste = todasDetecciones.some(d => {
         const cx1 = d.x + d.w/2, cy1 = d.y + d.h/2;
         const cx2 = b.x + b.width/2, cy2 = b.y + b.height/2;
@@ -1615,8 +1611,6 @@ async function detectarRostrosMultiEscala(img, onProgreso){
     });
     console.log(`TinyFaceDetector: ${caras.length} rostros`);
   } catch(e){ console.warn('Tiny error:', e); }
-  
-  // Pasada 3: TinyFaceDetector en imagen reducida (catch rostros grandes que puedan fallar en alta res)
   try {
     onProgreso?.('Segunda pasada multi-escala…', 65);
     const canvas = document.createElement('canvas');
@@ -1629,7 +1623,6 @@ async function detectarRostrosMultiEscala(img, onProgreso){
     const caras = await window.faceapi.detectAllFaces(canvas, optsTiny);
     caras.forEach(c => {
       const b = c.box;
-      // Escalar de vuelta
       const rx = b.x / ratio, ry = b.y / ratio, rw = b.width / ratio, rh = b.height / ratio;
       const yaExiste = todasDetecciones.some(d => {
         const cx1 = d.x + d.w/2, cy1 = d.y + d.h/2;
@@ -1640,11 +1633,9 @@ async function detectarRostrosMultiEscala(img, onProgreso){
       if(!yaExiste) todasDetecciones.push({ x: rx, y: ry, w: rw, h: rh, tipo: 'face-tiny-small' });
     });
   } catch(e){ console.warn('Tiny small error:', e); }
-  
   return todasDetecciones;
 }
 
-/* Detección de vehículos con coco-ssd */
 async function detectarVehiculos(img, onProgreso){
   const detecciones = [];
   try {
@@ -1663,47 +1654,32 @@ async function detectarVehiculos(img, onProgreso){
 async function detectarYCensurar(dataUrl, onProgreso){
   const resultado={dataUrl,rostros:0,vehiculos:0,aplicado:false,error:null};
   if(!autoCensuraActiva) return resultado;
-  
   try{ await cargarModelosDeteccion(onProgreso); }
   catch(e){ resultado.error='Modelos no disponibles: ' + e.message; return resultado; }
-  
   let img;
   try{ img=await cargarImagenParaDeteccion(dataUrl); }
   catch(e){ resultado.error='No se pudo abrir'; return resultado; }
-  
   const canvas=document.createElement('canvas');
   canvas.width=img.naturalWidth||img.width; 
   canvas.height=img.naturalHeight||img.height;
   const ctx=canvas.getContext('2d');
   ctx.drawImage(img,0,0);
-  
-  // Detectar rostros con múltiples pasadas
   const deteccionesRostros = await detectarRostrosMultiEscala(img, onProgreso);
   resultado.rostros = deteccionesRostros.length;
-  
-  // Detectar vehículos
   const deteccionesVehiculos = await detectarVehiculos(img, onProgreso);
   resultado.vehiculos = deteccionesVehiculos.length;
-  
   const todasDetecciones = [...deteccionesRostros, ...deteccionesVehiculos];
-  
   if(todasDetecciones.length===0){ 
     resultado.aplicado=true; 
     onProgreso?.('✅ Imagen limpia (sin detecciones)', 100);
     return resultado; 
   }
-  
   onProgreso?.(`Aplicando censura a ${todasDetecciones.length} zona(s)…`, 90);
-  
-  // Pixelado más denso (más agresivo)
   const tamPixel=Math.max(8,Math.round(Math.min(canvas.width,canvas.height)/40));
-  
   todasDetecciones.forEach(d=>{ 
-    // Padding del 20% para mayor margen
     const pad = Math.max(d.w, d.h) * 0.20; 
     pixelarRegion(ctx, d.x - pad, d.y - pad, d.w + pad*2, d.h + pad*2, tamPixel); 
   });
-  
   try{ 
     resultado.dataUrl=canvas.toDataURL('image/jpeg',FOTO_JPEG_QUALITY); 
     resultado.aplicado=true; 
@@ -1711,17 +1687,12 @@ async function detectarYCensurar(dataUrl, onProgreso){
     resultado.error='No se pudo exportar'; 
     resultado.dataUrl=dataUrl; 
   }
-  
   return resultado;
 }
 
-/* ══════════════════════════════════════════════════════════
-   CENSURA MANUAL
-   ══════════════════════════════════════════════════════════ */
 window.abrirModalCensura = async function(fotoId){
   const foto = await obtenerFotoDB(fotoId);
   if(!foto || !foto.data){ mostrarAviso('⚠️ Foto no encontrada','error'); return; }
-  
   const img = new Image();
   img.onload = () => {
     censuraActual.fotoId = fotoId;
@@ -1730,7 +1701,6 @@ window.abrirModalCensura = async function(fotoId){
     censuraActual.dibujando = false;
     censuraActual.inicio = null;
     censuraActual.actual = null;
-    
     const canvas = document.getElementById('censuraCanvas');
     const maxW = Math.min(window.innerWidth - 60, 700);
     const ratio = Math.min(maxW / img.naturalWidth, 1);
@@ -1739,7 +1709,6 @@ window.abrirModalCensura = async function(fotoId){
     censuraActual.canvas = canvas;
     censuraActual.ctx = canvas.getContext('2d');
     censuraActual.escala = ratio;
-    
     redibujarCensura();
     document.getElementById('censuraInfo').textContent = 'Zonas marcadas: 0';
     document.getElementById('modalCensura').classList.add('visible');
@@ -1753,8 +1722,6 @@ function redibujarCensura(){
   if(!img || !canvas) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-  
-  // Dibujar rectángulos ya marcados
   rectangulos.forEach(r => {
     ctx.save();
     ctx.strokeStyle = '#ff453a';
@@ -1763,14 +1730,11 @@ function redibujarCensura(){
     ctx.strokeRect(r.x, r.y, r.w, r.h);
     ctx.fillStyle = 'rgba(255,69,58,0.25)';
     ctx.fillRect(r.x, r.y, r.w, r.h);
-    // Dibujar un icono de "censurar"
     ctx.fillStyle = '#ff453a';
     ctx.font = 'bold 14px sans-serif';
     ctx.fillText('🛡️', r.x + 4, r.y + 18);
     ctx.restore();
   });
-  
-  // Dibujar rectángulo actual (mientras se arrastra)
   if(actual){
     ctx.save();
     ctx.strokeStyle = '#0a84ff';
@@ -1828,41 +1792,30 @@ window.deshacerUltimaCensura = function(){
 
 window.cerrarModalCensura = function(){
   document.getElementById('modalCensura').classList.remove('visible');
-  censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null };
+  censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null, escala:1 };
 };
 
 window.aplicarCensuraManual = async function(){
   if(censuraActual.rectangulos.length === 0){ mostrarAviso('⚠️ Marca al menos una zona','error'); return; }
   if(!censuraActual.img || !censuraActual.fotoId){ mostrarAviso('⚠️ Error','error'); return; }
-  
   const img = censuraActual.img;
   const escala = censuraActual.escala;
-  
-  // Crear canvas a resolución original
   const canvasFull = document.createElement('canvas');
   canvasFull.width = img.naturalWidth;
   canvasFull.height = img.naturalHeight;
   const ctxFull = canvasFull.getContext('2d');
   ctxFull.drawImage(img, 0, 0);
-  
-  // Aplicar pixelado en cada rectángulo (escalando de vuelta)
   const tamPixel = Math.max(8, Math.round(Math.min(canvasFull.width, canvasFull.height) / 40));
   censuraActual.rectangulos.forEach(r => {
     const x = r.x / escala, y = r.y / escala, w = r.w / escala, h = r.h / escala;
     pixelarRegion(ctxFull, x, y, w, h, tamPixel);
   });
-  
   const dataFinal = canvasFull.toDataURL('image/jpeg', FOTO_JPEG_QUALITY);
   const kb = Math.round((dataFinal.length * 0.75) / 1024);
-  
-  // Actualizar en IndexedDB
   await guardarFotoDB(censuraActual.fotoId, dataFinal, { tamanoKB: kb, fecha: new Date().toISOString(), censurada: true, manual: true });
   cacheFotos.set(censuraActual.fotoId, dataFinal);
-  
-  // Actualizar el array de fotos pendientes
   const fp = fotosPendientes.find(f => f.id === censuraActual.fotoId);
   if(fp){ fp.censurada = true; fp.manual = true; fp.tamanoKB = kb; }
-  
   await renderizarGaleriaFotos();
   guardarEstadoCompleto();
   cerrarModalCensura();
@@ -1870,20 +1823,6 @@ window.aplicarCensuraManual = async function(){
   beepOk();
 };
 
-/* Configurar eventos del canvas de censura */
-document.addEventListener('DOMContentLoaded', () => {
-  const canvas = document.getElementById('censuraCanvas');
-  if(!canvas) return;
-  canvas.addEventListener('mousedown', iniciarTrazoCensura);
-  canvas.addEventListener('mousemove', moverTrazoCensura);
-  canvas.addEventListener('mouseup', terminarTrazoCensura);
-  canvas.addEventListener('mouseleave', (e) => { if(censuraActual.dibujando) terminarTrazoCensura(e); });
-  canvas.addEventListener('touchstart', iniciarTrazoCensura, { passive: false });
-  canvas.addEventListener('touchmove', moverTrazoCensura, { passive: false });
-  canvas.addEventListener('touchend', terminarTrazoCensura);
-  canvas.addEventListener('touchcancel', terminarTrazoCensura);
-});
-// Por si el DOMContentLoaded ya pasó
 setTimeout(() => {
   const canvas = document.getElementById('censuraCanvas');
   if(canvas && !canvas._censuraBound){
@@ -1900,7 +1839,7 @@ setTimeout(() => {
 }, 1000);
 
 /* ══════════════════════════════════════════════════════════
-   BANCO DE CÓDIGOS (sin geocodificación)
+   BANCO DE CÓDIGOS
    ══════════════════════════════════════════════════════════ */
 function codigosEnVisitas(){ const s=new Set(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); }); return s; }
 
@@ -2186,8 +2125,6 @@ function guardarDiaActual(){ const f=fechaLocalISO(); let h={}; try{ h=JSON.pars
 function cargarHistorialDetallado(){ try{ return JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch{ return {}; } }
 function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo||0; }); cargarCodigosRegistradosHoy(); actualizarDashboard(); }
 
-window.agregarCodigo = function(){ /* Deshabilitado - solo banco */ mostrarAviso('ℹ️ Solo puedes usar códigos del banco. Ve a la pestaña 📥 Banco','warn'); };
-
 function agregarCodigoPendiente(c){
   if(!c) return;
   c=c.trim();
@@ -2211,12 +2148,22 @@ function renderizarCodigosPendientes(){
   if(ct) ct.textContent=`📦 ${codigosPendientes.length} pedido(s)`;
 }
 
+/* ══════════════════════════════════════════════════════════
+   TABLA HISTORIAL (DETALLE DE VISITAS)
+   ══════════════════════════════════════════════════════════ */
 function renderizarTabla(){
   const t=document.getElementById('cuerpoTabla'); if(!t) return;
   t.innerHTML='';
   const f=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase();
   const cb=document.getElementById('contadorBusqueda');
-  if(!visitas.length){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=12; td.className='sin-resultados'; td.textContent='📋 Aún no hay visitas registradas hoy.'; tr.appendChild(td); t.appendChild(tr); if(cb) cb.textContent=''; return; }
+  if(!visitas.length){ 
+    const tr=document.createElement('tr'); 
+    const td=document.createElement('td'); 
+    td.colSpan=12; td.className='sin-resultados'; td.textContent='📋 Aún no hay visitas registradas hoy.'; 
+    tr.appendChild(td); t.appendChild(tr); 
+    if(cb) cb.textContent=''; 
+    return; 
+  }
   const items=[];
   visitas.forEach((v,i)=>{
     const cod=(v.codigo||'').toLowerCase();
@@ -2225,38 +2172,87 @@ function renderizarTabla(){
     if(!f || cod.includes(f) || dir.includes(f) || est.includes(f)) items.push({visita:v,indexOriginal:i});
   });
   if(cb) cb.textContent=f?`🔎 ${items.length} resultado(s) de ${visitas.length}`:`Total: ${visitas.length} visita(s).`;
-  if(!items.length){ const tr=document.createElement('tr'); const td=document.createElement('td'); td.colSpan=12; td.className='sin-resultados'; td.textContent='❌ Sin resultados.'; tr.appendChild(td); t.appendChild(tr); return; }
+  if(!items.length){ 
+    const tr=document.createElement('tr'); 
+    const td=document.createElement('td'); 
+    td.colSpan=12; td.className='sin-resultados'; td.textContent='❌ Sin resultados.'; 
+    tr.appendChild(td); t.appendChild(tr); 
+    return; 
+  }
   items.forEach(({visita:v,indexOriginal})=>{
     const ed=filaEditando===indexOriginal;
     const tr=document.createElement('tr');
     tr.appendChild(Object.assign(document.createElement('td'),{textContent:indexOriginal+1}));
-    tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.llegada}));
-    tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.salida}));
+    tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.llegada||'—'}));
+    tr.appendChild(Object.assign(document.createElement('td'),{textContent:v.salida||'—'}));
     tr.appendChild(Object.assign(document.createElement('td'),{innerHTML:`<strong>${Number(v.tiempo)||0} min</strong>`}));
     const tdC=document.createElement('td');
-    if(ed){ const inp=document.createElement('input'); inp.type='text'; inp.value=v.codigo||''; inp.id=`edit-codigo-${indexOriginal}`; inp.style.width='100%'; inp.setAttribute('inputmode','numeric'); inp.setAttribute('maxlength','12'); inp.addEventListener('input',()=>{ const l=(inp.value||'').replace(/\D/g,'').slice(0,12); if(inp.value!==l) inp.value=l; }); tdC.appendChild(inp); }
-    else tdC.textContent=v.codigo||'';
+    if(ed){ 
+      const inp=document.createElement('input'); 
+      inp.type='text'; inp.value=v.codigo||''; 
+      inp.id=`edit-codigo-${indexOriginal}`; 
+      inp.style.width='100%'; inp.style.minWidth='110px'; 
+      inp.setAttribute('inputmode','numeric'); inp.setAttribute('maxlength','12'); 
+      inp.addEventListener('input',()=>{ const l=(inp.value||'').replace(/\D/g,'').slice(0,12); if(inp.value!==l) inp.value=l; }); 
+      tdC.appendChild(inp); 
+    }
+    else tdC.textContent=v.codigo||'—';
     tr.appendChild(tdC);
-    const tdDir=document.createElement('td'); tdDir.style.fontSize='.72rem'; tdDir.textContent=v.direccion||'—'; tr.appendChild(tdDir);
-    const tdPre=document.createElement('td'); tdPre.textContent=v.precio?formatCOP(v.precio):'—'; tdPre.style.fontWeight='600'; tdPre.style.color=v.precio?'var(--sys-green)':'var(--text-muted)'; tr.appendChild(tdPre);
+    const tdDir=document.createElement('td'); 
+    tdDir.style.fontSize='.72rem'; tdDir.style.minWidth='160px'; 
+    tdDir.textContent=v.direccion||'—'; 
+    tr.appendChild(tdDir);
+    const tdPre=document.createElement('td'); 
+    tdPre.textContent=v.precio?formatCOP(v.precio):'—'; 
+    tdPre.style.fontWeight='600'; 
+    tdPre.style.color=v.precio?'var(--sys-green)':'var(--text-muted)'; 
+    tr.appendChild(tdPre);
     const tdE=document.createElement('td');
-    if(ed){ const sel=document.createElement('select'); sel.id=`edit-estado-${indexOriginal}`; ESTADOS.forEach(o=>{ const op=document.createElement('option'); op.value=o; op.textContent=o; if(o===v.estado) op.selected=true; sel.appendChild(op); }); tdE.appendChild(sel); }
+    if(ed){ 
+      const sel=document.createElement('select'); 
+      sel.id=`edit-estado-${indexOriginal}`; 
+      sel.style.minWidth='150px';
+      ESTADOS.forEach(o=>{ 
+        const op=document.createElement('option'); 
+        op.value=o; op.textContent=o; 
+        if(o===v.estado) op.selected=true; 
+        sel.appendChild(op); 
+      }); 
+      tdE.appendChild(sel); 
+    }
     else tdE.textContent=v.estado;
     tr.appendChild(tdE);
-    const tdD=document.createElement('td'); tdD.className='descripcion-cell';
-    if(ed){ const ta=document.createElement('textarea'); ta.id=`edit-desc-${indexOriginal}`; ta.value=v.descripcion||''; ta.style.width='100%'; ta.style.minHeight='44px'; ta.style.fontSize='0.85em'; tdD.appendChild(ta); }
+    const tdD=document.createElement('td'); tdD.className='col-desc';
+    if(ed){ 
+      const ta=document.createElement('textarea'); 
+      ta.id=`edit-desc-${indexOriginal}`; 
+      ta.value=v.descripcion||''; 
+      ta.style.width='100%'; ta.style.minHeight='44px'; ta.style.fontSize='0.85em'; 
+      tdD.appendChild(ta); 
+    }
     else tdD.textContent=v.descripcion||'—';
     tr.appendChild(tdD);
     const tdF=document.createElement('td'); tdF.className='cell-fotos';
     const fotos=Array.isArray(v.fotos)?v.fotos:[];
-    if(fotos.length){ const b=document.createElement('button'); b.type='button'; b.className='btn-ver-fotos'; b.textContent=`📸 ${fotos.length}`; b.onclick=()=>window.verFotosVisita(indexOriginal); tdF.appendChild(b); }
+    if(fotos.length){ 
+      const b=document.createElement('button'); 
+      b.type='button'; b.className='btn-ver-fotos'; b.textContent=`📸 ${fotos.length}`; 
+      b.onclick=()=>window.verFotosVisita(indexOriginal); 
+      tdF.appendChild(b); 
+    }
     else { const sp=document.createElement('span'); sp.className='sin-fotos'; sp.textContent='—'; tdF.appendChild(sp); }
     tr.appendChild(tdF);
     const tdFirma=document.createElement('td'); tdFirma.textContent=v.firma?'✅':'—'; tr.appendChild(tdFirma);
     const tdA=document.createElement('td'); tdA.className='no-print';
     const dv=document.createElement('div'); dv.className='acciones-btn';
-    if(ed){ const bg=document.createElement('button'); bg.type='button'; bg.textContent='💾'; bg.className='btn-guardar-edicion'; bg.onclick=()=>guardarEdicion(indexOriginal); dv.appendChild(bg); const bc=document.createElement('button'); bc.type='button'; bc.textContent='❌'; bc.className='btn-cancelar-edicion'; bc.onclick=()=>{ filaEditando=null; renderizarTabla(); }; dv.appendChild(bc); }
-    else { const be=document.createElement('button'); be.type='button'; be.textContent='✏️'; be.className='btn-editar'; be.onclick=()=>{ filaEditando=indexOriginal; renderizarTabla(); }; dv.appendChild(be); const bd=document.createElement('button'); bd.type='button'; bd.textContent='🗑️'; bd.className='btn-eliminar-fila'; bd.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) window.eliminarVisita(indexOriginal); }; dv.appendChild(bd); }
+    if(ed){ 
+      const bg=document.createElement('button'); bg.type='button'; bg.textContent='💾 Guardar'; bg.className='btn-guardar-edicion'; bg.onclick=()=>guardarEdicion(indexOriginal); dv.appendChild(bg); 
+      const bc=document.createElement('button'); bc.type='button'; bc.textContent='❌'; bc.className='btn-cancelar-edicion'; bc.onclick=()=>{ filaEditando=null; renderizarTabla(); }; dv.appendChild(bc); 
+    }
+    else { 
+      const be=document.createElement('button'); be.type='button'; be.textContent='✏️ Editar'; be.className='btn-editar'; be.onclick=()=>{ filaEditando=indexOriginal; renderizarTabla(); }; dv.appendChild(be); 
+      const bd=document.createElement('button'); bd.type='button'; bd.textContent='🗑️'; bd.className='btn-eliminar-fila'; bd.onclick=()=>{ if(confirm(`¿Eliminar visita #${indexOriginal+1}?`)) window.eliminarVisita(indexOriginal); }; dv.appendChild(bd); 
+    }
     tdA.appendChild(dv); tr.appendChild(tdA);
     t.appendChild(tr);
   });
@@ -2285,57 +2281,300 @@ window.eliminarVisita = async (index)=>{
   guardarEstadoCompleto();
 };
 
+/* ══════════════════════════════════════════════════════════
+   VISTA DEL DÍA - TABLA HTML NATIVA CON EDICIÓN INLINE
+   (reemplaza Jspreadsheet CE que no funciona bien en móvil)
+   ══════════════════════════════════════════════════════════ */
 let filtroVistaDia='todas';
-window.filtrarVistaDia = function(filtro){ filtroVistaDia=filtro||'todas'; document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.toggle('active',b.dataset.filtro===filtroVistaDia)); window.renderizarVistaDia(); };
-window.limpiarBusquedaDia = function(){ const i=document.getElementById('busquedaDia'); if(i){ i.value=''; i.focus(); } window.renderizarVistaDia(); guardarBorrador(); };
 let _renderVistaTimer=null;
-window.renderizarVistaDia = function(){ clearTimeout(_renderVistaTimer); _renderVistaTimer=setTimeout(_renderizarVistaDiaExcel,200); };
 
-function _renderizarVistaDiaExcel(){
+window.filtrarVistaDia = function(filtro){ 
+  filtroVistaDia=filtro||'todas'; 
+  document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.toggle('active',b.dataset.filtro===filtroVistaDia)); 
+  window.renderizarVistaDia(); 
+};
+window.limpiarBusquedaDia = function(){ 
+  const i=document.getElementById('busquedaDia'); 
+  if(i){ i.value=''; i.focus(); } 
+  window.renderizarVistaDia(); 
+  guardarBorrador(); 
+};
+window.renderizarVistaDia = function(){ 
+  clearTimeout(_renderVistaTimer); 
+  _renderVistaTimer=setTimeout(_renderizarVistaDia,150); 
+};
+
+function _renderizarVistaDia(){
   const contenedor=document.getElementById('tablaVisitasExcel');
   if(!contenedor) return;
+  
   const cntEnt=visitas.filter(v=>v.estado==='Entregado').length;
   const cntNoEnt=visitas.length-cntEnt;
   const elT=document.getElementById('cnt-todas'), elE=document.getElementById('cnt-entregados'), elN=document.getElementById('cnt-no-entregados');
   if(elT) elT.textContent=`(${visitas.length})`;
   if(elE) elE.textContent=`(${cntEnt})`;
   if(elN) elN.textContent=`(${cntNoEnt})`;
-  const busq=(document.getElementById('busquedaDia')?.value||'').trim();
-  const busqLower = busq.toLowerCase();
-  let datos=visitas.map((v,i)=>[i+1,v.llegada||'',v.salida||'',(Number(v.tiempo)||0)+' min',v.codigo||'',v.direccion||'',v.precio?formatCOP(v.precio):'',v.estado||'',v.descripcion||'',(v.fotos&&v.fotos.length)?v.fotos.length:0]);
-  if(filtroVistaDia==='entregados') datos=datos.filter(d=>d[7]==='Entregado');
-  else if(filtroVistaDia==='no-entregados') datos=datos.filter(d=>d[7]!=='Entregado');
-  if(busqLower){ datos=datos.filter(d => { const cod=(d[4]||'').toLowerCase(); const dir=(d[5]||'').toLowerCase(); const est=(d[7]||'').toLowerCase(); const desc=(d[8]||'').toLowerCase(); return cod.includes(busqLower) || dir.includes(busqLower) || est.includes(busqLower) || desc.includes(busqLower); }); }
+  
+  const busq=(document.getElementById('busquedaDia')?.value||'').trim().toLowerCase();
+  
+  // Filtrar visitas (conservando el índice original)
+  const items = [];
+  visitas.forEach((v, i) => {
+    // Filtro por estado
+    if(filtroVistaDia === 'entregados' && v.estado !== 'Entregado') return;
+    if(filtroVistaDia === 'no-entregados' && v.estado === 'Entregado') return;
+    // Filtro por búsqueda
+    if(busq){
+      const cod=(v.codigo||'').toLowerCase();
+      const dir=(v.direccion||'').toLowerCase();
+      const est=(v.estado||'').toLowerCase();
+      const desc=(v.descripcion||'').toLowerCase();
+      if(!(cod.includes(busq) || dir.includes(busq) || est.includes(busq) || desc.includes(busq))) return;
+    }
+    items.push({ v, idx: i });
+  });
+  
   const cb=document.getElementById('contadorBusquedaDia');
-  if(cb){ const etiqueta=filtroVistaDia==='todas'?'Todas':filtroVistaDia==='entregados'?'Entregados':'No entregados'; if(busqLower){ cb.innerHTML = `🔎 <strong>${datos.length}</strong> resultado(s) para "<strong>${escapeHtml(busq)}</strong>"`; } else { cb.innerHTML = `Mostrando: <strong>${etiqueta}</strong> — ${datos.length} visita(s)`; } }
-  if(spreadsheetVisitas){ try{ spreadsheetVisitas.destroy(); }catch(e){} spreadsheetVisitas=null; }
-  contenedor.innerHTML='';
-  if(datos.length === 0){ contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);font-style:italic;">${busqLower ? `❌ No hay coincidencias para "${escapeHtml(busq)}"` : 'Sin visitas para mostrar'}</div>`; return; }
-  try{
-    spreadsheetVisitas=jspreadsheet(contenedor,{
-      data:datos,
-      columns:[ {type:'numeric',title:'#',width:50,readOnly:true},{type:'text',title:'Llegada',width:70,readOnly:true},{type:'text',title:'Salida',width:70,readOnly:true},{type:'text',title:'Tiempo',width:70,readOnly:true},{type:'text',title:'Guía / Código',width:130},{type:'text',title:'Dirección',width:180},{type:'text',title:'Precio',width:90},{type:'dropdown',title:'Estado',width:170,source:ESTADOS},{type:'text',title:'Descripción',width:220},{type:'numeric',title:'📸',width:45,readOnly:true} ],
-      minDimensions:[10,0], allowInsertColumn:false, allowDeleteColumn:false, allowRenameColumn:false, allowInsertRow:false, allowDeleteRow:true, columnSorting:true, columnDrag:false, columnResize:true, tableOverflow:true, tableWidth:'100%', tableHeight:'400px', pagination:50, paginationOptions:[25,50,100,200], search:false,
-      onchange:function(instance,cell,col,row,val){
-        const fila = instance.getData()[row];
-        const numOriginal = parseInt(fila[0]) - 1;
-        if(isNaN(numOriginal) || numOriginal < 0 || numOriginal >= visitas.length) return;
-        const index = numOriginal;
-        if(col===4){ const codigoLimpio=val.replace(/\D/g,'').slice(0,12); if(codigoLimpio.length===12){ visitas[index].codigo=codigoLimpio; if(!bancoContiene(codigoLimpio)) bancoCodigos.push({codigo:codigoLimpio,direccion:'',precio:0}); } }
-        else if(col===5){ visitas[index].direccion=val; }
-        else if(col===6){ const num=parseFloat(val.replace(/[^0-9]/g,''))||0; visitas[index].precio=num; }
-        else if(col===7){ visitas[index].estado=val; }
-        else if(col===8){ visitas[index].descripcion=val; }
-        recalcularEstadisticas(); guardarEstadoCompleto();
-      }
-    });
-  }catch(e){ 
-    let html = '<table class="tabla-visitas-dia"><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>';
-    datos.forEach(d=>{ html += `<tr><td>${d[0]}</td><td>${escapeHtml(d[1])}</td><td>${escapeHtml(d[2])}</td><td>${escapeHtml(d[3])}</td><td style="font-family:monospace;">${escapeHtml(d[4])}</td><td style="text-align:left;font-size:.72rem;">${escapeHtml(d[5])}</td><td style="font-weight:700;color:var(--sys-green);">${escapeHtml(d[6])}</td><td>${escapeHtml(d[7])}</td></tr>`; });
-    html += '</tbody></table>';
-    contenedor.innerHTML = html;
+  if(cb){
+    const etiqueta=filtroVistaDia==='todas'?'Todas':filtroVistaDia==='entregados'?'Entregados':'No entregados';
+    if(busq){
+      cb.innerHTML = `🔎 <strong>${items.length}</strong> resultado(s) para "<strong>${escapeHtml(busq)}</strong>"`;
+    } else {
+      cb.innerHTML = `Mostrando: <strong>${etiqueta}</strong> — ${items.length} visita(s)`;
+    }
   }
+  
+  contenedor.innerHTML='';
+  
+  if(items.length === 0){
+    const vacio = document.createElement('div');
+    vacio.style.cssText = 'padding:40px 20px;text-align:center;color:var(--text-muted);font-style:italic;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-light);margin-top:16px;';
+    vacio.textContent = busq ? `❌ No hay coincidencias para "${busq}"` : (visitas.length === 0 ? '📋 Aún no hay visitas registradas hoy' : 'Sin visitas para mostrar en este filtro');
+    contenedor.appendChild(vacio);
+    return;
+  }
+  
+  // Construir tabla nativa
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tabla-wrapper';
+  wrapper.style.marginTop = '16px';
+  
+  const tabla = document.createElement('table');
+  tabla.className = 'tabla-visitas-dia';
+  
+  // THEAD
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th style="width:50px">#</th>
+      <th style="width:80px">Llegada</th>
+      <th style="width:80px">Salida</th>
+      <th style="width:80px">Tiempo</th>
+      <th style="width:140px">Guía / Código</th>
+      <th style="width:180px">Dirección</th>
+      <th style="width:100px">Precio</th>
+      <th style="width:170px">Estado</th>
+      <th style="width:240px">Descripción</th>
+      <th style="width:50px">📸</th>
+      <th style="width:80px" class="no-print">Acciones</th>
+    </tr>
+  `;
+  tabla.appendChild(thead);
+  
+  // TBODY
+  const tbody = document.createElement('tbody');
+  items.forEach(({v, idx}) => {
+    const tr = document.createElement('tr');
+    tr.dataset.idx = idx;
+    
+    // #
+    const td0 = document.createElement('td');
+    td0.textContent = idx + 1;
+    td0.style.fontWeight = '600';
+    td0.style.color = 'var(--text-muted)';
+    tr.appendChild(td0);
+    
+    // Llegada
+    const td1 = document.createElement('td');
+    td1.textContent = v.llegada || '—';
+    tr.appendChild(td1);
+    
+    // Salida
+    const td2 = document.createElement('td');
+    td2.textContent = v.salida || '—';
+    tr.appendChild(td2);
+    
+    // Tiempo
+    const td3 = document.createElement('td');
+    td3.innerHTML = `<strong>${Number(v.tiempo)||0} min</strong>`;
+    tr.appendChild(td3);
+    
+    // Código (editable)
+    const td4 = document.createElement('td');
+    td4.className = 'col-codigo';
+    const inputCod = document.createElement('input');
+    inputCod.type = 'text';
+    inputCod.className = 'inline-input';
+    inputCod.value = v.codigo || '';
+    inputCod.maxLength = 12;
+    inputCod.inputMode = 'numeric';
+    inputCod.style.fontFamily = "'Courier New',monospace";
+    inputCod.style.fontWeight = '700';
+    inputCod.style.textAlign = 'center';
+    inputCod.addEventListener('input', () => {
+      const l = (inputCod.value || '').replace(/\D/g,'').slice(0,12);
+      if(inputCod.value !== l) inputCod.value = l;
+    });
+    inputCod.dataset.field = 'codigo';
+    td4.appendChild(inputCod);
+    tr.appendChild(td4);
+    
+    // Dirección (editable)
+    const td5 = document.createElement('td');
+    const inputDir = document.createElement('input');
+    inputDir.type = 'text';
+    inputDir.className = 'inline-input';
+    inputDir.value = v.direccion || '';
+    inputDir.dataset.field = 'direccion';
+    inputDir.style.fontSize = '.75rem';
+    td5.appendChild(inputDir);
+    tr.appendChild(td5);
+    
+    // Precio (editable)
+    const td6 = document.createElement('td');
+    td6.className = 'col-precio';
+    const inputPre = document.createElement('input');
+    inputPre.type = 'number';
+    inputPre.className = 'inline-input';
+    inputPre.value = v.precio || 0;
+    inputPre.min = 0;
+    inputPre.step = 1000;
+    inputPre.inputMode = 'numeric';
+    inputPre.style.textAlign = 'right';
+    inputPre.style.fontWeight = '700';
+    inputPre.style.color = 'var(--sys-green)';
+    inputPre.dataset.field = 'precio';
+    td6.appendChild(inputPre);
+    tr.appendChild(td6);
+    
+    // Estado (editable)
+    const td7 = document.createElement('td');
+    const selectEst = document.createElement('select');
+    selectEst.className = 'inline-input';
+    selectEst.dataset.field = 'estado';
+    selectEst.style.fontSize = '.78rem';
+    ESTADOS.forEach(o => {
+      const opt = document.createElement('option');
+      opt.value = o; opt.textContent = o;
+      if(o === v.estado) opt.selected = true;
+      selectEst.appendChild(opt);
+    });
+    td7.appendChild(selectEst);
+    tr.appendChild(td7);
+    
+    // Descripción (editable)
+    const td8 = document.createElement('td');
+    td8.className = 'col-desc';
+    const textDesc = document.createElement('textarea');
+    textDesc.className = 'inline-input textarea';
+    textDesc.value = v.descripcion || '';
+    textDesc.rows = 2;
+    textDesc.dataset.field = 'descripcion';
+    td8.appendChild(textDesc);
+    tr.appendChild(td8);
+    
+    // Fotos
+    const td9 = document.createElement('td');
+    const numFotos = (v.fotos && v.fotos.length) ? v.fotos.length : 0;
+    if(numFotos > 0){
+      const btnFotos = document.createElement('button');
+      btnFotos.type = 'button';
+      btnFotos.className = 'btn-ver-fotos';
+      btnFotos.textContent = `📸 ${numFotos}`;
+      btnFotos.onclick = () => window.verFotosVisita(idx);
+      td9.appendChild(btnFotos);
+    } else {
+      td9.innerHTML = '<span class="sin-fotos">—</span>';
+    }
+    tr.appendChild(td9);
+    
+    // Acciones
+    const td10 = document.createElement('td');
+    td10.className = 'no-print';
+    const divAcc = document.createElement('div');
+    divAcc.className = 'acciones-inline';
+    
+    const btnGuardar = document.createElement('button');
+    btnGuardar.type = 'button';
+    btnGuardar.className = 'btn-guardar-inline';
+    btnGuardar.textContent = '💾';
+    btnGuardar.title = 'Guardar cambios';
+    btnGuardar.onclick = () => guardarFilaInline(idx, tr);
+    divAcc.appendChild(btnGuardar);
+    
+    const btnEliminar = document.createElement('button');
+    btnEliminar.type = 'button';
+    btnEliminar.className = 'btn-borrar-inline';
+    btnEliminar.textContent = '🗑️';
+    btnEliminar.title = 'Eliminar visita';
+    btnEliminar.onclick = () => {
+      if(confirm(`¿Eliminar visita #${idx+1}?`)) window.eliminarVisita(idx);
+    };
+    divAcc.appendChild(btnEliminar);
+    
+    td10.appendChild(divAcc);
+    tr.appendChild(td10);
+    
+    tbody.appendChild(tr);
+  });
+  tabla.appendChild(tbody);
+  wrapper.appendChild(tabla);
+  contenedor.appendChild(wrapper);
 }
+
+/* Guardar los cambios de una fila */
+window.guardarFilaInline = function(idx, tr){
+  if(!tr) tr = document.querySelector(`tr[data-idx="${idx}"]`);
+  if(!tr){ mostrarAviso('⚠️ No se encontró la fila','error'); return; }
+  
+  const codInput = tr.querySelector('[data-field="codigo"]');
+  const dirInput = tr.querySelector('[data-field="direccion"]');
+  const preInput = tr.querySelector('[data-field="precio"]');
+  const estSelect = tr.querySelector('[data-field="estado"]');
+  const descInput = tr.querySelector('[data-field="descripcion"]');
+  
+  const codigo = (codInput?.value || '').trim();
+  const direccion = (dirInput?.value || '').trim();
+  const precio = parseFloat(preInput?.value) || 0;
+  const estado = estSelect?.value || '';
+  const descripcion = (descInput?.value || '').trim();
+  
+  // Validar código
+  if(codigo){
+    const err = validarCodigo(codigo);
+    if(err){ mostrarAviso('⚠️ ' + err, 'error'); beepError(); return; }
+  }
+  if(!estado){ mostrarAviso('⚠️ Selecciona un estado', 'error'); beepError(); return; }
+  
+  // Actualizar visita
+  visitas[idx].codigo = codigo;
+  visitas[idx].direccion = direccion;
+  visitas[idx].precio = precio;
+  visitas[idx].estado = estado;
+  visitas[idx].descripcion = descripcion;
+  
+  // Asegurar que el código esté en el banco
+  if(codigo && !bancoContiene(codigo)){
+    bancoCodigos.push({ codigo, direccion, precio });
+    renderizarBanco();
+  }
+  
+  recalcularEstadisticas();
+  guardarEstadoCompleto();
+  renderizarTabla();
+  mostrarAviso('✅ Visita #' + (idx+1) + ' actualizada', 'ok');
+  beepOk();
+};
 
 function actualizarDashboard(){
   const e=contadores['Entregado']||0, n=totalVisitas-e, p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
@@ -2396,7 +2635,6 @@ window.calcularTiemposBase = function(silencioso){
 window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); guardarBorrador(); };
 window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert('Primero marca llegada'); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert('Selecciona estado'); return; } const s=horaActual(); document.getElementById('salidaCliente').value=s; window.registrarVisita(); };
 
-/* Firma */
 let canvasFirma, ctxFirma, dibujandoFirma=false, firmaGuardada=null;
 let ultimoX=0, ultimoY=0;
 window.inicializarFirma = function(){
@@ -2443,24 +2681,19 @@ window.registrarVisita = async ()=>{
   if(!l){ alert('Ingresa la hora de llegada'); return; }
   if(!es){ alert('Selecciona estado'); return; }
   if(!s) s=l;
-  
-  // Solo se permiten códigos del banco (ya validados)
   if(codigosPendientes.length === 0){ 
     alert('⚠️ Debes seleccionar al menos un código del banco.\n\nVe a la pestaña 📥 Banco para agregar códigos, o usa la búsqueda en esta sección para seleccionarlos.'); 
     return; 
   }
-  
   for(const c of codigosPendientes){ 
     const e=validarCodigo(c); 
     if(e){ mostrarAviso('⚠️ Código inválido: '+c,'error'); beepError(); return; } 
   }
-  
   const codigos=[...codigosPendientes];
   const t=calcularMinutos(l,s);
   const hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   const firmaAdjunta=firmaGuardada||null;
-  
   codigos.forEach(co=>{ 
     visitas.push({ 
       llegada:l, salida:s, tiempo:t, estado:es, codigo:co, 
@@ -2469,7 +2702,6 @@ window.registrarVisita = async ()=>{
       grupo:codigos.length>1?hr:null, fotos:fv 
     }); 
   });
-  
   ultimoEstadoUsado=es;
   cancelarEscaneo();
   limpiarFormularioVisita();
@@ -2479,7 +2711,6 @@ window.registrarVisita = async ()=>{
   setTimeout(()=>{ document.getElementById('llegadaCliente')?.focus(); mostrarAviso('✅ Visita guardada ('+codigos.length+' código'+ (codigos.length>1?'s':'') +')','ok'); beepOk(); },120);
 };
 
-/* Escáner QR */
 let escaneoModo='pendientes';
 window.iniciarEscaneo = function(modo){
   if(escaneoActivo) return;
@@ -2526,7 +2757,6 @@ window.iniciarEscaneo = function(modo){
         cerrar();
         return;
       }
-      // En modo 'pendientes', solo se permiten códigos del banco
       if(!bancoContiene(cod)){ 
         mostrarAviso('⚠️ Código no está en el banco. Agrégalo primero.','error'); 
         beepError(); 
@@ -2557,7 +2787,6 @@ window.cancelarEscaneo = ()=>{
   if(i){ i.stop().then(()=>{ try{ i.clear(); }catch(_){} oc(); }).catch(()=>{ try{ i.clear(); }catch(_){} oc(); }); } else oc();
 };
 
-/* Gráficas impresión */
 function generarChartEstadosHorizontal(ancho,alto){
   const c=document.createElement('canvas'); c.width=ancho; c.height=alto;
   const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,ancho,alto);
@@ -2593,7 +2822,6 @@ function generarChartDona(ancho,alto){
   return c.toDataURL('image/png');
 }
 
-/* Impresión */
 function esModoStandalone(){ try{ return window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.navigator.standalone===true; }catch(e){ return false; } }
 window.esModoStandalone = esModoStandalone;
 function esDispositivoIOS(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); }
@@ -3142,12 +3370,11 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','abrirModalCensura','cerrarModalCensura','deshacerUltimaCensura','aplicarCensuraManual'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','abrirModalCensura','cerrarModalCensura','deshacerUltimaCensura','aplicarCensuraManual','guardarFilaInline'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:',faltan);
   else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
-  if(typeof jspreadsheet==='undefined') console.error('❌ Jspreadsheet no cargó'); else console.log('✅ Jspreadsheet OK');
 }
 document.addEventListener('touchstart',function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart',ua); },{once:true});
 document.addEventListener('click',(e)=>{ const c=document.getElementById('resultadosBusquedaCodigo'), i=document.getElementById('busquedaCodigoBanco'); if(!c||!i) return; if(!c.contains(e.target) && e.target!==i){ c.innerHTML=''; c.style.display='none'; } });
