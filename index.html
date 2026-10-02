@@ -15,10 +15,6 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/index.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jspreadsheet-ce/dist/jspreadsheet.min.css" type="text/css" />
 <script src="https://cdn.jsdelivr.net/npm/jsuites/dist/jsuites.min.js"></script>
@@ -63,9 +59,8 @@ body.dark .btn-informe{background:var(--gray-5)}body.dark .btn-informe:hover{bac
 .btn-ahora{background:var(--sys-orange);margin-top:0;padding:10px;font-size:.9em}.btn-ahora:hover{background:#e08800}
 .btn-whatsapp{background:#25D366}.btn-whatsapp:hover{background:#1ebe5b}
 .btn-darkmode{background:var(--gray-7);width:auto;padding:8px 12px;margin:0;font-size:1rem;border-radius:var(--radius-sm)}.btn-darkmode:hover{background:var(--gray-8)}
-.btn-ia{background:var(--sys-indigo);margin-top:0;padding:10px;font-size:.9em}.btn-ia:hover{background:#4a3fa3}
 .btn-firma{background:var(--sys-purple);margin-top:0;padding:10px;font-size:.9em}.btn-firma:hover{background:#a03dd0}
-.btn-coord{background:var(--sys-orange);margin-top:0;padding:10px;font-size:.9em}.btn-coord:hover{background:#e08800}
+.btn-censura{background:var(--sys-orange);margin-top:0;padding:10px;font-size:.9em}.btn-censura:hover{background:#e08800}
 .result-box{background:rgba(48,209,88,.08);border-left:3px solid var(--sys-green);padding:14px;margin-top:12px;border-radius:var(--radius-md);color:var(--text-primary)}
 body.dark .result-box{background:rgba(48,209,88,.1)}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
@@ -151,7 +146,6 @@ body.dark .chip-codigo.usado{color:#a0e0b0}
 .chip-codigo.usado button{background:var(--gray-5)}
 .chip-banco{display:block;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;margin:6px 0;position:relative;transition:border-color .2s var(--ease)}
 .chip-banco.usado{border-color:rgba(48,209,88,.4);background:rgba(48,209,88,.06)}
-.chip-banco.sin-coords{border-color:rgba(255,159,10,.4);background:rgba(255,159,10,.05)}
 .chip-banco .cb-codigo{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Courier New',monospace;font-weight:700;font-size:.92rem;color:var(--text-primary)}
 .chip-banco.usado .cb-codigo .cod{text-decoration:line-through;color:var(--text-muted)}
 .chip-banco .cb-codigo .estado-badge{font-size:.68rem;padding:2px 8px;border-radius:var(--radius-pill);font-weight:700;white-space:nowrap}
@@ -166,7 +160,7 @@ body.dark .chip-banco.usado .cb-codigo .estado-badge{color:#ff8a80}
 .chip-banco .cb-actions button{width:auto;padding:6px 12px;font-size:.72rem;margin:0;border-radius:var(--radius-sm);font-weight:600}
 .chip-banco .btn-edit-codigo{background:var(--sys-yellow);color:var(--gray-9)}
 .chip-banco .btn-del-codigo{background:var(--sys-red);color:#fff}
-.chip-banco .btn-geo-codigo{background:var(--sys-indigo);color:#fff}
+.chip-banco .btn-usar-codigo{background:var(--sys-blue);color:#fff}
 .chip-banco-edit{background:var(--bg-section);border:2px solid var(--sys-blue);border-radius:var(--radius-md);padding:10px 12px;margin:6px 0}
 .chip-banco-edit input{margin-top:4px;font-size:.85rem;padding:8px 10px}
 .chip-banco-edit .edit-actions{display:flex;gap:6px;margin-top:8px}
@@ -241,6 +235,7 @@ body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer;transition:transform .2s var(--ease)}
 .foto-thumb img:hover{transform:scale(1.04)}
 .foto-thumb .btn-eliminar-foto{position:absolute;top:4px;right:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,69,58,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center}
+.foto-thumb .btn-editar-censura{position:absolute;top:4px;left:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,159,10,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center}
 .foto-thumb .badge-censura{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.75);color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.65rem;font-weight:700;letter-spacing:.02em;pointer-events:none;display:flex;align-items:center;gap:3px}
 .btn-foto{background:var(--sys-purple);margin-top:10px;padding:12px;font-size:.9rem}
 .btn-foto.btn-galeria{background:var(--sys-teal)}.btn-foto.btn-galeria:hover{background:#2ba7bd}
@@ -260,6 +255,19 @@ body.dark #indicadorGuardado{background:rgba(48,209,88,.2);color:#70dd8a}
 .modal-foto-nav{display:flex;align-items:center;gap:16px;color:#fff;font-weight:600;font-size:1rem}
 .modal-foto-nav button{background:rgba(255,255,255,.18);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:18px;cursor:pointer;margin:0;padding:0;font-weight:700}
 .btn-descargar-foto{background:var(--sys-green);color:#fff;text-decoration:none;padding:12px 24px;border-radius:var(--radius-md);font-weight:600;font-size:.9rem;display:inline-block}
+/* Modal de censura manual */
+#modalCensura{position:fixed;inset:0;background:rgba(0,0,0,.95);display:none;align-items:center;justify-content:center;z-index:100004;padding:10px}
+#modalCensura.visible{display:flex}
+.censura-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:16px;max-width:95vw;max-height:96vh;width:100%;box-shadow:var(--shadow-lg);display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.censura-content h3{margin:0;font-size:1rem;text-align:center;color:var(--text-heading)}
+.censura-content .censura-hint{font-size:.75rem;color:var(--text-secondary);text-align:center;margin:0}
+.censura-canvas-wrapper{position:relative;display:inline-block;margin:0 auto;max-width:100%;max-height:60vh;overflow:hidden;border-radius:var(--radius-md);background:#000}
+#censuraCanvas{display:block;max-width:100%;max-height:60vh;touch-action:none;cursor:crosshair}
+.censura-controles{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.censura-controles button{width:auto;padding:10px 16px;font-size:.85rem;margin:0}
+.censura-controles .btn-deshacer{background:var(--sys-orange)}
+.censura-controles .btn-guardar-censura{background:var(--sys-green)}
+.censura-info{font-size:.75rem;color:var(--text-muted);text-align:center;font-weight:600}
 .tab-panel{display:none;animation:fadeTab .25s var(--ease-out)}
 .tab-panel.active{display:block}
 @keyframes fadeTab{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -320,6 +328,8 @@ body.dark .aviso-reglas-inline{color:#f5c76a}
 .procesando-content h3{color:var(--text-heading);margin:0 0 8px 0;font-size:1.15rem}
 .procesando-content p{color:var(--text-secondary);font-size:.88rem;margin:0;line-height:1.5}
 .procesando-content .paso{font-size:.75rem;color:var(--text-muted);margin-top:10px;font-style:italic}
+.procesando-content .barra-progreso{width:100%;height:8px;background:var(--border-light);border-radius:4px;margin-top:14px;overflow:hidden}
+.procesando-content .barra-progreso .fill{height:100%;background:var(--sys-blue);transition:width .3s var(--ease);width:0%}
 .menu-dropdown{position:relative;display:inline-block;width:100%;margin-bottom:20px}
 .menu-toggle{background:var(--bg-section);color:var(--text-primary);border:1px solid var(--border-main);padding:14px 20px;border-radius:var(--radius-lg);font-weight:700;font-size:1rem;display:flex;justify-content:space-between;align-items:center;cursor:pointer;width:100%;text-align:left;margin:0}
 .menu-toggle:hover{background:var(--bg-card)}
@@ -332,23 +342,6 @@ body.dark .aviso-reglas-inline{color:#f5c76a}
 .menu-items button:hover{background:var(--bg-section)}
 .menu-items button.active{color:var(--sys-blue);background:rgba(10,132,255,.06)}
 body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
-#mapaRuta{width:100%;height:420px;border-radius:var(--radius-md);margin-top:12px;border:1px solid var(--border-light);z-index:1}
-@media(max-width:640px){#mapaRuta{height:320px}}
-.mapa-info{font-size:.85rem;color:var(--text-secondary);margin-top:8px;text-align:center;font-weight:500}
-.mapa-leyenda{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:.75rem;margin-top:6px}
-.mapa-leyenda span{display:flex;align-items:center;gap:4px}
-.mapa-leyenda .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-.ciudad-selector{background:var(--bg-card);border:2px solid var(--sys-blue);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px}
-.ciudad-selector label{margin-top:0;font-size:.85rem;color:var(--sys-blue);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
-.ciudad-selector select{margin-top:8px;font-weight:600;font-size:1rem}
-.ciudad-info{background:rgba(10,132,255,.08);border-left:3px solid var(--sys-blue);border-radius:var(--radius-sm);padding:10px 12px;margin-top:10px;font-size:.82rem;color:var(--text-secondary);line-height:1.5}
-.ciudad-info strong{color:var(--sys-blue)}
-.ciudades-detectadas{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.ciudad-chip{background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius-pill);padding:5px 12px;font-size:.75rem;font-weight:600;cursor:pointer;color:var(--text-secondary);transition:all .2s var(--ease)}
-.ciudad-chip:hover{border-color:var(--sys-blue);color:var(--sys-blue)}
-.ciudad-chip.activa{background:var(--sys-blue);color:#fff;border-color:var(--sys-blue)}
-.ciudad-chip .count{background:rgba(255,255,255,.25);padding:1px 6px;border-radius:var(--radius-pill);font-size:.68rem;margin-left:4px}
-.ciudad-chip:not(.activa) .count{background:var(--bg-chip);color:var(--sys-blue)}
 .firma-wrapper{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:12px;margin-top:10px;text-align:center}
 #canvasFirma{width:100%;max-width:500px;height:180px;border:2px dashed var(--border-main);border-radius:var(--radius-md);background:#fff;touch-action:none;cursor:crosshair;margin:0 auto;display:block;padding:0}
 .firma-controles{display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap}
@@ -360,22 +353,13 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 .informe-empresa-header .empresa-datos{font-size:8pt;color:#333;line-height:1.5}
 .informe-empresa-header .empresa-datos strong{color:#1c1c1e}
 .informe-empresa-header .doc-info{text-align:right;font-size:8pt;color:#555;line-height:1.5}
-/* Modal coords manuales */
-#modalCoords{position:fixed;inset:0;background:rgba(0,0,0,.75);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:100005;padding:20px}
-#modalCoords.visible{display:flex}
-.coords-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow-lg)}
-.coords-content h3{margin:0 0 8px;text-align:center;color:var(--text-heading)}
-.coords-content p{font-size:.85rem;color:var(--text-secondary);text-align:center;margin:0 0 16px}
-.coords-content input{margin-top:8px}
-.coords-actions{display:flex;gap:8px;margin-top:16px}
-.coords-actions button{flex:1;margin:0;padding:12px;font-size:.9rem}
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#fafafa!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#1c1c1e!important;--text-muted:#555!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-sm:transparent!important;--shadow-md:transparent!important;--shadow-lg:transparent!important;--table-header-bg:#1c1c1e!important;--table-header-color:#fff!important;}
   @page{size:A4 portrait;margin:10mm 8mm 12mm 8mm}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9pt;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important;border:none!important;background:#fff!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#mapaRuta,.mapa-leyenda,.ciudad-selector,.ciudad-info,#modalCoords{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#modalCensura{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
@@ -489,28 +473,13 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 
 <div id="avisoDuplicado"></div>
 
-<div id="modalCoords">
-  <div class="coords-content">
-    <h3>📍 Coordenadas Manuales</h3>
-    <p>Si la IA no encuentra la dirección, puedes pegar las coordenadas de Google Maps</p>
-    <label style="margin-top:8px;">Latitud</label>
-    <input type="text" id="coordLat" placeholder="Ej: 10.9878" inputmode="decimal">
-    <label>Longitud</label>
-    <input type="text" id="coordLon" placeholder="Ej: -74.7889" inputmode="decimal">
-    <div class="coords-actions">
-      <button type="button" class="btn-cancelar" onclick="cerrarModalCoords()">✖ Cancelar</button>
-      <button type="button" class="btn-guardar" onclick="guardarCoordsManuales()">💾 Guardar</button>
-    </div>
-    <p style="font-size:.72rem;color:var(--text-muted);margin-top:12px;">💡 En Google Maps: clic derecho → copiar coordenadas</p>
-  </div>
-</div>
-
 <div id="modalProcesando">
   <div class="procesando-content">
     <div class="spinner"></div>
-    <h3>🛡️ Protegiendo la imagen…</h3>
+    <h3 id="procesandoTituloGrande">🛡️ Protegiendo la imagen…</h3>
     <p id="procesandoTitulo">Analizando contenido…</p>
     <div class="paso" id="procesandoPaso">Cargando módulos de detección…</div>
+    <div class="barra-progreso"><div class="fill" id="procesandoBarra"></div></div>
   </div>
 </div>
 
@@ -524,6 +493,22 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <button type="button" onclick="navegarFoto(1)">▶</button>
     </div>
     <a id="modalFotoDescargar" class="btn-descargar-foto" download>💾 Descargar</a>
+  </div>
+</div>
+
+<div id="modalCensura">
+  <div class="censura-content">
+    <h3>🖐️ Censurar manualmente</h3>
+    <p class="censura-hint">Arrastra con el dedo/ratón sobre la imagen para marcar zonas a censurar (rostros, placas, documentos, etc.)</p>
+    <div class="censura-canvas-wrapper">
+      <canvas id="censuraCanvas"></canvas>
+    </div>
+    <div class="censura-controles">
+      <button type="button" class="btn-deshacer" onclick="deshacerUltimaCensura()">↶ Deshacer</button>
+      <button type="button" class="btn-cancelar" onclick="cerrarModalCensura()">✖ Cancelar</button>
+      <button type="button" class="btn-guardar-censura" onclick="aplicarCensuraManual()">💾 Aplicar y guardar</button>
+    </div>
+    <div class="censura-info" id="censuraInfo">Zonas marcadas: 0</div>
   </div>
 </div>
 
@@ -550,6 +535,10 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <li><span class="tag-ok">Aviso de visita</span> en la puerta</li>
       </ul>
     </div>
+    <div class="reglas-bloque" style="background:rgba(10,132,255,.12);border-left-color:var(--sys-blue);color:#0a4d9e;">
+      <h4>🛡️ Censura automática mejorada:</h4>
+      <p style="margin:4px 0 0 0;line-height:1.4;">Usamos <strong>IA de detección avanzada</strong> (SSD Mobilenet + multi-escala) que pixela <strong>rostros y vehículos</strong> con alta precisión. Si algo se escapa, puedes <strong>censurarlo manualmente</strong> después.</p>
+    </div>
     <label class="reglas-chk" id="lblReglasChk">
       <input type="checkbox" id="chkAceptoReglas" onchange="toggleBotonCamara(); this.parentNode.classList.toggle('activo', this.checked);">
       <span>Entiendo y acepto estas reglas. Me comprometo a proteger la privacidad de las personas.</span>
@@ -574,7 +563,6 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <button type="button" data-tab="tiempos" onclick="cambiarTab('tiempos')">⏱️ Tiempos</button>
       <button type="button" data-tab="banco" onclick="cambiarTab('banco')">📥 Banco</button>
       <button type="button" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita</button>
-      <button type="button" data-tab="ruta" onclick="cambiarTab('ruta')">🗺️ Ruta</button>
       <button type="button" data-tab="historial" onclick="cambiarTab('historial')">📋 Historial</button>
       <button type="button" data-tab="informes" onclick="cambiarTab('informes')">📊 Informes</button>
       <button type="button" data-tab="informe-empresarial" onclick="cambiarTab('informe-empresarial')">🏢 Informe Empresarial</button>
@@ -634,9 +622,9 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <button type="button" onclick="cambiarTab('tiempos')">⏱️ Tiempos Base</button>
         <button type="button" onclick="cambiarTab('banco')">📥 Banco de Códigos</button>
         <button type="button" onclick="cambiarTab('visita')">📝 Registrar Visita</button>
-        <button type="button" onclick="cambiarTab('ruta')">🗺️ Mapa de Ruta</button>
         <button type="button" onclick="cambiarTab('historial')">📋 Detalle de Visitas</button>
         <button type="button" onclick="cambiarTab('informes')">📈 Informes</button>
+        <button type="button" onclick="cambiarTab('nube')">☁️ Sincronización</button>
       </div>
     </div>
   </div>
@@ -658,7 +646,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
   <div class="tab-panel" data-tab="banco">
     <div class="section no-print">
       <h2>2. 📥 Banco de Códigos del Día</h2>
-      <p style="font-size:.85em;color:var(--text-secondary);text-align:center;margin-top:0;">Carga los códigos con <strong>dirección</strong> y <strong>precio</strong> para autocompletar al registrar la visita.</p>
+      <p style="font-size:.85em;color:var(--text-secondary);text-align:center;margin-top:0;">Carga los códigos con <strong>dirección</strong> y <strong>precio</strong>. Al registrar visitas solo podrás usar códigos del banco.</p>
       <label>Escribe o escanea un código:</label>
       <div class="input-group">
         <input type="text" id="codigoBanco" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" autocomplete="off" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosBanco');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigoBanco();}">
@@ -696,35 +684,27 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <div class="input-group"><input type="time" id="llegadaCliente"><button type="button" class="btn-ahora" onclick="marcarLlegada()">📥 Ahora</button></div>
       <label>Hora de salida:</label>
       <div class="input-group"><input type="time" id="salidaCliente"><button type="button" class="btn-ahora" onclick="marcarSalidaYRegistrar()">📤 Salida y Registrar</button></div>
+      
       <label style="margin-top:15px;">📍 Dirección de entrega:</label>
-      <div class="input-group">
-        <input type="text" id="direccionVisita" placeholder="Ej: Calle 123 # 45-67, Bogotá" autocomplete="off">
-        <button type="button" class="btn-ia" onclick="asistirDireccionIA()" title="Validar con IA">🤖 IA</button>
-        <button type="button" class="btn-coord" onclick="abrirModalCoords()" title="Coordenadas manuales">📍</button>
-      </div>
-      <div id="resultadoIA" style="font-size:.8rem;color:var(--sys-green);margin-top:4px;display:none;"></div>
+      <input type="text" id="direccionVisita" placeholder="Ej: Calle 123 # 45-67, Bogotá" autocomplete="off">
+      
       <label style="margin-top:12px;">💰 Precio del paquete (COP):</label>
       <input type="number" id="precioVisita" placeholder="Ej: 50000" min="0" step="1000" inputmode="numeric">
+      
       <label style="margin-top:15px;">🔍 Buscar código en el banco:</label>
       <div class="input-group">
         <input type="text" id="busquedaCodigoBanco" placeholder="Escribe parte del código" inputmode="numeric" autocomplete="off" oninput="filtrarSoloDigitos(this);buscarCodigosBanco();" onkeydown="if(event.key==='Enter'){event.preventDefault();seleccionarPrimerResultado();}">
         <button type="button" class="btn-buscar-limpiar" onclick="limpiarBusquedaCodigo()">✖</button>
       </div>
       <div id="resultadosBusquedaCodigo"></div>
-      <label style="margin-top:15px;">O agrega manualmente:</label>
-      <div class="input-group">
-        <input type="text" id="codigoBarras" placeholder="000000000000" inputmode="numeric" maxlength="12" pattern="[0-9]{12}" autocomplete="off" oninput="filtrarSoloDigitos(this);actualizarContadorDigitos(this,'contadorDigitosVisita');" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarCodigo();}">
-        <button type="button" class="btn-escaneo" onclick="iniciarEscaneo('pendientes')">📷</button>
-        <button type="button" class="btn-agregar-codigo" onclick="agregarCodigo()">➕</button>
-      </div>
-      <div class="contador-digitos" id="contadorDigitosVisita"></div>
-      <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando...</div></div>
-      <div style="text-align:center;margin-top:5px;"><button type="button" class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar escaneo</button></div>
-      <label style="margin-top:15px;">📦 Códigos seleccionados:</label>
+      <div class="hint-codigo" style="margin-top:10px;">💡 <span class="badge">SOLO códigos del banco</span> — agrégalos en la pestaña 📥 Banco</div>
+      
+      <label style="margin-top:15px;">📦 Códigos seleccionados para esta visita:</label>
       <div id="listaCodigosPendientes" class="lista-codigos"></div>
       <div id="contadorCodigos" class="contador-codigos"></div>
-      <div id="contadorUnicos">✅ Códigos únicos hoy: <span>0</span></div>
-      <label>Estado:</label>
+      <div id="contadorUnicos">✅ Códigos únicos registrados hoy: <span>0</span></div>
+      
+      <label>Estado del paquete:</label>
       <select id="estadoPaquete" onchange="alCambiarEstado()">
         <option value="">-- Seleccione --</option>
         <option value="Entregado">Entregado</option>
@@ -751,7 +731,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <option value="Flete mal liquidado">Flete mal liquidado</option>
         <option value="Cerrados en horas hábiles">Cerrados en horas hábiles</option>
       </select>
-      <label>📝 Descripción:</label>
+      <label>📝 Descripción detallada:</label>
       <textarea id="descripcionVisita" placeholder="Al seleccionar un estado se autocompletará..." style="min-height:90px;"></textarea>
       <div style="display:flex;gap:6px;margin-top:6px;">
         <button type="button" class="btn-cancelar" onclick="restaurarDescripcionRecomendada()" style="flex:1;padding:10px;font-size:.82em;margin-top:0;">↺ Restaurar</button>
@@ -768,7 +748,10 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
         <img id="previewFirma" class="firma-preview" style="display:none;" alt="Firma guardada">
         <div id="estadoFirma" style="font-size:.78rem;color:var(--text-secondary);margin-top:6px;"></div>
       </div>
-      <label style="margin-top:15px;">📸 Fotos de evidencia:</label>
+      <label style="margin-top:15px;">📸 Fotos de evidencia <span style="font-weight:normal;font-size:.78em;color:var(--text-muted);">(máx. 20 fotos)</span>:</label>
+      <div class="aviso-reglas-inline">
+        ⚠️ <strong>Censura IA mejorada:</strong> SSD Mobilenet + multi-escala detecta y pixela rostros y vehículos con alta precisión. Si algo se escapa, puedes <strong>censurarlo manualmente</strong> con el botón 🖐️ en cada foto.
+      </div>
       <div class="fotos-wrapper">
         <input type="file" id="inputFotoCamara" accept="image/*" capture="environment" style="display:none;" onchange="capturarFoto(event)">
         <input type="file" id="inputFotoGaleria" accept="image/*" style="display:none;" onchange="capturarFoto(event)">
@@ -781,36 +764,6 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <div id="contadorFotos" class="contador-fotos"></div>
       <button type="button" onclick="registrarVisita()" style="background:var(--gray-8);">📋 Guardar Visita</button>
       <p style="font-size:.78rem;color:var(--text-secondary);text-align:center;margin-top:8px;">💡 Al guardar, todos los campos se limpian.</p>
-    </div>
-  </div>
-
-  <div class="tab-panel" data-tab="ruta">
-    <div class="section">
-      <h2>🗺️ Mapa de Ruta del Día</h2>
-      <p style="font-size:.85rem;color:var(--text-secondary);text-align:center;margin-top:0;">Selecciona la ciudad para trazar la ruta con IA.</p>
-      
-      <div class="ciudad-selector">
-        <label for="ciudadRuta">🏙️ Ciudad de la ruta:</label>
-        <select id="ciudadRuta" onchange="cambiarCiudadRuta(this.value)">
-          <option value="">-- Selecciona la ciudad --</option>
-        </select>
-        <div class="ciudad-info">
-          💡 <strong>Tip:</strong> Usamos <strong>Photon + Nominatim</strong> para geocodificar. Si una dirección falla, usa el botón 📍 <strong>Coordenadas manuales</strong> en el registro de visita (clic derecho en Google Maps → copiar coordenadas).
-        </div>
-        <div id="ciudadesDetectadas" class="ciudades-detectadas"></div>
-      </div>
-      
-      <div id="mapaRuta"></div>
-      <div class="mapa-leyenda">
-        <span><span class="dot" style="background:#30d158;"></span> Entregado</span>
-        <span><span class="dot" style="background:#ff453a;"></span> Novedad</span>
-        <span><span class="dot" style="background:#0a84ff;"></span> Ruta óptima</span>
-      </div>
-      <div id="mapaInfo" class="mapa-info"></div>
-      <div class="btn-group" style="margin-top:10px;">
-        <button type="button" class="btn-informe" onclick="dibujarRutaMapa()">🔄 Trazar ruta con IA</button>
-        <button type="button" class="btn-informe" onclick="geolocalizarTodasVisitas()">📡 Geolocalizar direcciones</button>
-      </div>
     </div>
   </div>
 
@@ -930,12 +883,13 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>🛡️ Privacidad y censura automática</h3>
       <div class="toggle-wrapper" style="margin-top:8px;">
-        <label class="toggle-label" for="toggleAutoCensura">🛡️ Censurar rostros y vehículos</label>
+        <label class="toggle-label" for="toggleAutoCensura">🛡️ Censurar rostros y vehículos<span class="toggle-sub">Detector SSD Mobilenet de alta precisión + coco-ssd</span></label>
         <div class="switch"><input type="checkbox" id="toggleAutoCensura" onchange="toggleAutoCensura()" checked><span class="slider"></span></div>
       </div>
       <div class="btn-group" style="margin-top:8px;">
         <button type="button" class="btn-informe" onclick="preCargarModelos()">⚙️ Pre-cargar modelos</button>
       </div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-top:8px;line-height:1.4;">Los modelos se cargan la primera vez (~25 MB). Después quedan en caché del navegador y funcionan sin internet.</p>
       <hr style="margin:15px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>🧹 Gestión de fotos</h3>
       <div class="btn-group">
@@ -1245,10 +1199,6 @@ window.cambiarTab = function(tab){
   if(tab==='historial' && typeof window.renderizarTabla==='function') window.renderizarTabla();
   if(tab==='inicio' && typeof window.recargarGraficas==='function') window.recargarGraficas();
   if(tab==='inicio' && typeof window.renderizarVistaDia==='function') window.renderizarVistaDia();
-  if(tab==='ruta'){
-    if(typeof window.inicializarSelectorCiudad==='function') window.inicializarSelectorCiudad();
-    setTimeout(()=>{ if(typeof window.dibujarRutaMapa==='function') window.dibujarRutaMapa(); }, 400);
-  }
   if(tab==='visita' && typeof window.inicializarFirma==='function') setTimeout(()=>window.inicializarFirma(), 200);
   if(tab==='banco' && typeof window.renderizarBanco==='function') window.renderizarBanco();
   try{ localStorage.setItem('colserlog_tab_actual', tab); }catch(e){}
@@ -1285,123 +1235,14 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
-<!-- SCRIPT 2: App principal -->
+<!-- SCRIPT 2: App principal con censura mejorada -->
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
-const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=900; const FOTO_JPEG_QUALITY=0.65;
+const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=1200; const FOTO_JPEG_QUALITY=0.75;
 const CLAVE_BORRADOR='colserlog_borrador';
 const CLAVE_AUTO_CENSURA='colserlog_auto_censura';
-const CLAVE_CIUDAD_RUTA='colserlog_ciudad_ruta';
 
-/* ══════════════════════════════════════════════════════════
-   CIUDADES DE COLOMBIA con viewbox (para filtro local)
-   ══════════════════════════════════════════════════════════ */
-const CIUDADES_COLOMBIA = [
-  { nombre:'Bogotá', viewbox:'-74.30,4.45,-73.98,4.83', lat:4.65, lon:-74.08 },
-  { nombre:'Medellín', viewbox:'-75.65,6.15,-75.45,6.40', lat:6.24, lon:-75.58 },
-  { nombre:'Cali', viewbox:'-76.60,3.30,-76.45,3.55', lat:3.45, lon:-76.53 },
-  { nombre:'Barranquilla', viewbox:'-74.90,10.85,-74.70,11.10', lat:10.98, lon:-74.80 },
-  { nombre:'Cartagena', viewbox:'-75.60,10.30,-75.40,10.50', lat:10.39, lon:-75.51 },
-  { nombre:'Bucaramanga', viewbox:'-73.20,7.00,-73.05,7.20', lat:7.12, lon:-73.12 },
-  { nombre:'Cúcuta', viewbox:'-72.60,7.80,-72.45,8.05', lat:7.89, lon:-72.50 },
-  { nombre:'Pereira', viewbox:'-75.80,4.75,-75.65,4.90', lat:4.81, lon:-75.69 },
-  { nombre:'Santa Marta', viewbox:'-74.30,11.15,-74.10,11.35', lat:11.24, lon:-74.19 },
-  { nombre:'Ibagué', viewbox:'-75.30,4.35,-75.10,4.55', lat:4.44, lon:-75.24 },
-  { nombre:'Manizales', viewbox:'-75.60,5.00,-75.45,5.15', lat:5.07, lon:-75.51 },
-  { nombre:'Villavicencio', viewbox:'-73.75,4.05,-73.55,4.25', lat:4.14, lon:-73.63 },
-  { nombre:'Pasto', viewbox:'-77.35,1.15,-77.20,1.30', lat:1.21, lon:-77.28 },
-  { nombre:'Neiva', viewbox:'-75.40,2.85,-75.20,3.05', lat:2.93, lon:-75.28 },
-  { nombre:'Armenia', viewbox:'-75.75,4.45,-75.60,4.60', lat:4.53, lon:-75.68 },
-  { nombre:'Valledupar', viewbox:'-73.35,10.35,-73.15,10.55', lat:10.46, lon:-73.25 },
-  { nombre:'Sincelejo', viewbox:'-75.45,9.20,-75.30,9.35', lat:9.30, lon:-75.39 },
-  { nombre:'Montería', viewbox:'-75.95,8.65,-75.75,8.85', lat:8.75, lon:-75.88 },
-  { nombre:'Popayán', viewbox:'-76.70,2.35,-76.55,2.50', lat:2.44, lon:-76.61 },
-  { nombre:'Tunja', viewbox:'-73.45,5.45,-73.30,5.60', lat:5.53, lon:-73.36 },
-  { nombre:'Riohacha', viewbox:'-72.95,11.45,-72.80,11.60', lat:11.54, lon:-72.91 },
-  { nombre:'Quibdó', viewbox:'-76.75,5.60,-76.55,5.80', lat:5.69, lon:-76.66 },
-  { nombre:'Florencia', viewbox:'-75.70,1.55,-75.55,1.70', lat:1.61, lon:-75.61 },
-  { nombre:'Yopal', viewbox:'-72.50,5.25,-72.30,5.45', lat:5.34, lon:-72.40 },
-  { nombre:'Arauca', viewbox:'-70.85,6.95,-70.65,7.15', lat:7.08, lon:-70.76 },
-  { nombre:'Leticia', viewbox:'-70.00,-4.30,-69.80,-4.10', lat:-4.21, lon:-69.94 },
-  { nombre:'San Andrés', viewbox:'-81.75,12.45,-81.65,12.60', lat:12.58, lon:-81.70 },
-  { nombre:'Soacha', viewbox:'-74.25,4.55,-74.15,4.65', lat:4.58, lon:-74.22 },
-  { nombre:'Bello', viewbox:'-75.60,6.30,-75.50,6.40', lat:6.34, lon:-75.55 },
-  { nombre:'Envigado', viewbox:'-75.60,6.15,-75.55,6.25', lat:6.17, lon:-75.58 },
-  { nombre:'Palmira', viewbox:'-76.35,3.50,-76.25,3.60', lat:3.53, lon:-76.30 },
-  { nombre:'Soledad', viewbox:'-74.80,10.90,-74.75,10.95', lat:10.92, lon:-74.78 }
-];
-
-function normalizarTexto(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
-
-function detectarCiudadEnDireccion(direccion){
-  if(!direccion) return null;
-  const dirNorm = normalizarTexto(direccion);
-  for(const ciudad of CIUDADES_COLOMBIA){ if(dirNorm.includes(normalizarTexto(ciudad.nombre))) return ciudad.nombre; }
-  return null;
-}
-
-function obtenerCiudadesDisponibles(){
-  const conteo = {};
-  visitas.forEach(v => { const ciudad = detectarCiudadEnDireccion(v.direccion); if(ciudad){ conteo[ciudad] = (conteo[ciudad]||0) + 1; } });
-  return conteo;
-}
-
-function getCiudadSeleccionada(){ const sel = document.getElementById('ciudadRuta'); return sel ? sel.value : ''; }
-function getConfigCiudad(nombre){ if(!nombre) return null; return CIUDADES_COLOMBIA.find(c => c.nombre === nombre) || null; }
-function filtrarVisitasPorCiudad(ciudad){ if(!ciudad) return visitas; return visitas.filter(v => detectarCiudadEnDireccion(v.direccion) === ciudad); }
-
-window.cambiarCiudadRuta = function(ciudad){
-  try{ localStorage.setItem(CLAVE_CIUDAD_RUTA, ciudad||''); }catch(e){}
-  document.querySelectorAll('.ciudad-chip').forEach(ch => { ch.classList.toggle('activa', ch.dataset.ciudad === ciudad); });
-  setTimeout(() => window.dibujarRutaMapa(), 200);
-  if(ciudad) mostrarAviso(`🏙️ Ciudad: ${ciudad}`, 'ok');
-};
-
-window.inicializarSelectorCiudad = function(){
-  const sel = document.getElementById('ciudadRuta');
-  if(!sel) return;
-  if(sel.options.length <= 1){
-    const ciudadesSorted = CIUDADES_COLOMBIA.map(c=>c.nombre).sort();
-    ciudadesSorted.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); });
-  }
-  let ciudadGuardada = '';
-  try{ ciudadGuardada = localStorage.getItem(CLAVE_CIUDAD_RUTA)||''; }catch(e){}
-  const ciudadesDetectadas = obtenerCiudadesDisponibles();
-  if(!ciudadGuardada && Object.keys(ciudadesDetectadas).length > 0){
-    ciudadGuardada = Object.entries(ciudadesDetectadas).sort((a,b)=>b[1]-a[1])[0][0];
-  }
-  if(ciudadGuardada) sel.value = ciudadGuardada;
-  renderizarChipsCiudades(ciudadesDetectadas, sel.value);
-};
-
-function renderizarChipsCiudades(conteo, ciudadActiva){
-  const cont = document.getElementById('ciudadesDetectadas');
-  if(!cont) return;
-  cont.innerHTML = '';
-  const entries = Object.entries(conteo).sort((a,b)=>b[1]-a[1]);
-  if(entries.length === 0){
-    cont.innerHTML = '<small style="color:var(--text-muted);font-style:italic;">Aún no se detectan ciudades en las visitas. Registra direcciones con el nombre de la ciudad (ej: "Calle 10 #5-20, Medellín").</small>';
-    return;
-  }
-  const label = document.createElement('small');
-  label.style.cssText = 'color:var(--text-muted);font-size:.72rem;font-weight:600;width:100%;margin-bottom:4px;';
-  label.textContent = '📍 Ciudades detectadas (clic para filtrar):';
-  cont.appendChild(label);
-  entries.forEach(([ciudad, count]) => {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.className = 'ciudad-chip' + (ciudad === ciudadActiva ? ' activa' : '');
-    chip.dataset.ciudad = ciudad;
-    chip.innerHTML = `${ciudad} <span class="count">${count}</span>`;
-    chip.onclick = () => { const sel = document.getElementById('ciudadRuta'); if(sel) sel.value = ciudad; window.cambiarCiudadRuta(ciudad); };
-    cont.appendChild(chip);
-  });
-}
-
-/* ══════════════════════════════════════════════════════════
-   DESCRIPCIONES PROFESIONALES
-   ══════════════════════════════════════════════════════════ */
 const DATOS_EMPRESA = {
   colserlog: { nombre:'COLSERLOG S.A.S.', nit:'900.496.469-3', direccion:'Avenida Calle 24 # 81-13, Bogotá D.C.', telefono:'(571) 2637734 / 314 304 6374', email:'contacto@colserglog.com', web:'www.colserlog.com' },
   colvanes: { nombre:'COLVANES S.A.S. (Envía)', nit:'800.185.306-4', direccion:'Carrera 88 # 17B-10, Bogotá D.C.', telefono:'(601) 7943670', email:'contacto@enviacolvanes.com', web:'www.enviacolvanes.com' },
@@ -1412,29 +1253,29 @@ function escapeHtml(t){ if(t===null||t===undefined) return ''; return String(t).
 window.escapeHtml = escapeHtml;
 
 const DESCRIPCIONES_RECOMENDADAS={
-  'Entregado':'Envío entregado exitosamente al destinatario en la dirección registrada. El cliente verificó el contenido, firmó la guía de recibido y confirmó que el paquete llegó en perfectas condiciones.',
-  'Rechazado':'El destinatario manifestó su decisión de NO recibir el envío al momento de la visita. Se le informó el procedimiento de devolución a bodega central.',
+  'Entregado':'Envío entregado exitosamente al destinatario. El cliente verificó el contenido, firmó la guía y confirmó que el paquete llegó en perfectas condiciones.',
+  'Rechazado':'El destinatario manifestó su decisión de NO recibir el envío. Se le informó el procedimiento de devolución a bodega central.',
   'Dirección Errónea':'La dirección registrada en la guía NO corresponde a ninguna ubicación física verificable en el sector.',
-  'Dirección incompleta':'La dirección suministrada carece de información esencial (nomenclatura exacta, barrio, punto de referencia) que impide ubicar al destinatario.',
-  'Coordinado con Cliente':'Se estableció comunicación efectiva con el destinatario por vía telefónica. Se acordó nueva fecha y horario para la entrega del envío.',
-  'No está en casa':'Se visitó la dirección en horario hábil sin obtener respuesta de ninguna persona. Se dejó aviso de visita con los datos de contacto.',
-  'Pasa después (Sin dinero)':'El destinatario informó que no cuenta con los recursos económicos disponibles en el momento (pago contra entrega).',
-  'No lo conocen':'En la dirección visitada, los residentes o encargados manifiestan NO conocer al destinatario registrado en la guía.',
+  'Dirección incompleta':'La dirección suministrada carece de información esencial que impide ubicar al destinatario.',
+  'Coordinado con Cliente':'Se estableció comunicación con el destinatario. Se acordó nueva fecha y horario para la entrega.',
+  'No está en casa':'Se visitó la dirección en horario hábil sin obtener respuesta. Se dejó aviso de visita.',
+  'Pasa después (Sin dinero)':'El destinatario informó que no cuenta con los recursos económicos disponibles en el momento.',
+  'No lo conocen':'En la dirección visitada, los residentes manifiestan NO conocer al destinatario registrado.',
   'Programo para otro día':'El destinatario solicitó expresamente reprogramar la entrega para otra fecha.',
-  'Dejar en oficina principal':'Por instrucción expresa del destinatario, el envío será dejado en la oficina principal de la transportadora para retiro personal.',
+  'Dejar en oficina principal':'Por instrucción del destinatario, el envío será dejado en la oficina principal para retiro personal.',
   'Pertenece a otra ciudad':'El envío corresponde a una ciudad diferente a la zona de reparto asignada.',
-  'Cerrado local comercial':'El establecimiento comercial se encontraba cerrado al momento de la visita dentro del horario comercial establecido.',
-  'No visita tiempo':'Por limitaciones de tiempo operativo en la ruta asignada, NO se logró visitar al destinatario dentro del horario programado.',
-  'Casa totalmente cerrada':'La vivienda se encontraba completamente cerrada (puertas, ventanas y accesos principales bloqueados).',
-  'Oficina principal':'El paquete fue trasladado y dejado en la oficina principal de la transportadora por disposición operativa o a solicitud del cliente.',
-  'Se trasladó':'El destinatario se ha mudado de la dirección registrada según información suministrada por los residentes actuales del inmueble.',
-  'Exige ver el producto':'El destinatario exige verificar el contenido del paquete antes de firmar el recibido. Se requiere autorización del remitente.',
-  'Destinatario no recibe sábados':'El destinatario ha manifestado expresamente que NO recibe envíos los días sábados. Se reprograma la entrega para día hábil.',
-  'Restricciones en el tránsito reparto urbano':'Se presentaron restricciones viales (cierres, manifestaciones, obras, paros o bloqueos) que impidieron el acceso al punto de entrega durante la jornada.',
-  'No coincide la mercancía física con lo escrito en la orden de compra':'Al verificar el contenido del envío se detecta que la mercancía física NO coincide con la descripción detallada en la orden de compra.',
-  'Mercancía se abrió en reparto no entregada':'Durante el traslado o manipulación del paquete, la mercancía presentó apertura, deterioro o faltantes.',
+  'Cerrado local comercial':'El establecimiento comercial se encontraba cerrado al momento de la visita.',
+  'No visita tiempo':'Por limitaciones de tiempo operativo, NO se logró visitar al destinatario.',
+  'Casa totalmente cerrada':'La vivienda se encontraba completamente cerrada. No hubo respuesta a llamados.',
+  'Oficina principal':'El paquete fue dejado en la oficina principal por disposición operativa o a solicitud del cliente.',
+  'Se trasladó':'El destinatario se ha mudado de la dirección registrada según información suministrada por residentes actuales.',
+  'Exige ver el producto':'El destinatario exige verificar el contenido del paquete antes de firmar el recibido.',
+  'Destinatario no recibe sábados':'El destinatario ha manifestado que NO recibe envíos los días sábados.',
+  'Restricciones en el tránsito reparto urbano':'Se presentaron restricciones viales que impidieron el acceso al punto de entrega.',
+  'No coincide la mercancía física con lo escrito en la orden de compra':'La mercancía física NO coincide con la descripción en la orden de compra.',
+  'Mercancía se abrió en reparto no entregada':'Durante el traslado, la mercancía presentó apertura, deterioro o faltantes.',
   'Flete mal liquidado':'El flete asociado al envío presenta ERROR en su liquidación según revisión administrativa.',
-  'Cerrados en horas hábiles':'El establecimiento se encontraba cerrado al momento de la visita, dentro del horario comercial habitual según registro del sector.'
+  'Cerrados en horas hábiles':'El establecimiento se encontraba cerrado dentro del horario comercial habitual.'
 };
 
 function esDescripcionSugerida(t){ if(!t)return false; const x=t.trim(); return Object.values(DESCRIPCIONES_RECOMENDADAS).some(d=>d===x); }
@@ -1462,10 +1303,11 @@ let sincronizarFotosNube=false; try{ sincronizarFotosNube=localStorage.getItem(C
 let _estabaDarkAlImprimir=false; let _autoPrintMode=false;
 let spreadsheetVisitas=null;
 let autoCensuraActiva=true; try{ const p=localStorage.getItem(CLAVE_AUTO_CENSURA); if(p!==null) autoCensuraActiva=p==='1'; }catch(e){}
-let _modelosCargados=false, _cargandoModelos=null, _cocoModel=null;
+let _modelosCargados=false, _cargandoModelos=null, _cocoModel=null, _ssdModel=null, _tinyModel=null;
 let bancoCodigoEditando=null;
-const cacheGeocoding = new Map();
-let _coordManualContexto = null;
+
+/* Censura manual */
+let censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null };
 
 function calcularTotalesPrecios(){
   let totalGeneral=0, totalEntregado=0, totalNoEntregado=0, cantEntregado=0, cantNoEntregado=0;
@@ -1476,7 +1318,7 @@ window.calcularTotalesPrecios = calcularTotalesPrecios;
 function formatCOP(n){ return '$' + (Number(n)||0).toLocaleString('es-CO'); }
 window.formatCOP = formatCOP;
 
-function normalizarCodigoBanco(item){ if(typeof item === 'string') return { codigo:item, direccion:'', precio:0 }; if(item && typeof item === 'object') return { codigo:item.codigo||'', direccion:item.direccion||'', precio:Number(item.precio)||0, lat:item.lat, lon:item.lon }; return { codigo:'', direccion:'', precio:0 }; }
+function normalizarCodigoBanco(item){ if(typeof item === 'string') return { codigo:item, direccion:'', precio:0 }; if(item && typeof item === 'object') return { codigo:item.codigo||'', direccion:item.direccion||'', precio:Number(item.precio)||0 }; return { codigo:'', direccion:'', precio:0 }; }
 function buscarEnBanco(codigo){ if(!codigo) return null; for(let i=0;i<bancoCodigos.length;i++){ const item = normalizarCodigoBanco(bancoCodigos[i]); if(item.codigo === codigo) return { index:i, item }; } return null; }
 function bancoContiene(codigo){ return buscarEnBanco(codigo) !== null; }
 
@@ -1493,338 +1335,10 @@ function beepError(){ try{ const ctx=new (window.AudioContext||window.webkitAudi
 function beepOk(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15); o.start(); o.stop(ctx.currentTime+0.15); setTimeout(()=>ctx.close(),400); }catch(e){} }
 function mostrarIndicadorGuardado(){ const el=document.getElementById('indicadorGuardado'); if(!el) return; el.textContent='✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); el.classList.add('visible'); clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.classList.remove('visible'); },2500); }
 
-/* ══════════════════════════════════════════════════════════
-   ✅ GEOCODIFICACIÓN CORREGIDA
-   Photon (Komoot) como PRIMARIO — funciona sin headers especiales
-   Nominatim como RESPALDO — sin User-Agent (browser lo bloquea)
-   ══════════════════════════════════════════════════════════ */
-async function geocodificarPhoton(query, configCiudad) {
-  try {
-    // Photon API (Komoot) - Basado en OpenStreetMap, muy permisivo
-    // Documentación: https://photon.komoot.io/
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=es`;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    if (!data || !data.features || data.features.length === 0) return null;
-    
-    // Buscar el mejor resultado dentro del rango
-    for (const f of data.features) {
-      if (!f.geometry || !f.geometry.coordinates) continue;
-      const [lon, lat] = f.geometry.coordinates;
-      // Validar Colombia
-      if (lat < -5 || lat > 13 || lon < -80 || lon > -66) continue;
-      // Validar ciudad si la tenemos
-      if (configCiudad) {
-        const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
-        const margen = 0.4;
-        if (lat < (s - margen) || lat > (n + margen) || lon < (w - margen) || lon > (e + margen)) continue;
-      }
-      const props = f.properties || {};
-      const partes = [props.name, props.street, props.housenumber, props.district, props.city, props.state, props.country].filter(Boolean);
-      return {
-        lat: lat.toString(),
-        lon: lon.toString(),
-        display: partes.join(', ') || props.name || query,
-        precision: props.type || 'photon',
-        servicio: 'photon'
-      };
-    }
-    return null;
-  } catch(e) {
-    console.warn('Photon error:', e.message);
-    return null;
-  }
-}
-
-async function geocodificarNominatim(query, configCiudad) {
-  try {
-    // Nominatim SIN User-Agent (los browsers lo eliminan)
-    // Usando email como identificación (permitido por su política)
-    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=3&addressdetails=1&countrycodes=co&email=colserlog@example.com`;
-    if (configCiudad) {
-      url += `&viewbox=${configCiudad.viewbox}&bounded=0`;
-    }
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    const resp = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
-    if (!resp.ok) return null;
-    const data = await resp.json();
-    if (!data || data.length === 0) return null;
-    for (const r of data) {
-      const lat = parseFloat(r.lat);
-      const lon = parseFloat(r.lon);
-      if (lat < -5 || lat > 13 || lon < -80 || lon > -66) continue;
-      if (configCiudad) {
-        const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
-        const margen = 0.4;
-        if (lat < (s - margen) || lat > (n + margen) || lon < (w - margen) || lon > (e + margen)) continue;
-      }
-      return {
-        lat: r.lat,
-        lon: r.lon,
-        display: r.display_name,
-        precision: r.type || 'nominatim',
-        servicio: 'nominatim'
-      };
-    }
-    return null;
-  } catch(e) {
-    console.warn('Nominatim error:', e.message);
-    return null;
-  }
-}
-
-async function geocodificarDireccionAvanzado(direccion, ciudadNombre) {
-  if (!direccion || !direccion.trim()) return null;
-  const dirLimpia = direccion.trim();
-  const ciudadCtx = ciudadNombre || detectarCiudadEnDireccion(dirLimpia) || getCiudadSeleccionada();
-  const cacheKey = (dirLimpia + '|' + (ciudadCtx||'')).toLowerCase();
-  if(cacheGeocoding.has(cacheKey)) return cacheGeocoding.get(cacheKey);
-  
-  const configCiudad = getConfigCiudad(ciudadCtx);
-  
-  // Construir varias queries de prueba
-  const queries = [];
-  if (ciudadCtx) {
-    queries.push(`${dirLimpia}, ${ciudadCtx}, Colombia`);
-    queries.push(`${dirLimpia} ${ciudadCtx} Colombia`);
-    queries.push(`${dirLimpia}, ${ciudadCtx}`);
-  }
-  queries.push(`${dirLimpia}, Colombia`);
-  queries.push(dirLimpia);
-  
-  // 1️⃣ PROBAR PHOTON PRIMERO (más confiable desde browser)
-  for (const q of queries) {
-    const res = await geocodificarPhoton(q, configCiudad);
-    if (res) {
-      console.log('✅ Photon OK:', q, '→', res.display);
-      cacheGeocoding.set(cacheKey, res);
-      return res;
-    }
-    await new Promise(r => setTimeout(r, 350)); // Rate limit Photon
-  }
-  
-  // 2️⃣ RESPALDO: NOMINATIM
-  for (const q of queries) {
-    const res = await geocodificarNominatim(q, configCiudad);
-    if (res) {
-      console.log('✅ Nominatim OK:', q, '→', res.display);
-      cacheGeocoding.set(cacheKey, res);
-      return res;
-    }
-    await new Promise(r => setTimeout(r, 1100)); // Rate limit Nominatim
-  }
-  
-  console.warn('❌ No se pudo geocodificar:', dirLimpia);
-  cacheGeocoding.set(cacheKey, null);
-  return null;
-}
-window.geocodificarDireccionAvanzado = geocodificarDireccionAvanzado;
-
-/* IA de direcciones */
-window.asistirDireccionIA = async function(){
-  const input = document.getElementById('direccionVisita');
-  const resultado = document.getElementById('resultadoIA');
-  if(!input || !resultado) return;
-  const direccion = input.value.trim();
-  if(!direccion){ mostrarAviso('⚠️ Escribe una dirección primero','error'); return; }
-  const ciudad = getCiudadSeleccionada() || detectarCiudadEnDireccion(direccion);
-  resultado.style.display = 'block';
-  resultado.style.color = 'var(--text-secondary)';
-  resultado.textContent = `🤖 Analizando con IA${ciudad ? ' (contexto: '+ciudad+')' : ''}...`;
-  const geocoded = await geocodificarDireccionAvanzado(direccion, ciudad);
-  if(geocoded){
-    input.value = geocoded.display || direccion;
-    input.dataset.lat = geocoded.lat;
-    input.dataset.lon = geocoded.lon;
-    resultado.style.color = 'var(--sys-green)';
-    resultado.innerHTML = `✅ <strong>Validada</strong> ${ciudad?'· '+escapeHtml(ciudad):''} (${geocoded.servicio})<br><small>📍 ${escapeHtml(geocoded.display)}<br>Coords: ${geocoded.lat}, ${geocoded.lon}</small>`;
-    const b = buscarEnBanco(direccion);
-    if(b && b.item){ b.item.lat = geocoded.lat; b.item.lon = geocoded.lon; guardarEstadoCompleto(); }
-  } else {
-    resultado.style.color = 'var(--sys-red)';
-    resultado.innerHTML = `❌ No encontrada.<br><small>💡 Usa el botón 📍 de coordenadas manuales o verifica la dirección.</small>`;
-  }
-};
-
-/* Coordenadas manuales */
-window.abrirModalCoords = function(){
-  const lat = document.getElementById('direccionVisita')?.dataset?.lat || '';
-  const lon = document.getElementById('direccionVisita')?.dataset?.lon || '';
-  document.getElementById('coordLat').value = lat;
-  document.getElementById('coordLon').value = lon;
-  document.getElementById('modalCoords').classList.add('visible');
-};
-window.cerrarModalCoords = function(){
-  document.getElementById('modalCoords').classList.remove('visible');
-};
-window.guardarCoordsManuales = function(){
-  const lat = (document.getElementById('coordLat').value||'').trim().replace(',', '.');
-  const lon = (document.getElementById('coordLon').value||'').trim().replace(',', '.');
-  const latN = parseFloat(lat);
-  const lonN = parseFloat(lon);
-  if(isNaN(latN) || isNaN(lonN)){ mostrarAviso('⚠️ Coordenadas inválidas','error'); return; }
-  if(latN < -5 || latN > 13 || lonN < -80 || lonN > -66){ mostrarAviso('⚠️ Coordenadas fuera de Colombia','error'); return; }
-  const input = document.getElementById('direccionVisita');
-  if(input){
-    input.dataset.lat = latN.toString();
-    input.dataset.lon = lonN.toString();
-  }
-  mostrarAviso('✅ Coordenadas guardadas: '+latN.toFixed(4)+', '+lonN.toFixed(4), 'ok');
-  cerrarModalCoords();
-};
-document.getElementById('modalCoords')?.addEventListener('click',(e)=>{ if(e.target.id==='modalCoords') cerrarModalCoords(); });
-
-/* Geolocalización masiva */
-window.geolocalizarTodasVisitas = async function(){
-  const ciudadSel = getCiudadSeleccionada();
-  const candidatas = ciudadSel ? filtrarVisitasPorCiudad(ciudadSel) : visitas;
-  const sinCoords = candidatas.filter(v => v.direccion && (!v.lat || !v.lon));
-  
-  if(sinCoords.length === 0){ 
-    mostrarAviso(`ℹ️ Todas las visitas ${ciudadSel?'de '+ciudadSel:''} ya tienen coordenadas`,'ok');
-    window.dibujarRutaMapa();
-    return; 
-  }
-  
-  if(!confirm(`📡 Se geolocalizarán ${sinCoords.length} dirección(es)${ciudadSel?' de '+ciudadSel:''}.\n\n¿Continuar?`)) return;
-  
-  const modal = document.getElementById('modalProcesando');
-  const paso = document.getElementById('procesandoPaso');
-  const titulo = document.getElementById('procesandoTitulo');
-  if(titulo) titulo.textContent = `📡 Geocodificando ${ciudadSel||'direcciones'}...`;
-  if(modal) modal.classList.add('visible');
-  
-  let exitosos = 0, fallidos = 0;
-  const fallidas = [];
-  for(let i = 0; i < sinCoords.length; i++){
-    const v = sinCoords[i];
-    if(paso) paso.textContent = `(${i+1}/${sinCoords.length}) ${v.direccion.substring(0,50)}...`;
-    const ciudadDetectada = detectarCiudadEnDireccion(v.direccion) || ciudadSel;
-    const g = await geocodificarDireccionAvanzado(v.direccion, ciudadDetectada);
-    if(g){ 
-      v.lat = g.lat; 
-      v.lon = g.lon; 
-      exitosos++; 
-    } else {
-      fallidos++;
-      fallidas.push(v.direccion.substring(0, 40));
-    }
-    await new Promise(r => setTimeout(r, 400));
-  }
-  
-  if(modal) modal.classList.remove('visible');
-  guardarEstadoCompleto();
-  
-  if(fallidos > 0){
-    const detalle = fallidas.slice(0, 3).join('\n• ');
-    alert(`📡 Resultado:\n\n✅ Geolocalizadas: ${exitosos}\n⚠️ Fallidas: ${fallidos}\n\n${fallidos>0?'Direcciones sin encontrar:\n• '+detalle+'\n\n💡 Tip: usa el botón 📍 de coordenadas manuales en el registro de visita (clic derecho en Google Maps → copiar coordenadas).':''}`);
-  } else {
-    mostrarAviso(`✅ Geolocalizadas: ${exitosos} · ⚠️ Fallidas: ${fallidos}`, 'ok');
-  }
-  
-  setTimeout(() => window.dibujarRutaMapa(), 500);
-};
-
-/* ══════════════════════════════════════════════════════════
-   MAPA DE RUTA
-   ══════════════════════════════════════════════════════════ */
-let mapaRuta=null, routingControl=null, marcadoresRuta=[];
-
-window.dibujarRutaMapa = async function(){
-  const contenedor = document.getElementById('mapaRuta');
-  if(!contenedor) return;
-  if(typeof L === 'undefined'){ contenedor.innerHTML = '<p style="padding:20px;text-align:center;">Mapa no disponible</p>'; return; }
-  
-  const ciudadSel = getCiudadSeleccionada();
-  const configCiudad = getConfigCiudad(ciudadSel);
-  const visitasCiudad = ciudadSel ? filtrarVisitasPorCiudad(ciudadSel) : visitas;
-  
-  const visitasConCoords = visitasCiudad.filter(v => {
-    if(!v.lat || !v.lon) return false;
-    const lat = parseFloat(v.lat), lon = parseFloat(v.lon);
-    if(isNaN(lat) || isNaN(lon)) return false;
-    if(configCiudad){
-      const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
-      return lat >= (s-0.3) && lat <= (n+0.3) && lon >= (w-0.3) && lon <= (e+0.3);
-    }
-    return lat >= -5 && lat <= 13 && lon >= -80 && lon <= -66;
-  });
-  
-  if(mapaRuta){ try{ mapaRuta.remove(); }catch(e){} mapaRuta=null; routingControl=null; marcadoresRuta=[]; }
-  const info = document.getElementById('mapaInfo');
-  
-  if(visitasConCoords.length === 0){ 
-    contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);">🗺️ No hay visitas con coordenadas ${ciudadSel ? 'en <strong>'+escapeHtml(ciudadSel)+'</strong>' : ''}.<br><small>${ciudadSel ? 'Usa "📡 Geolocalizar direcciones" o agrega coordenadas manuales.' : 'Selecciona una ciudad.'}</small></div>`;
-    if(info) info.textContent = '';
-    return; 
-  }
-  
-  const centro = configCiudad ? [configCiudad.lat, configCiudad.lon] : [4.65, -74.08];
-  const zoomInicial = configCiudad ? 13 : 6;
-  
-  mapaRuta = L.map(contenedor, { zoomControl: true, scrollWheelZoom: true }).setView(centro, zoomInicial);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(mapaRuta);
-  
-  const puntos = [];
-  visitasConCoords.forEach((v) => {
-    const lat = parseFloat(v.lat);
-    const lon = parseFloat(v.lon);
-    const numero = visitas.indexOf(v) + 1;
-    const esEntregado = v.estado === 'Entregado';
-    const color = esEntregado ? '#30d158' : '#ff453a';
-    const icono = L.divIcon({
-      className: 'marcador-ruta',
-      html: `<div style="background:${color};color:#fff;width:34px;height:34px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;box-shadow:0 3px 10px rgba(0,0,0,.45);">${numero}</div>`,
-      iconSize: [34, 34], iconAnchor: [17, 17], popupAnchor: [0, -17]
-    });
-    const marker = L.marker([lat, lon], { icon: icono }).addTo(mapaRuta);
-    marker.bindPopup(`<div style="min-width:220px;font-family:-apple-system,sans-serif;font-size:13px;line-height:1.5;"><div style="font-weight:800;font-size:15px;color:${color};margin-bottom:6px;">#${numero} · ${escapeHtml(v.estado || 'Sin estado')}</div><div style="font-family:'Courier New',monospace;background:#f5f5f7;padding:4px 8px;border-radius:4px;margin-bottom:6px;font-size:12px;">${escapeHtml(v.codigo || 'Sin código')}</div><div style="margin-bottom:4px;">📍 ${escapeHtml(v.direccion || 'Sin dirección')}</div>${ciudadSel ? `<div style="margin-bottom:4px;">🏙️ ${escapeHtml(ciudadSel)}</div>` : ''}<div style="font-weight:700;color:${esEntregado ? '#1e8449' : '#a02015'};">💰 ${formatCOP(v.precio || 0)}</div></div>`);
-    marcadoresRuta.push(marker);
-    puntos.push(L.latLng(lat, lon));
-  });
-  
-  if(puntos.length > 1 && typeof L.Routing !== 'undefined'){
-    try {
-      routingControl = L.Routing.control({
-        waypoints: puntos, routeWhileDragging: false, addWaypoints: false, show: false,
-        createMarker: () => null,
-        lineOptions: { styles: [ { color: '#ffffff', weight: 8, opacity: 1 }, { color: '#0a84ff', weight: 5, opacity: 0.9 } ] },
-        router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1', profile: 'driving' })
-      }).addTo(mapaRuta);
-      routingControl.on('routesfound', function(e){
-        const routes = e.routes;
-        if(routes && routes[0]){
-          const summary = routes[0].summary;
-          const km = (summary.totalDistance / 1000).toFixed(2);
-          const min = Math.round(summary.totalTime / 60);
-          if(info) info.innerHTML = `${ciudadSel?'🏙️ <strong>'+escapeHtml(ciudadSel)+'</strong> · ':''}📍 <strong>${puntos.length}</strong> paradas · 🛣️ <strong>${km} km</strong> · ⏱️ <strong>~${min} min</strong>`;
-        }
-      });
-    } catch(e){ if(info) info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s).`; }
-  }
-  
-  try { const group = new L.featureGroup(marcadoresRuta); mapaRuta.fitBounds(group.getBounds().pad(0.15)); } catch(e){}
-  if(info && !routingControl) info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s) geolocalizada(s).`;
-  if(ciudadSel) renderizarChipsCiudades(obtenerCiudadesDisponibles(), ciudadSel);
-};
-
-function refrescarMapaSiActivo(){
-  const panelRuta = document.querySelector('.tab-panel[data-tab="ruta"]');
-  if(panelRuta && panelRuta.classList.contains('active')){
-    setTimeout(() => { if(typeof window.inicializarSelectorCiudad === 'function') window.inicializarSelectorCiudad(); window.dibujarRutaMapa(); }, 400);
-  }
-}
-
 /* BORRADOR */
 function guardarBorrador(){
   try{
-    const b={ llegadaCliente:document.getElementById('llegadaCliente')?.value||'', salidaCliente:document.getElementById('salidaCliente')?.value||'', estadoPaquete:document.getElementById('estadoPaquete')?.value||'', descripcionVisita:document.getElementById('descripcionVisita')?.value||'', codigoBarras:document.getElementById('codigoBarras')?.value||'', busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'', busquedaDia:document.getElementById('busquedaDia')?.value||'', busquedaGuia:document.getElementById('busquedaGuia')?.value||'', direccionVisita:document.getElementById('direccionVisita')?.value||'', precioVisita:document.getElementById('precioVisita')?.value||'', codigoBanco:document.getElementById('codigoBanco')?.value||'', direccionBanco:document.getElementById('direccionBanco')?.value||'', precioBanco:document.getElementById('precioBanco')?.value||'', timestamp:Date.now() };
+    const b={ llegadaCliente:document.getElementById('llegadaCliente')?.value||'', salidaCliente:document.getElementById('salidaCliente')?.value||'', estadoPaquete:document.getElementById('estadoPaquete')?.value||'', descripcionVisita:document.getElementById('descripcionVisita')?.value||'', busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'', busquedaDia:document.getElementById('busquedaDia')?.value||'', busquedaGuia:document.getElementById('busquedaGuia')?.value||'', direccionVisita:document.getElementById('direccionVisita')?.value||'', precioVisita:document.getElementById('precioVisita')?.value||'', codigoBanco:document.getElementById('codigoBanco')?.value||'', direccionBanco:document.getElementById('direccionBanco')?.value||'', precioBanco:document.getElementById('precioBanco')?.value||'', timestamp:Date.now() };
     localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(b));
   }catch(e){}
 }
@@ -1835,12 +1349,12 @@ function restaurarBorrador(){
     if(b.timestamp && (Date.now()-b.timestamp)>24*60*60*1000){ localStorage.removeItem(CLAVE_BORRADOR); return false; }
     const set=(id,v)=>{ const el=document.getElementById(id); if(el && v) el.value=v; };
     set('llegadaCliente',b.llegadaCliente); set('salidaCliente',b.salidaCliente);
-    set('descripcionVisita',b.descripcionVisita); set('codigoBarras',b.codigoBarras);
+    set('descripcionVisita',b.descripcionVisita);
     set('busquedaCodigoBanco',b.busquedaCodigoBanco); set('busquedaDia',b.busquedaDia);
     set('busquedaGuia',b.busquedaGuia); set('direccionVisita',b.direccionVisita); set('precioVisita',b.precioVisita);
     set('codigoBanco',b.codigoBanco); set('direccionBanco',b.direccionBanco); set('precioBanco',b.precioBanco);
     if(b.estadoPaquete){ const s=document.getElementById('estadoPaquete'); if(s){ s.value=b.estadoPaquete; window.actualizarPlaceholderDescripcion(); } }
-    return !!(b.llegadaCliente||b.descripcionVisita||b.codigoBarras||b.codigoBanco);
+    return !!(b.llegadaCliente||b.descripcionVisita||b.codigoBanco);
   }catch(e){ return false; }
 }
 setInterval(()=>{ if(typeof window._guardarEstadoSilencioso==='function') window._guardarEstadoSilencioso(); guardarBorrador(); },20000);
@@ -1892,7 +1406,7 @@ function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){
     reader.onload=(e)=>{
       const dataUrl=e.target.result;
       const img=new Image();
-      img.onerror=()=>{ if(esHEIC){ reject(new Error('HEIC no soportado')); } else { reject(new Error('No se pudo decodificar')); } };
+      img.onerror=()=>{ if(esHEIC){ reject(new Error('HEIC no soportado. En iPhone: Ajustes → Cámara → Formatos → "Más compatible"')); } else { reject(new Error('No se pudo decodificar')); } };
       img.onload=()=>{
         try{
           let {width,height}=img;
@@ -1919,19 +1433,29 @@ window.capturarFoto = async function(event){
   if(!file){ input.value=''; return; }
   if(fotosPendientes.length>=MAX_FOTOS_POR_VISITA){ mostrarAviso(`⚠️ Máximo ${MAX_FOTOS_POR_VISITA} fotos`,'error'); beepError(); input.value=''; return; }
   if(!file.type||!file.type.startsWith('image/')){ mostrarAviso('⚠️ Solo imágenes','error'); input.value=''; return; }
-  if(file.size>15*1024*1024){ mostrarAviso('⚠️ Imagen muy grande','error'); input.value=''; return; }
+  if(file.size>20*1024*1024){ mostrarAviso('⚠️ Imagen muy grande (máx 20 MB)','error'); input.value=''; return; }
   const modal=document.getElementById('modalProcesando');
   const paso=document.getElementById('procesandoPaso');
   const titulo=document.getElementById('procesandoTitulo');
-  const onP=(msg)=>{ if(paso) paso.textContent=msg; };
-  if(titulo) titulo.textContent='Procesando imagen…';
+  const tituloGrande=document.getElementById('procesandoTituloGrande');
+  const barra=document.getElementById('procesandoBarra');
+  const onP=(msg,pct)=>{ if(paso) paso.textContent=msg; if(barra && typeof pct==='number') barra.style.width=pct+'%'; };
+  if(tituloGrande) tituloGrande.textContent='📸 Procesando imagen';
+  if(titulo) titulo.textContent='Comprimiendo y analizando…';
+  if(barra) barra.style.width='0%';
   if(modal) modal.classList.add('visible');
   try{
-    onP('Comprimiendo imagen…');
+    onP('Comprimiendo imagen…', 10);
     const b64=await comprimirImagen(file);
+    onP('Imagen comprimida', 25);
     let dataFinal=b64;
     let censura={rostros:0,vehiculos:0,aplicado:false,error:null};
-    if(autoCensuraActiva){ if(titulo) titulo.textContent='🛡️ Protegiendo la imagen…'; try{ censura=await detectarYCensurar(b64,onP); dataFinal=censura.dataUrl||b64; }catch(e){} } else onP('Censura desactivada…');
+    if(autoCensuraActiva){ 
+      if(tituloGrande) tituloGrande.textContent='🛡️ Protegiendo la imagen';
+      if(titulo) titulo.textContent='Detectando rostros y vehículos con IA...';
+      try{ censura=await detectarYCensurar(b64,onP); dataFinal=censura.dataUrl||b64; }catch(e){ console.warn('Censura error:', e); }
+    } else onP('Censura desactivada', 90);
+    onP('Guardando...', 95);
     const kb=Math.round((dataFinal.length*0.75)/1024);
     const id='foto_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
     await guardarFotoDB(id,dataFinal,{tamanoKB:kb,fecha:new Date().toISOString(),censurada:!!(censura.rostros||censura.vehiculos),rostros:censura.rostros||0,vehiculos:censura.vehiculos||0});
@@ -1941,11 +1465,12 @@ window.capturarFoto = async function(event){
     guardarEstadoCompleto();
     beepOk();
     if(navigator.vibrate) navigator.vibrate(60);
+    onP('✅ Listo', 100);
     let msg=`✅ Foto agregada (${kb} KB)`;
     if(censura.rostros||censura.vehiculos){ const partes=[]; if(censura.rostros) partes.push(`${censura.rostros} rostro${censura.rostros>1?'s':''}`); if(censura.vehiculos) partes.push(`${censura.vehiculos} vehículo${censura.vehiculos>1?'s':''}`); msg=`🛡️ Censurado: ${partes.join(' + ')} · ${kb} KB`; }
     mostrarAviso(msg,'ok');
   }catch(e){ mostrarAviso('⚠️ '+(e.message||'Error'),'error'); beepError(); }
-  finally{ if(modal) modal.classList.remove('visible'); input.value=''; }
+  finally{ setTimeout(()=>{ if(modal) modal.classList.remove('visible'); if(barra) barra.style.width='0%'; },400); input.value=''; }
 };
 
 async function renderizarGaleriaFotos(){
@@ -1962,49 +1487,79 @@ async function renderizarGaleriaFotos(){
     img.onclick=async()=>{ const foto=await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto],0); };
     w.appendChild(img);
     if(f.censurada){ const b=document.createElement('span'); b.className='badge-censura'; const partes=[]; if(f.rostros) partes.push('👤'+f.rostros); if(f.vehiculos) partes.push('🚗'+f.vehiculos); b.textContent='🛡️ '+(partes.join(' ')); w.appendChild(b); }
+    const bE=document.createElement('button'); bE.type='button'; bE.className='btn-editar-censura'; bE.textContent='🖐️'; bE.title='Censurar manualmente';
+    bE.onclick=async(e)=>{ e.stopPropagation(); await abrirModalCensura(f.id); };
+    w.appendChild(bE);
     const b=document.createElement('button'); b.type='button'; b.className='btn-eliminar-foto'; b.textContent='✕'; b.title='Eliminar';
     b.onclick=async(e)=>{ e.stopPropagation(); if(!confirm('¿Eliminar esta foto?')) return; await eliminarFotoDB(f.id); fotosPendientes.splice(i,1); await renderizarGaleriaFotos(); guardarEstadoCompleto(); };
     w.appendChild(b);
     c.appendChild(w);
   });
-  if(ct){ const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`; ct.classList.toggle('alerta',total>1500); }
+  if(ct){ const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} foto(s) · ${total} KB`; ct.classList.toggle('alerta',total>2000); }
 }
 
-/* Censura */
+/* ══════════════════════════════════════════════════════════
+   CENSURA AUTOMÁTICA MEJORADA
+   - SSD Mobilenet V1 (más preciso que TinyFaceDetector)
+   - Multi-escala (3 pasadas a diferentes tamaños)
+   - Múltiples pasadas para mayor cobertura
+   - coco-ssd con umbral 0.35 para vehículos
+   - Pixelado agresivo (/40 en vez de /60)
+   - Padding 20% para más margen
+   ══════════════════════════════════════════════════════════ */
 const CDN_TFJS='https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js';
 const CDN_COCO='https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js';
 const CDN_FACEAPI='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/dist/face-api.js';
 const FACEAPI_MODEL='https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.15/model';
 const CLASES_VEHICULO=['car','truck','bus','motorcycle','bicycle','train','boat'];
+
 function cargarScript(src){ return new Promise((resolve,reject)=>{ const existente=document.querySelector(`script[src="${src}"]`); if(existente){ if(existente.dataset.cargado==='1'){ resolve(); return; } existente.addEventListener('load',()=>resolve(),{once:true}); existente.addEventListener('error',()=>reject(new Error('Error')),{once:true}); return; } const s=document.createElement('script'); s.src=src; s.async=true; s.onload=()=>{ s.dataset.cargado='1'; resolve(); }; s.onerror=()=>reject(new Error('No se pudo cargar')); document.head.appendChild(s); }); }
+
 async function cargarModelosDeteccion(onProgreso){
   if(_modelosCargados) return true;
   if(_cargandoModelos) return _cargandoModelos;
   _cargandoModelos=(async()=>{
     try{
-      onProgreso?.('Cargando TensorFlow.js…'); await cargarScript(CDN_TFJS);
-      onProgreso?.('Cargando detector de rostros…'); await cargarScript(CDN_FACEAPI);
+      onProgreso?.('Cargando TensorFlow.js…', 5); await cargarScript(CDN_TFJS);
+      onProgreso?.('Cargando face-api.js…', 15); await cargarScript(CDN_FACEAPI);
+      if(!window.faceapi) throw new Error('face-api no disponible');
+      onProgreso?.('Cargando SSD Mobilenet V1 (alta precisión)…', 30);
+      await window.faceapi.nets.ssdMobilenetv1.loadFromUri(FACEAPI_MODEL);
+      onProgreso?.('Cargando TinyFaceDetector (respaldo)…', 50);
       await window.faceapi.nets.tinyFaceDetector.loadFromUri(FACEAPI_MODEL);
-      onProgreso?.('Cargando detector de vehículos…'); await cargarScript(CDN_COCO);
+      onProgreso?.('Cargando coco-ssd (vehículos)…', 70); await cargarScript(CDN_COCO);
+      if(!window.cocoSsd) throw new Error('coco-ssd no disponible');
+      _ssdModel = window.faceapi.nets.ssdMobilenetv1;
+      _tinyModel = window.faceapi.nets.tinyFaceDetector;
+      onProgreso?.('Inicializando detector de vehículos…', 85);
       _cocoModel=await window.cocoSsd.load({base:'lite_mobilenet_v2'});
       _modelosCargados=true;
+      onProgreso?.('✅ Modelos listos', 100);
+      console.log('✅ Modelos de detección cargados');
       return true;
-    }catch(e){ _cargandoModelos=null; throw e; }
+    }catch(e){ _cargandoModelos=null; console.error('❌ Error modelos:', e); throw e; }
   })();
   return _cargandoModelos;
 }
+
 window.toggleAutoCensura = function(){ const t=document.getElementById('toggleAutoCensura'); if(!t) return; autoCensuraActiva=!!t.checked; try{ localStorage.setItem(CLAVE_AUTO_CENSURA,autoCensuraActiva?'1':'0'); }catch(e){} mostrarAviso(autoCensuraActiva?'🛡️ Censura activada':'⚠️ Censura desactivada',autoCensuraActiva?'ok':'error'); };
+
 window.preCargarModelos = async function(){
   if(_modelosCargados){ mostrarAviso('✅ Modelos ya cargados','ok'); return; }
   const modal=document.getElementById('modalProcesando');
   const paso=document.getElementById('procesandoPaso');
+  const tituloGrande=document.getElementById('procesandoTituloGrande');
+  const barra=document.getElementById('procesandoBarra');
+  if(tituloGrande) tituloGrande.textContent='⚙️ Cargando modelos IA';
   if(modal) modal.classList.add('visible');
-  const onP=(msg)=>{ if(paso) paso.textContent=msg; };
+  const onP=(msg,pct)=>{ if(paso) paso.textContent=msg; if(barra && typeof pct==='number') barra.style.width=pct+'%'; };
   try{ await cargarModelosDeteccion(onP); mostrarAviso('✅ Modelos cargados','ok'); }
   catch(e){ mostrarAviso('⚠️ No se pudieron cargar','error'); }
-  finally{ if(modal) modal.classList.remove('visible'); }
+  finally{ setTimeout(()=>{ if(modal) modal.classList.remove('visible'); if(barra) barra.style.width='0%'; },400); }
 };
+
 function cargarImagenParaDeteccion(src){ return new Promise((resolve,reject)=>{ const img=new Image(); img.crossOrigin='anonymous'; img.onload=()=>resolve(img); img.onerror=()=>reject(new Error('No se pudo cargar')); img.src=src; }); }
+
 function pixelarRegion(ctx,x,y,w,h,tamano){
   const canvas=ctx.canvas;
   const sx=Math.max(0,Math.floor(x)); const sy=Math.max(0,Math.floor(y));
@@ -2013,33 +1568,340 @@ function pixelarRegion(ctx,x,y,w,h,tamano){
   let imagen;
   try{ imagen=ctx.getImageData(sx,sy,sw,sh); }catch(e){ return; }
   const data=imagen.data; const bs=Math.max(6,Math.floor(tamano));
-  for(let by=0;by<sh;by+=bs){ for(let bx=0;bx<sw;bx+=bs){ let r=0,g=0,b=0,count=0; const yMax=Math.min(by+bs,sh), xMax=Math.min(bx+bs,sw); for(let yy=by;yy<yMax;yy++) for(let xx=bx;xx<xMax;xx++){ const i=(yy*sw+xx)*4; r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++; } if(!count) continue; r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count); for(let yy=by;yy<yMax;yy++) for(let xx=bx;xx<xMax;xx++){ const i=(yy*sw+xx)*4; data[i]=r; data[i+1]=g; data[i+2]=b; } } }
+  for(let by=0;by<sh;by+=bs){ 
+    for(let bx=0;bx<sw;bx+=bs){ 
+      let r=0,g=0,b=0,count=0; 
+      const yMax=Math.min(by+bs,sh), xMax=Math.min(bx+bs,sw); 
+      for(let yy=by;yy<yMax;yy++) for(let xx=bx;xx<xMax;xx++){ const i=(yy*sw+xx)*4; r+=data[i]; g+=data[i+1]; b+=data[i+2]; count++; } 
+      if(!count) continue; 
+      r=Math.round(r/count); g=Math.round(g/count); b=Math.round(b/count); 
+      for(let yy=by;yy<yMax;yy++) for(let xx=bx;xx<xMax;xx++){ const i=(yy*sw+xx)*4; data[i]=r; data[i+1]=g; data[i+2]=b; } 
+    } 
+  }
   ctx.putImageData(imagen,sx,sy);
 }
-async function detectarYCensurar(dataUrl,onProgreso){
+
+/* Detección de rostros con SSD Mobilenet + TinyFaceDetector multi-escala */
+async function detectarRostrosMultiEscala(img, onProgreso){
+  const todasDetecciones = [];
+  
+  // Pasada 1: SSD Mobilenet V1 (alta precisión, umbral 0.35)
+  try {
+    onProgreso?.('Detectando rostros (SSD, alta precisión)…', 35);
+    const opts = new window.faceapi.SsdMobilenetv1Options({ minConfidence: 0.35, maxResults: 50 });
+    const caras = await window.faceapi.detectAllFaces(img, opts);
+    caras.forEach(c => {
+      const b = c.box;
+      todasDetecciones.push({ x: b.x, y: b.y, w: b.width, h: b.height, tipo: 'face-ssd' });
+    });
+    console.log(`SSD Mobilenet: ${caras.length} rostros`);
+  } catch(e){ console.warn('SSD error:', e); }
+  
+  // Pasada 2: TinyFaceDetector a escala original (catch pequeños)
+  try {
+    onProgreso?.('Detectando rostros pequeños…', 50);
+    const optsTiny = new window.faceapi.TinyFaceDetectorOptions({ inputSize: 512, scoreThreshold: 0.35 });
+    const caras = await window.faceapi.detectAllFaces(img, optsTiny);
+    caras.forEach(c => {
+      const b = c.box;
+      // Solo añadir si no se solapa demasiado con las ya detectadas
+      const yaExiste = todasDetecciones.some(d => {
+        const cx1 = d.x + d.w/2, cy1 = d.y + d.h/2;
+        const cx2 = b.x + b.width/2, cy2 = b.y + b.height/2;
+        const dist = Math.hypot(cx1-cx2, cy1-cy2);
+        return dist < Math.min(d.w, d.h) * 0.5;
+      });
+      if(!yaExiste) todasDetecciones.push({ x: b.x, y: b.y, w: b.width, h: b.height, tipo: 'face-tiny' });
+    });
+    console.log(`TinyFaceDetector: ${caras.length} rostros`);
+  } catch(e){ console.warn('Tiny error:', e); }
+  
+  // Pasada 3: TinyFaceDetector en imagen reducida (catch rostros grandes que puedan fallar en alta res)
+  try {
+    onProgreso?.('Segunda pasada multi-escala…', 65);
+    const canvas = document.createElement('canvas');
+    const ratio = 0.7;
+    canvas.width = Math.round((img.naturalWidth||img.width) * ratio);
+    canvas.height = Math.round((img.naturalHeight||img.height) * ratio);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    const optsTiny = new window.faceapi.TinyFaceDetectorOptions({ inputSize: 416, scoreThreshold: 0.3 });
+    const caras = await window.faceapi.detectAllFaces(canvas, optsTiny);
+    caras.forEach(c => {
+      const b = c.box;
+      // Escalar de vuelta
+      const rx = b.x / ratio, ry = b.y / ratio, rw = b.width / ratio, rh = b.height / ratio;
+      const yaExiste = todasDetecciones.some(d => {
+        const cx1 = d.x + d.w/2, cy1 = d.y + d.h/2;
+        const cx2 = rx + rw/2, cy2 = ry + rh/2;
+        const dist = Math.hypot(cx1-cx2, cy1-cy2);
+        return dist < Math.min(d.w, d.h) * 0.5;
+      });
+      if(!yaExiste) todasDetecciones.push({ x: rx, y: ry, w: rw, h: rh, tipo: 'face-tiny-small' });
+    });
+  } catch(e){ console.warn('Tiny small error:', e); }
+  
+  return todasDetecciones;
+}
+
+/* Detección de vehículos con coco-ssd */
+async function detectarVehiculos(img, onProgreso){
+  const detecciones = [];
+  try {
+    onProgreso?.('Detectando vehículos…', 75);
+    const objetos = await _cocoModel.detect(img, 30, 0.35);
+    objetos.forEach(o => {
+      if (!CLASES_VEHICULO.includes(o.class)) return;
+      const [x, y, w, h] = o.bbox;
+      detecciones.push({ x, y, w, h, tipo: o.class, confianza: o.score });
+    });
+    console.log(`coco-ssd: ${detecciones.length} vehículos`);
+  } catch(e){ console.warn('COCO-SSD error:', e); }
+  return detecciones;
+}
+
+async function detectarYCensurar(dataUrl, onProgreso){
   const resultado={dataUrl,rostros:0,vehiculos:0,aplicado:false,error:null};
   if(!autoCensuraActiva) return resultado;
-  try{ await cargarModelosDeteccion(onProgreso); }catch(e){ resultado.error='Modelos no disponibles'; return resultado; }
+  
+  try{ await cargarModelosDeteccion(onProgreso); }
+  catch(e){ resultado.error='Modelos no disponibles: ' + e.message; return resultado; }
+  
   let img;
-  try{ img=await cargarImagenParaDeteccion(dataUrl); }catch(e){ resultado.error='No se pudo abrir'; return resultado; }
+  try{ img=await cargarImagenParaDeteccion(dataUrl); }
+  catch(e){ resultado.error='No se pudo abrir'; return resultado; }
+  
   const canvas=document.createElement('canvas');
-  canvas.width=img.naturalWidth||img.width; canvas.height=img.naturalHeight||img.height;
+  canvas.width=img.naturalWidth||img.width; 
+  canvas.height=img.naturalHeight||img.height;
   const ctx=canvas.getContext('2d');
   ctx.drawImage(img,0,0);
-  const detecciones=[];
-  onProgreso?.('Analizando rostros…');
-  try{ const caras=await window.faceapi.detectAllFaces(img,new window.faceapi.TinyFaceDetectorOptions({inputSize:512,scoreThreshold:0.5})); caras.forEach(c=>{ const b=c.box; detecciones.push({x:b.x,y:b.y,w:b.width,h:b.height}); }); resultado.rostros=caras.length; }catch(e){}
-  onProgreso?.('Analizando vehículos…');
-  try{ const objetos=await _cocoModel.detect(img,20,0.5); objetos.forEach(o=>{ if(!CLASES_VEHICULO.includes(o.class)) return; const [x,y,w,h]=o.bbox; detecciones.push({x,y,w,h}); }); resultado.vehiculos=objetos.filter(o=>CLASES_VEHICULO.includes(o.class)).length; }catch(e){}
-  if(detecciones.length===0){ resultado.aplicado=true; return resultado; }
-  onProgreso?.('Aplicando censura…');
-  const tamPixel=Math.max(10,Math.round(Math.min(canvas.width,canvas.height)/60));
-  detecciones.forEach(d=>{ const pad=Math.max(d.w,d.h)*0.10; pixelarRegion(ctx,d.x-pad,d.y-pad,d.w+pad*2,d.h+pad*2,tamPixel); });
-  try{ resultado.dataUrl=canvas.toDataURL('image/jpeg',FOTO_JPEG_QUALITY); resultado.aplicado=true; }catch(e){ resultado.error='No se pudo exportar'; resultado.dataUrl=dataUrl; }
+  
+  // Detectar rostros con múltiples pasadas
+  const deteccionesRostros = await detectarRostrosMultiEscala(img, onProgreso);
+  resultado.rostros = deteccionesRostros.length;
+  
+  // Detectar vehículos
+  const deteccionesVehiculos = await detectarVehiculos(img, onProgreso);
+  resultado.vehiculos = deteccionesVehiculos.length;
+  
+  const todasDetecciones = [...deteccionesRostros, ...deteccionesVehiculos];
+  
+  if(todasDetecciones.length===0){ 
+    resultado.aplicado=true; 
+    onProgreso?.('✅ Imagen limpia (sin detecciones)', 100);
+    return resultado; 
+  }
+  
+  onProgreso?.(`Aplicando censura a ${todasDetecciones.length} zona(s)…`, 90);
+  
+  // Pixelado más denso (más agresivo)
+  const tamPixel=Math.max(8,Math.round(Math.min(canvas.width,canvas.height)/40));
+  
+  todasDetecciones.forEach(d=>{ 
+    // Padding del 20% para mayor margen
+    const pad = Math.max(d.w, d.h) * 0.20; 
+    pixelarRegion(ctx, d.x - pad, d.y - pad, d.w + pad*2, d.h + pad*2, tamPixel); 
+  });
+  
+  try{ 
+    resultado.dataUrl=canvas.toDataURL('image/jpeg',FOTO_JPEG_QUALITY); 
+    resultado.aplicado=true; 
+  }catch(e){ 
+    resultado.error='No se pudo exportar'; 
+    resultado.dataUrl=dataUrl; 
+  }
+  
   return resultado;
 }
 
-/* BANCO */
+/* ══════════════════════════════════════════════════════════
+   CENSURA MANUAL
+   ══════════════════════════════════════════════════════════ */
+window.abrirModalCensura = async function(fotoId){
+  const foto = await obtenerFotoDB(fotoId);
+  if(!foto || !foto.data){ mostrarAviso('⚠️ Foto no encontrada','error'); return; }
+  
+  const img = new Image();
+  img.onload = () => {
+    censuraActual.fotoId = fotoId;
+    censuraActual.img = img;
+    censuraActual.rectangulos = [];
+    censuraActual.dibujando = false;
+    censuraActual.inicio = null;
+    censuraActual.actual = null;
+    
+    const canvas = document.getElementById('censuraCanvas');
+    const maxW = Math.min(window.innerWidth - 60, 700);
+    const ratio = Math.min(maxW / img.naturalWidth, 1);
+    canvas.width = Math.round(img.naturalWidth * ratio);
+    canvas.height = Math.round(img.naturalHeight * ratio);
+    censuraActual.canvas = canvas;
+    censuraActual.ctx = canvas.getContext('2d');
+    censuraActual.escala = ratio;
+    
+    redibujarCensura();
+    document.getElementById('censuraInfo').textContent = 'Zonas marcadas: 0';
+    document.getElementById('modalCensura').classList.add('visible');
+  };
+  img.onerror = () => mostrarAviso('⚠️ No se pudo cargar la imagen','error');
+  img.src = foto.data;
+};
+
+function redibujarCensura(){
+  const {img, canvas, ctx, rectangulos, actual} = censuraActual;
+  if(!img || !canvas) return;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  
+  // Dibujar rectángulos ya marcados
+  rectangulos.forEach(r => {
+    ctx.save();
+    ctx.strokeStyle = '#ff453a';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(r.x, r.y, r.w, r.h);
+    ctx.fillStyle = 'rgba(255,69,58,0.25)';
+    ctx.fillRect(r.x, r.y, r.w, r.h);
+    // Dibujar un icono de "censurar"
+    ctx.fillStyle = '#ff453a';
+    ctx.font = 'bold 14px sans-serif';
+    ctx.fillText('🛡️', r.x + 4, r.y + 18);
+    ctx.restore();
+  });
+  
+  // Dibujar rectángulo actual (mientras se arrastra)
+  if(actual){
+    ctx.save();
+    ctx.strokeStyle = '#0a84ff';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeRect(actual.x, actual.y, actual.w, actual.h);
+    ctx.fillStyle = 'rgba(10,132,255,0.2)';
+    ctx.fillRect(actual.x, actual.y, actual.w, actual.h);
+    ctx.restore();
+  }
+}
+
+function getPosCensura(e){
+  const canvas = censuraActual.canvas;
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches ? e.touches[0] : e;
+  return { x: (touch.clientX - rect.left) * (canvas.width / rect.width), y: (touch.clientY - rect.top) * (canvas.height / rect.height) };
+}
+
+function iniciarTrazoCensura(e){
+  e.preventDefault();
+  const p = getPosCensura(e);
+  censuraActual.dibujando = true;
+  censuraActual.inicio = p;
+  censuraActual.actual = { x: p.x, y: p.y, w: 0, h: 0 };
+  redibujarCensura();
+}
+function moverTrazoCensura(e){
+  if(!censuraActual.dibujando) return;
+  e.preventDefault();
+  const p = getPosCensura(e);
+  const ini = censuraActual.inicio;
+  censuraActual.actual = { x: Math.min(ini.x, p.x), y: Math.min(ini.y, p.y), w: Math.abs(p.x - ini.x), h: Math.abs(p.y - ini.y) };
+  redibujarCensura();
+}
+function terminarTrazoCensura(e){
+  if(!censuraActual.dibujando) return;
+  e.preventDefault();
+  censuraActual.dibujando = false;
+  const r = censuraActual.actual;
+  if(r && r.w > 10 && r.h > 10){
+    censuraActual.rectangulos.push(r);
+    document.getElementById('censuraInfo').textContent = `Zonas marcadas: ${censuraActual.rectangulos.length}`;
+  }
+  censuraActual.actual = null;
+  redibujarCensura();
+}
+
+window.deshacerUltimaCensura = function(){
+  if(censuraActual.rectangulos.length === 0){ mostrarAviso('ℹ️ No hay zonas marcadas','warn'); return; }
+  censuraActual.rectangulos.pop();
+  document.getElementById('censuraInfo').textContent = `Zonas marcadas: ${censuraActual.rectangulos.length}`;
+  redibujarCensura();
+};
+
+window.cerrarModalCensura = function(){
+  document.getElementById('modalCensura').classList.remove('visible');
+  censuraActual = { fotoId:null, img:null, canvas:null, ctx:null, rectangulos:[], dibujando:false, inicio:null, actual:null };
+};
+
+window.aplicarCensuraManual = async function(){
+  if(censuraActual.rectangulos.length === 0){ mostrarAviso('⚠️ Marca al menos una zona','error'); return; }
+  if(!censuraActual.img || !censuraActual.fotoId){ mostrarAviso('⚠️ Error','error'); return; }
+  
+  const img = censuraActual.img;
+  const escala = censuraActual.escala;
+  
+  // Crear canvas a resolución original
+  const canvasFull = document.createElement('canvas');
+  canvasFull.width = img.naturalWidth;
+  canvasFull.height = img.naturalHeight;
+  const ctxFull = canvasFull.getContext('2d');
+  ctxFull.drawImage(img, 0, 0);
+  
+  // Aplicar pixelado en cada rectángulo (escalando de vuelta)
+  const tamPixel = Math.max(8, Math.round(Math.min(canvasFull.width, canvasFull.height) / 40));
+  censuraActual.rectangulos.forEach(r => {
+    const x = r.x / escala, y = r.y / escala, w = r.w / escala, h = r.h / escala;
+    pixelarRegion(ctxFull, x, y, w, h, tamPixel);
+  });
+  
+  const dataFinal = canvasFull.toDataURL('image/jpeg', FOTO_JPEG_QUALITY);
+  const kb = Math.round((dataFinal.length * 0.75) / 1024);
+  
+  // Actualizar en IndexedDB
+  await guardarFotoDB(censuraActual.fotoId, dataFinal, { tamanoKB: kb, fecha: new Date().toISOString(), censurada: true, manual: true });
+  cacheFotos.set(censuraActual.fotoId, dataFinal);
+  
+  // Actualizar el array de fotos pendientes
+  const fp = fotosPendientes.find(f => f.id === censuraActual.fotoId);
+  if(fp){ fp.censurada = true; fp.manual = true; fp.tamanoKB = kb; }
+  
+  await renderizarGaleriaFotos();
+  guardarEstadoCompleto();
+  cerrarModalCensura();
+  mostrarAviso('✅ Censura manual aplicada', 'ok');
+  beepOk();
+};
+
+/* Configurar eventos del canvas de censura */
+document.addEventListener('DOMContentLoaded', () => {
+  const canvas = document.getElementById('censuraCanvas');
+  if(!canvas) return;
+  canvas.addEventListener('mousedown', iniciarTrazoCensura);
+  canvas.addEventListener('mousemove', moverTrazoCensura);
+  canvas.addEventListener('mouseup', terminarTrazoCensura);
+  canvas.addEventListener('mouseleave', (e) => { if(censuraActual.dibujando) terminarTrazoCensura(e); });
+  canvas.addEventListener('touchstart', iniciarTrazoCensura, { passive: false });
+  canvas.addEventListener('touchmove', moverTrazoCensura, { passive: false });
+  canvas.addEventListener('touchend', terminarTrazoCensura);
+  canvas.addEventListener('touchcancel', terminarTrazoCensura);
+});
+// Por si el DOMContentLoaded ya pasó
+setTimeout(() => {
+  const canvas = document.getElementById('censuraCanvas');
+  if(canvas && !canvas._censuraBound){
+    canvas._censuraBound = true;
+    canvas.addEventListener('mousedown', iniciarTrazoCensura);
+    canvas.addEventListener('mousemove', moverTrazoCensura);
+    canvas.addEventListener('mouseup', terminarTrazoCensura);
+    canvas.addEventListener('mouseleave', (e) => { if(censuraActual.dibujando) terminarTrazoCensura(e); });
+    canvas.addEventListener('touchstart', iniciarTrazoCensura, { passive: false });
+    canvas.addEventListener('touchmove', moverTrazoCensura, { passive: false });
+    canvas.addEventListener('touchend', terminarTrazoCensura);
+    canvas.addEventListener('touchcancel', terminarTrazoCensura);
+  }
+}, 1000);
+
+/* ══════════════════════════════════════════════════════════
+   BANCO DE CÓDIGOS (sin geocodificación)
+   ══════════════════════════════════════════════════════════ */
 function codigosEnVisitas(){ const s=new Set(); visitas.forEach(v=>{ if(v.codigo && v.codigo.trim()) s.add(v.codigo.trim()); }); return s; }
 
 window.agregarCodigoBanco = function(){
@@ -2090,30 +1952,11 @@ window.guardarEdicionBanco = function(index){
   const e=validarCodigo(nuevoCod);
   if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); return; }
   for(let i=0;i<bancoCodigos.length;i++){ if(i===index) continue; const item=normalizarCodigoBanco(bancoCodigos[i]); if(item.codigo===nuevoCod){ mostrarAviso('⚠️ Ya existe otro código igual','error'); beepError(); return; } }
-  const anterior = normalizarCodigoBanco(bancoCodigos[index]);
-  bancoCodigos[index] = { codigo:nuevoCod, direccion:nuevaDir, precio:nuevoPre, lat:anterior.lat, lon:anterior.lon };
+  bancoCodigos[index] = { codigo:nuevoCod, direccion:nuevaDir, precio:nuevoPre };
   bancoCodigoEditando=null;
   renderizarBanco();
   guardarEstadoCompleto();
   mostrarAviso('✅ Guardado','ok');
-};
-
-/* Geocodificar un código individual del banco */
-window.geocodificarCodigoBanco = async function(codigo){
-  const b = buscarEnBanco(codigo);
-  if(!b || !b.item.direccion){ mostrarAviso('⚠️ Este código no tiene dirección','error'); return; }
-  mostrarAviso('🤖 Geocodificando...','ok');
-  const ciudad = detectarCiudadEnDireccion(b.item.direccion) || getCiudadSeleccionada();
-  const g = await geocodificarDireccionAvanzado(b.item.direccion, ciudad);
-  if(g){
-    b.item.lat = g.lat;
-    b.item.lon = g.lon;
-    guardarEstadoCompleto();
-    mostrarAviso('✅ Geocodificado: '+g.display.substring(0,50)+'...','ok');
-    renderizarBanco();
-  } else {
-    mostrarAviso('❌ No se pudo geocodificar. Usa coords manuales.','error');
-  }
 };
 
 function renderizarBanco(){
@@ -2149,8 +1992,7 @@ function renderizarBanco(){
       ic?.addEventListener('input',()=>{ const l=(ic.value||'').replace(/\D/g,'').slice(0,12); if(ic.value!==l) ic.value=l; });
     } else {
       const w=document.createElement('div');
-      const tieneCoords = item.lat && item.lon;
-      w.className='chip-banco '+(usado?'usado':'disponible')+(!tieneCoords && item.direccion?' sin-coords':'');
+      w.className='chip-banco '+(usado?'usado':'disponible');
       const header=document.createElement('div');
       header.className='cb-codigo';
       const codSpan=document.createElement('span');
@@ -2164,19 +2006,17 @@ function renderizarBanco(){
       w.appendChild(header);
       const datos=document.createElement('div');
       datos.className='cb-datos';
-      if(item.direccion){ const dir=document.createElement('span'); dir.className='dir'; dir.textContent='📍 '+item.direccion + (tieneCoords?' ✅':''); datos.appendChild(dir); }
+      if(item.direccion){ const dir=document.createElement('span'); dir.className='dir'; dir.textContent='📍 '+item.direccion; datos.appendChild(dir); }
       else { const dir=document.createElement('span'); dir.className='dir'; dir.style.color='var(--text-muted)'; dir.style.fontStyle='italic'; dir.textContent='📍 Sin dirección'; datos.appendChild(dir); }
       if(item.precio>0){ const pre=document.createElement('span'); pre.className='precio'; pre.textContent='💰 '+formatCOP(item.precio); datos.appendChild(pre); }
       w.appendChild(datos);
       const actions=document.createElement('div');
       actions.className='cb-actions';
-      const btnGeo=document.createElement('button');
-      btnGeo.type='button'; btnGeo.className='btn-geo-codigo'; btnGeo.textContent= tieneCoords ? '✅ Geocodificado' : '🌐 Geocodificar'; btnGeo.onclick=()=>window.geocodificarCodigoBanco(item.codigo);
       const btnEdit=document.createElement('button');
-      btnEdit.type='button'; btnEdit.className='btn-edit-codigo'; btnEdit.textContent='✏️'; btnEdit.onclick=()=>window.editarCodigoBanco(item.codigo);
+      btnEdit.type='button'; btnEdit.className='btn-edit-codigo'; btnEdit.textContent='✏️ Editar'; btnEdit.onclick=()=>window.editarCodigoBanco(item.codigo);
       const btnDel=document.createElement('button');
-      btnDel.type='button'; btnDel.className='btn-del-codigo'; btnDel.textContent='🗑️'; btnDel.onclick=()=>window.eliminarCodigoBanco(item.codigo);
-      actions.appendChild(btnGeo); actions.appendChild(btnEdit); actions.appendChild(btnDel);
+      btnDel.type='button'; btnDel.className='btn-del-codigo'; btnDel.textContent='🗑️ Eliminar'; btnDel.onclick=()=>window.eliminarCodigoBanco(item.codigo);
+      actions.appendChild(btnEdit); actions.appendChild(btnDel);
       w.appendChild(actions);
       c.appendChild(w);
     }
@@ -2241,7 +2081,7 @@ window.buscarCodigosBanco = function(){
     if(item.codigo.toLowerCase().includes(q) || (item.direccion||'').toLowerCase().includes(q)){ coincidencias.push(item); }
   });
   const m=coincidencias.slice(0,30);
-  if(!m.length){ const d=document.createElement('div'); d.className='sin-resultados'; d.textContent='❌ Sin coincidencias'; c.appendChild(d); c.style.display='block'; return; }
+  if(!m.length){ const d=document.createElement('div'); d.className='sin-resultados'; d.textContent='❌ Sin coincidencias en el banco'; c.appendChild(d); c.style.display='block'; return; }
   m.forEach(item=>{
     const uu=u.has(item.codigo);
     const it=document.createElement('div');
@@ -2266,7 +2106,7 @@ window.seleccionarPrimerResultado = function(){ const c=document.getElementById(
 window.agregarCodigoDesdeBanco = function(cod){
   if(codigosPendientes.includes(cod)){ mostrarAviso('⚠️ Ya seleccionado','error'); beepError(); return; }
   const u=codigosEnVisitas();
-  if(u.has(cod) && !confirm('⚠️ Ya está en otra visita. ¿Agregar?')) return;
+  if(u.has(cod) && !confirm('⚠️ Ya está en otra visita. ¿Agregar de todas formas?')) return;
   codigosPendientes.push(cod);
   renderizarCodigosPendientes();
   const b=buscarEnBanco(cod);
@@ -2274,9 +2114,8 @@ window.agregarCodigoDesdeBanco = function(cod){
   if(b && b.item){
     const dirInput=document.getElementById('direccionVisita');
     const preInput=document.getElementById('precioVisita');
-    if(b.item.direccion){ if(dirInput && !dirInput.value.trim()){ dirInput.value = b.item.direccion; autoMsg += ' 📍'; } }
-    if(b.item.precio>0){ if(preInput && !preInput.value){ preInput.value = b.item.precio; autoMsg += ' 💰'; } }
-    if(b.item.lat && b.item.lon && dirInput){ dirInput.dataset.lat = b.item.lat; dirInput.dataset.lon = b.item.lon; }
+    if(b.item.direccion && dirInput && !dirInput.value.trim()){ dirInput.value = b.item.direccion; autoMsg += ' 📍'; }
+    if(b.item.precio>0 && preInput && !preInput.value){ preInput.value = b.item.precio; autoMsg += ' 💰'; }
   }
   window.limpiarBusquedaCodigo();
   guardarEstadoCompleto();
@@ -2347,28 +2186,8 @@ function guardarDiaActual(){ const f=fechaLocalISO(); let h={}; try{ h=JSON.pars
 function cargarHistorialDetallado(){ try{ return JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch{ return {}; } }
 function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo||0; }); cargarCodigosRegistradosHoy(); actualizarDashboard(); }
 
-window.agregarCodigo = function(){
-  const i=document.getElementById('codigoBarras'); if(!i) return;
-  const c=(i.value||'').trim();
-  if(!c){ mostrarAviso('⚠️ Ingresa un código','error'); beepError(); i.focus(); return; }
-  const e=validarCodigo(c);
-  if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); i.focus(); return; }
-  const m=motivoDuplicado(c);
-  if(m){ mostrarAviso('⚠️ '+m,'error'); beepError(); i.value=''; actualizarContadorDigitos(i,'contadorDigitosVisita'); i.focus(); return; }
-  if(!bancoContiene(c)){ bancoCodigos.push({codigo:c,direccion:'',precio:0}); renderizarBanco(); }
-  agregarCodigoPendiente(c);
-  const b=buscarEnBanco(c);
-  if(b && b.item){
-    const dirInput=document.getElementById('direccionVisita');
-    const preInput=document.getElementById('precioVisita');
-    if(b.item.direccion && dirInput && !dirInput.value.trim()) dirInput.value=b.item.direccion;
-    if(b.item.precio>0 && preInput && !preInput.value) preInput.value=b.item.precio;
-  }
-  i.value='';
-  actualizarContadorDigitos(i,'contadorDigitosVisita');
-  i.focus();
-  guardarBorrador();
-};
+window.agregarCodigo = function(){ /* Deshabilitado - solo banco */ mostrarAviso('ℹ️ Solo puedes usar códigos del banco. Ve a la pestaña 📥 Banco','warn'); };
+
 function agregarCodigoPendiente(c){
   if(!c) return;
   c=c.trim();
@@ -2387,7 +2206,7 @@ function renderizarCodigosPendientes(){
   const c=document.getElementById('listaCodigosPendientes'), ct=document.getElementById('contadorCodigos');
   if(!c) return;
   c.innerHTML='';
-  if(!codigosPendientes.length){ const v=document.createElement('div'); v.className='lista-vacia'; v.textContent='Sin códigos seleccionados.'; c.appendChild(v); if(ct) ct.textContent=''; return; }
+  if(!codigosPendientes.length){ const v=document.createElement('div'); v.className='lista-vacia'; v.textContent='Sin códigos seleccionados. Búscalos en el banco ↑'; c.appendChild(v); if(ct) ct.textContent=''; return; }
   codigosPendientes.forEach((cod,i)=>{ const ch=document.createElement('span'); ch.className='chip-codigo'; const sp=document.createElement('span'); sp.textContent=cod; ch.appendChild(sp); const b=document.createElement('button'); b.type='button'; b.textContent='✕'; b.onclick=()=>window.eliminarCodigoPendiente(i); ch.appendChild(b); c.appendChild(ch); });
   if(ct) ct.textContent=`📦 ${codigosPendientes.length} pedido(s)`;
 }
@@ -2464,7 +2283,6 @@ window.eliminarVisita = async (index)=>{
   if(filaEditando===index) filaEditando=null; else if(filaEditando!==null && filaEditando>index) filaEditando--;
   recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   guardarEstadoCompleto();
-  refrescarMapaSiActivo();
 };
 
 let filtroVistaDia='todas';
@@ -2508,7 +2326,7 @@ function _renderizarVistaDiaExcel(){
         else if(col===6){ const num=parseFloat(val.replace(/[^0-9]/g,''))||0; visitas[index].precio=num; }
         else if(col===7){ visitas[index].estado=val; }
         else if(col===8){ visitas[index].descripcion=val; }
-        recalcularEstadisticas(); guardarEstadoCompleto(); refrescarMapaSiActivo();
+        recalcularEstadisticas(); guardarEstadoCompleto();
       }
     });
   }catch(e){ 
@@ -2578,6 +2396,7 @@ window.calcularTiemposBase = function(silencioso){
 window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); guardarBorrador(); };
 window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert('Primero marca llegada'); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert('Selecciona estado'); return; } const s=horaActual(); document.getElementById('salidaCliente').value=s; window.registrarVisita(); };
 
+/* Firma */
 let canvasFirma, ctxFirma, dibujandoFirma=false, firmaGuardada=null;
 let ultimoX=0, ultimoY=0;
 window.inicializarFirma = function(){
@@ -2608,14 +2427,10 @@ window.guardarFirma = function(){
 };
 
 function limpiarFormularioVisita(){
-  ['llegadaCliente','salidaCliente','codigoBarras','descripcionVisita','estadoPaquete','busquedaCodigoBanco','direccionVisita','precioVisita'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  const dirInput=document.getElementById('direccionVisita');
-  if(dirInput){ delete dirInput.dataset.lat; delete dirInput.dataset.lon; }
+  ['llegadaCliente','salidaCliente','descripcionVisita','estadoPaquete','busquedaCodigoBanco','direccionVisita','precioVisita'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   codigosPendientes=[]; renderizarCodigosPendientes();
   fotosPendientes=[]; renderizarGaleriaFotos();
-  actualizarContadorDigitos(document.getElementById('codigoBarras'),'contadorDigitosVisita');
   window.limpiarBusquedaCodigo(); window.actualizarPlaceholderDescripcion();
-  const resIA=document.getElementById('resultadoIA'); if(resIA){ resIA.style.display='none'; resIA.textContent=''; }
   window.limpiarFirma();
   try{ localStorage.removeItem(CLAVE_BORRADOR); }catch(e){}
 }
@@ -2625,39 +2440,46 @@ window.registrarVisita = async ()=>{
   const desc=(document.getElementById('descripcionVisita').value||'').trim();
   const direccion=(document.getElementById('direccionVisita')?.value||'').trim();
   const precio=parseFloat(document.getElementById('precioVisita')?.value)||0;
-  let lat=document.getElementById('direccionVisita')?.dataset?.lat||null;
-  let lon=document.getElementById('direccionVisita')?.dataset?.lon||null;
   if(!l){ alert('Ingresa la hora de llegada'); return; }
   if(!es){ alert('Selecciona estado'); return; }
   if(!s) s=l;
-  const ic=(document.getElementById('codigoBarras').value||'').trim();
-  if(ic){ const e=validarCodigo(ic); if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); return; } const m=motivoDuplicado(ic); if(m){ mostrarAviso('⚠️ '+m,'error'); beepError(); return; } if(!codigosPendientes.includes(ic)) codigosPendientes.push(ic); if(!bancoContiene(ic)) bancoCodigos.push({codigo:ic,direccion:'',precio:0}); }
-  if(!codigosPendientes.length && !ic){ if(!confirm('⚠️ ¿Registrar visita sin código?')) return; }
-  for(const c of codigosPendientes){ const e=validarCodigo(c); if(e){ mostrarAviso('⚠️ Código inválido: '+c,'error'); beepError(); return; } }
-  // Auto-geocodificar si falta
-  if(direccion && !lat){
-    try {
-      const ciudadDetectada = detectarCiudadEnDireccion(direccion) || getCiudadSeleccionada();
-      const g = await geocodificarDireccionAvanzado(direccion, ciudadDetectada);
-      if(g){ lat = g.lat; lon = g.lon; }
-    } catch(e){ console.warn('Auto-geo:', e); }
+  
+  // Solo se permiten códigos del banco (ya validados)
+  if(codigosPendientes.length === 0){ 
+    alert('⚠️ Debes seleccionar al menos un código del banco.\n\nVe a la pestaña 📥 Banco para agregar códigos, o usa la búsqueda en esta sección para seleccionarlos.'); 
+    return; 
   }
-  const codigos=codigosPendientes.length?[...codigosPendientes]:[''];
+  
+  for(const c of codigosPendientes){ 
+    const e=validarCodigo(c); 
+    if(e){ mostrarAviso('⚠️ Código inválido: '+c,'error'); beepError(); return; } 
+  }
+  
+  const codigos=[...codigosPendientes];
   const t=calcularMinutos(l,s);
   const hr=new Date().toISOString();
-  const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}));
+  const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   const firmaAdjunta=firmaGuardada||null;
-  codigos.forEach(co=>{ visitas.push({ llegada:l, salida:s, tiempo:t, estado:es, codigo:co, descripcion:desc, direccion:direccion, precio:precio, lat:lat, lon:lon, firma:firmaAdjunta, horaRegistro:hr, grupo:codigos.length>1?hr:null, fotos:fv }); });
+  
+  codigos.forEach(co=>{ 
+    visitas.push({ 
+      llegada:l, salida:s, tiempo:t, estado:es, codigo:co, 
+      descripcion:desc, direccion:direccion, precio:precio, 
+      firma:firmaAdjunta, horaRegistro:hr, 
+      grupo:codigos.length>1?hr:null, fotos:fv 
+    }); 
+  });
+  
   ultimoEstadoUsado=es;
   cancelarEscaneo();
   limpiarFormularioVisita();
   recalcularEstadisticas(); renderizarTabla(); renderizarBanco(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   guardarEstadoCompleto();
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
-  refrescarMapaSiActivo();
-  setTimeout(()=>{ document.getElementById('llegadaCliente')?.focus(); mostrarAviso('✅ Visita guardada','ok'); beepOk(); },120);
+  setTimeout(()=>{ document.getElementById('llegadaCliente')?.focus(); mostrarAviso('✅ Visita guardada ('+codigos.length+' código'+ (codigos.length>1?'s':'') +')','ok'); beepOk(); },120);
 };
 
+/* Escáner QR */
 let escaneoModo='pendientes';
 window.iniciarEscaneo = function(modo){
   if(escaneoActivo) return;
@@ -2704,9 +2526,16 @@ window.iniciarEscaneo = function(modo){
         cerrar();
         return;
       }
+      // En modo 'pendientes', solo se permiten códigos del banco
+      if(!bancoContiene(cod)){ 
+        mostrarAviso('⚠️ Código no está en el banco. Agrégalo primero.','error'); 
+        beepError(); 
+        sesionEscaneoYaAgrego=false; 
+        setTimeout(()=>{ try{ html5QrCode.resume(); }catch(_){} },1500); 
+        return; 
+      }
       const m=motivoDuplicado(cod);
       if(m){ mostrarAviso('⚠️ '+m,'error'); beepError(); sesionEscaneoYaAgrego=false; setTimeout(()=>{ try{ html5QrCode.resume(); }catch(_){} },1000); return; }
-      if(!bancoContiene(cod)){ bancoCodigos.push({codigo:cod,direccion:'',precio:0}); renderizarBanco(); }
       agregarCodigoPendiente(cod);
       const b=buscarEnBanco(cod);
       if(b && b.item){
@@ -2764,6 +2593,7 @@ function generarChartDona(ancho,alto){
   return c.toDataURL('image/png');
 }
 
+/* Impresión */
 function esModoStandalone(){ try{ return window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.navigator.standalone===true; }catch(e){ return false; } }
 window.esModoStandalone = esModoStandalone;
 function esDispositivoIOS(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); }
@@ -3032,7 +2862,7 @@ async function crearObjetoRespaldo(){
   let e=null, en={};
   try{ e=JSON.parse(localStorage.getItem('estadoSesion')||'null'); }catch(e2){}
   try{ en=JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch(e2){}
-  const obj={version:8,usuario:u,fecha_respaldo:new Date().toISOString(),estadoSesion:e,entregasDiariasDetallado:en,tiemposBase:{inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'',finCarga:localStorage.getItem('tiempoBase_finCarga')||'',salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'',primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||''},ciudadRuta:localStorage.getItem(CLAVE_CIUDAD_RUTA)||''};
+  const obj={version:9,usuario:u,fecha_respaldo:new Date().toISOString(),estadoSesion:e,entregasDiariasDetallado:en,tiemposBase:{inicioCarga:localStorage.getItem('tiempoBase_inicioCarga')||'',finCarga:localStorage.getItem('tiempoBase_finCarga')||'',salidaEmpresa:localStorage.getItem('tiempoBase_salidaEmpresa')||'',primeraEntrega:localStorage.getItem('tiempoBase_primeraEntrega')||''}};
   try{ const tf=await obtenerTodasLasFotosDB(); if(tf.length) obj.fotosIndexedDB=tf.map(f=>({id:f.id,data:f.data,fecha:f.fecha,tamanoKB:f.tamanoKB,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos})); }catch(e2){}
   return obj;
 }
@@ -3108,7 +2938,6 @@ async function aplicarRespaldo(r){
     localStorage.setItem('estadoSesion',JSON.stringify(r.estadoSesion));
   }
   if(r.tiemposBase){ for(const k in r.tiemposBase){ if(r.tiemposBase[k]) localStorage.setItem('tiempoBase_'+k,r.tiemposBase[k]); } }
-  if(r.ciudadRuta){ try{ localStorage.setItem(CLAVE_CIUDAD_RUTA, r.ciudadRuta); }catch(e){} }
   if(Array.isArray(r.fotosIndexedDB) && r.fotosIndexedDB.length){ for(const f of r.fotosIndexedDB){ try{ await guardarFotoDB(f.id,f.data,{tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos}); }catch(e){} } }
   if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
   return true;
@@ -3151,7 +2980,7 @@ window.cargarRespaldoDesdeArchivo = async function(event){
     let cI=[]; if(im.length && window.ZXing){ cI=await decodificarCodigosDeImagenes(im,(a,t)=>mostrarAviso(`🔍 ${a}/${t}`,'ok')); }
     const s=new Set(); cT.forEach(c=>s.add(c)); cI.forEach(c=>s.add(c)); const cs=Array.from(s);
     if(!cs.length){ alert('❌ No se encontraron datos.'); return; }
-    if(!confirm(`📥 ${cs.length} código(s) encontrados. ¿Cargar?`)) return;
+    if(!confirm(`📥 ${cs.length} código(s) encontrados. ¿Cargar al banco?`)) return;
     const {agregados,yaEstaban}=cargarCodigosAlBanco(cs);
     let mF=`✅ ${agregados} agregado(s).`; if(yaEstaban>0) mF+=`\n⚠️ ${yaEstaban} ya estaban.`;
     alert(mF);
@@ -3198,8 +3027,7 @@ window.verEstadoAlmacenamiento = async function(){
   const tKB=todas.reduce((s,f)=>s+(f.tamanoKB||0),0);
   const nC=todas.filter(f=>f.censurada).length;
   let lS=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i), v=localStorage.getItem(k); lS+=(k.length+(v?.length||0)); } }catch(e){}
-  const ciudades = obtenerCiudadesDisponibles();
-  alert(`💾 ALMACENAMIENTO\n\n📸 Fotos: ${tf}\n   ├─ ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}\n\n🏙️ Ciudades: ${Object.keys(ciudades).length}\n${Object.entries(ciudades).map(([c,n])=>`  • ${c}: ${n}`).join('\n')}`);
+  alert(`💾 ALMACENAMIENTO\n\n📸 Fotos: ${tf}\n   ├─ ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}\n🧠 Modelos IA: ${_modelosCargados?'CARGADOS':'no cargados'}`);
 };
 window.eliminarFotosAntiguas = async function(){
   const d=prompt('🗑️ Eliminar fotos anteriores a X días:','60');
@@ -3231,14 +3059,12 @@ function limpiarSesion(){
   renderizarGaleriaFotos(); renderizarCodigosPendientes(); actualizarContadorUnicos(); renderizarBanco();
   ['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; localStorage.removeItem('tiempoBase_'+id); });
   const r=document.getElementById('resumenTiempos'); if(r) r.style.display='none';
-  ['codigoBanco','codigoBarras','busquedaCodigoBanco','llegadaCliente','salidaCliente','direccionVisita','precioVisita','direccionBanco','precioBanco'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+  ['codigoBanco','busquedaCodigoBanco','llegadaCliente','salidaCliente','direccionVisita','precioVisita','direccionBanco','precioBanco'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const sel=document.getElementById('estadoPaquete'); if(sel) sel.value='';
   actualizarContadorDigitos(document.getElementById('codigoBanco'),'contadorDigitosBanco');
-  actualizarContadorDigitos(document.getElementById('codigoBarras'),'contadorDigitosVisita');
   window.limpiarBusquedaCodigo(); window.limpiarFirma();
   try{ localStorage.removeItem('estadoSesion'); localStorage.removeItem(CLAVE_BORRADOR); }catch(e){}
   actualizarDashboard(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
-  refrescarMapaSiActivo();
 }
 window.eliminarTodo = async ()=>{
   if(!confirm('¿ELIMINAR TODO? Irreversible')) return;
@@ -3288,7 +3114,6 @@ window.recargarUIDesdeStorage = function(){
     renderizarTabla(); renderizarBanco(); renderizarCodigosPendientes(); renderizarGaleriaFotos();
     actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
     if(typeof window.renderizarVistaDia==='function') window.renderizarVistaDia();
-    refrescarMapaSiActivo();
   }catch(e){}
 };
 window.reiniciarUIOffline = function(){
@@ -3317,21 +3142,19 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','asistirDireccionIA','dibujarRutaMapa','geolocalizarTodasVisitas','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','geocodificarDireccionAvanzado','inicializarSelectorCiudad','cambiarCiudadRuta','abrirModalCoords','cerrarModalCoords','guardarCoordsManuales','geocodificarCodigoBanco'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','abrirModalCensura','cerrarModalCensura','deshacerUltimaCensura','aplicarCensuraManual'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:',faltan);
   else console.log('✅ Todas las funciones OK');
   if(typeof Chart==='undefined') console.error('❌ Chart.js no cargó'); else console.log('✅ Chart.js OK');
   if(typeof jspreadsheet==='undefined') console.error('❌ Jspreadsheet no cargó'); else console.log('✅ Jspreadsheet OK');
-  if(typeof L==='undefined') console.warn('⚠️ Leaflet no cargó'); else console.log('✅ Leaflet OK');
-  console.log(`🏙️ Ciudades disponibles: ${CIUDADES_COLOMBIA.length}`);
 }
 document.addEventListener('touchstart',function ua(){ try{ const c=new (window.AudioContext||window.webkitAudioContext)(); c.resume(); }catch(e){} document.removeEventListener('touchstart',ua); },{once:true});
 document.addEventListener('click',(e)=>{ const c=document.getElementById('resultadosBusquedaCodigo'), i=document.getElementById('busquedaCodigoBanco'); if(!c||!i) return; if(!c.contains(e.target) && e.target!==i){ c.innerHTML=''; c.style.display='none'; } });
 document.addEventListener('input',(e)=>{
   const id=e.target && e.target.id;
   if(!id) return;
-  if(['llegadaCliente','salidaCliente','estadoPaquete','descripcionVisita','codigoBarras','busquedaCodigoBanco','busquedaDia','busquedaGuia','direccionVisita','precioVisita','codigoBanco','direccionBanco','precioBanco'].includes(id)){
+  if(['llegadaCliente','salidaCliente','estadoPaquete','descripcionVisita','busquedaCodigoBanco','busquedaDia','busquedaGuia','direccionVisita','precioVisita','codigoBanco','direccionBanco','precioBanco'].includes(id)){
     clearTimeout(window._borradorTimeout);
     window._borradorTimeout=setTimeout(guardarBorrador,500);
   }
@@ -3369,7 +3192,6 @@ window.addEventListener('load',async()=>{
   actualizarInformesSemanalesMensuales();
   if(!visitas.length) renderizarGrafica();
   if(typeof window.renderizarVistaDia==='function') window.renderizarVistaDia();
-  if(typeof window.inicializarSelectorCiudad==='function') window.inicializarSelectorCiudad();
   const se=document.getElementById('estadoPaquete'); if(se && !se.value) se.selectedIndex=0;
   renderizarCodigosPendientes();
   actualizarContadorUnicos();
@@ -3380,7 +3202,6 @@ window.addEventListener('load',async()=>{
   if(ae) ae.value=ahora.getFullYear();
   document.getElementById('btnImprimirDiario')?.addEventListener('click',()=>window.imprimirReporteDiario());
   actualizarContadorDigitos(document.getElementById('codigoBanco'),'contadorDigitosBanco');
-  actualizarContadorDigitos(document.getElementById('codigoBarras'),'contadorDigitosVisita');
   setInterval(()=>{ const cut=Date.now()-120000; for(const [k,t] of codesScannedRecently){ if(t<cut) codesScannedRecently.delete(k); } },60000);
   ['llegadaCliente','salidaCliente'].forEach(id=>{ document.getElementById(id)?.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); window.registrarVisita(); } }); });
   document.getElementById('descripcionVisita')?.addEventListener('keydown',e=>{ if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){ e.preventDefault(); window.registrarVisita(); } });
