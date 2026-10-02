@@ -65,6 +65,7 @@ body.dark .btn-informe{background:var(--gray-5)}body.dark .btn-informe:hover{bac
 .btn-darkmode{background:var(--gray-7);width:auto;padding:8px 12px;margin:0;font-size:1rem;border-radius:var(--radius-sm)}.btn-darkmode:hover{background:var(--gray-8)}
 .btn-ia{background:var(--sys-indigo);margin-top:0;padding:10px;font-size:.9em}.btn-ia:hover{background:#4a3fa3}
 .btn-firma{background:var(--sys-purple);margin-top:0;padding:10px;font-size:.9em}.btn-firma:hover{background:#a03dd0}
+.btn-coord{background:var(--sys-orange);margin-top:0;padding:10px;font-size:.9em}.btn-coord:hover{background:#e08800}
 .result-box{background:rgba(48,209,88,.08);border-left:3px solid var(--sys-green);padding:14px;margin-top:12px;border-radius:var(--radius-md);color:var(--text-primary)}
 body.dark .result-box{background:rgba(48,209,88,.1)}
 .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
@@ -150,6 +151,7 @@ body.dark .chip-codigo.usado{color:#a0e0b0}
 .chip-codigo.usado button{background:var(--gray-5)}
 .chip-banco{display:block;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;margin:6px 0;position:relative;transition:border-color .2s var(--ease)}
 .chip-banco.usado{border-color:rgba(48,209,88,.4);background:rgba(48,209,88,.06)}
+.chip-banco.sin-coords{border-color:rgba(255,159,10,.4);background:rgba(255,159,10,.05)}
 .chip-banco .cb-codigo{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Courier New',monospace;font-weight:700;font-size:.92rem;color:var(--text-primary)}
 .chip-banco.usado .cb-codigo .cod{text-decoration:line-through;color:var(--text-muted)}
 .chip-banco .cb-codigo .estado-badge{font-size:.68rem;padding:2px 8px;border-radius:var(--radius-pill);font-weight:700;white-space:nowrap}
@@ -164,7 +166,7 @@ body.dark .chip-banco.usado .cb-codigo .estado-badge{color:#ff8a80}
 .chip-banco .cb-actions button{width:auto;padding:6px 12px;font-size:.72rem;margin:0;border-radius:var(--radius-sm);font-weight:600}
 .chip-banco .btn-edit-codigo{background:var(--sys-yellow);color:var(--gray-9)}
 .chip-banco .btn-del-codigo{background:var(--sys-red);color:#fff}
-.chip-banco .btn-add-visita{background:var(--sys-blue);color:#fff}
+.chip-banco .btn-geo-codigo{background:var(--sys-indigo);color:#fff}
 .chip-banco-edit{background:var(--bg-section);border:2px solid var(--sys-blue);border-radius:var(--radius-md);padding:10px 12px;margin:6px 0}
 .chip-banco-edit input{margin-top:4px;font-size:.85rem;padding:8px 10px}
 .chip-banco-edit .edit-actions{display:flex;gap:6px;margin-top:8px}
@@ -183,6 +185,7 @@ body.dark .chip-banco.usado .cb-codigo .estado-badge{color:#ff8a80}
 #avisoDuplicado{position:fixed;top:76px;left:50%;transform:translateX(-50%);background:var(--sys-red);color:#fff;padding:14px 22px;border-radius:var(--radius-md);font-weight:600;font-size:.95rem;z-index:99999;box-shadow:var(--shadow-lg);display:none;max-width:90%;text-align:center;animation:shake .4s}
 #avisoDuplicado.visible{display:block}
 #avisoDuplicado.ok{background:var(--sys-green)}
+#avisoDuplicado.warn{background:var(--sys-orange)}
 @keyframes shake{0%,100%{transform:translateX(-50%) translateY(0)}25%{transform:translateX(-50%) translateY(-4px)}75%{transform:translateX(-50%) translateY(4px)}}
 #contadorUnicos{font-size:.85rem;color:var(--text-heading);margin-top:8px;text-align:center;font-weight:600}
 #contadorUnicos span{color:var(--sys-red)}
@@ -335,7 +338,6 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 .mapa-leyenda{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:.75rem;margin-top:6px}
 .mapa-leyenda span{display:flex;align-items:center;gap:4px}
 .mapa-leyenda .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
-/* NUEVO: Selector de ciudad */
 .ciudad-selector{background:var(--bg-card);border:2px solid var(--sys-blue);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:12px}
 .ciudad-selector label{margin-top:0;font-size:.85rem;color:var(--sys-blue);font-weight:700;text-transform:uppercase;letter-spacing:.05em}
 .ciudad-selector select{margin-top:8px;font-weight:600;font-size:1rem}
@@ -358,13 +360,22 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 .informe-empresa-header .empresa-datos{font-size:8pt;color:#333;line-height:1.5}
 .informe-empresa-header .empresa-datos strong{color:#1c1c1e}
 .informe-empresa-header .doc-info{text-align:right;font-size:8pt;color:#555;line-height:1.5}
+/* Modal coords manuales */
+#modalCoords{position:fixed;inset:0;background:rgba(0,0,0,.75);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:100005;padding:20px}
+#modalCoords.visible{display:flex}
+.coords-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:24px;max-width:400px;width:100%;box-shadow:var(--shadow-lg)}
+.coords-content h3{margin:0 0 8px;text-align:center;color:var(--text-heading)}
+.coords-content p{font-size:.85rem;color:var(--text-secondary);text-align:center;margin:0 0 16px}
+.coords-content input{margin-top:8px}
+.coords-actions{display:flex;gap:8px;margin-top:16px}
+.coords-actions button{flex:1;margin:0;padding:12px;font-size:.9rem}
 @media print{
   :root,body,body.dark{--bg-body:#fff!important;--bg-container:#fff!important;--bg-section:#fafafa!important;--bg-input:#fff!important;--bg-card:#fff!important;--bg-table:#fff!important;--text-primary:#000!important;--text-secondary:#333!important;--text-heading:#1c1c1e!important;--text-muted:#555!important;--border-main:#999!important;--border-light:#ccc!important;--shadow-sm:transparent!important;--shadow-md:transparent!important;--shadow-lg:transparent!important;--table-header-bg:#1c1c1e!important;--table-header-color:#fff!important;}
   @page{size:A4 portrait;margin:10mm 8mm 12mm 8mm}
   html,body{background:#fff!important;color:#000!important;margin:0!important;padding:0!important;width:100%!important;overflow:visible!important;font-size:9pt;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif}
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .container{box-shadow:none!important;max-width:100%!important;padding:0!important;margin:0!important;border:none!important;background:#fff!important}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#mapaRuta,.mapa-leyenda,.ciudad-selector,.ciudad-info{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.rules-seccion,.tabs-nav,.quick-actions,.filtros-visitas,#listaVisitasDia,#informeContenedor .no-print,#modalProcesando,.menu-dropdown,.firma-wrapper,#mapaRuta,.mapa-leyenda,.ciudad-selector,.ciudad-info,#modalCoords{display:none!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important;max-width:100%!important;margin:0!important;padding:0!important;overflow:visible!important}
   #areaImpresion{font-size:9pt!important;color:#000;background:#fff;width:100%;max-width:194mm;margin:0 auto;overflow:visible!important}
@@ -477,6 +488,22 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
 </div>
 
 <div id="avisoDuplicado"></div>
+
+<div id="modalCoords">
+  <div class="coords-content">
+    <h3>📍 Coordenadas Manuales</h3>
+    <p>Si la IA no encuentra la dirección, puedes pegar las coordenadas de Google Maps</p>
+    <label style="margin-top:8px;">Latitud</label>
+    <input type="text" id="coordLat" placeholder="Ej: 10.9878" inputmode="decimal">
+    <label>Longitud</label>
+    <input type="text" id="coordLon" placeholder="Ej: -74.7889" inputmode="decimal">
+    <div class="coords-actions">
+      <button type="button" class="btn-cancelar" onclick="cerrarModalCoords()">✖ Cancelar</button>
+      <button type="button" class="btn-guardar" onclick="guardarCoordsManuales()">💾 Guardar</button>
+    </div>
+    <p style="font-size:.72rem;color:var(--text-muted);margin-top:12px;">💡 En Google Maps: clic derecho → copiar coordenadas</p>
+  </div>
+</div>
 
 <div id="modalProcesando">
   <div class="procesando-content">
@@ -673,6 +700,7 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
       <div class="input-group">
         <input type="text" id="direccionVisita" placeholder="Ej: Calle 123 # 45-67, Bogotá" autocomplete="off">
         <button type="button" class="btn-ia" onclick="asistirDireccionIA()" title="Validar con IA">🤖 IA</button>
+        <button type="button" class="btn-coord" onclick="abrirModalCoords()" title="Coordenadas manuales">📍</button>
       </div>
       <div id="resultadoIA" style="font-size:.8rem;color:var(--sys-green);margin-top:4px;display:none;"></div>
       <label style="margin-top:12px;">💰 Precio del paquete (COP):</label>
@@ -756,20 +784,18 @@ body.dark .menu-items button.active{background:rgba(10,132,255,.15)}
     </div>
   </div>
 
-  <!-- ═══════════ PESTAÑA RUTA (con selector de ciudad) ═══════════ -->
   <div class="tab-panel" data-tab="ruta">
     <div class="section">
       <h2>🗺️ Mapa de Ruta del Día</h2>
-      <p style="font-size:.85rem;color:var(--text-secondary);text-align:center;margin-top:0;">Selecciona la ciudad para trazar la ruta con IA. Solo se mostrarán las direcciones de esa ciudad.</p>
+      <p style="font-size:.85rem;color:var(--text-secondary);text-align:center;margin-top:0;">Selecciona la ciudad para trazar la ruta con IA.</p>
       
-      <!-- NUEVO: Selector de ciudad -->
       <div class="ciudad-selector">
         <label for="ciudadRuta">🏙️ Ciudad de la ruta:</label>
         <select id="ciudadRuta" onchange="cambiarCiudadRuta(this.value)">
           <option value="">-- Selecciona la ciudad --</option>
         </select>
         <div class="ciudad-info">
-          💡 <strong>Tip:</strong> Al seleccionar una ciudad, el asistente IA geocodificará con contexto local para obtener coordenadas exactas, y trazará la ruta óptima entre las paradas de esa ciudad.
+          💡 <strong>Tip:</strong> Usamos <strong>Photon + Nominatim</strong> para geocodificar. Si una dirección falla, usa el botón 📍 <strong>Coordenadas manuales</strong> en el registro de visita (clic derecho en Google Maps → copiar coordenadas).
         </div>
         <div id="ciudadesDetectadas" class="ciudades-detectadas"></div>
       </div>
@@ -1259,7 +1285,7 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
-<!-- SCRIPT 2: App principal con selector de ciudad -->
+<!-- SCRIPT 2: App principal -->
 <script type="module">
 const ESTADOS=['Entregado','Rechazado','Dirección Errónea','Dirección incompleta','Coordinado con Cliente','No está en casa','Pasa después (Sin dinero)','No lo conocen','Programo para otro día','Dejar en oficina principal','Pertenece a otra ciudad','Cerrado local comercial','No visita tiempo','Casa totalmente cerrada','Oficina principal','Se trasladó','Exige ver el producto','Destinatario no recibe sábados','Restricciones en el tránsito reparto urbano','No coincide la mercancía física con lo escrito en la orden de compra','Mercancía se abrió en reparto no entregada','Flete mal liquidado','Cerrados en horas hábiles'];
 const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
@@ -1269,8 +1295,7 @@ const CLAVE_AUTO_CENSURA='colserlog_auto_censura';
 const CLAVE_CIUDAD_RUTA='colserlog_ciudad_ruta';
 
 /* ══════════════════════════════════════════════════════════
-   NUEVO: CATÁLOGO DE CIUDADES DE COLOMBIA con sus viewbox
-   para geocodificación precisa.
+   CIUDADES DE COLOMBIA con viewbox (para filtro local)
    ══════════════════════════════════════════════════════════ */
 const CIUDADES_COLOMBIA = [
   { nombre:'Bogotá', viewbox:'-74.30,4.45,-73.98,4.83', lat:4.65, lon:-74.08 },
@@ -1307,92 +1332,49 @@ const CIUDADES_COLOMBIA = [
   { nombre:'Soledad', viewbox:'-74.80,10.90,-74.75,10.95', lat:10.92, lon:-74.78 }
 ];
 
-/* Normalizar texto para comparación */
-function normalizarTexto(s){
-  return (s||'').toString().toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-    .replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim();
-}
+function normalizarTexto(s){ return (s||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\s]/g,' ').replace(/\s+/g,' ').trim(); }
 
-/* Detectar si una dirección contiene el nombre de una ciudad */
 function detectarCiudadEnDireccion(direccion){
   if(!direccion) return null;
   const dirNorm = normalizarTexto(direccion);
-  for(const ciudad of CIUDADES_COLOMBIA){
-    const ciudadNorm = normalizarTexto(ciudad.nombre);
-    if(dirNorm.includes(ciudadNorm)){
-      return ciudad.nombre;
-    }
-  }
+  for(const ciudad of CIUDADES_COLOMBIA){ if(dirNorm.includes(normalizarTexto(ciudad.nombre))) return ciudad.nombre; }
   return null;
 }
 
-/* Obtener ciudades disponibles según las visitas registradas */
 function obtenerCiudadesDisponibles(){
   const conteo = {};
-  visitas.forEach(v => {
-    const ciudad = detectarCiudadEnDireccion(v.direccion);
-    if(ciudad){ conteo[ciudad] = (conteo[ciudad]||0) + 1; }
-  });
+  visitas.forEach(v => { const ciudad = detectarCiudadEnDireccion(v.direccion); if(ciudad){ conteo[ciudad] = (conteo[ciudad]||0) + 1; } });
   return conteo;
 }
 
-/* Obtener ciudad seleccionada actual */
-function getCiudadSeleccionada(){
-  const sel = document.getElementById('ciudadRuta');
-  return sel ? sel.value : '';
-}
+function getCiudadSeleccionada(){ const sel = document.getElementById('ciudadRuta'); return sel ? sel.value : ''; }
+function getConfigCiudad(nombre){ if(!nombre) return null; return CIUDADES_COLOMBIA.find(c => c.nombre === nombre) || null; }
+function filtrarVisitasPorCiudad(ciudad){ if(!ciudad) return visitas; return visitas.filter(v => detectarCiudadEnDireccion(v.direccion) === ciudad); }
 
-/* Cambiar ciudad seleccionada */
 window.cambiarCiudadRuta = function(ciudad){
   try{ localStorage.setItem(CLAVE_CIUDAD_RUTA, ciudad||''); }catch(e){}
-  // Actualizar chips visuales
-  document.querySelectorAll('.ciudad-chip').forEach(ch => {
-    ch.classList.toggle('activa', ch.dataset.ciudad === ciudad);
-  });
-  // Redibujar mapa con nuevo filtro
+  document.querySelectorAll('.ciudad-chip').forEach(ch => { ch.classList.toggle('activa', ch.dataset.ciudad === ciudad); });
   setTimeout(() => window.dibujarRutaMapa(), 200);
-  if(ciudad){
-    mostrarAviso(`🏙️ Ciudad: ${ciudad}`, 'ok');
-  }
+  if(ciudad) mostrarAviso(`🏙️ Ciudad: ${ciudad}`, 'ok');
 };
 
-/* Inicializar el selector de ciudad */
 window.inicializarSelectorCiudad = function(){
   const sel = document.getElementById('ciudadRuta');
   if(!sel) return;
-  
-  // Poblar el select si está vacío
   if(sel.options.length <= 1){
     const ciudadesSorted = CIUDADES_COLOMBIA.map(c=>c.nombre).sort();
-    ciudadesSorted.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c;
-      opt.textContent = c;
-      sel.appendChild(opt);
-    });
+    ciudadesSorted.forEach(c => { const opt = document.createElement('option'); opt.value = c; opt.textContent = c; sel.appendChild(opt); });
   }
-  
-  // Restaurar ciudad guardada
   let ciudadGuardada = '';
   try{ ciudadGuardada = localStorage.getItem(CLAVE_CIUDAD_RUTA)||''; }catch(e){}
-  
-  // Si no hay guardada, auto-detectar según visitas
   const ciudadesDetectadas = obtenerCiudadesDisponibles();
   if(!ciudadGuardada && Object.keys(ciudadesDetectadas).length > 0){
-    // Elegir la ciudad con más visitas
     ciudadGuardada = Object.entries(ciudadesDetectadas).sort((a,b)=>b[1]-a[1])[0][0];
   }
-  
-  if(ciudadGuardada){
-    sel.value = ciudadGuardada;
-  }
-  
-  // Renderizar chips de ciudades detectadas
+  if(ciudadGuardada) sel.value = ciudadGuardada;
   renderizarChipsCiudades(ciudadesDetectadas, sel.value);
 };
 
-/* Renderizar chips con las ciudades detectadas */
 function renderizarChipsCiudades(conteo, ciudadActiva){
   const cont = document.getElementById('ciudadesDetectadas');
   if(!cont) return;
@@ -1404,7 +1386,7 @@ function renderizarChipsCiudades(conteo, ciudadActiva){
   }
   const label = document.createElement('small');
   label.style.cssText = 'color:var(--text-muted);font-size:.72rem;font-weight:600;width:100%;margin-bottom:4px;';
-  label.textContent = '📍 Ciudades detectadas en las visitas (clic para filtrar):';
+  label.textContent = '📍 Ciudades detectadas (clic para filtrar):';
   cont.appendChild(label);
   entries.forEach(([ciudad, count]) => {
     const chip = document.createElement('button');
@@ -1412,32 +1394,13 @@ function renderizarChipsCiudades(conteo, ciudadActiva){
     chip.className = 'ciudad-chip' + (ciudad === ciudadActiva ? ' activa' : '');
     chip.dataset.ciudad = ciudad;
     chip.innerHTML = `${ciudad} <span class="count">${count}</span>`;
-    chip.onclick = () => {
-      const sel = document.getElementById('ciudadRuta');
-      if(sel) sel.value = ciudad;
-      window.cambiarCiudadRuta(ciudad);
-    };
+    chip.onclick = () => { const sel = document.getElementById('ciudadRuta'); if(sel) sel.value = ciudad; window.cambiarCiudadRuta(ciudad); };
     cont.appendChild(chip);
   });
 }
 
-/* Filtrar visitas por ciudad seleccionada */
-function filtrarVisitasPorCiudad(ciudad){
-  if(!ciudad) return visitas; // Si no hay ciudad, todas
-  return visitas.filter(v => {
-    const ciudadDetectada = detectarCiudadEnDireccion(v.direccion);
-    return ciudadDetectada === ciudad;
-  });
-}
-
-/* Obtener configuración de ciudad */
-function getConfigCiudad(nombre){
-  if(!nombre) return null;
-  return CIUDADES_COLOMBIA.find(c => c.nombre === nombre) || null;
-}
-
 /* ══════════════════════════════════════════════════════════
-   DESCRIPCIONES PROFESIONALES DE ESTADOS
+   DESCRIPCIONES PROFESIONALES
    ══════════════════════════════════════════════════════════ */
 const DATOS_EMPRESA = {
   colserlog: { nombre:'COLSERLOG S.A.S.', nit:'900.496.469-3', direccion:'Avenida Calle 24 # 81-13, Bogotá D.C.', telefono:'(571) 2637734 / 314 304 6374', email:'contacto@colserglog.com', web:'www.colserlog.com' },
@@ -1449,28 +1412,28 @@ function escapeHtml(t){ if(t===null||t===undefined) return ''; return String(t).
 window.escapeHtml = escapeHtml;
 
 const DESCRIPCIONES_RECOMENDADAS={
-  'Entregado':'Envío entregado exitosamente al destinatario en la dirección registrada. El cliente verificó el contenido, firmó la guía de recibido y confirmó que el paquete llegó en perfectas condiciones. Se cierra la novedad como ENTREGA EFECTIVA.',
-  'Rechazado':'El destinatario manifestó su decisión de NO recibir el envío al momento de la visita. Se le informó el procedimiento de devolución a bodega central. El paquete queda disponible para logística inversa y se documenta el motivo del rechazo para gestión comercial con el remitente.',
-  'Dirección Errónea':'La dirección registrada en la guía NO corresponde a ninguna ubicación física verificable en el sector. Se realizaron labores de búsqueda con vecinos y comerciantes del área sin obtener resultados positivos. El envío retorna a bodega para validación de datos con el remitente.',
-  'Dirección incompleta':'La dirección suministrada carece de información esencial (nomenclatura exacta, barrio, punto de referencia) que impide ubicar al destinatario. Se recomienda contactar al remitente para completar los datos.',
-  'Coordinado con Cliente':'Se estableció comunicación efectiva con el destinatario por vía telefónica. Se acordó nueva fecha y horario para la entrega del envío, quedando registrada la autorización correspondiente.',
-  'No está en casa':'Se visitó la dirección en horario hábil sin obtener respuesta de ninguna persona. Se dejó aviso de visita con los datos de contacto para que el destinatario programe la nueva entrega.',
-  'Pasa después (Sin dinero)':'El destinatario informó que no cuenta con los recursos económicos disponibles en el momento (pago contra entrega) y solicita ser visitado nuevamente cuando disponga del efectivo.',
-  'No lo conocen':'En la dirección visitada, los residentes o encargados manifiestan NO conocer al destinatario registrado en la guía. No se logra ubicar al titular del envío.',
-  'Programo para otro día':'El destinatario solicitó expresamente reprogramar la entrega para otra fecha. Se acuerda nuevo intento y el paquete regresa a bodega.',
+  'Entregado':'Envío entregado exitosamente al destinatario en la dirección registrada. El cliente verificó el contenido, firmó la guía de recibido y confirmó que el paquete llegó en perfectas condiciones.',
+  'Rechazado':'El destinatario manifestó su decisión de NO recibir el envío al momento de la visita. Se le informó el procedimiento de devolución a bodega central.',
+  'Dirección Errónea':'La dirección registrada en la guía NO corresponde a ninguna ubicación física verificable en el sector.',
+  'Dirección incompleta':'La dirección suministrada carece de información esencial (nomenclatura exacta, barrio, punto de referencia) que impide ubicar al destinatario.',
+  'Coordinado con Cliente':'Se estableció comunicación efectiva con el destinatario por vía telefónica. Se acordó nueva fecha y horario para la entrega del envío.',
+  'No está en casa':'Se visitó la dirección en horario hábil sin obtener respuesta de ninguna persona. Se dejó aviso de visita con los datos de contacto.',
+  'Pasa después (Sin dinero)':'El destinatario informó que no cuenta con los recursos económicos disponibles en el momento (pago contra entrega).',
+  'No lo conocen':'En la dirección visitada, los residentes o encargados manifiestan NO conocer al destinatario registrado en la guía.',
+  'Programo para otro día':'El destinatario solicitó expresamente reprogramar la entrega para otra fecha.',
   'Dejar en oficina principal':'Por instrucción expresa del destinatario, el envío será dejado en la oficina principal de la transportadora para retiro personal.',
-  'Pertenece a otra ciudad':'El envío corresponde a una ciudad diferente a la zona de reparto asignada. Se debe reenrutar al centro de distribución correspondiente.',
+  'Pertenece a otra ciudad':'El envío corresponde a una ciudad diferente a la zona de reparto asignada.',
   'Cerrado local comercial':'El establecimiento comercial se encontraba cerrado al momento de la visita dentro del horario comercial establecido.',
   'No visita tiempo':'Por limitaciones de tiempo operativo en la ruta asignada, NO se logró visitar al destinatario dentro del horario programado.',
-  'Casa totalmente cerrada':'La vivienda se encontraba completamente cerrada (puertas, ventanas y accesos principales bloqueados). No hubo respuesta a llamados, timbres ni voces desde el interior.',
+  'Casa totalmente cerrada':'La vivienda se encontraba completamente cerrada (puertas, ventanas y accesos principales bloqueados).',
   'Oficina principal':'El paquete fue trasladado y dejado en la oficina principal de la transportadora por disposición operativa o a solicitud del cliente.',
   'Se trasladó':'El destinatario se ha mudado de la dirección registrada según información suministrada por los residentes actuales del inmueble.',
   'Exige ver el producto':'El destinatario exige verificar el contenido del paquete antes de firmar el recibido. Se requiere autorización del remitente.',
   'Destinatario no recibe sábados':'El destinatario ha manifestado expresamente que NO recibe envíos los días sábados. Se reprograma la entrega para día hábil.',
   'Restricciones en el tránsito reparto urbano':'Se presentaron restricciones viales (cierres, manifestaciones, obras, paros o bloqueos) que impidieron el acceso al punto de entrega durante la jornada.',
   'No coincide la mercancía física con lo escrito en la orden de compra':'Al verificar el contenido del envío se detecta que la mercancía física NO coincide con la descripción detallada en la orden de compra.',
-  'Mercancía se abrió en reparto no entregada':'Durante el traslado o manipulación del paquete, la mercancía presentó apertura, deterioro o faltantes. NO se puede entregar al cliente en esas condiciones.',
-  'Flete mal liquidado':'El flete asociado al envío presenta ERROR en su liquidación según revisión administrativa. Se devuelve a bodega para corrección.',
+  'Mercancía se abrió en reparto no entregada':'Durante el traslado o manipulación del paquete, la mercancía presentó apertura, deterioro o faltantes.',
+  'Flete mal liquidado':'El flete asociado al envío presenta ERROR en su liquidación según revisión administrativa.',
   'Cerrados en horas hábiles':'El establecimiento se encontraba cerrado al momento de la visita, dentro del horario comercial habitual según registro del sector.'
 };
 
@@ -1502,6 +1465,7 @@ let autoCensuraActiva=true; try{ const p=localStorage.getItem(CLAVE_AUTO_CENSURA
 let _modelosCargados=false, _cargandoModelos=null, _cocoModel=null;
 let bancoCodigoEditando=null;
 const cacheGeocoding = new Map();
+let _coordManualContexto = null;
 
 function calcularTotalesPrecios(){
   let totalGeneral=0, totalEntregado=0, totalNoEntregado=0, cantEntregado=0, cantNoEntregado=0;
@@ -1523,144 +1487,207 @@ function fechaLocalISO(d=new Date()){ const off=d.getTimezoneOffset(); const l=n
 function esDarkMode(){ return document.body.classList.contains('dark'); }
 function hashSync(texto){ let h1=0x811c9dc5; for(let i=0;i<texto.length;i++){ h1^=texto.charCodeAt(i); h1=(h1*0x01000193)>>>0; } let h2=5381; for(let i=0;i<texto.length;i++) h2=((h2<<5)+h2+texto.charCodeAt(i))|0; return `${h1.toString(16).padStart(8,'0').toUpperCase()}-${(h2>>>0).toString(16).padStart(8,'0').toUpperCase()}-${texto.length.toString(16).toUpperCase()}`; }
 
-function mostrarAviso(texto,tipo='error'){ const el=document.getElementById('avisoDuplicado'); if(!el) return; el.textContent=texto; el.className=tipo==='ok'?'visible ok':'visible'; clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.className=''; }, tipo==='error'?5000:2800); }
+function mostrarAviso(texto,tipo='error'){ const el=document.getElementById('avisoDuplicado'); if(!el) return; el.textContent=texto; el.className=tipo==='ok'?'visible ok':(tipo==='warn'?'visible warn':'visible'); clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.className=''; }, tipo==='error'?5000:3000); }
 window.mostrarAviso = mostrarAviso;
 function beepError(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=220; o.type='square'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.3); o.start(); o.stop(ctx.currentTime+0.3); setTimeout(()=>ctx.close(),500); }catch(e){} }
 function beepOk(){ try{ const ctx=new (window.AudioContext||window.webkitAudioContext)(); const o=ctx.createOscillator(), g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=880; o.type='sine'; g.gain.setValueAtTime(0.15,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.15); o.start(); o.stop(ctx.currentTime+0.15); setTimeout(()=>ctx.close(),400); }catch(e){} }
 function mostrarIndicadorGuardado(){ const el=document.getElementById('indicadorGuardado'); if(!el) return; el.textContent='✓ '+new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); el.classList.add('visible'); clearTimeout(el._timeout); el._timeout=setTimeout(()=>{ el.classList.remove('visible'); },2500); }
 
 /* ══════════════════════════════════════════════════════════
-   GEOCODIFICACIÓN AVANZADA con contexto de CIUDAD
+   ✅ GEOCODIFICACIÓN CORREGIDA
+   Photon (Komoot) como PRIMARIO — funciona sin headers especiales
+   Nominatim como RESPALDO — sin User-Agent (browser lo bloquea)
    ══════════════════════════════════════════════════════════ */
+async function geocodificarPhoton(query, configCiudad) {
+  try {
+    // Photon API (Komoot) - Basado en OpenStreetMap, muy permisivo
+    // Documentación: https://photon.komoot.io/
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(query)}&limit=5&lang=es`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || !data.features || data.features.length === 0) return null;
+    
+    // Buscar el mejor resultado dentro del rango
+    for (const f of data.features) {
+      if (!f.geometry || !f.geometry.coordinates) continue;
+      const [lon, lat] = f.geometry.coordinates;
+      // Validar Colombia
+      if (lat < -5 || lat > 13 || lon < -80 || lon > -66) continue;
+      // Validar ciudad si la tenemos
+      if (configCiudad) {
+        const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
+        const margen = 0.4;
+        if (lat < (s - margen) || lat > (n + margen) || lon < (w - margen) || lon > (e + margen)) continue;
+      }
+      const props = f.properties || {};
+      const partes = [props.name, props.street, props.housenumber, props.district, props.city, props.state, props.country].filter(Boolean);
+      return {
+        lat: lat.toString(),
+        lon: lon.toString(),
+        display: partes.join(', ') || props.name || query,
+        precision: props.type || 'photon',
+        servicio: 'photon'
+      };
+    }
+    return null;
+  } catch(e) {
+    console.warn('Photon error:', e.message);
+    return null;
+  }
+}
+
+async function geocodificarNominatim(query, configCiudad) {
+  try {
+    // Nominatim SIN User-Agent (los browsers lo eliminan)
+    // Usando email como identificación (permitido por su política)
+    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=3&addressdetails=1&countrycodes=co&email=colserlog@example.com`;
+    if (configCiudad) {
+      url += `&viewbox=${configCiudad.viewbox}&bounded=0`;
+    }
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const resp = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    if (!data || data.length === 0) return null;
+    for (const r of data) {
+      const lat = parseFloat(r.lat);
+      const lon = parseFloat(r.lon);
+      if (lat < -5 || lat > 13 || lon < -80 || lon > -66) continue;
+      if (configCiudad) {
+        const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
+        const margen = 0.4;
+        if (lat < (s - margen) || lat > (n + margen) || lon < (w - margen) || lon > (e + margen)) continue;
+      }
+      return {
+        lat: r.lat,
+        lon: r.lon,
+        display: r.display_name,
+        precision: r.type || 'nominatim',
+        servicio: 'nominatim'
+      };
+    }
+    return null;
+  } catch(e) {
+    console.warn('Nominatim error:', e.message);
+    return null;
+  }
+}
+
 async function geocodificarDireccionAvanzado(direccion, ciudadNombre) {
   if (!direccion || !direccion.trim()) return null;
   const dirLimpia = direccion.trim();
   const ciudadCtx = ciudadNombre || detectarCiudadEnDireccion(dirLimpia) || getCiudadSeleccionada();
-  
-  // Caché con clave que incluye ciudad
   const cacheKey = (dirLimpia + '|' + (ciudadCtx||'')).toLowerCase();
   if(cacheGeocoding.has(cacheKey)) return cacheGeocoding.get(cacheKey);
   
   const configCiudad = getConfigCiudad(ciudadCtx);
   
-  // Estrategias ordenadas de mayor a menor precisión
-  const estrategias = [];
-  
-  if(ciudadCtx){
-    // Si tenemos ciudad: usar viewbox específico para máxima precisión
-    estrategias.push({
-      q: `${dirLimpia}, ${ciudadCtx}, Colombia`,
-      viewbox: configCiudad ? configCiudad.viewbox : '-79,-4.5,-66,13',
-      bounded: 1,
-      etiqueta: 'ciudad viewbox'
-    });
-    estrategias.push({
-      q: `${dirLimpia}, ${ciudadCtx}`,
-      viewbox: configCiudad ? configCiudad.viewbox : null,
-      bounded: configCiudad ? 1 : 0,
-      etiqueta: 'ciudad sin país'
-    });
-    // Fallback: solo dirección + ciudad pero sin bounded
-    estrategias.push({
-      q: `${dirLimpia}, ${ciudadCtx}, Colombia`,
-      viewbox: null,
-      bounded: 0,
-      etiqueta: 'ciudad amplio'
-    });
-  } else {
-    // Sin ciudad: usar solo viewbox general de Colombia
-    estrategias.push({ q: `${dirLimpia}, Colombia`, viewbox: '-79,-4.5,-66,13', bounded: 1, etiqueta: 'colombia' });
-    estrategias.push({ q: dirLimpia, viewbox: '-79,-4.5,-66,13', bounded: 1, etiqueta: 'solo dir' });
+  // Construir varias queries de prueba
+  const queries = [];
+  if (ciudadCtx) {
+    queries.push(`${dirLimpia}, ${ciudadCtx}, Colombia`);
+    queries.push(`${dirLimpia} ${ciudadCtx} Colombia`);
+    queries.push(`${dirLimpia}, ${ciudadCtx}`);
   }
+  queries.push(`${dirLimpia}, Colombia`);
+  queries.push(dirLimpia);
   
-  for (const e of estrategias) {
-    try {
-      let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(e.q)}&limit=1&addressdetails=1`;
-      if(e.viewbox) url += `&viewbox=${e.viewbox}`;
-      if(e.bounded) url += `&bounded=1`;
-      
-      const resp = await fetch(url, { headers: { 'User-Agent': 'Colserlog-App/1.0' } });
-      if (!resp.ok) continue;
-      const data = await resp.json();
-      
-      if (data && data.length > 0) {
-        const r = data[0];
-        const lat = parseFloat(r.lat);
-        const lon = parseFloat(r.lon);
-        
-        // Validación geográfica estricta
-        let valido = false;
-        if(configCiudad && configCiudad.viewbox){
-          // Validar dentro del viewbox de la ciudad (±0.15 grados de margen)
-          const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
-          valido = lat >= (s-0.15) && lat <= (n+0.15) && lon >= (w-0.15) && lon <= (e+0.15);
-        } else {
-          // Validar dentro de Colombia
-          valido = lat >= -5 && lat <= 13 && lon >= -80 && lon <= -66;
-        }
-        
-        if (valido) {
-          const resultado = {
-            lat: r.lat,
-            lon: r.lon,
-            display: r.display_name,
-            ciudad: ciudadCtx,
-            precision: r.type || 'unknown',
-            estrategia: e.etiqueta
-          };
-          cacheGeocoding.set(cacheKey, resultado);
-          return resultado;
-        }
-      }
-      await new Promise(res => setTimeout(res, 1100));
-    } catch(err) {
-      console.warn('Estrategia fallida:', e.etiqueta, err);
+  // 1️⃣ PROBAR PHOTON PRIMERO (más confiable desde browser)
+  for (const q of queries) {
+    const res = await geocodificarPhoton(q, configCiudad);
+    if (res) {
+      console.log('✅ Photon OK:', q, '→', res.display);
+      cacheGeocoding.set(cacheKey, res);
+      return res;
     }
+    await new Promise(r => setTimeout(r, 350)); // Rate limit Photon
   }
   
+  // 2️⃣ RESPALDO: NOMINATIM
+  for (const q of queries) {
+    const res = await geocodificarNominatim(q, configCiudad);
+    if (res) {
+      console.log('✅ Nominatim OK:', q, '→', res.display);
+      cacheGeocoding.set(cacheKey, res);
+      return res;
+    }
+    await new Promise(r => setTimeout(r, 1100)); // Rate limit Nominatim
+  }
+  
+  console.warn('❌ No se pudo geocodificar:', dirLimpia);
   cacheGeocoding.set(cacheKey, null);
   return null;
 }
 window.geocodificarDireccionAvanzado = geocodificarDireccionAvanzado;
 
-/* IA de direcciones con contexto de ciudad */
+/* IA de direcciones */
 window.asistirDireccionIA = async function(){
   const input = document.getElementById('direccionVisita');
   const resultado = document.getElementById('resultadoIA');
   if(!input || !resultado) return;
   const direccion = input.value.trim();
   if(!direccion){ mostrarAviso('⚠️ Escribe una dirección primero','error'); return; }
-  
   const ciudad = getCiudadSeleccionada() || detectarCiudadEnDireccion(direccion);
-  
   resultado.style.display = 'block';
   resultado.style.color = 'var(--text-secondary)';
   resultado.textContent = `🤖 Analizando con IA${ciudad ? ' (contexto: '+ciudad+')' : ''}...`;
-  
   const geocoded = await geocodificarDireccionAvanzado(direccion, ciudad);
-  
   if(geocoded){
     input.value = geocoded.display || direccion;
     input.dataset.lat = geocoded.lat;
     input.dataset.lon = geocoded.lon;
     resultado.style.color = 'var(--sys-green)';
-    resultado.innerHTML = `✅ <strong>Dirección validada</strong> ${ciudad?'· '+escapeHtml(ciudad):''}<br><small>📍 ${escapeHtml(geocoded.display)}<br>Coordenadas: ${geocoded.lat}, ${geocoded.lon} (${geocoded.estrategia||''})</small>`;
+    resultado.innerHTML = `✅ <strong>Validada</strong> ${ciudad?'· '+escapeHtml(ciudad):''} (${geocoded.servicio})<br><small>📍 ${escapeHtml(geocoded.display)}<br>Coords: ${geocoded.lat}, ${geocoded.lon}</small>`;
     const b = buscarEnBanco(direccion);
     if(b && b.item){ b.item.lat = geocoded.lat; b.item.lon = geocoded.lon; guardarEstadoCompleto(); }
   } else {
     resultado.style.color = 'var(--sys-red)';
-    resultado.innerHTML = `❌ No se pudo geolocalizar ${ciudad?'en '+escapeHtml(ciudad):''}.<br><small>Verifica la dirección o asegúrate de seleccionar la ciudad en la pestaña 🗺️ Ruta.</small>`;
+    resultado.innerHTML = `❌ No encontrada.<br><small>💡 Usa el botón 📍 de coordenadas manuales o verifica la dirección.</small>`;
   }
 };
 
-/* Geolocalización masiva con ciudad seleccionada */
+/* Coordenadas manuales */
+window.abrirModalCoords = function(){
+  const lat = document.getElementById('direccionVisita')?.dataset?.lat || '';
+  const lon = document.getElementById('direccionVisita')?.dataset?.lon || '';
+  document.getElementById('coordLat').value = lat;
+  document.getElementById('coordLon').value = lon;
+  document.getElementById('modalCoords').classList.add('visible');
+};
+window.cerrarModalCoords = function(){
+  document.getElementById('modalCoords').classList.remove('visible');
+};
+window.guardarCoordsManuales = function(){
+  const lat = (document.getElementById('coordLat').value||'').trim().replace(',', '.');
+  const lon = (document.getElementById('coordLon').value||'').trim().replace(',', '.');
+  const latN = parseFloat(lat);
+  const lonN = parseFloat(lon);
+  if(isNaN(latN) || isNaN(lonN)){ mostrarAviso('⚠️ Coordenadas inválidas','error'); return; }
+  if(latN < -5 || latN > 13 || lonN < -80 || lonN > -66){ mostrarAviso('⚠️ Coordenadas fuera de Colombia','error'); return; }
+  const input = document.getElementById('direccionVisita');
+  if(input){
+    input.dataset.lat = latN.toString();
+    input.dataset.lon = lonN.toString();
+  }
+  mostrarAviso('✅ Coordenadas guardadas: '+latN.toFixed(4)+', '+lonN.toFixed(4), 'ok');
+  cerrarModalCoords();
+};
+document.getElementById('modalCoords')?.addEventListener('click',(e)=>{ if(e.target.id==='modalCoords') cerrarModalCoords(); });
+
+/* Geolocalización masiva */
 window.geolocalizarTodasVisitas = async function(){
   const ciudadSel = getCiudadSeleccionada();
   const candidatas = ciudadSel ? filtrarVisitasPorCiudad(ciudadSel) : visitas;
   const sinCoords = candidatas.filter(v => v.direccion && (!v.lat || !v.lon));
   
   if(sinCoords.length === 0){ 
-    mostrarAviso(`ℹ️ Todas las visitas ${ciudadSel?'de '+ciudadSel:''} ya están geolocalizadas`,'ok');
+    mostrarAviso(`ℹ️ Todas las visitas ${ciudadSel?'de '+ciudadSel:''} ya tienen coordenadas`,'ok');
     window.dibujarRutaMapa();
     return; 
   }
@@ -1674,190 +1701,130 @@ window.geolocalizarTodasVisitas = async function(){
   if(modal) modal.classList.add('visible');
   
   let exitosos = 0, fallidos = 0;
+  const fallidas = [];
   for(let i = 0; i < sinCoords.length; i++){
     const v = sinCoords[i];
-    if(paso) paso.textContent = `(${i+1}/${sinCoords.length}) ${v.direccion.substring(0,40)}...`;
+    if(paso) paso.textContent = `(${i+1}/${sinCoords.length}) ${v.direccion.substring(0,50)}...`;
     const ciudadDetectada = detectarCiudadEnDireccion(v.direccion) || ciudadSel;
     const g = await geocodificarDireccionAvanzado(v.direccion, ciudadDetectada);
-    if(g){ v.lat = g.lat; v.lon = g.lon; exitosos++; }
-    else fallidos++;
-    await new Promise(r => setTimeout(r, 1100));
+    if(g){ 
+      v.lat = g.lat; 
+      v.lon = g.lon; 
+      exitosos++; 
+    } else {
+      fallidos++;
+      fallidas.push(v.direccion.substring(0, 40));
+    }
+    await new Promise(r => setTimeout(r, 400));
   }
   
   if(modal) modal.classList.remove('visible');
   guardarEstadoCompleto();
-  mostrarAviso(`✅ Geolocalizadas: ${exitosos} · ⚠️ Fallidas: ${fallidos}`, exitosos > 0 ? 'ok' : 'error');
+  
+  if(fallidos > 0){
+    const detalle = fallidas.slice(0, 3).join('\n• ');
+    alert(`📡 Resultado:\n\n✅ Geolocalizadas: ${exitosos}\n⚠️ Fallidas: ${fallidos}\n\n${fallidos>0?'Direcciones sin encontrar:\n• '+detalle+'\n\n💡 Tip: usa el botón 📍 de coordenadas manuales en el registro de visita (clic derecho en Google Maps → copiar coordenadas).':''}`);
+  } else {
+    mostrarAviso(`✅ Geolocalizadas: ${exitosos} · ⚠️ Fallidas: ${fallidos}`, 'ok');
+  }
+  
   setTimeout(() => window.dibujarRutaMapa(), 500);
 };
 
 /* ══════════════════════════════════════════════════════════
-   MAPA DE RUTA con filtro por ciudad
+   MAPA DE RUTA
    ══════════════════════════════════════════════════════════ */
 let mapaRuta=null, routingControl=null, marcadoresRuta=[];
 
 window.dibujarRutaMapa = async function(){
   const contenedor = document.getElementById('mapaRuta');
   if(!contenedor) return;
-  if(typeof L === 'undefined'){ 
-    contenedor.innerHTML = '<p style="padding:20px;text-align:center;">Mapa no disponible (Leaflet no cargó)</p>'; 
-    return; 
-  }
+  if(typeof L === 'undefined'){ contenedor.innerHTML = '<p style="padding:20px;text-align:center;">Mapa no disponible</p>'; return; }
   
   const ciudadSel = getCiudadSeleccionada();
   const configCiudad = getConfigCiudad(ciudadSel);
-  
-  // Filtrar visitas por ciudad seleccionada
   const visitasCiudad = ciudadSel ? filtrarVisitasPorCiudad(ciudadSel) : visitas;
   
-  // Filtrar por coordenadas válidas
   const visitasConCoords = visitasCiudad.filter(v => {
     if(!v.lat || !v.lon) return false;
     const lat = parseFloat(v.lat), lon = parseFloat(v.lon);
     if(isNaN(lat) || isNaN(lon)) return false;
-    // Validación extra dentro de la ciudad si la tenemos
     if(configCiudad){
       const [w, s, e, n] = configCiudad.viewbox.split(',').map(parseFloat);
-      return lat >= (s-0.2) && lat <= (n+0.2) && lon >= (w-0.2) && lon <= (e+0.2);
+      return lat >= (s-0.3) && lat <= (n+0.3) && lon >= (w-0.3) && lon <= (e+0.3);
     }
     return lat >= -5 && lat <= 13 && lon >= -80 && lon <= -66;
   });
   
   if(mapaRuta){ try{ mapaRuta.remove(); }catch(e){} mapaRuta=null; routingControl=null; marcadoresRuta=[]; }
-  
   const info = document.getElementById('mapaInfo');
   
   if(visitasConCoords.length === 0){ 
-    contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);">
-      🗺️ No hay visitas geolocalizadas ${ciudadSel ? 'en <strong>'+escapeHtml(ciudadSel)+'</strong>' : ''}.<br>
-      <small>${ciudadSel ? 'Registra direcciones con la ciudad "'+escapeHtml(ciudadSel)+'" o usa "📡 Geolocalizar direcciones".' : 'Selecciona una ciudad o registra direcciones.'}</small>
-    </div>`;
+    contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);">🗺️ No hay visitas con coordenadas ${ciudadSel ? 'en <strong>'+escapeHtml(ciudadSel)+'</strong>' : ''}.<br><small>${ciudadSel ? 'Usa "📡 Geolocalizar direcciones" o agrega coordenadas manuales.' : 'Selecciona una ciudad.'}</small></div>`;
     if(info) info.textContent = '';
     return; 
   }
   
-  // Centro inicial según ciudad o auto
   const centro = configCiudad ? [configCiudad.lat, configCiudad.lon] : [4.65, -74.08];
   const zoomInicial = configCiudad ? 13 : 6;
   
   mapaRuta = L.map(contenedor, { zoomControl: true, scrollWheelZoom: true }).setView(centro, zoomInicial);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-    attribution: '© OpenStreetMap', 
-    maxZoom: 19 
-  }).addTo(mapaRuta);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(mapaRuta);
   
   const puntos = [];
-  
   visitasConCoords.forEach((v) => {
     const lat = parseFloat(v.lat);
     const lon = parseFloat(v.lon);
     const numero = visitas.indexOf(v) + 1;
     const esEntregado = v.estado === 'Entregado';
     const color = esEntregado ? '#30d158' : '#ff453a';
-    
     const icono = L.divIcon({
       className: 'marcador-ruta',
-      html: `<div style="background:${color};color:#fff;width:34px;height:34px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;box-shadow:0 3px 10px rgba(0,0,0,.45);font-family:-apple-system,sans-serif;">${numero}</div>`,
-      iconSize: [34, 34],
-      iconAnchor: [17, 17],
-      popupAnchor: [0, -17]
+      html: `<div style="background:${color};color:#fff;width:34px;height:34px;border-radius:50%;border:3px solid #fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;box-shadow:0 3px 10px rgba(0,0,0,.45);">${numero}</div>`,
+      iconSize: [34, 34], iconAnchor: [17, 17], popupAnchor: [0, -17]
     });
-    
     const marker = L.marker([lat, lon], { icon: icono }).addTo(mapaRuta);
-    marker.bindPopup(`
-      <div style="min-width:220px;font-family:-apple-system,sans-serif;font-size:13px;line-height:1.5;">
-        <div style="font-weight:800;font-size:15px;color:${color};margin-bottom:6px;">#${numero} · ${escapeHtml(v.estado || 'Sin estado')}</div>
-        <div style="font-family:'Courier New',monospace;background:#f5f5f7;padding:4px 8px;border-radius:4px;margin-bottom:6px;font-size:12px;">${escapeHtml(v.codigo || 'Sin código')}</div>
-        <div style="margin-bottom:4px;">📍 ${escapeHtml(v.direccion || 'Sin dirección')}</div>
-        ${ciudadSel ? `<div style="margin-bottom:4px;">🏙️ ${escapeHtml(ciudadSel)}</div>` : ''}
-        <div style="margin-bottom:4px;">🕐 ${escapeHtml(v.llegada || '')} ${v.salida ? '- ' + escapeHtml(v.salida) : ''}</div>
-        <div style="font-weight:700;color:${esEntregado ? '#1e8449' : '#a02015'};">💰 ${formatCOP(v.precio || 0)}</div>
-      </div>
-    `);
+    marker.bindPopup(`<div style="min-width:220px;font-family:-apple-system,sans-serif;font-size:13px;line-height:1.5;"><div style="font-weight:800;font-size:15px;color:${color};margin-bottom:6px;">#${numero} · ${escapeHtml(v.estado || 'Sin estado')}</div><div style="font-family:'Courier New',monospace;background:#f5f5f7;padding:4px 8px;border-radius:4px;margin-bottom:6px;font-size:12px;">${escapeHtml(v.codigo || 'Sin código')}</div><div style="margin-bottom:4px;">📍 ${escapeHtml(v.direccion || 'Sin dirección')}</div>${ciudadSel ? `<div style="margin-bottom:4px;">🏙️ ${escapeHtml(ciudadSel)}</div>` : ''}<div style="font-weight:700;color:${esEntregado ? '#1e8449' : '#a02015'};">💰 ${formatCOP(v.precio || 0)}</div></div>`);
     marcadoresRuta.push(marker);
     puntos.push(L.latLng(lat, lon));
   });
   
-  // Trazar ruta óptima
   if(puntos.length > 1 && typeof L.Routing !== 'undefined'){
     try {
       routingControl = L.Routing.control({
-        waypoints: puntos,
-        routeWhileDragging: false,
-        addWaypoints: false,
-        show: false,
+        waypoints: puntos, routeWhileDragging: false, addWaypoints: false, show: false,
         createMarker: () => null,
-        lineOptions: { 
-          styles: [
-            { color: '#ffffff', weight: 8, opacity: 1 },
-            { color: '#0a84ff', weight: 5, opacity: 0.9 }
-          ] 
-        },
-        router: L.Routing.osrmv1({ 
-          serviceUrl: 'https://router.project-osrm.org/route/v1',
-          profile: 'driving'
-        })
+        lineOptions: { styles: [ { color: '#ffffff', weight: 8, opacity: 1 }, { color: '#0a84ff', weight: 5, opacity: 0.9 } ] },
+        router: L.Routing.osrmv1({ serviceUrl: 'https://router.project-osrm.org/route/v1', profile: 'driving' })
       }).addTo(mapaRuta);
-      
       routingControl.on('routesfound', function(e){
         const routes = e.routes;
         if(routes && routes[0]){
           const summary = routes[0].summary;
           const km = (summary.totalDistance / 1000).toFixed(2);
           const min = Math.round(summary.totalTime / 60);
-          if(info) info.innerHTML = `${ciudadSel?'🏙️ <strong>'+escapeHtml(ciudadSel)+'</strong> · ':''}📍 <strong>${puntos.length}</strong> paradas · 🛣️ <strong>${km} km</strong> · ⏱️ <strong>~${min} min</strong> de ruta`;
+          if(info) info.innerHTML = `${ciudadSel?'🏙️ <strong>'+escapeHtml(ciudadSel)+'</strong> · ':''}📍 <strong>${puntos.length}</strong> paradas · 🛣️ <strong>${km} km</strong> · ⏱️ <strong>~${min} min</strong>`;
         }
       });
-    } catch(e){ 
-      console.warn('Routing error:', e); 
-      if(info) info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s) en el mapa.`;
-    }
+    } catch(e){ if(info) info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s).`; }
   }
   
-  try {
-    const group = new L.featureGroup(marcadoresRuta);
-    mapaRuta.fitBounds(group.getBounds().pad(0.15));
-  } catch(e){}
-  
-  if(info && !routingControl) {
-    info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s) geolocalizada(s).`;
-  }
-  
-  // Actualizar chips por si cambió el conteo
+  try { const group = new L.featureGroup(marcadoresRuta); mapaRuta.fitBounds(group.getBounds().pad(0.15)); } catch(e){}
+  if(info && !routingControl) info.textContent = `${ciudadSel?'🏙️ '+ciudadSel+' · ':''}📍 ${puntos.length} visita(s) geolocalizada(s).`;
   if(ciudadSel) renderizarChipsCiudades(obtenerCiudadesDisponibles(), ciudadSel);
 };
 
-/* Refresco automático del mapa cuando cambian las visitas */
 function refrescarMapaSiActivo(){
   const panelRuta = document.querySelector('.tab-panel[data-tab="ruta"]');
   if(panelRuta && panelRuta.classList.contains('active')){
-    setTimeout(() => {
-      if(typeof window.inicializarSelectorCiudad === 'function') window.inicializarSelectorCiudad();
-      window.dibujarRutaMapa();
-    }, 400);
+    setTimeout(() => { if(typeof window.inicializarSelectorCiudad === 'function') window.inicializarSelectorCiudad(); window.dibujarRutaMapa(); }, 400);
   }
 }
 
-/* ══════════════════════════════════════════════════════════
-   BORRADOR / ESTADO
-   ══════════════════════════════════════════════════════════ */
+/* BORRADOR */
 function guardarBorrador(){
   try{
-    const b={
-      llegadaCliente:document.getElementById('llegadaCliente')?.value||'',
-      salidaCliente:document.getElementById('salidaCliente')?.value||'',
-      estadoPaquete:document.getElementById('estadoPaquete')?.value||'',
-      descripcionVisita:document.getElementById('descripcionVisita')?.value||'',
-      codigoBarras:document.getElementById('codigoBarras')?.value||'',
-      busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'',
-      busquedaDia:document.getElementById('busquedaDia')?.value||'',
-      busquedaGuia:document.getElementById('busquedaGuia')?.value||'',
-      direccionVisita:document.getElementById('direccionVisita')?.value||'',
-      precioVisita:document.getElementById('precioVisita')?.value||'',
-      codigoBanco:document.getElementById('codigoBanco')?.value||'',
-      direccionBanco:document.getElementById('direccionBanco')?.value||'',
-      precioBanco:document.getElementById('precioBanco')?.value||'',
-      timestamp:Date.now()
-    };
+    const b={ llegadaCliente:document.getElementById('llegadaCliente')?.value||'', salidaCliente:document.getElementById('salidaCliente')?.value||'', estadoPaquete:document.getElementById('estadoPaquete')?.value||'', descripcionVisita:document.getElementById('descripcionVisita')?.value||'', codigoBarras:document.getElementById('codigoBarras')?.value||'', busquedaCodigoBanco:document.getElementById('busquedaCodigoBanco')?.value||'', busquedaDia:document.getElementById('busquedaDia')?.value||'', busquedaGuia:document.getElementById('busquedaGuia')?.value||'', direccionVisita:document.getElementById('direccionVisita')?.value||'', precioVisita:document.getElementById('precioVisita')?.value||'', codigoBanco:document.getElementById('codigoBanco')?.value||'', direccionBanco:document.getElementById('direccionBanco')?.value||'', precioBanco:document.getElementById('precioBanco')?.value||'', timestamp:Date.now() };
     localStorage.setItem(CLAVE_BORRADOR, JSON.stringify(b));
   }catch(e){}
 }
@@ -1915,7 +1882,7 @@ document.addEventListener('keydown',(e)=>{ if(e.key==='Escape'){ const m=documen
 document.getElementById('modalReglasFoto')?.addEventListener('click',(e)=>{ if(e.target.id==='modalReglasFoto') cerrarModalReglasFoto(); });
 window.toggleFotosNube = function(){ const t=document.getElementById('toggleFotosNube'); if(!t)return; sincronizarFotosNube=t.checked; try{ localStorage.setItem(CLAVE_FOTOS_NUBE,sincronizarFotosNube?'true':'false'); localStorage.setItem('clave_fotos_nube_proxy',sincronizarFotosNube?'true':'false'); }catch(e){} mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok'); };
 
-/* Compresión foto */
+/* Compresión */
 function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){
   return new Promise((resolve,reject)=>{
     if(!file||!file.type||!file.type.startsWith('image/')){ reject(new Error('Archivo no válido')); return; }
@@ -2131,6 +2098,24 @@ window.guardarEdicionBanco = function(index){
   mostrarAviso('✅ Guardado','ok');
 };
 
+/* Geocodificar un código individual del banco */
+window.geocodificarCodigoBanco = async function(codigo){
+  const b = buscarEnBanco(codigo);
+  if(!b || !b.item.direccion){ mostrarAviso('⚠️ Este código no tiene dirección','error'); return; }
+  mostrarAviso('🤖 Geocodificando...','ok');
+  const ciudad = detectarCiudadEnDireccion(b.item.direccion) || getCiudadSeleccionada();
+  const g = await geocodificarDireccionAvanzado(b.item.direccion, ciudad);
+  if(g){
+    b.item.lat = g.lat;
+    b.item.lon = g.lon;
+    guardarEstadoCompleto();
+    mostrarAviso('✅ Geocodificado: '+g.display.substring(0,50)+'...','ok');
+    renderizarBanco();
+  } else {
+    mostrarAviso('❌ No se pudo geocodificar. Usa coords manuales.','error');
+  }
+};
+
 function renderizarBanco(){
   const c=document.getElementById('listaBanco'), ct=document.getElementById('contadorBanco');
   if(!c) return;
@@ -2164,7 +2149,8 @@ function renderizarBanco(){
       ic?.addEventListener('input',()=>{ const l=(ic.value||'').replace(/\D/g,'').slice(0,12); if(ic.value!==l) ic.value=l; });
     } else {
       const w=document.createElement('div');
-      w.className='chip-banco '+(usado?'usado':'disponible');
+      const tieneCoords = item.lat && item.lon;
+      w.className='chip-banco '+(usado?'usado':'disponible')+(!tieneCoords && item.direccion?' sin-coords':'');
       const header=document.createElement('div');
       header.className='cb-codigo';
       const codSpan=document.createElement('span');
@@ -2178,18 +2164,19 @@ function renderizarBanco(){
       w.appendChild(header);
       const datos=document.createElement('div');
       datos.className='cb-datos';
-      if(item.direccion){ const dir=document.createElement('span'); dir.className='dir'; dir.textContent='📍 '+item.direccion; datos.appendChild(dir); }
+      if(item.direccion){ const dir=document.createElement('span'); dir.className='dir'; dir.textContent='📍 '+item.direccion + (tieneCoords?' ✅':''); datos.appendChild(dir); }
       else { const dir=document.createElement('span'); dir.className='dir'; dir.style.color='var(--text-muted)'; dir.style.fontStyle='italic'; dir.textContent='📍 Sin dirección'; datos.appendChild(dir); }
       if(item.precio>0){ const pre=document.createElement('span'); pre.className='precio'; pre.textContent='💰 '+formatCOP(item.precio); datos.appendChild(pre); }
-      else { const pre=document.createElement('span'); pre.className='precio'; pre.style.color='var(--text-muted)'; pre.style.fontStyle='italic'; pre.textContent='💰 Sin precio'; datos.appendChild(pre); }
       w.appendChild(datos);
       const actions=document.createElement('div');
       actions.className='cb-actions';
+      const btnGeo=document.createElement('button');
+      btnGeo.type='button'; btnGeo.className='btn-geo-codigo'; btnGeo.textContent= tieneCoords ? '✅ Geocodificado' : '🌐 Geocodificar'; btnGeo.onclick=()=>window.geocodificarCodigoBanco(item.codigo);
       const btnEdit=document.createElement('button');
-      btnEdit.type='button'; btnEdit.className='btn-edit-codigo'; btnEdit.textContent='✏️ Editar'; btnEdit.onclick=()=>window.editarCodigoBanco(item.codigo);
+      btnEdit.type='button'; btnEdit.className='btn-edit-codigo'; btnEdit.textContent='✏️'; btnEdit.onclick=()=>window.editarCodigoBanco(item.codigo);
       const btnDel=document.createElement('button');
-      btnDel.type='button'; btnDel.className='btn-del-codigo'; btnDel.textContent='🗑️ Eliminar'; btnDel.onclick=()=>window.eliminarCodigoBanco(item.codigo);
-      actions.appendChild(btnEdit); actions.appendChild(btnDel);
+      btnDel.type='button'; btnDel.className='btn-del-codigo'; btnDel.textContent='🗑️'; btnDel.onclick=()=>window.eliminarCodigoBanco(item.codigo);
+      actions.appendChild(btnGeo); actions.appendChild(btnEdit); actions.appendChild(btnDel);
       w.appendChild(actions);
       c.appendChild(w);
     }
@@ -2287,14 +2274,9 @@ window.agregarCodigoDesdeBanco = function(cod){
   if(b && b.item){
     const dirInput=document.getElementById('direccionVisita');
     const preInput=document.getElementById('precioVisita');
-    if(b.item.direccion){
-      if(dirInput && !dirInput.value.trim()){ dirInput.value = b.item.direccion; autoMsg += ' 📍'; }
-      else if(dirInput && dirInput.value.trim() !== b.item.direccion){ if(confirm(`La dirección actual es:\n"${dirInput.value}"\n\n¿Reemplazar con la del banco?\n"${b.item.direccion}"`)){ dirInput.value = b.item.direccion; autoMsg += ' 📍'; } }
-    }
-    if(b.item.precio>0){
-      if(preInput && !preInput.value){ preInput.value = b.item.precio; autoMsg += ' 💰'; }
-      else if(preInput && parseFloat(preInput.value) !== b.item.precio){ if(confirm(`El precio actual es: ${formatCOP(preInput.value)}\n\n¿Reemplazar con el del banco?\n${formatCOP(b.item.precio)}`)){ preInput.value = b.item.precio; autoMsg += ' 💰'; } }
-    }
+    if(b.item.direccion){ if(dirInput && !dirInput.value.trim()){ dirInput.value = b.item.direccion; autoMsg += ' 📍'; } }
+    if(b.item.precio>0){ if(preInput && !preInput.value){ preInput.value = b.item.precio; autoMsg += ' 💰'; } }
+    if(b.item.lat && b.item.lon && dirInput){ dirInput.dataset.lat = b.item.lat; dirInput.dataset.lon = b.item.lon; }
   }
   window.limpiarBusquedaCodigo();
   guardarEstadoCompleto();
@@ -2310,32 +2292,8 @@ function motivoDuplicado(c){ if(!c) return null; if(codigosPendientes.includes(c
 window.actualizarPlaceholderDescripcion = function(){
   const s=document.getElementById('estadoPaquete'), t=document.getElementById('descripcionVisita');
   if(!s||!t) return;
-  const ph={
-    'Entregado':'Registre quién recibió y si firmó la guía...',
-    'Rechazado':'Registre el motivo del rechazo del cliente...',
-    'Dirección Errónea':'Indique por qué la dirección no existe...',
-    'Dirección incompleta':'Indique qué datos faltan...',
-    'Coordinado con Cliente':'Indique fecha y hora acordada...',
-    'No está en casa':'Indique si dejó aviso de visita...',
-    'Pasa después (Sin dinero)':'Indique cuándo el cliente tendrá el efectivo...',
-    'No lo conocen':'Indique con quién validó...',
-    'Programo para otro día':'Indique la nueva fecha acordada...',
-    'Dejar en oficina principal':'Indique quién autorizó...',
-    'Pertenece a otra ciudad':'Indique la ciudad correcta...',
-    'Cerrado local comercial':'Indique el horario en que estaba cerrado...',
-    'No visita tiempo':'Indique por qué no se alcanzó a visitar...',
-    'Casa totalmente cerrada':'Indique a qué hora se visitó...',
-    'Oficina principal':'Indique dónde quedó el paquete...',
-    'Se trasladó':'Indique quién confirmó la mudanza...',
-    'Exige ver el producto':'Indique qué producto exigía ver...',
-    'Destinatario no recibe sábados':'Indique la fecha hábil acordada...',
-    'Restricciones en el tránsito reparto urbano':'Indique qué tipo de restricción...',
-    'No coincide la mercancía física con lo escrito en la orden de compra':'Indique qué diferencia encontró...',
-    'Mercancía se abrió en reparto no entregada':'Indique el estado del paquete...',
-    'Flete mal liquidado':'Indique el monto correcto o el error...',
-    'Cerrados en horas hábiles':'Indique el horario de apertura...'
-  };
-  t.placeholder=ph[s.value]||'Al seleccionar un estado se autocompletará una descripción profesional...';
+  const ph={ 'Entregado':'Registre quién recibió y si firmó la guía...','Rechazado':'Registre el motivo del rechazo...','Dirección Errónea':'Indique por qué la dirección no existe...','Dirección incompleta':'Indique qué datos faltan...','Coordinado con Cliente':'Indique fecha y hora acordada...','No está en casa':'Indique si dejó aviso de visita...','Pasa después (Sin dinero)':'Indique cuándo el cliente tendrá efectivo...','No lo conocen':'Indique con quién validó...','Programo para otro día':'Indique nueva fecha acordada...','Dejar en oficina principal':'Indique quién autorizó...','Pertenece a otra ciudad':'Indique la ciudad correcta...','Cerrado local comercial':'Indique el horario en que estaba cerrado...','No visita tiempo':'Indique por qué no se alcanzó...','Casa totalmente cerrada':'Indique a qué hora se visitó...','Oficina principal':'Indique dónde quedó el paquete...','Se trasladó':'Indique quién confirmó la mudanza...','Exige ver el producto':'Indique qué producto exigía ver...','Destinatario no recibe sábados':'Indique la fecha hábil acordada...','Restricciones en el tránsito reparto urbano':'Indique el tipo de restricción...','No coincide la mercancía física con lo escrito en la orden de compra':'Indique qué diferencia encontró...','Mercancía se abrió en reparto no entregada':'Indique el estado del paquete...','Flete mal liquidado':'Indique el monto correcto o error...','Cerrados en horas hábiles':'Indique el horario de apertura...' };
+  t.placeholder=ph[s.value]||'Al seleccionar un estado se autocompletará...';
 };
 
 /* Estado persistente */
@@ -2346,8 +2304,7 @@ function guardarEstadoCompleto(){
   try{
     const bancoNorm = bancoCodigos.map(x=>normalizarCodigoBanco(x));
     const e={ visitas, contadores, totalMinutosVisitas, totalVisitas, bancoCodigos:bancoNorm, codigosPendientes, fotosPendientes };
-    const json=JSON.stringify(e);
-    localStorage.setItem('estadoSesion',json);
+    localStorage.setItem('estadoSesion',JSON.stringify(e));
     guardarDiaActual();
     if(typeof window.sincronizarConNube==='function') window.sincronizarConNube();
     mostrarIndicadorGuardado();
@@ -2390,7 +2347,6 @@ function guardarDiaActual(){ const f=fechaLocalISO(); let h={}; try{ h=JSON.pars
 function cargarHistorialDetallado(){ try{ return JSON.parse(localStorage.getItem('entregasDiariasDetallado')||'{}'); }catch{ return {}; } }
 function recalcularEstadisticas(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=visitas.length; visitas.forEach(v=>{ if(contadores[v.estado]!==undefined) contadores[v.estado]++; else contadores[v.estado]=1; totalMinutosVisitas+=v.tiempo||0; }); cargarCodigosRegistradosHoy(); actualizarDashboard(); }
 
-/* Códigos pendientes */
 window.agregarCodigo = function(){
   const i=document.getElementById('codigoBarras'); if(!i) return;
   const c=(i.value||'').trim();
@@ -2436,7 +2392,6 @@ function renderizarCodigosPendientes(){
   if(ct) ct.textContent=`📦 ${codigosPendientes.length} pedido(s)`;
 }
 
-/* Tabla historial */
 function renderizarTabla(){
   const t=document.getElementById('cuerpoTabla'); if(!t) return;
   t.innerHTML='';
@@ -2499,10 +2454,7 @@ window.guardarEdicion = (index)=>{
   visitas[index].estado=se.value;
   visitas[index].descripcion=de?de.value.trim():(visitas[index].descripcion||'');
   filaEditando=null;
-  recalcularEstadisticas();
-  renderizarTabla();
-  actualizarGraficaPromedios();
-  actualizarInformesSemanalesMensuales();
+  recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   guardarEstadoCompleto();
 };
 window.eliminarVisita = async (index)=>{
@@ -2510,15 +2462,11 @@ window.eliminarVisita = async (index)=>{
   if(v && Array.isArray(v.fotos) && v.fotos.length){ const ids=v.fotos.map(f=>f.id||f).filter(Boolean); await eliminarFotosMultiples(ids); }
   visitas.splice(index,1);
   if(filaEditando===index) filaEditando=null; else if(filaEditando!==null && filaEditando>index) filaEditando--;
-  recalcularEstadisticas();
-  renderizarTabla();
-  actualizarGraficaPromedios();
-  actualizarInformesSemanalesMensuales();
+  recalcularEstadisticas(); renderizarTabla(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales();
   guardarEstadoCompleto();
   refrescarMapaSiActivo();
 };
 
-/* Vista día Excel */
 let filtroVistaDia='todas';
 window.filtrarVistaDia = function(filtro){ filtroVistaDia=filtro||'todas'; document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.toggle('active',b.dataset.filtro===filtroVistaDia)); window.renderizarVistaDia(); };
 window.limpiarBusquedaDia = function(){ const i=document.getElementById('busquedaDia'); if(i){ i.value=''; i.focus(); } window.renderizarVistaDia(); guardarBorrador(); };
@@ -2534,64 +2482,22 @@ function _renderizarVistaDiaExcel(){
   if(elT) elT.textContent=`(${visitas.length})`;
   if(elE) elE.textContent=`(${cntEnt})`;
   if(elN) elN.textContent=`(${cntNoEnt})`;
-  
   const busq=(document.getElementById('busquedaDia')?.value||'').trim();
   const busqLower = busq.toLowerCase();
-  
   let datos=visitas.map((v,i)=>[i+1,v.llegada||'',v.salida||'',(Number(v.tiempo)||0)+' min',v.codigo||'',v.direccion||'',v.precio?formatCOP(v.precio):'',v.estado||'',v.descripcion||'',(v.fotos&&v.fotos.length)?v.fotos.length:0]);
-  
   if(filtroVistaDia==='entregados') datos=datos.filter(d=>d[7]==='Entregado');
   else if(filtroVistaDia==='no-entregados') datos=datos.filter(d=>d[7]!=='Entregado');
-  
-  if(busqLower){
-    datos=datos.filter(d => {
-      const cod=(d[4]||'').toLowerCase();
-      const dir=(d[5]||'').toLowerCase();
-      const est=(d[7]||'').toLowerCase();
-      const desc=(d[8]||'').toLowerCase();
-      return cod.includes(busqLower) || dir.includes(busqLower) || est.includes(busqLower) || desc.includes(busqLower);
-    });
-  }
-  
+  if(busqLower){ datos=datos.filter(d => { const cod=(d[4]||'').toLowerCase(); const dir=(d[5]||'').toLowerCase(); const est=(d[7]||'').toLowerCase(); const desc=(d[8]||'').toLowerCase(); return cod.includes(busqLower) || dir.includes(busqLower) || est.includes(busqLower) || desc.includes(busqLower); }); }
   const cb=document.getElementById('contadorBusquedaDia');
-  if(cb){
-    const etiqueta=filtroVistaDia==='todas'?'Todas':filtroVistaDia==='entregados'?'Entregados':'No entregados';
-    if(busqLower){
-      cb.innerHTML = `🔎 <strong>${datos.length}</strong> resultado(s) para "<strong>${escapeHtml(busq)}</strong>" en ${etiqueta}`;
-    } else {
-      cb.innerHTML = `Mostrando: <strong>${etiqueta}</strong> — ${datos.length} visita(s)`;
-    }
-  }
-  
+  if(cb){ const etiqueta=filtroVistaDia==='todas'?'Todas':filtroVistaDia==='entregados'?'Entregados':'No entregados'; if(busqLower){ cb.innerHTML = `🔎 <strong>${datos.length}</strong> resultado(s) para "<strong>${escapeHtml(busq)}</strong>"`; } else { cb.innerHTML = `Mostrando: <strong>${etiqueta}</strong> — ${datos.length} visita(s)`; } }
   if(spreadsheetVisitas){ try{ spreadsheetVisitas.destroy(); }catch(e){} spreadsheetVisitas=null; }
   contenedor.innerHTML='';
-  
-  if(datos.length === 0){
-    contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);font-style:italic;">${busqLower ? `❌ No hay coincidencias para "${escapeHtml(busq)}"` : 'Sin visitas para mostrar'}</div>`;
-    return;
-  }
-  
+  if(datos.length === 0){ contenedor.innerHTML = `<div style="padding:40px;text-align:center;color:var(--text-muted);font-style:italic;">${busqLower ? `❌ No hay coincidencias para "${escapeHtml(busq)}"` : 'Sin visitas para mostrar'}</div>`; return; }
   try{
     spreadsheetVisitas=jspreadsheet(contenedor,{
       data:datos,
-      columns:[
-        {type:'numeric',title:'#',width:50,readOnly:true},
-        {type:'text',title:'Llegada',width:70,readOnly:true},
-        {type:'text',title:'Salida',width:70,readOnly:true},
-        {type:'text',title:'Tiempo',width:70,readOnly:true},
-        {type:'text',title:'Guía / Código',width:130},
-        {type:'text',title:'Dirección',width:180},
-        {type:'text',title:'Precio',width:90},
-        {type:'dropdown',title:'Estado',width:170,source:ESTADOS},
-        {type:'text',title:'Descripción',width:220},
-        {type:'numeric',title:'📸',width:45,readOnly:true}
-      ],
-      minDimensions:[10,0],
-      allowInsertColumn:false, allowDeleteColumn:false, allowRenameColumn:false,
-      allowInsertRow:false, allowDeleteRow:true,
-      columnSorting:true, columnDrag:false, columnResize:true,
-      tableOverflow:true, tableWidth:'100%', tableHeight:'400px',
-      pagination:50, paginationOptions:[25,50,100,200], search:false,
+      columns:[ {type:'numeric',title:'#',width:50,readOnly:true},{type:'text',title:'Llegada',width:70,readOnly:true},{type:'text',title:'Salida',width:70,readOnly:true},{type:'text',title:'Tiempo',width:70,readOnly:true},{type:'text',title:'Guía / Código',width:130},{type:'text',title:'Dirección',width:180},{type:'text',title:'Precio',width:90},{type:'dropdown',title:'Estado',width:170,source:ESTADOS},{type:'text',title:'Descripción',width:220},{type:'numeric',title:'📸',width:45,readOnly:true} ],
+      minDimensions:[10,0], allowInsertColumn:false, allowDeleteColumn:false, allowRenameColumn:false, allowInsertRow:false, allowDeleteRow:true, columnSorting:true, columnDrag:false, columnResize:true, tableOverflow:true, tableWidth:'100%', tableHeight:'400px', pagination:50, paginationOptions:[25,50,100,200], search:false,
       onchange:function(instance,cell,col,row,val){
         const fila = instance.getData()[row];
         const numOriginal = parseInt(fila[0]) - 1;
@@ -2602,23 +2508,17 @@ function _renderizarVistaDiaExcel(){
         else if(col===6){ const num=parseFloat(val.replace(/[^0-9]/g,''))||0; visitas[index].precio=num; }
         else if(col===7){ visitas[index].estado=val; }
         else if(col===8){ visitas[index].descripcion=val; }
-        recalcularEstadisticas();
-        guardarEstadoCompleto();
-        refrescarMapaSiActivo();
+        recalcularEstadisticas(); guardarEstadoCompleto(); refrescarMapaSiActivo();
       }
     });
   }catch(e){ 
-    console.warn('Jspreadsheet error:', e);
     let html = '<table class="tabla-visitas-dia"><thead><tr><th>#</th><th>Llegada</th><th>Salida</th><th>Tiempo</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>';
-    datos.forEach(d=>{
-      html += `<tr><td>${d[0]}</td><td>${escapeHtml(d[1])}</td><td>${escapeHtml(d[2])}</td><td>${escapeHtml(d[3])}</td><td style="font-family:monospace;">${escapeHtml(d[4])}</td><td style="text-align:left;font-size:.72rem;">${escapeHtml(d[5])}</td><td style="font-weight:700;color:var(--sys-green);">${escapeHtml(d[6])}</td><td>${escapeHtml(d[7])}</td></tr>`;
-    });
+    datos.forEach(d=>{ html += `<tr><td>${d[0]}</td><td>${escapeHtml(d[1])}</td><td>${escapeHtml(d[2])}</td><td>${escapeHtml(d[3])}</td><td style="font-family:monospace;">${escapeHtml(d[4])}</td><td style="text-align:left;font-size:.72rem;">${escapeHtml(d[5])}</td><td style="font-weight:700;color:var(--sys-green);">${escapeHtml(d[6])}</td><td>${escapeHtml(d[7])}</td></tr>`; });
     html += '</tbody></table>';
     contenedor.innerHTML = html;
   }
 }
 
-/* Dashboard */
 function actualizarDashboard(){
   const e=contadores['Entregado']||0, n=totalVisitas-e, p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
   document.getElementById('c-entregados').innerText=e;
@@ -2626,10 +2526,7 @@ function actualizarDashboard(){
   document.getElementById('c-total').innerText=totalVisitas;
   document.getElementById('c-promedio').innerText=p+' min';
   const t = calcularTotalesPrecios();
-  const ecoTotal = document.getElementById('eco-total');
-  const ecoEntregado = document.getElementById('eco-entregado');
-  const ecoNoEntregado = document.getElementById('eco-noentregado');
-  const ecoCantidad = document.getElementById('eco-cantidad');
+  const ecoTotal = document.getElementById('eco-total'); const ecoEntregado = document.getElementById('eco-entregado'); const ecoNoEntregado = document.getElementById('eco-noentregado'); const ecoCantidad = document.getElementById('eco-cantidad');
   if(ecoTotal) ecoTotal.textContent = formatCOP(t.totalGeneral);
   if(ecoEntregado) ecoEntregado.textContent = formatCOP(t.totalEntregado);
   if(ecoNoEntregado) ecoNoEntregado.textContent = formatCOP(t.totalNoEntregado);
@@ -2670,7 +2567,6 @@ function actualizarInformesSemanalesMensuales(){
 }
 window.recargarGraficas = function(){ renderizarGrafica(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); };
 
-/* Tiempos base */
 window.calcularTiemposBase = function(silencioso){
   const iC=document.getElementById('inicioCarga').value, fC=document.getElementById('finCarga').value, sE=document.getElementById('salidaEmpresa').value, pE=document.getElementById('primeraEntrega').value;
   if(!iC||!fC||!sE||!pE){ if(!silencioso) alert('Completa todas las horas.'); return; }
@@ -2682,7 +2578,6 @@ window.calcularTiemposBase = function(silencioso){
 window.marcarLlegada = ()=>{ document.getElementById('llegadaCliente').value=horaActual(); guardarBorrador(); };
 window.marcarSalidaYRegistrar = ()=>{ const l=document.getElementById('llegadaCliente').value; if(!l){ alert('Primero marca llegada'); return; } const e=document.getElementById('estadoPaquete').value; if(!e){ alert('Selecciona estado'); return; } const s=horaActual(); document.getElementById('salidaCliente').value=s; window.registrarVisita(); };
 
-/* Firma */
 let canvasFirma, ctxFirma, dibujandoFirma=false, firmaGuardada=null;
 let ultimoX=0, ultimoY=0;
 window.inicializarFirma = function(){
@@ -2699,14 +2594,7 @@ window.inicializarFirma = function(){
   const preview=document.getElementById('previewFirma');
   if(firmaGuardada && preview){ preview.src=firmaGuardada; preview.style.display='block'; }
 };
-window.limpiarFirma = function(){
-  if(!ctxFirma||!canvasFirma) return;
-  ctxFirma.clearRect(0,0,canvasFirma.width,canvasFirma.height);
-  firmaGuardada=null;
-  const preview=document.getElementById('previewFirma');
-  if(preview){ preview.style.display='none'; preview.src=''; }
-  const estado=document.getElementById('estadoFirma'); if(estado) estado.textContent='';
-};
+window.limpiarFirma = function(){ if(!ctxFirma||!canvasFirma) return; ctxFirma.clearRect(0,0,canvasFirma.width,canvasFirma.height); firmaGuardada=null; const preview=document.getElementById('previewFirma'); if(preview){ preview.style.display='none'; preview.src=''; } const estado=document.getElementById('estadoFirma'); if(estado) estado.textContent=''; };
 window.guardarFirma = function(){
   if(!canvasFirma) return;
   const imageData=ctxFirma.getImageData(0,0,canvasFirma.width,canvasFirma.height);
@@ -2715,11 +2603,10 @@ window.guardarFirma = function(){
   firmaGuardada=canvasFirma.toDataURL('image/png');
   const preview=document.getElementById('previewFirma');
   if(preview){ preview.src=firmaGuardada; preview.style.display='block'; }
-  const estado=document.getElementById('estadoFirma'); if(estado) estado.textContent='✅ Firma guardada. Se adjuntará a la próxima visita.';
+  const estado=document.getElementById('estadoFirma'); if(estado) estado.textContent='✅ Firma guardada.';
   mostrarAviso('✅ Firma guardada','ok'); beepOk();
 };
 
-/* Registro visita */
 function limpiarFormularioVisita(){
   ['llegadaCliente','salidaCliente','codigoBarras','descripcionVisita','estadoPaquete','busquedaCodigoBanco','direccionVisita','precioVisita'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
   const dirInput=document.getElementById('direccionVisita');
@@ -2747,7 +2634,7 @@ window.registrarVisita = async ()=>{
   if(ic){ const e=validarCodigo(ic); if(e){ mostrarAviso('⚠️ '+e,'error'); beepError(); return; } const m=motivoDuplicado(ic); if(m){ mostrarAviso('⚠️ '+m,'error'); beepError(); return; } if(!codigosPendientes.includes(ic)) codigosPendientes.push(ic); if(!bancoContiene(ic)) bancoCodigos.push({codigo:ic,direccion:'',precio:0}); }
   if(!codigosPendientes.length && !ic){ if(!confirm('⚠️ ¿Registrar visita sin código?')) return; }
   for(const c of codigosPendientes){ const e=validarCodigo(c); if(e){ mostrarAviso('⚠️ Código inválido: '+c,'error'); beepError(); return; } }
-  
+  // Auto-geocodificar si falta
   if(direccion && !lat){
     try {
       const ciudadDetectada = detectarCiudadEnDireccion(direccion) || getCiudadSeleccionada();
@@ -2755,7 +2642,6 @@ window.registrarVisita = async ()=>{
       if(g){ lat = g.lat; lon = g.lon; }
     } catch(e){ console.warn('Auto-geo:', e); }
   }
-  
   const codigos=codigosPendientes.length?[...codigosPendientes]:[''];
   const t=calcularMinutos(l,s);
   const hr=new Date().toISOString();
@@ -2772,7 +2658,6 @@ window.registrarVisita = async ()=>{
   setTimeout(()=>{ document.getElementById('llegadaCliente')?.focus(); mostrarAviso('✅ Visita guardada','ok'); beepOk(); },120);
 };
 
-/* Escáner */
 let escaneoModo='pendientes';
 window.iniciarEscaneo = function(modo){
   if(escaneoActivo) return;
@@ -2815,7 +2700,7 @@ window.iniciarEscaneo = function(modo){
         renderizarBanco();
         guardarEstadoCompleto();
         beepOk();
-        mostrarAviso('✅ Agregado: '+cod+' (edita para dirección/precio)','ok');
+        mostrarAviso('✅ Agregado: '+cod,'ok');
         cerrar();
         return;
       }
@@ -2833,7 +2718,7 @@ window.iniciarEscaneo = function(modo){
       mostrarAviso('✅ Código: '+cod,'ok');
       cerrar();
     },()=>{}).catch(err=>{ fin('No se pudo acceder a cámara: '+err); });
-  }catch(e){ fin('⚠️ No se pudo iniciar el escáner: '+e.message); }
+  }catch(e){ fin('⚠️ No se pudo iniciar: '+e.message); }
 };
 window.cancelarEscaneo = ()=>{
   const db=document.getElementById('lectorQRBanco'), dp=document.getElementById('lectorQR');
@@ -2879,7 +2764,6 @@ function generarChartDona(ancho,alto){
   return c.toDataURL('image/png');
 }
 
-/* Impresión */
 function esModoStandalone(){ try{ return window.matchMedia('(display-mode: standalone)').matches||window.matchMedia('(display-mode: fullscreen)').matches||window.navigator.standalone===true; }catch(e){ return false; } }
 window.esModoStandalone = esModoStandalone;
 function esDispositivoIOS(){ return /iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1); }
@@ -2914,7 +2798,6 @@ async function ejecutarImpresion(html,clasesExtra){
 }
 window.ejecutarImpresion = ejecutarImpresion;
 
-/* Informe diario */
 window.imprimirReporteDiario = async function(){
   try{
     if(!visitas.length && !_autoPrintMode){ if(!confirm('⚠️ No hay visitas. ¿Imprimir?')) return; }
@@ -2944,65 +2827,13 @@ window.imprimirReporteDiario = async function(){
     const idsFaltantes=idsNecesarios.filter(id=>!cacheFotos.has(id));
     if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
     const T = calcularTotalesPrecios();
-
-    let html=`<div class="reporte-diario">
-      <div class="informe-empresa-header">
-        <div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div>
-        <div class="doc-info"><strong>Reporte Diario</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div>
-      </div>
-      <div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;">
-        <div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div>
-        <div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div>
-      </div>
-      <header class="rd-header">
-        <h1>Reporte Diario de Entregas</h1>
-        <div class="rd-subtitle">Registro detallado de visitas y evidencias</div>
-        <div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div>
-      </header>
-      <section class="rd-kpis">
-        <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div>
-        <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entreg.</div><div class="rd-kpi-valor">${noEnt}</div></div>
-        <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
-        <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div>
-        <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div>
-        <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
-        <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
-        <div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div>
-      </section>
-      <section>
-        <h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3>
-        <table class="rd-economic-table">
-          <tr>
-            <td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td>
-            <td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td>
-            <td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td>
-          </tr>
-          <tr>
-            <td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td>
-            <td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td>
-            <td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td>
-          </tr>
-        </table>
-      </section>
-      <section class="rd-charts">
-        <div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div>
-        <div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div>
-      </section>
-      <section class="rd-tiempos">
-        <h3 class="rd-section-title">⏱️ Tiempos Base</h3>
-        <table class="rd-tabla-tiempos">
-          <tr><td><strong>Inicio</strong><br>${iC}</td><td><strong>Fin</strong><br>${fC}</td><td><strong>Salida</strong><br>${sE}</td><td><strong>1ª entrega</strong><br>${pE}</td></tr>
-          <tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr>
-        </table>
-      </section>`;
-
+    let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div><div class="doc-info"><strong>Reporte Diario</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div></div><div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;"><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div></div><header class="rd-header"><h1>Reporte Diario de Entregas</h1><div class="rd-subtitle">Registro detallado de visitas y evidencias</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Entreg.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom/Visita</div><div class="rd-kpi-valor">${prom} min</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr><tr><td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td><td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td><td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td></tr></table></section><section class="rd-charts"><div class="rd-chart-box"><img src="${chartEstados}" alt="Distribución"></div><div class="rd-chart-box"><img src="${chartDona}" alt="Entregados vs No"></div></section><section class="rd-tiempos"><h3 class="rd-section-title">⏱️ Tiempos Base</h3><table class="rd-tabla-tiempos"><tr><td><strong>Inicio</strong><br>${iC}</td><td><strong>Fin</strong><br>${fC}</td><td><strong>Salida</strong><br>${sE}</td><td><strong>1ª entrega</strong><br>${pE}</td></tr><tr><td>Carga: <strong>${minC} min</strong></td><td>Prep: <strong>${minP} min</strong></td><td>Viaje: <strong>${minV} min</strong></td><td>Total: <strong>${minT} min</strong></td></tr></table></section>`;
     const eCV=Object.entries(contadores).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
     if(eCV.length){
       html+=`<section><h3 class="rd-section-title">📈 Distribución por Estado</h3><table class="rd-tabla"><thead><tr><th style="text-align:left;width:35%">Estado</th><th style="width:12%">Cant.</th><th style="width:12%">%</th><th style="width:15%">Valor</th><th style="width:26%">Barra</th></tr></thead><tbody>`;
       eCV.forEach(([k,v])=>{ const p=totalVisitas>0?((v/totalVisitas)*100):0; const bw=Math.max(p,2); const valor = visitas.filter(vv=>vv.estado===k).reduce((s,vv)=>s+(Number(vv.precio)||0),0); html+=`<tr><td style="text-align:left;">${escapeHtml(k)}</td><td><strong>${v}</strong></td><td>${p.toFixed(1)}%</td><td style="font-weight:700;color:#1e8449;">${formatCOP(valor)}</td><td><div style="background:#e8e8ed;border-radius:2px;height:9px;"><div style="background:#0a84ff;height:100%;width:${bw}%;"></div></div></td></tr>`; });
       html+=`<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td>100%</td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td></td></tr></tbody></table></section>`;
     }
-
     html+=`<section><h3 class="rd-section-title">📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:3%">#</th><th style="width:6%">Lleg.</th><th style="width:6%">Sal.</th><th style="width:5%">T.</th><th style="width:12%">Código</th><th style="width:15%">Dirección</th><th style="width:9%">Precio</th><th style="width:12%">Estado</th><th style="width:4%">📸</th><th style="width:4%">✍️</th><th>Descripción</th></tr></thead><tbody>`;
     if(!visitas.length){ html+=`<tr><td colspan="11" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas</td></tr>`; }
     else {
@@ -3020,7 +2851,6 @@ window.imprimirReporteDiario = async function(){
       }
     }
     html+=`</tbody></table></section>`;
-
     if(bancoCodigos.length){
       const us=new Set(visitas.map(v=>(v.codigo||'').trim()).filter(Boolean));
       const uc=bancoCodigos.filter(x=>us.has(normalizarCodigoBanco(x).codigo)).length;
@@ -3028,16 +2858,14 @@ window.imprimirReporteDiario = async function(){
       const conDir=bancoCodigos.filter(x=>normalizarCodigoBanco(x).direccion).length;
       const conPre=bancoCodigos.filter(x=>normalizarCodigoBanco(x).precio>0).length;
       const totalBanco = bancoCodigos.reduce((s,x)=>s+normalizarCodigoBanco(x).precio,0);
-      html+=`<section><h3 class="rd-section-title">📥 Banco de Códigos</h3><table class="rd-tabla-tiempos"><tr><td><strong>Total</strong><br>${bancoCodigos.length}</td><td><strong>✓ Usados</strong><br>${uc}</td><td><strong>⏳ Disp.</strong><br>${disp}</td><td><strong>📍 Con dir.</strong><br>${conDir}</td><td><strong>💰 Con precio</strong><br>${conPre}</td><td><strong>💰 Valor banco</strong><br>${formatCOP(totalBanco)}</td></tr></table></section>`;
+      html+=`<section><h3 class="rd-section-title">📥 Banco de Códigos</h3><table class="rd-tabla-tiempos"><tr><td><strong>Total</strong><br>${bancoCodigos.length}</td><td><strong>✓ Usados</strong><br>${uc}</td><td><strong>⏳ Disp.</strong><br>${disp}</td><td><strong>📍 Con dir.</strong><br>${conDir}</td><td><strong>💰 Con precio</strong><br>${conPre}</td><td><strong>💰 Valor</strong><br>${formatCOP(totalBanco)}</td></tr></table></section>`;
     }
-
     const visitasConFirma=visitas.filter(v=>v.firma);
     if(visitasConFirma.length){
       html+=`<section><h3 class="rd-section-title">✍️ Firmas Digitales (${visitasConFirma.length})</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;">`;
       visitasConFirma.forEach(v=>{ html+=`<div style="border:1px solid #999;border-radius:3px;padding:4px;text-align:center;background:#f8f9fa;"><img src="${v.firma}" style="max-width:100%;max-height:25mm;object-fit:contain;display:block;"><div style="font-size:6pt;color:#555;margin-top:2px;">#${visitas.indexOf(v)+1} · ${escapeHtml(v.codigo||'')}</div></div>`; });
       html+=`</div></section>`;
     }
-
     const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
     if(vCF.length){
       const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
@@ -3054,24 +2882,11 @@ window.imprimirReporteDiario = async function(){
       }
       html+=`</section>`;
     }
-
-    html+=`<section class="rd-firmas">
-      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div>
-      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor</div><div class="rd-firma-nombre">_________________</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div>
-      <div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor</div><div class="rd-firma-nombre">_________________</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div>
-    </section>
-    <div class="rd-footer">
-      <div class="rd-confidencial">Documento confidencial — Uso interno</div>
-      <div>${DATOS_EMPRESA.colserlog.nombre} · NIT ${DATOS_EMPRESA.colserlog.nit}</div>
-      <div>${DATOS_EMPRESA.colvanes.nombre} · NIT ${DATOS_EMPRESA.colvanes.nit}</div>
-      <div>Hash: ${escapeHtml(hash)}</div>
-    </div></div>`;
-
+    html+=`<section class="rd-firmas"><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor</div><div class="rd-firma-nombre">_________________</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor</div><div class="rd-firma-nombre">_________________</div><div class="rd-firma-detalle">C.C.: ________<br>Fecha: ______</div></div></section><div class="rd-footer"><div class="rd-confidencial">Documento confidencial — Uso interno</div><div>${DATOS_EMPRESA.colserlog.nombre} · NIT ${DATOS_EMPRESA.colserlog.nit}</div><div>${DATOS_EMPRESA.colvanes.nombre} · NIT ${DATOS_EMPRESA.colvanes.nit}</div><div>Hash: ${escapeHtml(hash)}</div></div></div>`;
     await ejecutarImpresion(html,['modo-reporte-diario']);
   }catch(err){ console.error(err); finalizarImpresion(); alert('❌ Error al preparar informe.'); }
 };
 
-/* Álbum */
 window.imprimirAlbumFotografico = async function(){
   try{
     const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
@@ -3088,9 +2903,7 @@ window.imprimirAlbumFotografico = async function(){
     if(!planas.length){ alert('⚠️ No se pudieron cargar fotos.'); return; }
     const FPP=12; const totalP=Math.ceil(planas.length/FPP);
     const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-    let html=`<div class="reporte-diario">
-      <div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}</div></div><div class="doc-info"><strong>Álbum Fotográfico</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}</div></div>
-      <header class="rd-header"><h1>Álbum Fotográfico</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fotos:</strong> ${planas.length}</div><div><strong>Páginas:</strong> ${totalP}</div></div></header>`;
+    let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}</div></div><div class="doc-info"><strong>Álbum Fotográfico</strong><br>Código: ${codigoDoc}<br>Fecha: ${fecha}</div></div><header class="rd-header"><h1>Álbum Fotográfico</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fotos:</strong> ${planas.length}</div><div><strong>Páginas:</strong> ${totalP}</div></div></header>`;
     for(let p=0;p<planas.length;p+=FPP){
       const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
       html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Pág. ${np}/${totalP}</div><div class="rd-album-grid">`;
@@ -3102,7 +2915,6 @@ window.imprimirAlbumFotografico = async function(){
   }catch(err){ finalizarImpresion(); alert('❌ Error al generar álbum.'); }
 };
 
-/* Informe mensual */
 window.imprimirInformeMensual = async function(){
   try{
     const ic=document.getElementById('informeContenedor');
@@ -3113,7 +2925,6 @@ window.imprimirInformeMensual = async function(){
   }catch(err){ finalizarImpresion(); alert('❌ Error.'); }
 };
 
-/* Informe empresarial */
 window.generarInformeEmpresarial = async function(){
   const contenedor=document.getElementById('informeEmpresarialContenedor');
   if(!contenedor) return;
@@ -3133,44 +2944,7 @@ window.generarInformeEmpresarial = async function(){
   const idsNecesarios=[]; visitas.forEach(v=>{ if(Array.isArray(v.fotos)) v.fotos.forEach(f=>{ if(f.id) idsNecesarios.push(f.id); }); });
   const idsFaltantes=idsNecesarios.filter(id=>!cacheFotos.has(id));
   if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
-
-  let html=`<div class="reporte-diario">
-    <div class="informe-empresa-header">
-      <div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div>
-      <div class="doc-info"><strong>Informe Empresarial</strong><br>Código: INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div>
-    </div>
-    <div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;">
-      <div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div>
-      <div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div>
-    </div>
-    <header class="rd-header"><h1>Informe Empresarial Detallado</h1><div class="rd-subtitle">Trazabilidad completa</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header>
-    <section class="rd-kpis">
-      <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div>
-      <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div>
-      <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
-      <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div>
-      <div class="rd-kpi naranja"><div class="rd-kpi-label">💰 Valor Total</div><div class="rd-kpi-valor">${formatCOP(T.totalGeneral)}</div></div>
-      <div class="rd-kpi gris"><div class="rd-kpi-label">📍 Dir.</div><div class="rd-kpi-valor">${visitasConDireccion}</div></div>
-      <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div>
-      <div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div>
-    </section>
-    <section>
-      <h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3>
-      <table class="rd-economic-table">
-        <tr>
-          <td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td>
-          <td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td>
-          <td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td>
-        </tr>
-        <tr>
-          <td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td>
-          <td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td>
-          <td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td>
-        </tr>
-      </table>
-    </section>
-    <section class="rd-tiempos"><h3 class="rd-section-title">📊 Gestión</h3><table class="rd-tabla-tiempos"><tr><td><strong>Con precio</strong><br>${visitasConPrecio}</td><td><strong>Fotos</strong><br>${tFotos}</td><td><strong>Censuradas</strong><br>${tCensuradas}</td><td><strong>Con firma</strong><br>${visitasConFirma}</td></tr></table></section>`;
-
+  let html=`<div class="reporte-diario"><div class="informe-empresa-header"><div class="logo-section"><div class="logo-placeholder">C</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colserlog.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colserlog.nit}<br>${DATOS_EMPRESA.colserlog.direccion}<br>Tel: ${DATOS_EMPRESA.colserlog.telefono}<br>${DATOS_EMPRESA.colserlog.email}</div></div><div class="doc-info"><strong>Informe Empresarial</strong><br>Código: INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}<br>Fecha: ${fecha}<br>Generado: ${horaGen}</div></div><div class="informe-empresa-header" style="border-bottom:1px solid #ccc;padding-bottom:6px;margin-bottom:10px;"><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#30d158,#248a3d);font-size:1.2rem;">V</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.colvanes.nombre}</strong><br>NIT: ${DATOS_EMPRESA.colvanes.nit}<br>${DATOS_EMPRESA.colvanes.direccion}<br>Tel: ${DATOS_EMPRESA.colvanes.telefono}</div></div><div class="logo-section"><div class="logo-placeholder" style="background:linear-gradient(135deg,#ff9f0a,#ff6b00);font-size:1.2rem;">E</div><div class="empresa-datos"><strong>${DATOS_EMPRESA.envia.nombre}</strong><br>NIT: ${DATOS_EMPRESA.envia.nit}<br>${DATOS_EMPRESA.envia.direccion}<br>Tel: ${DATOS_EMPRESA.envia.telefono}</div></div></div><header class="rd-header"><h1>Informe Empresarial Detallado</h1><div class="rd-subtitle">Trazabilidad completa</div><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">💰 Valor Total</div><div class="rd-kpi-valor">${formatCOP(T.totalGeneral)}</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">📍 Dir.</div><div class="rd-kpi-valor">${visitasConDireccion}</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico de Paquetes</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Valor Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Valor Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ Valor No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr><tr><td><div class="eco-label">📊 Total Paquetes</div><div class="eco-valor">${totalVisitas}</div></td><td><div class="eco-label">✅ Cantidad Entregados</div><div class="eco-valor verde">${T.cantEntregado}</div></td><td><div class="eco-label">❌ Cantidad No Entregados</div><div class="eco-valor rojo">${T.cantNoEntregado}</div></td></tr></table></section><section class="rd-tiempos"><h3 class="rd-section-title">📊 Gestión</h3><table class="rd-tabla-tiempos"><tr><td><strong>Con precio</strong><br>${visitasConPrecio}</td><td><strong>Fotos</strong><br>${tFotos}</td><td><strong>Censuradas</strong><br>${tCensuradas}</td><td><strong>Con firma</strong><br>${visitasConFirma}</td></tr></table></section>`;
   if(visitas.length){
     html+=`<section><h3 class="rd-section-title">📋 Detalle de Visitas</h3><table class="rd-tabla"><thead><tr><th>#</th><th>Lleg.</th><th>Sal.</th><th>T.</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th><th>📸</th><th>✍️</th></tr></thead><tbody>`;
     visitas.forEach((v,i)=>{
@@ -3186,13 +2960,11 @@ window.generarInformeEmpresarial = async function(){
     }
     html+=`</tbody></table></section>`;
   }
-
   if(visitasConFirma>0){
     html+=`<section><h3 class="rd-section-title">✍️ Firmas Digitales</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5mm;">`;
     visitas.filter(v=>v.firma).forEach(v=>{ html+=`<div style="border:1px solid #999;border-radius:3px;padding:4px;text-align:center;background:#f8f9fa;"><img src="${v.firma}" style="max-width:100%;max-height:25mm;object-fit:contain;display:block;"><div style="font-size:6pt;color:#555;margin-top:2px;">#${visitas.indexOf(v)+1} · ${escapeHtml(v.codigo||'')}</div></div>`; });
     html+=`</div></section>`;
   }
-
   const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
   if(vCF.length){
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
@@ -3209,16 +2981,13 @@ window.generarInformeEmpresarial = async function(){
     }
     html+=`</section>`;
   }
-
-  html+=`<section class="rd-firmas"><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor</div><div class="rd-firma-nombre">_____________</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor</div><div class="rd-firma-nombre">_____________</div></div></section>
-  <div class="rd-footer"><div class="rd-confidencial">Documento confidencial</div><div>${DATOS_EMPRESA.colserlog.nombre} · NIT ${DATOS_EMPRESA.colserlog.nit}</div><div>${DATOS_EMPRESA.colvanes.nombre} · NIT ${DATOS_EMPRESA.colvanes.nit}</div><div>${DATOS_EMPRESA.envia.nombre} · NIT ${DATOS_EMPRESA.envia.nit}</div></div></div>`;
+  html+=`<section class="rd-firmas"><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor</div><div class="rd-firma-nombre">_____________</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor</div><div class="rd-firma-nombre">_____________</div></div></section><div class="rd-footer"><div class="rd-confidencial">Documento confidencial</div><div>${DATOS_EMPRESA.colserlog.nombre} · NIT ${DATOS_EMPRESA.colserlog.nit}</div><div>${DATOS_EMPRESA.colvanes.nombre} · NIT ${DATOS_EMPRESA.colvanes.nit}</div><div>${DATOS_EMPRESA.envia.nombre} · NIT ${DATOS_EMPRESA.envia.nit}</div></div></div>`;
   contenedor.innerHTML=html;
   mostrarAviso('✅ Informe empresarial generado','ok');
 };
 
 window.compartirInformeEmpresarialWhatsApp = function(){ const t=construirTextoDia(); if(!t){ alert('⚠️ No hay datos.'); return; } abrirWhatsApp(t); };
 
-/* WhatsApp */
 function construirTextoDia(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'Sin usuario';
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
@@ -3226,7 +2995,7 @@ function construirTextoDia(){
   const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
   const ef=totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0;
   const T = calcularTotalesPrecios();
-  let t=`📦 *COLSERLOG - Reporte Diario*\n━━━━━━━━━━━━━━━━━\n👤 *Mensajero:* ${u}\n📅 *Fecha:* ${f}\n\n📊 *RESUMEN*\n✅ Entregados: *${e}*\n❌ No entregados: *${n}*\n📦 Total: *${totalVisitas}*\n⏱️ Promedio: *${p} min*\n🎯 Efectividad: *${ef}%*\n\n💰 *RESUMEN ECONÓMICO*\n📦 Valor total paquetes: *${formatCOP(T.totalGeneral)}*\n✅ Valor entregado: *${formatCOP(T.totalEntregado)}*\n❌ Valor no entregado: *${formatCOP(T.totalNoEntregado)}*\n📊 Paquetes entregados: *${T.cantEntregado}* de *${totalVisitas}*\n\n`;
+  let t=`📦 *COLSERLOG - Reporte Diario*\n━━━━━━━━━━━━━━━━━\n👤 *Mensajero:* ${u}\n📅 *Fecha:* ${f}\n\n📊 *RESUMEN*\n✅ Entregados: *${e}*\n❌ No entregados: *${n}*\n📦 Total: *${totalVisitas}*\n⏱️ Promedio: *${p} min*\n🎯 Efectividad: *${ef}%*\n\n💰 *RESUMEN ECONÓMICO*\n📦 Valor total: *${formatCOP(T.totalGeneral)}*\n✅ Valor entregado: *${formatCOP(T.totalEntregado)}*\n❌ Valor no entregado: *${formatCOP(T.totalNoEntregado)}*\n📊 Paquetes entregados: *${T.cantEntregado}* de *${totalVisitas}*\n\n`;
   if(visitas.length){ t+=`📋 *VISITAS*\n`; visitas.forEach((v,i)=>{ t+=`${i+1}. ${v.codigo||'—'} · ${v.estado}${v.precio?' · '+formatCOP(v.precio):''}${v.firma?' ✍️':''}\n`; }); }
   t+=`\n_Generado por Colserlog_`;
   return t;
@@ -3258,7 +3027,6 @@ window.compartirHistorialWhatsApp=()=>{ const t=construirTextoHistorial(); if(!t
 window.compartirInformeMensualVisible=()=>window.compartirMesWhatsApp();
 window.copiarResumenPortapapeles=(tipo)=>{ let t=''; if(tipo==='dia') t=construirTextoDia(); else if(tipo==='historial') t=construirTextoHistorial(); if(!t){ alert('⚠️ No hay datos.'); return; } copiarAlPortapapeles(t); };
 
-/* Respaldo */
 async function crearObjetoRespaldo(){
   const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'sin-usuario';
   let e=null, en={};
@@ -3369,19 +3137,14 @@ window.cargarRespaldoDesdeArchivo = async function(event){
   try{
     const bytes=new Uint8Array(await file.arrayBuffer());
     const tipo=detectarTipoArchivo(bytes);
-    let texto='';
-    let payload=null;
+    let texto=''; let payload=null;
     if(tipo==='zip'){
       if(!window.JSZip){ alert('⚠️ Falta JSZip.'); return; }
       try{ const z=await JSZip.loadAsync(file); const cand=Object.keys(z.files).filter(n=>/^word\/.*\.xml$/i.test(n)); for(const nombre of cand){ const xml=await z.file(nombre).async('string'); payload=extraerPayloadBase64(xml); if(payload) break; } }catch(e){}
     } else if(tipo==='ole2'){ texto=extraerTextoDeOLE2(bytes); payload=extraerPayloadBase64(texto); }
     else if(tipo==='rtf'){ texto=bytesATexto(bytes,'texto'); texto=extraerTextoDeRTF(texto); payload=extraerPayloadBase64(texto); }
     else { texto=bytesATexto(bytes,tipo); const trimmed=texto.replace(/^\uFEFF/,'').trim(); if(trimmed.startsWith('{')){ try{ const jp=JSON.parse(trimmed); if(jp && (jp.entregasDiariasDetallado||jp.estadoSesion||jp.usuario)) payload=jp; }catch(e){} } if(!payload) payload=extraerPayloadBase64(texto); }
-    if(payload){
-      const ok=await aplicarRespaldo(payload);
-      if(ok){ if(typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage(); alert('✅ Respaldo restaurado.'); setTimeout(()=>location.reload(),500); return; }
-      else { mostrarAviso('⚠️ Cancelado','error'); return; }
-    }
+    if(payload){ const ok=await aplicarRespaldo(payload); if(ok){ if(typeof window.recargarUIDesdeStorage==='function') window.recargarUIDesdeStorage(); alert('✅ Respaldo restaurado.'); setTimeout(()=>location.reload(),500); return; } else { mostrarAviso('⚠️ Cancelado','error'); return; } }
     if(!texto && tipo!=='zip'){ alert('❌ No se pudo leer.'); return; }
     const cT=texto?extraerCodigosDeTexto(texto):[];
     let im=[]; if(tipo==='zip' && window.JSZip){ try{ im=await extraerImagenesDeDocx(file); }catch(e){} } else if(texto){ im=extraerImagenesDeDocHTML(texto); }
@@ -3396,27 +3159,14 @@ window.cargarRespaldoDesdeArchivo = async function(event){
   finally{ event.target.value=''; }
 };
 
-/* Exportaciones Word */
 window.exportarDiaAWord = function(){
   if(!visitas.length){ alert('No hay visitas hoy.'); return; }
   const f=new Date().toLocaleDateString('es',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
   const e=contadores['Entregado']||0;
   const T = calcularTotalesPrecios();
-  let h=`<h1>📦 Reporte Diario</h1><h2>${escapeHtml(f)}</h2>
-    <h3>💰 Resumen Económico</h3>
-    <table>
-      <tr><td><strong>Valor Total Paquetes</strong></td><td>${formatCOP(T.totalGeneral)}</td><td><strong>Total Paquetes</strong></td><td>${totalVisitas}</td></tr>
-      <tr><td><strong>✅ Valor Entregado</strong></td><td>${formatCOP(T.totalEntregado)}</td><td><strong>✅ Cantidad Entregados</strong></td><td>${T.cantEntregado}</td></tr>
-      <tr><td><strong>❌ Valor No Entregado</strong></td><td>${formatCOP(T.totalNoEntregado)}</td><td><strong>❌ Cantidad No Entregados</strong></td><td>${T.cantNoEntregado}</td></tr>
-    </table>
-    <h3>📊 Resumen General</h3>
-    <table><tr><td>Entregados</td><td>${e}</td><td>Total</td><td>${totalVisitas}</td><td>Efectividad</td><td>${totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0}%</td></tr></table>
-    <h3>📋 Visitas</h3>
-    <table><thead><tr><th>#</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
+  let h=`<h1>📦 Reporte Diario</h1><h2>${escapeHtml(f)}</h2><h3>💰 Resumen Económico</h3><table><tr><td><strong>Valor Total Paquetes</strong></td><td>${formatCOP(T.totalGeneral)}</td><td><strong>Total Paquetes</strong></td><td>${totalVisitas}</td></tr><tr><td><strong>✅ Valor Entregado</strong></td><td>${formatCOP(T.totalEntregado)}</td><td><strong>✅ Cantidad Entregados</strong></td><td>${T.cantEntregado}</td></tr><tr><td><strong>❌ Valor No Entregado</strong></td><td>${formatCOP(T.totalNoEntregado)}</td><td><strong>❌ Cantidad No Entregados</strong></td><td>${T.cantNoEntregado}</td></tr></table><h3>📊 Resumen General</h3><table><tr><td>Entregados</td><td>${e}</td><td>Total</td><td>${totalVisitas}</td><td>Efectividad</td><td>${totalVisitas>0?((e/totalVisitas)*100).toFixed(1):0}%</td></tr></table><h3>📋 Visitas</h3><table><thead><tr><th>#</th><th>Código</th><th>Dirección</th><th>Precio</th><th>Estado</th></tr></thead><tbody>`;
   visitas.forEach((v,i)=>{ h+=`<tr><td>${i+1}</td><td>${escapeHtml(v.codigo)||'—'}</td><td>${escapeHtml(v.direccion)||'—'}</td><td>${v.precio?formatCOP(v.precio):'—'}</td><td>${escapeHtml(v.estado)||''}</td></tr>`; });
-  h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td></tr>`;
-  h+=`<tr class="total-row"><td colspan="3"><strong>✅ ENTREGADOS</strong></td><td><strong>${formatCOP(T.totalEntregado)}</strong></td><td><strong>${T.cantEntregado}</strong></td></tr>`;
-  h+=`</tbody></table>`;
+  h+=`<tr class="total-row"><td colspan="3"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td></tr><tr class="total-row"><td colspan="3"><strong>✅ ENTREGADOS</strong></td><td><strong>${formatCOP(T.totalEntregado)}</strong></td><td><strong>${T.cantEntregado}</strong></td></tr></tbody></table>`;
   descargarWord(`Reporte_${fechaLocalISO()}.doc`,h);
 };
 window.exportarMesAWord = function(){
@@ -3442,7 +3192,6 @@ window.exportarHistorialCompletoAWord = function(){
   descargarWord(`Historial_Completo.doc`,html);
 };
 
-/* Almacenamiento */
 window.verEstadoAlmacenamiento = async function(){
   const tf=await contarFotosDB();
   const todas=await obtenerTodasLasFotosDB();
@@ -3450,7 +3199,7 @@ window.verEstadoAlmacenamiento = async function(){
   const nC=todas.filter(f=>f.censurada).length;
   let lS=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i), v=localStorage.getItem(k); lS+=(k.length+(v?.length||0)); } }catch(e){}
   const ciudades = obtenerCiudadesDisponibles();
-  alert(`💾 ALMACENAMIENTO\n\n📸 Fotos: ${tf}\n   ├─ ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}\n\n🏙️ Ciudades detectadas: ${Object.keys(ciudades).length}\n${Object.entries(ciudades).map(([c,n])=>`  • ${c}: ${n}`).join('\n')}`);
+  alert(`💾 ALMACENAMIENTO\n\n📸 Fotos: ${tf}\n   ├─ ${(tKB/1024).toFixed(2)} MB\n   └─ Censuradas: ${nC}\n📦 localStorage: ${(lS/1024).toFixed(1)} KB\n🛡️ Auto-censura: ${autoCensuraActiva?'ACTIVADA':'desactivada'}\n\n🏙️ Ciudades: ${Object.keys(ciudades).length}\n${Object.entries(ciudades).map(([c,n])=>`  • ${c}: ${n}`).join('\n')}`);
 };
 window.eliminarFotosAntiguas = async function(){
   const d=prompt('🗑️ Eliminar fotos anteriores a X días:','60');
@@ -3471,7 +3220,6 @@ window.vaciarTodasLasFotos = async function(){
   cacheFotos.clear(); alert('✅ Todas eliminadas');
 };
 
-/* Control */
 window.guardarDia = ()=>{ guardarDiaActual(); if(typeof window.sincronizarConNube==='function') window.sincronizarConNube(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); if(confirm('✅ Día guardado.\n\n¿Exportar respaldo?')){ try{ window.descargarRespaldoWord(); }catch(e){} } };
 window.reiniciarDia = ()=>{ if(!confirm('¿Reiniciar día?')) return; guardarDiaActual(); if(typeof window.sincronizarConNube==='function') window.sincronizarConNube(); limpiarSesion(); alert('✅ Día reiniciado'); };
 window.reiniciarSesion = ()=>{ if(!confirm('¿Limpiar sesión?')) return; limpiarSesion(); alert('✅ Sesión reiniciada'); };
@@ -3501,7 +3249,6 @@ window.eliminarTodo = async ()=>{
   alert('✅ Todo eliminado');
 };
 
-/* Informe mensual */
 window.generarInformeMensual = ()=>{
   const m=parseInt(document.getElementById('mesInforme').value), a=parseInt(document.getElementById('anioInforme').value);
   if(!m||!a){ alert('Selecciona mes y año'); return; }
@@ -3570,7 +3317,7 @@ window.compactarHistorial = function(){
 };
 
 function diagnosticar(){
-  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','asistirDireccionIA','dibujarRutaMapa','geolocalizarTodasVisitas','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','geocodificarDireccionAvanzado','inicializarSelectorCiudad','cambiarCiudadRuta'];
+  const fns=['imprimirReporteDiario','imprimirAlbumFotografico','imprimirInformeMensual','guardarDia','forzarSincronizacion','cargarDeNube','descargarRespaldoWord','generarInformeMensual','calcularTiemposBase','registrarVisita','iniciarEscaneo','marcarLlegada','filtrarVisitas','limpiarBusqueda','agregarCodigo','eliminarCodigoPendiente','cargarRespaldoDesdeArchivo','exportarDiaAWord','exportarMesAWord','exportarHistorialCompletoAWord','actualizarPlaceholderDescripcion','cambiarUsuario','cerrarSesion','getUsuarioActual','agregarCodigoBanco','eliminarCodigoBanco','vaciarBanco','buscarCodigosBanco','agregarCodigoDesdeBanco','limpiarBusquedaCodigo','toggleCargaMasiva','procesarCargaMasiva','seleccionarPrimerResultado','filtrarSoloDigitos','actualizarContadorDigitos','compactarHistorial','mostrarDiagnosticoNube','hacerLogin','hacerRegistro','cambiarTabUser','olvidarUsuariosLocales','toggleDarkMode','instalarPWA','compartirDiaWhatsApp','compartirMesWhatsApp','compartirHistorialWhatsApp','copiarResumenPortapapeles','compartirInformeMensualVisible','restaurarDescripcionRecomendada','limpiarDescripcion','alCambiarEstado','aplicarDescripcionRecomendada','capturarFoto','abrirModalFoto','cerrarModalFoto','navegarFoto','verFotosVisita','toggleFotosNube','verEstadoAlmacenamiento','eliminarFotosAntiguas','vaciarTodasLasFotos','abrirModalReglasFoto','cerrarModalReglasFoto','toggleBotonCamara','confirmarYabrirCamara','cambiarTab','filtrarVistaDia','limpiarBusquedaDia','renderizarVistaDia','toggleAutoCensura','preCargarModelos','detectarYCensurar','descargarJSON','precargarFotosEnCache','esModoStandalone','esIOSPWA','ejecutarImpresion','escapeHtml','asistirDireccionIA','dibujarRutaMapa','geolocalizarTodasVisitas','inicializarFirma','limpiarFirma','guardarFirma','generarInformeEmpresarial','compartirInformeEmpresarialWhatsApp','toggleMenu','renderizarBanco','editarCodigoBanco','guardarEdicionBanco','cancelarEdicionBanco','calcularTotalesPrecios','formatCOP','geocodificarDireccionAvanzado','inicializarSelectorCiudad','cambiarCiudadRuta','abrirModalCoords','cerrarModalCoords','guardarCoordsManuales','geocodificarCodigoBanco'];
   const faltan=fns.filter(f=>typeof window[f]!=='function');
   if(faltan.length) console.error('❌ Faltan funciones:',faltan);
   else console.log('✅ Todas las funciones OK');
