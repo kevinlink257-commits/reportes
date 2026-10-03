@@ -19,7 +19,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
-/* ========== ESTILOS SIN CAMBIOS (idénticos al original) ========== */
 :root{--sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;--sys-red:#ff453a;--sys-red-dark:#c92c20;--sys-orange:#ff9f0a;--sys-yellow:#ffd60a;--sys-purple:#bf5af2;--sys-teal:#40c8e0;--sys-pink:#ff375f;--gray-0:#fff;--gray-1:#f5f5f7;--gray-2:#e8e8ed;--gray-3:#d2d2d7;--gray-4:#aeaeb2;--gray-5:#8e8e93;--gray-6:#636366;--gray-7:#48484a;--gray-8:#1c1c1e;--gray-9:#000;--bg-body:var(--gray-1);--bg-container:#fff;--bg-section:#fafafc;--bg-input:#fff;--bg-card:#fff;--bg-table:#fff;--bg-chip:rgba(10,132,255,.08);--text-primary:#1c1c1e;--text-secondary:#3a3a3c;--text-heading:#1c1c1e;--text-muted:#8e8e93;--border-main:#d2d2d7;--border-light:#e8e8ed;--shadow-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-lg:0 8px 24px rgba(0,0,0,.08);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--radius-pill:999px;--ease:cubic-bezier(.4,0,.2,1);--table-header-bg:#f5f5f7;--table-header-color:#1c1c1e}
 body.dark{--bg-body:#000;--bg-container:#1c1c1e;--bg-section:#2c2c2e;--bg-input:#2c2c2e;--bg-card:#2c2c2e;--bg-table:#1c1c1e;--bg-chip:rgba(10,132,255,.18);--text-primary:#f5f5f7;--text-secondary:#d1d1d6;--text-heading:#f5f5f7;--text-muted:#8e8e93;--border-main:#38383a;--border-light:#2c2c2e;--table-header-bg:#2c2c2e;--table-header-color:#f5f5f7}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -208,8 +207,12 @@ body.dark #barraUsuario button{background:var(--gray-7)}
 .galeria-vacia{grid-column:1/-1;text-align:center;color:var(--text-muted);font-style:italic;font-size:.82rem;padding:14px}
 .foto-thumb{position:relative;aspect-ratio:1;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-light);background:#000}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer}
-.foto-thumb .btn-eliminar-foto{position:absolute;top:4px;right:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,69,58,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center}
-.foto-thumb .badge-censura{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.75);color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.65rem;font-weight:700;pointer-events:none}
+.foto-thumb .btn-eliminar-foto{position:absolute;top:4px;right:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,69,58,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center;z-index:3}
+.foto-thumb .badge-censura{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.75);color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.65rem;font-weight:700;pointer-events:auto;z-index:3;cursor:pointer}
+/* ✅ NUEVO: Botón CENSURAR manual en cada miniatura */
+.foto-thumb .btn-censurar-foto{position:absolute;bottom:4px;right:4px;width:28px;height:28px;min-width:28px;border-radius:50%;background:rgba(191,90,242,.95);color:#fff;border:2px solid #fff;padding:0;font-size:13px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .15s var(--ease),background .15s var(--ease);z-index:3}
+.foto-thumb .btn-censurar-foto:hover{transform:scale(1.12);background:rgba(160,60,200,1)}
+.foto-thumb .btn-censurar-foto:active{transform:scale(.95)}
 .btn-foto{background:var(--sys-purple);margin-top:10px;padding:12px;font-size:.9rem}
 .btn-foto.btn-galeria{background:var(--sys-teal)}
 .btn-foto-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
@@ -389,9 +392,6 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 </head>
 <body>
 
-<!-- El HTML del body queda IDÉNTICO al original (para no romper nada).
-     Solo listo debajo los <script> que CAMBIAN. -->
-
 <div id="barraUsuario">
   <div class="info-usuario"><div class="avatar" id="avatarUsuario">👤</div><span id="infoUsuario">Cargando...</span></div>
   <div class="acciones-bar">
@@ -508,8 +508,6 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
       <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:10px;">💡 Se refleja también en Detalle y Visita Clásica.</p>
     </div>
   </div>
-
-  <!-- ... resto del HTML IGUAL al original ... -->
 
   <div class="tab-panel" data-tab="inicio">
     <div class="section">
@@ -696,7 +694,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 <div id="areaImpresion" style="display:none"></div>
 
 <!-- ============================================================
-     FIREBASE (idéntico al original)
+     FIREBASE
      ============================================================ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
@@ -856,7 +854,7 @@ window.addEventListener('load', ()=>{
 </script>
 
 <!-- ============================================================
-     APP PRINCIPAL — SECCIÓN MODIFICADA
+     APP PRINCIPAL
      ============================================================ -->
 <script type="module">
 const ESTADOS_INFO = [
@@ -871,7 +869,6 @@ function contarEntregadosEnContadores(c){ if(!c) return 0; return (c[ESTADO_ENTR
 function contarEntregadosActuales(){ return (contadores[ESTADO_ENTREGADO]||0) + (contadores[ESTADO_ENTREGADO_LINK]||0); }
 
 const LONGITUD_CODIGO=12;
-// ✅ ANTES 2000 → AHORA 8000ms: bloqueo más agresivo anti-re-escaneo
 const TIEMPO_BLOQUEO_MS=8000;
 const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=1200; const FOTO_JPEG_QUALITY=0.75;
 const CLAVE_BORRADOR='colserlog_borrador';
@@ -943,9 +940,8 @@ let totalMinutosVisitas=0, totalVisitas=0, visitas=[];
 let miGrafico=null, miGraficoPromedios=null, miGraficoSemana=null, miGraficoMes=null;
 let html5QrCode=null, escaneoActivo=false, filaEditando=null;
 let codigosPendientes=[]; let codigosRegistradosHoy=new Set();
-// ✅ Map con TTL más largo + Set permanente de la sesión
 let codesScannedRecently=new Map();
-let _codigosEscaneadosSesion=new Set(); // ⛔ NUNCA permitir re-agregar el mismo en 1 sesión de cámara
+let _codigosEscaneadosSesion=new Set();
 let bancoCodigos=[]; let ultimoEstadoUsado='';
 let scanEstabilizador={codigo:null,contador:0,ultimo:0}; let sesionEscaneoYaAgrego=false;
 let fotosPendientes=[]; let modalFotosActual={lista:[],indice:0};
@@ -960,7 +956,6 @@ let estadoRepartoSeleccionado = '';
 let firmaRepartoGuardada = null;
 let canvasFirmaReparto, ctxFirmaReparto, dibujandoFirmaReparto = false, ultimoXRep = 0, ultimoYRep = 0;
 
-// ✅ Índice Set para búsquedas O(1)
 let _bancoIndex = new Set();
 function _reindexarBanco(){ _bancoIndex.clear(); bancoCodigos.forEach(x=>{ const n=normalizarCodigoBanco(x); if(n.codigo) _bancoIndex.add(n.codigo); }); }
 
@@ -970,7 +965,6 @@ function formatCOP(n){ return '$' + (Number(n)||0).toLocaleString('es-CO'); }
 window.formatCOP = formatCOP;
 function normalizarCodigoBanco(item){ if(typeof item === 'string') return { codigo:item, direccion:'', precio:0 }; if(item && typeof item === 'object') return { codigo:item.codigo||'', direccion:item.direccion||'', precio:Number(item.precio)||0 }; return { codigo:'', direccion:'', precio:0 }; }
 function buscarEnBanco(codigo){ if(!codigo) return null; for(let i=0;i<bancoCodigos.length;i++){ const item = normalizarCodigoBanco(bancoCodigos[i]); if(item.codigo === codigo) return { index:i, item }; } return null; }
-// ✅ O(1) con Set
 function bancoContiene(codigo){ return !!codigo && _bancoIndex.has(codigo); }
 function horaActual(){ const a=new Date(); return String(a.getHours()).padStart(2,'0')+':'+String(a.getMinutes()).padStart(2,'0'); }
 function calcularMinutos(h1,h2){ if(!h1||!h2) return 0; const [a,b]=h1.split(':').map(Number); const [c,d]=h2.split(':').map(Number); let m1=a*60+b, m2=c*60+d; if(m2<m1) m2+=1440; return m2-m1; }
@@ -988,7 +982,6 @@ function guardarBorrador(){ try{ const b={ llegadaCliente:document.getElementByI
 function restaurarBorrador(){ try{ const raw=localStorage.getItem(CLAVE_BORRADOR); if(!raw) return false; const b=JSON.parse(raw); if(b.timestamp && (Date.now()-b.timestamp)>24*60*60*1000){ localStorage.removeItem(CLAVE_BORRADOR); return false; } const set=(id,v)=>{ const el=document.getElementById(id); if(el && v) el.value=v; }; set('llegadaCliente',b.llegadaCliente); set('salidaCliente',b.salidaCliente); set('descripcionVisita',b.descripcionVisita); set('direccionVisita',b.direccionVisita); set('precioVisita',b.precioVisita); if(b.estadoPaquete){ const s=document.getElementById('estadoPaquete'); if(s) s.value=b.estadoPaquete; } return true; }catch(e){ return false; } }
 setInterval(()=>{ if(typeof window._guardarEstadoSilencioso==='function') window._guardarEstadoSilencioso(); guardarBorrador(); },20000);
 
-// ============ IndexedDB Fotos (idéntico) ============
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
 const cacheFotos=new Map();
 function abrirFotosDB(){ return new Promise((resolve,reject)=>{ if(fotosDB && !fotosDB._closed){ try{ void fotosDB.objectStoreNames; resolve(fotosDB); return; }catch(e){ try{ fotosDB.close(); }catch(_){} fotosDB = null; } } if(!window.indexedDB){ reject(new Error('no IndexedDB')); return; } const req=indexedDB.open(DB_NOMBRE, DB_VERSION); req.onupgradeneeded = (e) => { try{ const db = e.target.result; if(!db.objectStoreNames.contains(STORE_FOTOS)) db.createObjectStore(STORE_FOTOS,{keyPath:'id'}); }catch(err){} }; req.onsuccess = (e) => { const db = e.target.result; db._closed = false; db.onclose = () => { db._closed = true; if(fotosDB === db) fotosDB = null; }; fotosDB = db; resolve(db); }; req.onerror = () => reject(req.error); }); }
@@ -1084,55 +1077,175 @@ window.capturarFoto = async function(event){
   finally{ setTimeout(()=>{ if(modal) modal.classList.remove('visible'); },400); input.value=''; }
 };
 
+// ✅ GALERÍA VISITA CLÁSICA — con botón de censura manual
 async function renderizarGaleriaFotos(){
-  const c=document.getElementById('galeriaFotosVisita'); const ct=document.getElementById('contadorFotos'); if(!c) return; c.innerHTML='';
+  const c=document.getElementById('galeriaFotosVisita'); 
+  const ct=document.getElementById('contadorFotos'); 
+  if(!c) return; 
+  c.innerHTML='';
   let datos={};
-  if(fotosPendientes.length){ const ids=fotosPendientes.map(f=>f.id); datos=await obtenerFotosDB(ids); }
-  if(fotosPendientes.length===0){ const v=document.createElement('div'); v.className='galeria-vacia'; v.textContent='Sin fotos.'; c.appendChild(v); if(ct) ct.textContent=''; return; }
+  if(fotosPendientes.length){ 
+    const ids=fotosPendientes.map(f=>f.id); 
+    datos=await obtenerFotosDB(ids); 
+  }
+  if(fotosPendientes.length===0){ 
+    const v=document.createElement('div'); 
+    v.className='galeria-vacia'; 
+    v.textContent='Sin fotos.'; 
+    c.appendChild(v); 
+    if(ct) ct.textContent=''; 
+    return; 
+  }
   fotosPendientes.forEach((f,i)=>{
-    const w=document.createElement('div'); w.className='foto-thumb';
-    const img=document.createElement('img'); img.src=datos[f.id]||cacheFotos.get(f.id)||'';
-    img.onclick=async()=>{ const foto=await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto],0); };
+    const w=document.createElement('div'); 
+    w.className='foto-thumb';
+
+    const img=document.createElement('img'); 
+    img.src=datos[f.id]||cacheFotos.get(f.id)||'';
+    img.onclick=async()=>{ 
+      const foto=await obtenerFotoDB(f.id); 
+      if(foto) abrirModalFoto([foto],0); 
+    };
     w.appendChild(img);
-    if(f.censurada){ const b=document.createElement('span'); b.className='badge-censura'; b.textContent='🛡️'; w.appendChild(b); }
-    const b=document.createElement('button'); b.type='button'; b.className='btn-eliminar-foto'; b.textContent='✕';
-    b.onclick=async(e)=>{ e.stopPropagation(); if(!confirm('¿Eliminar?')) return; await eliminarFotoDB(f.id); fotosPendientes.splice(i,1); await renderizarGaleriaFotos(); await renderizarGaleriaFotosReparto(); guardarEstadoCompleto(); };
-    w.appendChild(b); c.appendChild(w);
+
+    if(f.censurada){ 
+      const b=document.createElement('span'); 
+      b.className='badge-censura'; 
+      b.textContent='🛡️'; 
+      b.title='Click para volver a censurar';
+      b.onclick=async(e)=>{ 
+        e.stopPropagation(); 
+        if(confirm('¿Volver a censurar esta foto?')) {
+          window.abrirModalCensura(f.id);
+        }
+      };
+      w.appendChild(b); 
+    }
+
+    const btnCens=document.createElement('button');
+    btnCens.type='button';
+    btnCens.className='btn-censurar-foto';
+    btnCens.textContent='🖐️';
+    btnCens.title='Censurar manualmente (marcar zonas)';
+    btnCens.onclick=async(e)=>{
+      e.stopPropagation();
+      window.abrirModalCensura(f.id);
+    };
+    w.appendChild(btnCens);
+
+    const b=document.createElement('button'); 
+    b.type='button'; 
+    b.className='btn-eliminar-foto'; 
+    b.textContent='✕';
+    b.onclick=async(e)=>{ 
+      e.stopPropagation(); 
+      if(!confirm('¿Eliminar foto?')) return; 
+      await eliminarFotoDB(f.id); 
+      fotosPendientes.splice(i,1); 
+      await renderizarGaleriaFotos(); 
+      await renderizarGaleriaFotosReparto(); 
+      guardarEstadoCompleto(); 
+    };
+    w.appendChild(b); 
+    c.appendChild(w);
   });
-  if(ct){ const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} · ${total} KB`; }
+  if(ct){ 
+    const total=fotosPendientes.reduce((s,f)=>s+(f.tamanoKB||0),0); 
+    ct.textContent=`📸 ${fotosPendientes.length} / ${MAX_FOTOS_POR_VISITA} · ${total} KB`; 
+  }
 }
 window.renderizarGaleriaFotos = renderizarGaleriaFotos;
 
+// ✅ GALERÍA REPARTO RÁPIDO — con botón de censura manual
 async function renderizarGaleriaFotosReparto(){
-  const c = document.getElementById('galeriaFotosReparto'); if(!c) return; c.innerHTML='';
-  if(!fotosPendientes.length){ const v=document.createElement('div'); v.className='galeria-vacia'; v.textContent='Sin fotos.'; c.appendChild(v); return; }
-  const ids = fotosPendientes.map(f=>f.id); const datos = await obtenerFotosDB(ids);
+  const c = document.getElementById('galeriaFotosReparto'); 
+  if(!c) return; 
+  c.innerHTML='';
+  if(!fotosPendientes.length){ 
+    const v=document.createElement('div'); 
+    v.className='galeria-vacia'; 
+    v.textContent='Sin fotos.'; 
+    c.appendChild(v); 
+    return; 
+  }
+  const ids = fotosPendientes.map(f=>f.id); 
+  const datos = await obtenerFotosDB(ids);
   fotosPendientes.forEach((f,i)=>{
-    const w=document.createElement('div'); w.className='foto-thumb';
-    const img=document.createElement('img'); img.src=datos[f.id]||cacheFotos.get(f.id)||'';
-    img.onclick=async()=>{ const foto=await obtenerFotoDB(f.id); if(foto) abrirModalFoto([foto],0); };
+    const w=document.createElement('div'); 
+    w.className='foto-thumb';
+
+    const img=document.createElement('img'); 
+    img.src=datos[f.id]||cacheFotos.get(f.id)||'';
+    img.onclick=async()=>{ 
+      const foto=await obtenerFotoDB(f.id); 
+      if(foto) abrirModalFoto([foto],0); 
+    };
     w.appendChild(img);
-    if(f.censurada){ const b=document.createElement('span'); b.className='badge-censura'; b.textContent='🛡️'; w.appendChild(b); }
-    const b=document.createElement('button'); b.type='button'; b.className='btn-eliminar-foto'; b.textContent='✕';
-    b.onclick=async(e)=>{ e.stopPropagation(); if(!confirm('¿Eliminar?')) return; await eliminarFotoDB(f.id); fotosPendientes.splice(i,1); await renderizarGaleriaFotosReparto(); await renderizarGaleriaFotos(); guardarEstadoCompleto(); };
-    w.appendChild(b); c.appendChild(w);
+
+    if(f.censurada){ 
+      const b=document.createElement('span'); 
+      b.className='badge-censura'; 
+      b.textContent='🛡️'; 
+      b.title='Click para volver a censurar';
+      b.onclick=async(e)=>{ 
+        e.stopPropagation(); 
+        if(confirm('¿Volver a censurar esta foto?')) {
+          window.abrirModalCensura(f.id);
+        }
+      };
+      w.appendChild(b); 
+    }
+
+    const btnCens=document.createElement('button');
+    btnCens.type='button';
+    btnCens.className='btn-censurar-foto';
+    btnCens.textContent='🖐️';
+    btnCens.title='Censurar manualmente';
+    btnCens.onclick=async(e)=>{
+      e.stopPropagation();
+      window.abrirModalCensura(f.id);
+    };
+    w.appendChild(btnCens);
+
+    const b=document.createElement('button'); 
+    b.type='button'; 
+    b.className='btn-eliminar-foto'; 
+    b.textContent='✕';
+    b.onclick=async(e)=>{ 
+      e.stopPropagation(); 
+      if(!confirm('¿Eliminar?')) return; 
+      await eliminarFotoDB(f.id); 
+      fotosPendientes.splice(i,1); 
+      await renderizarGaleriaFotosReparto(); 
+      await renderizarGaleriaFotos(); 
+      guardarEstadoCompleto(); 
+    };
+    w.appendChild(b); 
+    c.appendChild(w);
   });
 }
 window.renderizarGaleriaFotosReparto = renderizarGaleriaFotosReparto;
 
 window.abrirModalCensura = async function(fotoId){
-  const foto = await obtenerFotoDB(fotoId); if(!foto || !foto.data){ mostrarAviso('⚠️ Foto no encontrada','error'); return; }
+  const foto = await obtenerFotoDB(fotoId); 
+  if(!foto || !foto.data){ mostrarAviso('⚠️ Foto no encontrada','error'); return; }
   const img = new Image();
   img.onload = () => {
     censuraActual.fotoId = fotoId; censuraActual.img = img; censuraActual.rectangulos = []; censuraActual.dibujando = false;
     const canvas = document.getElementById('censuraCanvas');
     const maxW = Math.min(window.innerWidth - 60, 700);
-    const ratio = Math.min(maxW / img.naturalWidth, 1);
-    canvas.width = Math.round(img.naturalWidth * ratio); canvas.height = Math.round(img.naturalHeight * ratio);
-    censuraActual.canvas = canvas; censuraActual.ctx = canvas.getContext('2d'); censuraActual.escala = ratio;
-    redibujarCensura(); document.getElementById('censuraInfo').textContent = 'Zonas marcadas: 0';
+    const maxH = window.innerHeight * 0.55;
+    const ratio = Math.min(maxW / img.naturalWidth, maxH / img.naturalHeight, 1);
+    canvas.width = Math.round(img.naturalWidth * ratio); 
+    canvas.height = Math.round(img.naturalHeight * ratio);
+    censuraActual.canvas = canvas; 
+    censuraActual.ctx = canvas.getContext('2d'); 
+    censuraActual.escala = ratio;
+    redibujarCensura(); 
+    document.getElementById('censuraInfo').textContent = 'Zonas marcadas: 0';
     document.getElementById('modalCensura').classList.add('visible');
   };
+  img.onerror = () => mostrarAviso('⚠️ No se pudo cargar la foto','error');
   img.src = foto.data;
 };
 function redibujarCensura(){ const {img, canvas, ctx, rectangulos, actual} = censuraActual; if(!img || !canvas) return; ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); rectangulos.forEach(r => { ctx.save(); ctx.strokeStyle = '#ff453a'; ctx.lineWidth = 3; ctx.setLineDash([6, 3]); ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.fillStyle = 'rgba(255,69,58,0.25)'; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.restore(); }); if(actual){ ctx.save(); ctx.strokeStyle = '#0a84ff'; ctx.lineWidth = 3; ctx.strokeRect(actual.x, actual.y, actual.w, actual.h); ctx.restore(); } }
@@ -1437,29 +1550,20 @@ window.iniciarEscaneo = function(modo){
   const div=document.getElementById(divId); if(!div) return;
   div.style.display='block'; const btnCancel=document.getElementById(btnId); if(btnCancel) btnCancel.style.display='inline-block';
   sesionEscaneoYaAgrego=false; scanEstabilizador={codigo:null,contador:0,ultimo:0};
-  // ✅ Resetear set de sesión al INICIAR escaneo (nueva sesión = puede re-escanear)
   _codigosEscaneadosSesion=new Set();
   try{
     escaneoActivo=true;
     html5QrCode=new Html5Qrcode(divId);
     html5QrCode.start({facingMode:'environment'},{ fps:5, qrbox:{width:300,height:120} },(txt)=>{
-      // ✅ 1. Filtro de concurrencia: no procesar mientras se procesa otro
       if(!escaneoActivo||sesionEscaneoYaAgrego) return;
       const cod=String(txt||'').trim().replace(/\D/g,'');
       if(!cod||cod.length!==12) return;
-
-      // ✅ 2. Bloqueo por sesión: ya escaneado en esta sesión de cámara → ignorar silenciosamente
       if(_codigosEscaneadosSesion.has(cod)) return;
-
-      // ✅ 3. Bloqueo temporal anti-rebote (8s)
       const ahora=Date.now(); const uv=codesScannedRecently.get(cod)||0;
       if(ahora-uv<TIEMPO_BLOQUEO_MS) return;
-
-      // ✅ 4. Marcar como escaneado (sesión + temporal)
       codesScannedRecently.set(cod,ahora);
       _codigosEscaneadosSesion.add(cod);
       sesionEscaneoYaAgrego=true;
-
       if(escaneoModo==='banco'){
         if(!bancoContiene(cod)){
           bancoCodigos.push({codigo:cod,direccion:'',precio:0});
@@ -1467,27 +1571,19 @@ window.iniciarEscaneo = function(modo){
           renderizarBanco(); guardarEstadoCompleto(); beepOk(); mostrarAviso('✅ '+cod,'ok');
         }
       } else {
-        // ✅ 5. Verificar si ya fue registrado hoy (silencioso, sin molestar)
         if(codigosRegistradosHoy.has(cod)) {
           mostrarAviso('⚠️ Ya registrado hoy: '+cod, 'warn');
         } else {
           agregarCodigoPendiente(cod);
         }
       }
-
-      // ✅ 6. Liberar tras 1.5s para permitir escanear otra guía
       setTimeout(()=>{ sesionEscaneoYaAgrego=false; }, 1500);
     },()=>{}).catch(err=>{ alert('No se pudo acceder a cámara: '+err); escaneoActivo=false; });
   }catch(e){ alert('⚠️ '+e.message); escaneoActivo=false; }
 };
 window.cancelarEscaneo = ()=>{ const i=html5QrCode; html5QrCode=null; const oc=()=>{ const a=document.getElementById('lectorQRBanco'); if(a) a.style.display='none'; const b=document.getElementById('lectorQR'); if(b) b.style.display='none'; const c=document.getElementById('btnCancelarEscaneoBanco'); if(c) c.style.display='none'; const d=document.getElementById('btnCancelarEscaneo'); if(d) d.style.display='none'; escaneoActivo=false; _codigosEscaneadosSesion=new Set(); }; if(i){ i.stop().then(()=>{ try{ i.clear(); }catch(_){} oc(); }).catch(()=>{ try{ i.clear(); }catch(_){} oc(); }); } else oc(); };
 
-/* ============================================================
-   ✅ OCR OPTIMIZADO: ZXing (barcode) → Google Vision → Tesseract
-   Preprocesa imagen para máxima velocidad.
-   ============================================================ */
-
-// ✅ Preprocesar: reducir + escala de grises + contraste
+// ✅ OCR OPTIMIZADO: ZXing (barcode) → Google Vision → Tesseract
 async function preprocesarImagenParaOCR(file, maxDim = 1600){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1504,7 +1600,6 @@ async function preprocesarImagenParaOCR(file, maxDim = 1600){
           canvas.width = width; canvas.height = height;
           const ctx = canvas.getContext('2d', { willReadFrequently: true });
           ctx.drawImage(img, 0, 0, width, height);
-          // Escala de grises + contraste
           const imageData = ctx.getImageData(0, 0, width, height);
           const data = imageData.data;
           const factor = 1.6;
@@ -1526,7 +1621,6 @@ async function preprocesarImagenParaOCR(file, maxDim = 1600){
   });
 }
 
-// ✅ ZXing: leer códigos de barras (RÁPIDO para guías con código de barras)
 async function detectarCodigosConZXing(file){
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -1564,12 +1658,11 @@ async function detectarCodigosConZXing(file){
   });
 }
 
-// ✅ Tesseract optimizado con PSM sparse + whitelist
 async function ocrConTesseractRapido(dataUrlOrFile, onProgress){
   if(!window.Tesseract) throw new Error('Tesseract no disponible');
   const { data: { text } } = await Tesseract.recognize(dataUrlOrFile, 'eng', {
     tessedit_char_whitelist: '0123456789',
-    tessedit_pageseg_mode: '11', // sparse text
+    tessedit_pageseg_mode: '11',
     logger: (m) => { if(m.status === 'recognizing text' && onProgress) onProgress(m.progress); }
   });
   return text || '';
@@ -1588,19 +1681,16 @@ window.procesarFotosOCR = async function(event){
   for(let i = 0; i < files.length; i++){
     const file = files[i];
     try{
-      // ✅ PASO 1: ZXing (códigos de barras → 10-50x más rápido)
       if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Buscando códigos de barras...`;
       const zxCodes = await detectarCodigosConZXing(file);
       const zxMatches = zxCodes.map(t => String(t).replace(/\D/g,'')).filter(c => c.length === 12);
       zxMatches.forEach(m => codigosEncontrados.add(m));
 
-      // Si ZXing encontró algo, no gastar tiempo en OCR de esta imagen
       if(zxMatches.length > 0){
         if(estadoOCR) estadoOCR.textContent = `✅ ${i+1}/${files.length} · ${zxMatches.length} código(s) por ZXing`;
         continue;
       }
 
-      // ✅ PASO 2: Google Vision (si hay key) — más rápido que Tesseract
       if(useVision){
         if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Vision...`;
         const texto = await ocrConGoogleVision(file, visionKey);
@@ -1609,7 +1699,6 @@ window.procesarFotosOCR = async function(event){
         continue;
       }
 
-      // ✅ PASO 3: Tesseract (fallback) — CON PREPROCESAMIENTO
       if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Preprocesando...`;
       let pre;
       try{
@@ -1830,7 +1919,6 @@ window.guardarVisitaReparto = async function(){
   if(navigator.vibrate) navigator.vibrate([60, 30, 60]);
 };
 
-// ============ Gráficas de informe (idénticas) ============
 function generarChartEstadosHorizontal(ancho,alto){
   const c=document.createElement('canvas'); c.width=ancho; c.height=alto;
   const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,ancho,alto);
@@ -1868,20 +1956,16 @@ function headerEmpresarialHTML(tituloDoc, codigoDoc, fecha, horaGen){
 }
 window.headerEmpresarialHTML = headerEmpresarialHTML;
 
-// ============ IMPRESIÓN CORREGIDA ============
 function prepararAreaImpresion(html,clasesExtra){ let area=document.getElementById('areaImpresion'); if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); } area.innerHTML=html; area.style.display='block'; _estabaDarkAlImprimir=document.body.classList.contains('dark'); if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching'); document.body.classList.add('modo-impresion'); (clasesExtra||[]).forEach(c=>document.body.classList.add(c)); return area; }
 function finalizarImpresion(){ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album','theme-switching'); const area=document.getElementById('areaImpresion'); if(area){ area.innerHTML=''; area.style.display='none'; } if(_estabaDarkAlImprimir){ try{ document.body.classList.add('dark'); }catch(e){} } _estabaDarkAlImprimir=false; }
 async function esperarImgsEn(el){ const imgs = el.querySelectorAll('img'); await Promise.all(Array.from(imgs).map(img => (img.complete && img.naturalWidth>0) ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 5000); }))); }
 
-// ✅ CORREGIDO: espera imágenes + timeout robusto + fallback
 async function ejecutarImpresion(html,clasesExtra){
   const area = prepararAreaImpresion(html, clasesExtra);
   try { await esperarImgsEn(area); } catch(e){}
-  // Esperar un tick para que el navegador aplique estilos
   await new Promise(r => setTimeout(r, 350));
 
   const estabaDark = document.body.classList.contains('dark');
-  // Forzar modo claro SOLO durante la impresión (evita texto blanco sobre blanco)
   if(estabaDark){
     document.body.classList.remove('dark');
     document.body.classList.add('theme-switching');
@@ -1895,7 +1979,6 @@ async function ejecutarImpresion(html,clasesExtra){
     finalizarImpresion();
   };
 
-  // Escuchar antes/después de imprimir
   const afterPrintHandler = () => { limpiar(); };
   window.addEventListener('afterprint', afterPrintHandler, {once:true});
 
@@ -1907,7 +1990,6 @@ async function ejecutarImpresion(html,clasesExtra){
     alert('❌ No se pudo imprimir: ' + (e.message||e));
     return;
   }
-  // Fallback robusto: si afterprint nunca dispara (iOS viejo), limpiamos a los 20s
   setTimeout(() => {
     window.removeEventListener('afterprint', afterPrintHandler);
     limpiar();
@@ -1915,7 +1997,6 @@ async function ejecutarImpresion(html,clasesExtra){
 }
 window.ejecutarImpresion = ejecutarImpresion;
 
-// ============ PDF (idéntico al original, ya funciona) ============
 async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   if(!window.html2canvas || !window.jspdf){ alert('⚠️ Librerías PDF no cargadas.'); return; }
   const { jsPDF } = window.jspdf;
@@ -2056,7 +2137,6 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
 }
 window.exportarHTMLaPDF = exportarHTMLaPDF;
 
-// ============ Reporte diario HTML (idéntico) ============
 async function generarHTMLReporteDiario(){
   const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
   const ahora=new Date();
