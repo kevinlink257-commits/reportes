@@ -19,15 +19,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
-:root{--sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;--sys-red:#ff453a;--sys-red-dark:#c92c20;--sys-orange:#ff9f0a;--sys-yellow:#ffd60a;--sys-purple:#bf5af2;--sys-teal:#40c8e0;--sys-pink:#ff375f;--gray-0:#fff;--gray-1:#f5f5f7;--gray-2:#e8e8ed;--gray-3:#d2d2d7;--gray-4:#aeaeb2;--gray-5:#8e8e93;--gray-6:#636366;--gray-7:#48484a;--gray-8:#1c1c1e;--gray-9:#000;--bg-body:var(--gray-1);--bg-container:#fff;--bg-section:#fafafc;--bg-input:#fff;--bg-card:#fff;--bg-table:#fff;--bg-chip:rgba(10,132,255,.08);--text-primary:#1c1c1e;--text-secondary:#3a3a3c;--text-heading:#1c1c1e;--text-muted:#8e8e93;--border-main:#d2d2d7;--border-light:#e8e8ed;--shadow-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-lg:0 8px 24px rgba(0,0,0,.08),0 16px 48px rgba(0,0,0,.06);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--radius-pill:999px;--ease:cubic-bezier(.4,0,.2,1);--table-header-bg:#f5f5f7;--table-header-color:#1c1c1e}
+:root{--sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;--sys-red:#ff453a;--sys-red-dark:#c92c20;--sys-orange:#ff9f0a;--sys-yellow:#ffd60a;--sys-purple:#bf5af2;--sys-teal:#40c8e0;--sys-pink:#ff375f;--gray-0:#fff;--gray-1:#f5f5f7;--gray-2:#e8e8ed;--gray-3:#d2d2d7;--gray-4:#aeaeb2;--gray-5:#8e8e93;--gray-6:#636366;--gray-7:#48484a;--gray-8:#1c1c1e;--gray-9:#000;--bg-body:var(--gray-1);--bg-container:#fff;--bg-section:#fafafc;--bg-input:#fff;--bg-card:#fff;--bg-table:#fff;--bg-chip:rgba(10,132,255,.08);--text-primary:#1c1c1e;--text-secondary:#3a3a3c;--text-heading:#1c1c1e;--text-muted:#8e8e93;--border-main:#d2d2d7;--border-light:#e8e8ed;--shadow-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-lg:0 8px 24px rgba(0,0,0,.08);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--radius-pill:999px;--ease:cubic-bezier(.4,0,.2,1);--table-header-bg:#f5f5f7;--table-header-color:#1c1c1e}
 body.dark{--bg-body:#000;--bg-container:#1c1c1e;--bg-section:#2c2c2e;--bg-input:#2c2c2e;--bg-card:#2c2c2e;--bg-table:#1c1c1e;--bg-chip:rgba(10,132,255,.18);--text-primary:#f5f5f7;--text-secondary:#d1d1d6;--text-heading:#f5f5f7;--text-muted:#8e8e93;--border-main:#38383a;--border-light:#2c2c2e;--table-header-bg:#2c2c2e;--table-header-color:#f5f5f7}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body.theme-switching *{transition:none!important}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;background-color:var(--bg-body);margin:0;padding:16px;padding-top:64px;color:var(--text-primary);font-size:16px;line-height:1.5;transition:background-color .3s var(--ease),color .3s var(--ease);overflow-x:hidden;letter-spacing:-.01em}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Helvetica Neue',Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;background-color:var(--bg-body);margin:0;padding:16px;padding-top:64px;color:var(--text-primary);font-size:16px;line-height:1.5;transition:background-color .3s var(--ease);overflow-x:hidden}
 .container{max-width:820px;margin:0 auto;background:var(--bg-container);padding:28px;border-radius:var(--radius-xl);box-shadow:var(--shadow-md);overflow:hidden}
 @media(max-width:640px){.container{padding:20px;border-radius:var(--radius-lg)}}
-h1,h2,h3{color:var(--text-heading);text-align:center;font-weight:700;letter-spacing:-.025em;margin:0 0 .5em}
+h1,h2,h3{color:var(--text-heading);text-align:center;font-weight:700;margin:0 0 .5em}
 h1{font-size:1.75rem}h2{font-size:1.25rem}h3{font-size:1.05rem}
 .section{background:var(--bg-section);padding:20px;border-radius:var(--radius-lg);margin-bottom:16px;border:1px solid var(--border-light)}
 label{display:block;margin-top:12px;font-weight:600;color:var(--text-primary);font-size:.9rem}
@@ -41,19 +41,18 @@ button:active{transform:scale(.98)}
 button:disabled{opacity:.5;cursor:not-allowed;transform:none}
 .btn-imprimir{background:var(--sys-green);font-size:1rem}.btn-imprimir:hover{background:var(--sys-green-dark)}
 .btn-pdf{background:var(--sys-red);font-size:1rem}.btn-pdf:hover{background:var(--sys-red-dark)}
-.btn-nube{background:var(--sys-teal)}.btn-nube:hover{background:#2ba7bd}
-.btn-informe{background:var(--gray-8)}.btn-informe:hover{background:#000}
-body.dark .btn-informe{background:var(--gray-5)}
+.btn-nube{background:var(--sys-teal)}
+.btn-informe{background:var(--gray-8)}body.dark .btn-informe{background:var(--gray-5)}
 .btn-guardar{background:var(--sys-green)}.btn-guardar:hover{background:var(--sys-green-dark)}
-.btn-reiniciar{background:var(--sys-orange)}.btn-reiniciar:hover{background:#e08800}
-.btn-eliminar{background:var(--sys-red)}.btn-eliminar:hover{background:var(--sys-red-dark)}
+.btn-reiniciar{background:var(--sys-orange)}
+.btn-eliminar{background:var(--sys-red)}
 .btn-eliminar-todo{background:#a02015;font-size:1.05em;font-weight:700}
 .btn-escaneo{background:var(--sys-purple);margin-top:0;padding:10px;font-size:.9em}
 .btn-agregar-codigo{background:var(--sys-green);margin-top:0;padding:10px 16px;font-size:1.05em;font-weight:700}
-.btn-cancelar{background:var(--gray-5);margin-top:6px}.btn-cancelar:hover{background:var(--gray-6)}
+.btn-cancelar{background:var(--gray-5);margin-top:6px}
 .btn-buscar-limpiar{background:var(--gray-5);width:auto;margin-top:0;padding:12px 16px}
 .btn-ahora{background:var(--sys-orange);margin-top:0;padding:10px;font-size:.9em}
-.btn-whatsapp{background:#25D366}.btn-whatsapp:hover{background:#1ebe5b}
+.btn-whatsapp{background:#25D366}
 .btn-darkmode{background:var(--gray-7);width:auto;padding:8px 12px;margin:0;font-size:1rem;border-radius:var(--radius-sm)}
 .btn-firma{background:var(--sys-purple);margin-top:0;padding:10px;font-size:.9em}
 .result-box{background:rgba(48,209,88,.08);border-left:3px solid var(--sys-green);padding:14px;margin-top:12px;border-radius:var(--radius-md)}
@@ -68,7 +67,7 @@ body.dark .btn-informe{background:var(--gray-5)}
 .stat-card.prom span{color:var(--sys-purple)}
 .economic-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px}
 @media(min-width:640px){.economic-grid{grid-template-columns:repeat(4,1fr)}}
-.economic-card{background:var(--bg-card);border:2px solid var(--border-light);padding:18px 14px;text-align:center;border-radius:var(--radius-md);color:var(--text-secondary);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.economic-card{background:var(--bg-card);border:2px solid var(--border-light);padding:18px 14px;text-align:center;border-radius:var(--radius-md);color:var(--text-secondary);font-size:.78rem;font-weight:600;text-transform:uppercase}
 .economic-card .eco-icon{font-size:1.5rem;display:block;margin-bottom:6px}
 .economic-card span.eco-valor{display:block;font-size:1.35rem;font-weight:800;margin-top:6px;color:var(--sys-green)}
 .economic-card.total{border-color:var(--sys-blue)}.economic-card.total span.eco-valor{color:var(--sys-blue)}
@@ -76,19 +75,19 @@ body.dark .btn-informe{background:var(--gray-5)}
 .economic-card.noentregado{border-color:var(--sys-red);background:rgba(255,69,58,.06)}.economic-card.noentregado span.eco-valor{color:var(--sys-red-dark)}
 .economic-card.cantidad{border-color:var(--sys-purple)}.economic-card.cantidad span.eco-valor{color:var(--sys-purple)}
 table{width:100%;border-collapse:collapse;margin-top:16px;background:var(--bg-table);font-size:.85rem;color:var(--text-primary);border-radius:var(--radius-md);overflow:hidden}
-th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);vertical-align:middle;color:var(--text-primary);white-space:nowrap}
+th,td{padding:10px 8px;text-align:center;border-bottom:1px solid var(--border-light);vertical-align:middle;white-space:nowrap}
 th{background:var(--table-header-bg);color:var(--table-header-color);font-size:.8rem;font-weight:600}
 .tabla-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius-md);margin-top:10px}
 .descripcion-cell{white-space:normal;word-break:normal;overflow-wrap:break-word;font-size:.75rem;color:var(--text-secondary);min-width:180px;max-width:280px;text-align:left;line-height:1.4}
 .tabla-dia{width:100%;border-collapse:collapse;font-size:.78rem;background:var(--bg-table);min-width:820px}
 .tabla-dia th{background:var(--table-header-bg);color:var(--table-header-color);padding:10px 8px;font-size:.72rem;font-weight:700;text-align:center;border-bottom:2px solid var(--border-main);white-space:nowrap;position:sticky;top:0;z-index:2}
-.tabla-dia td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border-light);color:var(--text-primary);white-space:nowrap;font-size:.78rem}
+.tabla-dia td{padding:9px 8px;text-align:center;border-bottom:1px solid var(--border-light);white-space:nowrap;font-size:.78rem}
 .tabla-dia td.col-codigo{font-family:'Courier New',monospace;font-weight:700;font-size:.78rem;color:var(--sys-blue)}
 .tabla-dia td.col-dir{text-align:left;white-space:normal;max-width:220px;min-width:180px;font-size:.75rem;line-height:1.35;word-break:break-word}
 .tabla-dia td.col-desc{text-align:left;white-space:normal;max-width:240px;min-width:200px;font-size:.72rem;color:var(--text-secondary);line-height:1.35;word-break:break-word}
 .tabla-dia td.col-precio{font-weight:700;color:var(--sys-green);white-space:nowrap}
 .tabla-dia td.col-estado{white-space:normal;max-width:180px;min-width:140px;font-size:.72rem;line-height:1.35}
-.badge-estado{display:inline-block;padding:3px 9px;border-radius:var(--radius-pill);font-size:.68rem;font-weight:700;white-space:nowrap;line-height:1.3}
+.badge-estado{display:inline-block;padding:3px 9px;border-radius:var(--radius-pill);font-size:.68rem;font-weight:700;white-space:nowrap}
 .badge-estado.ok{background:rgba(48,209,88,.15);color:#1e8449}
 .badge-estado.link{background:rgba(64,200,224,.18);color:#0e5f6f}
 .badge-estado.no{background:rgba(255,69,58,.13);color:#a02015}
@@ -124,7 +123,7 @@ canvas{margin-top:20px;background:var(--bg-card);padding:14px;border-radius:var(
 .switch{position:relative;display:inline-block;width:52px;height:30px;flex-shrink:0;margin:0}
 .switch input{opacity:0;width:0;height:0}
 .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--gray-4);transition:.3s var(--ease);border-radius:34px}
-.slider:before{position:absolute;content:"";height:24px;width:24px;left:3px;bottom:3px;background-color:#fff;transition:.3s var(--ease);border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.slider:before{position:absolute;content:"";height:24px;width:24px;left:3px;bottom:3px;background-color:#fff;transition:.3s var(--ease);border-radius:50%}
 .switch input:checked+.slider{background-color:var(--sys-green)}
 .switch input:checked+.slider:before{transform:translateX(22px)}
 #informeContenedor{display:none;background:var(--bg-container);padding:20px;color:var(--text-primary);border-radius:var(--radius-md)}
@@ -138,11 +137,11 @@ canvas{margin-top:20px;background:var(--bg-card);padding:14px;border-radius:var(
 .informe-tabla td{padding:5px 8px;text-align:center;border:1px solid var(--border-light);color:var(--text-primary)}
 .lista-codigos{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;margin-top:10px;min-height:48px;max-height:280px;overflow-y:auto}
 .lista-codigos .lista-vacia{color:var(--text-muted);font-style:italic;font-size:.82rem}
-.chip-codigo{display:inline-flex;align-items:center;gap:6px;background:var(--bg-chip);color:var(--text-primary);padding:5px 5px 5px 12px;border-radius:var(--radius-pill);margin:3px;font-size:.82rem;border:1px solid rgba(10,132,255,.2);font-weight:600;max-width:100%;word-break:break-all}
+.chip-codigo{display:inline-flex;align-items:center;gap:6px;background:var(--bg-chip);padding:5px 5px 5px 12px;border-radius:var(--radius-pill);margin:3px;font-size:.82rem;border:1px solid rgba(10,132,255,.2);font-weight:600;max-width:100%;word-break:break-all}
 .chip-codigo button{background:var(--sys-red);color:#fff;border:none;width:22px;height:22px;min-width:22px;border-radius:50%;padding:0;font-size:12px;line-height:1;cursor:pointer;margin:0}
 .chip-banco{display:block;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:10px 12px;margin:6px 0}
 .chip-banco.usado{border-color:rgba(48,209,88,.4);background:rgba(48,209,88,.06)}
-.chip-banco .cb-codigo{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Courier New',monospace;font-weight:700;font-size:.92rem;color:var(--text-primary)}
+.chip-banco .cb-codigo{display:flex;align-items:center;justify-content:space-between;gap:8px;font-family:'Courier New',monospace;font-weight:700;font-size:.92rem}
 .chip-banco.usado .cb-codigo .cod{text-decoration:line-through;color:var(--text-muted)}
 .chip-banco .cb-codigo .estado-badge{font-size:.68rem;padding:2px 8px;border-radius:var(--radius-pill);font-weight:700}
 .chip-banco.disponible .cb-codigo .estado-badge{background:rgba(48,209,88,.14);color:#1e8449}
@@ -158,8 +157,8 @@ canvas{margin-top:20px;background:var(--bg-card);padding:14px;border-radius:var(
 .chip-banco-edit .edit-actions{display:flex;gap:6px;margin-top:8px}
 .chip-banco-edit .edit-actions button{flex:1;padding:8px;font-size:.78rem;margin:0}
 .contador-codigos{font-size:.8rem;color:var(--text-secondary);margin-top:10px;font-weight:600;text-align:right}
-#resultadosBusquedaCodigo{display:none;max-height:280px;overflow-y:auto;border:1px solid var(--border-light);border-radius:var(--radius-md);margin-top:6px;background:var(--bg-card);box-shadow:var(--shadow-md)}
-.resultado-codigo{padding:12px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.9rem;gap:8px;color:var(--text-primary)}
+#resultadosBusquedaCodigo{display:none;max-height:280px;overflow-y:auto;border:1px solid var(--border-light);border-radius:var(--radius-md);margin-top:6px;background:var(--bg-card)}
+.resultado-codigo{padding:12px 14px;border-bottom:1px solid var(--border-light);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:.9rem;gap:8px}
 .resultado-codigo.usado{color:var(--text-muted)}
 .resultado-codigo small{color:var(--sys-red);font-weight:600;font-size:.75rem}
 .resultado-codigo.disponible small{color:var(--sys-green)}
@@ -172,14 +171,14 @@ canvas{margin-top:20px;background:var(--bg-card);padding:14px;border-radius:var(
 .contador-digitos{font-size:.78rem;text-align:right;color:var(--text-muted);margin-top:6px;font-weight:600}
 .contador-digitos.completo{color:var(--sys-green)}
 .contador-digitos.invalido{color:var(--sys-red)}
-#barraUsuario{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.72);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);color:var(--text-primary);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;z-index:9998;font-size:.9rem;border-bottom:1px solid var(--border-light);gap:10px}
+#barraUsuario{position:fixed;top:0;left:0;right:0;background:rgba(255,255,255,.72);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);padding:12px 18px;display:flex;justify-content:space-between;align-items:center;z-index:9998;font-size:.9rem;border-bottom:1px solid var(--border-light);gap:10px}
 body.dark #barraUsuario{background:rgba(28,28,30,.72)}
 #barraUsuario .info-usuario{display:flex;align-items:center;gap:10px;font-weight:600;overflow:hidden}
 #barraUsuario .avatar{width:32px;height:32px;background:linear-gradient(135deg,var(--sys-blue),var(--sys-purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;color:#fff;font-weight:700}
 #barraUsuario #infoUsuario{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px}
 #barraUsuario .acciones-bar{display:flex;gap:8px;flex-shrink:0;align-items:center}
 #barraUsuario button{background:var(--gray-2);color:var(--text-primary);border:none;padding:8px 12px;border-radius:var(--radius-sm);font-size:.85em;cursor:pointer;width:auto;margin:0;font-weight:600}
-body.dark #barraUsuario button{background:var(--gray-7);color:var(--text-primary)}
+body.dark #barraUsuario button{background:var(--gray-7)}
 #barraUsuario button.btn-pwa{background:var(--sys-orange);color:#fff}
 #barraUsuario button.btn-logout{background:var(--sys-red);color:#fff}
 #indicadorGuardado{display:none;font-size:.72rem;padding:3px 8px;border-radius:var(--radius-pill);background:rgba(48,209,88,.15);color:#1e8449;font-weight:600}
@@ -194,10 +193,10 @@ body.dark #barraUsuario button{background:var(--gray-7);color:var(--text-primary
 .tabs-user{display:flex;gap:6px;background:var(--bg-section);padding:5px;border-radius:var(--radius-md);margin-bottom:16px}
 .tabs-user button{flex:1;margin:0;padding:10px;font-size:.9rem;background:transparent;color:var(--text-primary);border-radius:var(--radius-sm);font-weight:600}
 .tabs-user button.activo{background:var(--bg-container);color:var(--sys-blue);box-shadow:0 1px 2px rgba(0,0,0,.1)}
-.msj-error-user{background:rgba(255,69,58,.12);color:#8c1a15;padding:12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:12px;display:none;text-align:center}
-.msj-error-user.visible{display:block}
-.msj-info-user{background:rgba(10,132,255,.1);color:#0a4d9e;padding:12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:12px;display:none;text-align:center}
-.msj-info-user.visible{display:block}
+.msj-error-user,.msj-info-user{padding:12px;border-radius:var(--radius-sm);font-size:.85rem;margin-top:12px;display:none;text-align:center}
+.msj-error-user{background:rgba(255,69,58,.12);color:#8c1a15}
+.msj-info-user{background:rgba(10,132,255,.1);color:#0a4d9e}
+.msj-error-user.visible,.msj-info-user.visible{display:block}
 #modalPWA{position:fixed;inset:0;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:100001;padding:20px}
 #modalPWA.visible{display:flex}
 .pwa-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:28px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
@@ -214,7 +213,6 @@ body.dark #barraUsuario button{background:var(--gray-7);color:var(--text-primary
 .btn-foto.btn-galeria{background:var(--sys-teal)}
 .btn-foto-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
 .contador-fotos{font-size:.78rem;color:var(--text-secondary);margin-top:8px;text-align:right;font-weight:600}
-.contador-fotos.alerta{color:var(--sys-red)}
 .btn-ver-fotos{background:var(--sys-blue);color:#fff;border:none;padding:5px 10px;border-radius:var(--radius-sm);font-size:.72rem;font-weight:600;cursor:pointer;margin:0;width:auto}
 .sin-fotos{color:var(--text-muted);font-size:.75rem;font-style:italic}
 .modal-foto{position:fixed;inset:0;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;z-index:100002;padding:15px}
@@ -308,7 +306,7 @@ body.dark .alerta-umbral{color:#ff8a80}
 .ocr-progreso{font-size:.85rem;text-align:center;margin-top:10px;font-weight:600;color:var(--sys-blue)}
 .indicador-ia{display:inline-block;background:linear-gradient(135deg,var(--sys-purple),var(--sys-blue));color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.7rem;font-weight:700;margin-left:6px}
 .barra-umbral-wrapper{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:14px;margin-bottom:14px}
-.barra-umbral-titulo{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem;font-weight:700;color:var(--text-heading)}
+.barra-umbral-titulo{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:.85rem;font-weight:700}
 .barra-umbral-titulo .valor{font-size:1.1rem;font-weight:900;color:var(--sys-purple)}
 .barra-umbral-titulo .valor.verde{color:var(--sys-green)}
 .barra-umbral-titulo .valor.rojo{color:var(--sys-red)}
@@ -321,7 +319,7 @@ body.dark .barra-umbral-container{background:linear-gradient(to right,#1c1c1e 0%
 body.dark .barra-umbral-marker{background:#fff}
 .barra-umbral-marker-label{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-size:.65rem;font-weight:800;color:var(--text-heading);background:var(--bg-card);padding:1px 5px;border-radius:var(--radius-sm);border:1px solid var(--border-main);white-space:nowrap}
 .barra-umbral-info{display:flex;justify-content:space-between;font-size:.72rem;color:var(--text-muted);margin-top:6px;font-weight:600}
-.reporte-diario{width:100%;max-width:194mm;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1c1e;font-size:9pt;background:#fff;padding:0}
+.reporte-diario{width:100%;max-width:194mm;margin:0 auto;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1c1c1e;font-size:9pt;background:#fff}
 .rd-header{text-align:center;border-bottom:2px solid #1c1c1e;padding-bottom:8px;margin-bottom:10px}
 .rd-header h1{color:#1c1c1e;font-size:14pt;margin:0 0 5px 0;text-align:center;font-weight:900}
 .rd-info{display:flex;justify-content:space-around;font-size:8.5pt;color:#333;flex-wrap:wrap;gap:5px;margin-top:5px}
@@ -360,21 +358,19 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 .rd-firma-nombre{font-size:8pt;color:#1c1c1e;font-weight:600;margin-bottom:2px}
 .rd-footer{text-align:center;font-size:6.5pt;color:#666;margin-top:10mm;border-top:1px solid #999;padding-top:4px;line-height:1.5}
 .rd-footer .rd-confidencial{color:#666;font-weight:600;text-transform:uppercase;margin-bottom:2px}
-.rd-fotos-page{width:100%;max-width:194mm;margin:0 auto;padding-top:2mm;page-break-inside:avoid;page-break-after:always;background:#fff}
-.rd-fotos-page:last-child{page-break-after:auto}
+.rd-fotos-page{width:100%;max-width:194mm;margin:0 auto;padding-top:2mm;background:#fff}
 .rd-fotos-page-header{font-size:7pt;color:#1c1c1e;font-weight:700;text-align:right;margin-bottom:2mm;padding-bottom:1mm;border-bottom:1px solid #ccc}
 .rd-fotos-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;width:100%}
-.rd-foto-item{border:1px solid #999;border-radius:2px;overflow:hidden;background:#fff;display:flex;flex-direction:column;page-break-inside:avoid;min-height:44mm}
+.rd-foto-item{border:1px solid #999;border-radius:2px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-height:44mm}
 .rd-foto-item img{width:100%;height:32mm;object-fit:contain;display:block;flex-shrink:0;background:#f0f0f0}
 .rd-foto-caption{font-size:5pt;text-align:center;padding:2px 1px;background:#f8f9fa;color:#333;border-top:1px solid #ddd;line-height:1.2;overflow:hidden;flex-grow:1;word-break:break-word}
 .rd-foto-caption .foto-guia{font-family:'Courier New',monospace;font-weight:700;font-size:6pt;color:#0a4d9e;display:block;margin-top:1px}
 .rd-foto-caption .foto-dir{font-size:5pt;color:#555;line-height:1.15;display:block;margin-top:1px}
 .rd-foto-caption .foto-visita{font-weight:800;color:#1c1c1e;font-size:5.5pt}
-.rd-album-page{width:100%;max-width:194mm;margin:0 auto;padding-top:2mm;page-break-inside:avoid;page-break-after:always;background:#fff}
-.rd-album-page:last-child{page-break-after:auto}
+.rd-album-page{width:100%;max-width:194mm;margin:0 auto;padding-top:2mm;background:#fff}
 .rd-album-page-header{font-size:7pt;color:#1c1c1e;font-weight:700;text-align:right;margin-bottom:2mm;padding-bottom:1mm;border-bottom:1px solid #ccc}
 .rd-album-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;width:100%}
-.rd-album-item{border:1px solid #999;border-radius:3px;overflow:hidden;background:#fff;display:flex;flex-direction:column;page-break-inside:avoid;min-height:62mm}
+.rd-album-item{border:1px solid #999;border-radius:3px;overflow:hidden;background:#fff;display:flex;flex-direction:column;min-height:62mm}
 .rd-album-item img{width:100%;height:50mm;object-fit:contain;display:block;flex-shrink:0;background:#f0f0f0}
 .rd-album-caption{font-size:5.5pt;text-align:center;padding:3px 2px;background:#f0f0f0;color:#333;line-height:1.25;overflow:hidden;flex-grow:1;word-break:break-word}
 .rd-album-caption .foto-guia{font-family:'Courier New',monospace;font-weight:700;font-size:6.5pt;color:#0a4d9e;display:block;margin-top:1px}
@@ -407,7 +403,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 <div id="modalUsuario">
   <div class="modal-content">
     <h2 id="tituloModalUser">👤 Bienvenido</h2>
-    <p id="subtituloModalUser">Inicia sesión o regístrate para guardar tus visitas.</p>
+    <p id="subtituloModalUser">Inicia sesión o regístrate.</p>
     <div class="tabs-user">
       <button type="button" id="tabLogin" class="activo" onclick="cambiarTabUser('login')">🔑 Iniciar sesión</button>
       <button type="button" id="tabRegistro" onclick="cambiarTabUser('registro')">✨ Registrarse</button>
@@ -864,7 +860,7 @@ window.addEventListener('load', ()=>{
 });
 </script>
 
-<!-- Main -->
+<!-- App principal -->
 <script type="module">
 const ESTADOS_INFO = [
   { num:'00', desc:'Entregado por link de pago' },
@@ -907,65 +903,63 @@ const ESTADOS_INFO = [
 const ESTADOS = ESTADOS_INFO.map(e => `${e.num} · ${e.desc}`);
 const ESTADO_ENTREGADO = '02 · Entregado';
 const ESTADO_ENTREGADO_LINK = '00 · Entregado por link de pago';
-
 function esEstadoEntregado(estado){ return estado === ESTADO_ENTREGADO || estado === ESTADO_ENTREGADO_LINK; }
 function esEstadoEntregadoLink(estado){ return estado === ESTADO_ENTREGADO_LINK; }
 function contarEntregadosEnContadores(c){ if(!c) return 0; return (c[ESTADO_ENTREGADO]||0) + (c[ESTADO_ENTREGADO_LINK]||0); }
 function contarEntregadosActuales(){ return (contadores[ESTADO_ENTREGADO]||0) + (contadores[ESTADO_ENTREGADO_LINK]||0); }
 
-const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const LECTURAS_ESTABLES_REQUERIDAS=3; const TIMEOUT_ESTABILIDAD_MS=800;
-const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=1200; const FOTO_JPEG_QUALITY=0.75;
+const LONGITUD_CODIGO=12; const TIEMPO_BLOQUEO_MS=2000; const MAX_FOTOS_POR_VISITA=20; const FOTO_MAX_DIM=1200; const FOTO_JPEG_QUALITY=0.75;
 const CLAVE_BORRADOR='colserlog_borrador';
 const CLAVE_VISION_KEY='colserlog_vision_key';
 const CLAVE_UMBRAL='colserlog_umbral_efectividad';
 const CLAVE_REGLAS_SESION='colserlog_reglas_aceptadas';
 
 const DATOS_EMPRESA = {
-  colserlog: { nombre:'COLSERLOG S.A.S.', nit:'900.496.469-3', direccion:'Avenida Calle 24 # 81-13, Bogotá D.C.', telefono:'(571) 2637734 / 314 304 6374', email:'contacto@colserglog.com', web:'www.colserlog.com' },
-  colvanes: { nombre:'COLVANES S.A.S. (Envía)', nit:'800.185.306-4', direccion:'Carrera 88 # 17B-10, Bogotá D.C.', telefono:'(601) 7943670', email:'contacto@enviacolvanes.com', web:'www.enviacolvanes.com' },
-  envia: { nombre:'ENVÍA COLVANES', nit:'800.185.306-4', direccion:'Avenida Boyacá # 68 B - 72, Bogotá D.C.', telefono:'(601) 7943670', web:'www.enviacolvanes.com' }
+  colserlog: { nombre:'COLSERLOG S.A.S.', nit:'900.496.469-3', direccion:'Avenida Calle 24 # 81-13, Bogotá D.C.', telefono:'(571) 2637734 / 314 304 6374', email:'contacto@colserglog.com' },
+  colvanes: { nombre:'COLVANES S.A.S. (Envía)', nit:'800.185.306-4', direccion:'Carrera 88 # 17B-10, Bogotá D.C.', telefono:'(601) 7943670', email:'contacto@enviacolvanes.com' },
+  envia: { nombre:'ENVÍA COLVANES', nit:'800.185.306-4', direccion:'Avenida Boyacá # 68 B - 72, Bogotá D.C.', telefono:'(601) 7943670' }
 };
 
 function escapeHtml(t){ if(t===null||t===undefined) return ''; return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 window.escapeHtml = escapeHtml;
 
 const DESCRIPCIONES_RECOMENDADAS = {
-  '00 · Entregado por link de pago':'Envío entregado al destinatario mediante pago realizado por link digital. El destinatario confirmó el pago y recibió el paquete en perfectas condiciones.',
-  '01 · Destinatario no se encuentra':'Se visitó la dirección indicada en la guía y el destinatario no se encontraba en el momento.',
-  '02 · Entregado':'Envío entregado exitosamente al destinatario. El cliente verificó el contenido, firmó la guía y confirmó que el paquete llegó en perfectas condiciones.',
-  '03 · Cerrado en horas hábiles':'El establecimiento o residencia se encontraba cerrado dentro del horario comercial habitual.',
-  '04 · Destinatario fija fecha y hora de recibo para el día siguiente':'El destinatario solicitó reprogramar la entrega para el día siguiente.',
-  '05 · Destinatario no recibe en día sábado':'El destinatario manifestó expresamente que no recibe envíos los días sábados.',
-  '06 · Destinatario no tenía plata para cancelar, regresar mañana':'El destinatario manifestó no contar con el dinero para cancelar el valor del envío.',
-  '10 · Restricción en el tránsito reparto urbano':'Se presentaron restricciones viales que impidieron el acceso al punto de entrega.',
-  '13 · Entrega no efectuada':'No se logró efectuar la entrega por causas no especificadas.',
-  '20 · Destinatario no pagará':'El destinatario manifestó su decisión de no pagar el valor del envío.',
-  '21 · Mercancía debe ser entregada en otra dirección':'El destinatario indicó una nueva dirección para la entrega.',
-  '22 · Para entregar en bodega receptora':'El envío debe ser entregado en la bodega receptora indicada.',
-  '23 · Ausencia de guía del número de orden de compra':'El paquete no trae la guía con el número de orden de compra.',
-  '24 · No coincide la mercancía física con lo descrito en la orden de compra':'La mercancía física entregada no coincide con la descripción.',
-  '27 · Destinatario exige presencia representante del remitente':'El destinatario exige la presencia de un representante autorizado del remitente.',
-  '28 · Destinatario exige inventario de mercancías':'El destinatario solicita realizar inventario detallado.',
-  '30 · Mercancía entregada, guía retenida por el destinatario':'La mercancía fue entregada pero este retuvo la guía firmada.',
-  '31 · No conocen destinatario en dirección destino':'En la dirección indicada, los residentes no conocen al destinatario.',
-  '32 · Destinatario exige documento anexo a guía':'El destinatario exige un documento adicional anexo a la guía.',
-  '33 · Dirección destinatario incompleta':'La dirección carece de información esencial.',
-  '34 · Dirección destinataria no existe':'La dirección registrada no corresponde a una ubicación física verificable.',
-  '35 · Destinatario se trasladó':'El destinatario se mudó de la dirección registrada.',
-  '36 · Dirección de destino corresponde a otra ciudad':'El envío corresponde a otra ciudad.',
-  '41 · Entrega no efectuada, reciben portería o celadores':'La entrega fue recibida por portería o celadores.',
-  '44 · Destinatario se rehúsa a recibir':'El destinatario manifestó su decisión de NO recibir el envío.',
-  '45 · Retención por orden del remitente':'El remitente ordenó la retención del envío.',
-  '58 · Mercancía se averió en reparto, no entregada':'Durante el traslado, la mercancía sufrió daños.',
-  '63 · Flete mal liquidado':'El flete presenta un error en su liquidación.',
-  '65 · Caja sellada buen estado, faltante de unidades internas':'La caja llegó sellada pero faltan unidades internas.',
-  '69 · Mercancía entregada, destinatario devuelve unidades internas o faltantes':'La mercancía fue entregada pero devolvió unidades internas.',
-  '81 · Coordinar entrega':'Se requiere coordinar la entrega con el destinatario.',
-  '84 · Faltantes de unidades en regional destino':'En la regional de destino se detectaron faltantes.',
-  '86 · Mercancía con orden de compra vencida':'La orden de compra se encuentra vencida.',
-  '89 · Guía no trae carta porte, factura o remisión':'La guía no incluye la carta porte, factura o remisión.',
-  '90 · Mercancía entregada con nota de faltante interno':'La mercancía fue entregada con nota de faltante interno.',
-  '91 · Destinatario fija fecha y hora de recibo mayor al día siguiente':'El destinatario fijó fecha de recibo mayor al día siguiente.'
+  '00 · Entregado por link de pago':'Envío entregado mediante pago realizado por link digital.',
+  '01 · Destinatario no se encuentra':'Se visitó la dirección y el destinatario no se encontraba.',
+  '02 · Entregado':'Envío entregado exitosamente al destinatario.',
+  '03 · Cerrado en horas hábiles':'El establecimiento se encontraba cerrado en horario habitual.',
+  '04 · Destinatario fija fecha y hora de recibo para el día siguiente':'Reprogramación para el día siguiente.',
+  '05 · Destinatario no recibe en día sábado':'El destinatario no recibe envíos los sábados.',
+  '06 · Destinatario no tenía plata para cancelar, regresar mañana':'Sin dinero para cancelar. Regresar mañana.',
+  '10 · Restricción en el tránsito reparto urbano':'Restricciones viales que impidieron el acceso.',
+  '13 · Entrega no efectuada':'No se logró efectuar la entrega.',
+  '20 · Destinatario no pagará':'El destinatario no pagará el valor del envío.',
+  '21 · Mercancía debe ser entregada en otra dirección':'Nueva dirección indicada por el destinatario.',
+  '22 · Para entregar en bodega receptora':'Entregar en bodega receptora.',
+  '23 · Ausencia de guía del número de orden de compra':'Paquete sin guía de orden de compra.',
+  '24 · No coincide la mercancía física con lo descrito en la orden de compra':'Mercancía no coincide con la descripción.',
+  '27 · Destinatario exige presencia representante del remitente':'Exige representante del remitente.',
+  '28 · Destinatario exige inventario de mercancías':'Solicita inventario detallado.',
+  '30 · Mercancía entregada, guía retenida por el destinatario':'Retuvo la guía firmada.',
+  '31 · No conocen destinatario en dirección destino':'Los residentes no conocen al destinatario.',
+  '32 · Destinatario exige documento anexo a guía':'Exige documento adicional.',
+  '33 · Dirección destinatario incompleta':'Dirección incompleta.',
+  '34 · Dirección destinataria no existe':'Dirección no verificable.',
+  '35 · Destinatario se trasladó':'El destinatario se mudó.',
+  '36 · Dirección de destino corresponde a otra ciudad':'Corresponde a otra ciudad.',
+  '41 · Entrega no efectuada, reciben portería o celadores':'Recibida por portería/celadores.',
+  '44 · Destinatario se rehúsa a recibir':'Se rehúsa a recibir el envío.',
+  '45 · Retención por orden del remitente':'Retención ordenada por el remitente.',
+  '58 · Mercancía se averió en reparto, no entregada':'Mercancía averiada en reparto.',
+  '63 · Flete mal liquidado':'Error en liquidación del flete.',
+  '65 · Caja sellada buen estado, faltante de unidades internas':'Caja sellada pero faltan unidades.',
+  '69 · Mercancía entregada, destinatario devuelve unidades internas o faltantes':'Devolvió unidades internas.',
+  '81 · Coordinar entrega':'Coordinar entrega con el destinatario.',
+  '84 · Faltantes de unidades en regional destino':'Faltantes en regional destino.',
+  '86 · Mercancía con orden de compra vencida':'Orden de compra vencida.',
+  '89 · Guía no trae carta porte, factura o remisión':'Guía sin carta porte/factura.',
+  '90 · Mercancía entregada con nota de faltante interno':'Nota de faltante interno.',
+  '91 · Destinatario fija fecha y hora de recibo mayor al día siguiente':'Fecha de recibo mayor al día siguiente.'
 };
 function esDescripcionSugerida(t){ if(!t)return false; const x=t.trim(); return Object.values(DESCRIPCIONES_RECOMENDADAS).some(d=>d===x); }
 function aplicarDescripcionRecomendada(f=false){ const sel=document.getElementById('estadoPaquete'); const ta=document.getElementById('descripcionVisita'); if(!sel||!ta)return; const s=DESCRIPCIONES_RECOMENDADAS[sel.value]||''; const a=ta.value; if(f||a.trim()===''||esDescripcionSugerida(a)) ta.value=s; }
@@ -1747,11 +1741,11 @@ window.headerEmpresarialHTML = headerEmpresarialHTML;
 
 function prepararAreaImpresion(html,clasesExtra){ let area=document.getElementById('areaImpresion'); if(!area){ area=document.createElement('div'); area.id='areaImpresion'; document.body.appendChild(area); } area.innerHTML=html; area.style.display='block'; _estabaDarkAlImprimir=document.body.classList.contains('dark'); if(_estabaDarkAlImprimir) document.body.classList.add('theme-switching'); document.body.classList.add('modo-impresion'); (clasesExtra||[]).forEach(c=>document.body.classList.add(c)); return area; }
 function finalizarImpresion(){ document.body.classList.remove('modo-impresion','modo-reporte-diario','modo-album','theme-switching'); const area=document.getElementById('areaImpresion'); if(area){ area.innerHTML=''; area.style.display='none'; } if(_estabaDarkAlImprimir && typeof window.cargarDarkMode==='function'){ try{ window.cargarDarkMode(); }catch(e){} } _estabaDarkAlImprimir=false; }
-async function esperarImagenesCargadas(area){ const imgs=area.querySelectorAll('img'); if(!imgs.length) return; await Promise.all(Array.from(imgs).map(img => (img.complete && img.naturalWidth>0) ? Promise.resolve() : new Promise(resolve => { img.onload=resolve; img.onerror=resolve; setTimeout(resolve,3000); }))); }
+async function esperarImgsEn(el){ const imgs = el.querySelectorAll('img'); await Promise.all(Array.from(imgs).map(img => (img.complete && img.naturalWidth>0) ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 5000); }))); }
 
 async function ejecutarImpresion(html,clasesExtra){
   const area = prepararAreaImpresion(html, clasesExtra);
-  await esperarImagenesCargadas(area);
+  await esperarImgsEn(area);
   const estabaDark = document.body.classList.contains('dark');
   if(estabaDark){ document.body.classList.remove('dark'); document.body.classList.add('theme-switching'); }
   let limpio = false;
@@ -1762,18 +1756,13 @@ async function ejecutarImpresion(html,clasesExtra){
 }
 window.ejecutarImpresion = ejecutarImpresion;
 
-async function esperarImgsEn(el){ const imgs = el.querySelectorAll('img'); await Promise.all(Array.from(imgs).map(img => (img.complete && img.naturalWidth>0) ? Promise.resolve() : new Promise(res => { img.onload = res; img.onerror = res; setTimeout(res, 5000); }))); }
-
 /* ============================================================
-   ✅ EXPORTAR PDF — FIX DEFINITIVO
-   - NO usar opacity baja (eso causaba el PDF en blanco)
-   - Usar z-index BEHIND del modal + mostrar modal que lo cubra
+   ✅ EXPORTAR PDF CORREGIDO — Preserva fotos con cloneNode
    ============================================================ */
 async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   if(!window.html2canvas || !window.jspdf){ alert('⚠️ Librerías PDF no cargadas.'); return; }
   const { jsPDF } = window.jspdf;
 
-  // 1. Mostrar modal de progreso (oculta la vista del render)
   const modalProg = document.getElementById('modalProcesando');
   const titulo = document.getElementById('procesandoTituloGrande');
   const paso = document.getElementById('procesandoPaso');
@@ -1782,12 +1771,11 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   if(paso) paso.textContent = 'Preparando contenido…';
   if(barra) barra.style.width = '5%';
   if(modalProg) modalProg.classList.add('visible');
-  await new Promise(r => setTimeout(r, 250));
+  await new Promise(r => setTimeout(r, 300));
 
-  // 2. Crear contenedor VISIBLE (opacity 1) detrás del modal
   const cont = document.createElement('div');
   cont.id = 'pdf-render-container';
-  cont.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:15px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;overflow:visible;';
+  cont.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:15px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;';
   cont.innerHTML = htmlCompleto;
   document.body.appendChild(cont);
 
@@ -1810,6 +1798,8 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
         el.style.backgroundColor = '#ffffff';
         el.style.color = '#000000';
         el.style.opacity = '1';
+        el.style.pageBreakInside = 'auto';
+        el.style.pageBreakAfter = 'auto';
       });
       clonedDoc.querySelectorAll('.rd-tabla, table').forEach(t => { t.style.tableLayout = 'auto'; t.style.width = '100%'; });
       clonedDoc.querySelectorAll('.rd-tabla td, .rd-foto-item, .rd-foto-caption, .rd-album-item, .rd-album-caption').forEach(c => {
@@ -1822,12 +1812,11 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   }
 
   try {
-    // 3. Esperar imágenes
     if(paso) paso.textContent = 'Cargando imágenes…';
     if(barra) barra.style.width = '15%';
     await esperarImgsEn(cont);
+    await new Promise(r => setTimeout(r, 500));
 
-    // 4. Preparar JS PDF
     const pdf = new jsPDF({ orientation: 'portrait', unit:'mm', format:'a4' });
     const anchoPagina = pdf.internal.pageSize.getWidth();
     const altoPagina = pdf.internal.pageSize.getHeight();
@@ -1835,7 +1824,7 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
     const anchoUtil = anchoPagina - margen*2;
     const altoUtil = altoPagina - margen*2;
 
-    // 5. Renderizar contenido principal
+    // CONTENIDO PRINCIPAL
     if(paso) paso.textContent = 'Renderizando contenido…';
     if(barra) barra.style.width = '30%';
     const principalClone = cont.cloneNode(true);
@@ -1844,6 +1833,7 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
     principalClone.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:15px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;';
     document.body.appendChild(principalClone);
     await esperarImgsEn(principalClone);
+    await new Promise(r => setTimeout(r, 200));
 
     let primeraPagina = true;
     if(principalClone.innerText.trim().length > 0 || principalClone.querySelector('table, canvas, svg')){
@@ -1872,18 +1862,35 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
     }
     document.body.removeChild(principalClone);
 
-    // 6. Renderizar páginas de fotos
+    // ✅ PÁGINAS DE FOTOS — usando cloneNode(true) para preservar imágenes
     const paginasFoto = Array.from(cont.querySelectorAll('.rd-fotos-page, .rd-album-page'));
+    console.log(`📸 Páginas de fotos encontradas: ${paginasFoto.length}`);
+
     for(let i = 0; i < paginasFoto.length; i++){
-      if(paso) paso.textContent = `Renderizando página de fotos ${i+1}/${paginasFoto.length}…`;
-      if(barra) barra.style.width = Math.min(85, 30 + (i/paginasFoto.length)*55) + '%';
       const pag = paginasFoto[i];
-      const bloque = document.createElement('div');
+      if(paso) paso.textContent = `Renderizando fotos ${i+1}/${paginasFoto.length}…`;
+      if(barra) barra.style.width = Math.min(85, 30 + (i/paginasFoto.length)*55) + '%';
+
+      // ✅ CLONE profundo que preserva las imágenes cargadas
+      const bloque = pag.cloneNode(true);
       bloque.id = 'pdf-render-fotos';
       bloque.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:6px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;';
-      bloque.innerHTML = pag.outerHTML;
+      bloque.style.pageBreakInside = 'auto';
+      bloque.style.pageBreakAfter = 'auto';
+      bloque.querySelectorAll('*').forEach(el => {
+        el.style.pageBreakInside = 'auto';
+        el.style.pageBreakAfter = 'auto';
+      });
       document.body.appendChild(bloque);
+
       await esperarImgsEn(bloque);
+      await new Promise(r => setTimeout(r, 600));
+
+      const imgs = bloque.querySelectorAll('img');
+      let imgsOk = 0;
+      imgs.forEach(img => { if(img.complete && img.naturalWidth > 0) imgsOk++; });
+      console.log(`📄 Página ${i+1}: ${imgs.length} imgs, ${imgsOk} cargadas OK`);
+
       const canvasFoto = await html2canvas(bloque, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
         scrollX: 0, scrollY: 0,
@@ -1903,7 +1910,6 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
       primeraPagina = false;
     }
 
-    // 7. Guardar
     if(paso) paso.textContent = 'Guardando PDF…';
     if(barra) barra.style.width = '100%';
     pdf.save(nombreArchivo);
@@ -1912,7 +1918,6 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
     console.error(e);
     alert('❌ Error PDF: ' + (e.message||e));
   } finally {
-    // 8. Limpiar
     const conts = document.querySelectorAll('#pdf-render-container, #pdf-render-principal, #pdf-render-fotos');
     conts.forEach(c => { if(c.parentNode) c.parentNode.removeChild(c); });
     if(barra) barra.style.width = '0%';
@@ -1937,9 +1942,15 @@ async function generarHTMLReporteDiario(){
   const iC=localStorage.getItem('tiempoBase_inicioCarga')||'—'; const fC=localStorage.getItem('tiempoBase_finCarga')||'—'; const sE=localStorage.getItem('tiempoBase_salidaEmpresa')||'—'; const pE=localStorage.getItem('tiempoBase_primeraEntrega')||'—';
   const codigoDoc=`RPT-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
   const hash=hashSync(JSON.stringify({u:usuario,f:fechaLocalISO(),t:totalVisitas}));
+  
+  // ✅ CARGAR FOTOS FALTANTES EN CACHÉ ANTES DE ARMAR HTML
   const idsNecesarios=[]; visitas.forEach(v=>{ if(Array.isArray(v.fotos)) v.fotos.forEach(f=>{ if(f.id) idsNecesarios.push(f.id); }); });
-  const idsFaltantes=idsNecesarios.filter(id=>!cacheFotos.has(id));
-  if(idsFaltantes.length){ try{ await obtenerFotosDB(idsFaltantes); }catch(e){} }
+  const idsFaltantes = idsNecesarios.filter(id => !cacheFotos.has(id));
+  if(idsFaltantes.length > 0){
+    console.log(`📥 Cargando ${idsFaltantes.length} fotos desde IndexedDB...`);
+    try{ await obtenerFotosDB(idsFaltantes); }catch(e){ console.error('Error fotos:', e); }
+  }
+  
   const T = calcularTotalesPrecios();
   let html=`<div class="reporte-diario">${headerEmpresarialHTML('Reporte Diario', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Reporte Diario de Entregas</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link Pago</div><div class="rd-kpi-valor">${entLink}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom</div><div class="rd-kpi-valor">${prom}m</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">✅ Normales</div><div class="rd-kpi-valor">${entNorm}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr></table></section><section class="rd-charts"><div class="rd-chart-box"><img src="${chartEstados}"></div><div class="rd-chart-box"><img src="${chartDona}"></div></section>`;
   html+=`<section><h3 class="rd-section-title">📋 Detalle (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:3%">#</th><th style="width:6%">Lleg.</th><th style="width:12%">Código</th><th style="width:18%">Dirección</th><th style="width:10%">Precio</th><th style="width:15%">Estado</th><th>Descripción</th></tr></thead><tbody>`;
@@ -1964,6 +1975,7 @@ async function generarHTMLReporteDiario(){
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
     const df=getFotosSync(ids); const planas=[];
     vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({dataUrl:df[foto.id],numVisita:nv,codigo:v.codigo||'',direccion:v.direccion||'',idxFoto:idx+1,totalFotosVisita:v.fotos.length,censurada:foto.censurada}); }); });
+    console.log(`📸 Total fotos en HTML: ${planas.length} de ${ids.length}`);
     const FPP=20; const totalP=Math.ceil(planas.length/FPP);
     html+=`<section><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length})</h3>`;
     for(let p=0;p<planas.length;p+=FPP){
