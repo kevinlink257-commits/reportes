@@ -19,6 +19,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
+/* ===== ESTILOS COMPLETOS (idénticos al original + nuevos) ===== */
 :root{--sys-blue:#0a84ff;--sys-blue-dark:#0066cc;--sys-green:#30d158;--sys-green-dark:#248a3d;--sys-red:#ff453a;--sys-red-dark:#c92c20;--sys-orange:#ff9f0a;--sys-yellow:#ffd60a;--sys-purple:#bf5af2;--sys-teal:#40c8e0;--sys-pink:#ff375f;--gray-0:#fff;--gray-1:#f5f5f7;--gray-2:#e8e8ed;--gray-3:#d2d2d7;--gray-4:#aeaeb2;--gray-5:#8e8e93;--gray-6:#636366;--gray-7:#48484a;--gray-8:#1c1c1e;--gray-9:#000;--bg-body:var(--gray-1);--bg-container:#fff;--bg-section:#fafafc;--bg-input:#fff;--bg-card:#fff;--bg-table:#fff;--bg-chip:rgba(10,132,255,.08);--text-primary:#1c1c1e;--text-secondary:#3a3a3c;--text-heading:#1c1c1e;--text-muted:#8e8e93;--border-main:#d2d2d7;--border-light:#e8e8ed;--shadow-md:0 2px 8px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);--shadow-lg:0 8px 24px rgba(0,0,0,.08);--radius-sm:8px;--radius-md:12px;--radius-lg:16px;--radius-xl:20px;--radius-pill:999px;--ease:cubic-bezier(.4,0,.2,1);--table-header-bg:#f5f5f7;--table-header-color:#1c1c1e}
 body.dark{--bg-body:#000;--bg-container:#1c1c1e;--bg-section:#2c2c2e;--bg-input:#2c2c2e;--bg-card:#2c2c2e;--bg-table:#1c1c1e;--bg-chip:rgba(10,132,255,.18);--text-primary:#f5f5f7;--text-secondary:#d1d1d6;--text-heading:#f5f5f7;--text-muted:#8e8e93;--border-main:#38383a;--border-light:#2c2c2e;--table-header-bg:#2c2c2e;--table-header-color:#f5f5f7}
 *,*::before,*::after{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -209,7 +210,6 @@ body.dark #barraUsuario button{background:var(--gray-7)}
 .foto-thumb img{width:100%;height:100%;object-fit:cover;cursor:pointer}
 .foto-thumb .btn-eliminar-foto{position:absolute;top:4px;right:4px;width:24px;height:24px;min-width:24px;border-radius:50%;background:rgba(255,69,58,.95);color:#fff;border:2px solid #fff;padding:0;font-size:11px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center;z-index:3}
 .foto-thumb .badge-censura{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.75);color:#fff;padding:2px 8px;border-radius:var(--radius-pill);font-size:.65rem;font-weight:700;pointer-events:auto;z-index:3;cursor:pointer}
-/* ✅ NUEVO: Botón CENSURAR manual en cada miniatura */
 .foto-thumb .btn-censurar-foto{position:absolute;bottom:4px;right:4px;width:28px;height:28px;min-width:28px;border-radius:50%;background:rgba(191,90,242,.95);color:#fff;border:2px solid #fff;padding:0;font-size:13px;line-height:1;cursor:pointer;margin:0;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.4);transition:transform .15s var(--ease),background .15s var(--ease);z-index:3}
 .foto-thumb .btn-censurar-foto:hover{transform:scale(1.12);background:rgba(160,60,200,1)}
 .foto-thumb .btn-censurar-foto:active{transform:scale(.95)}
@@ -392,6 +392,9 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 </head>
 <body>
 
+<!-- ===== HTML COMPLETO (idéntico al original + nuevas secciones) ===== -->
+
+<!-- Barra de usuario -->
 <div id="barraUsuario">
   <div class="info-usuario"><div class="avatar" id="avatarUsuario">👤</div><span id="infoUsuario">Cargando...</span></div>
   <div class="acciones-bar">
@@ -402,8 +405,10 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
   </div>
 </div>
 
+<!-- Modal PWA -->
 <div id="modalPWA"><div class="pwa-content"><div class="pwa-icon">📲</div><h3>Instalar Colserlog</h3><div id="pwaInstrucciones"></div><button type="button" onclick="document.getElementById('modalPWA').classList.remove('visible')">Entendido</button></div></div>
 
+<!-- Modal Usuario -->
 <div id="modalUsuario">
   <div class="modal-content">
     <h2 id="tituloModalUser">👤 Bienvenido</h2>
@@ -430,18 +435,26 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
   </div>
 </div>
 
+<!-- Aviso flotante -->
 <div id="avisoDuplicado"></div>
+
+<!-- Modal Procesando -->
 <div id="modalProcesando"><div class="procesando-content"><div class="spinner"></div><h3 id="procesandoTituloGrande">📸 Procesando…</h3><p id="procesandoTitulo">Comprimiendo…</p><div class="paso" id="procesandoPaso">Preparando…</div><div class="barra-progreso"><div class="fill" id="procesandoBarra"></div></div></div></div>
 
+<!-- Modal Foto -->
 <div id="modalFoto" class="modal-foto"><div class="modal-foto-content"><button type="button" class="modal-foto-cerrar" onclick="cerrarModalFoto()">✕</button><img id="modalFotoImg" src="" alt="Foto"><div class="modal-foto-nav"><button type="button" onclick="navegarFoto(-1)">◀</button><span id="modalFotoContador">1 / 1</span><button type="button" onclick="navegarFoto(1)">▶</button></div><a id="modalFotoDescargar" class="btn-descargar-foto" download>💾 Descargar</a></div></div>
 
+<!-- Modal Censura -->
 <div id="modalCensura"><div class="censura-content"><h3>🖐️ Censurar manualmente</h3><p class="censura-hint">Arrastra sobre la imagen para marcar zonas a censurar</p><div class="censura-canvas-wrapper"><canvas id="censuraCanvas"></canvas></div><div class="censura-controles"><button type="button" class="btn-deshacer" onclick="deshacerUltimaCensura()">↶ Deshacer</button><button type="button" class="btn-cancelar" onclick="cerrarModalCensura()">✖ Cancelar</button><button type="button" class="btn-guardar-censura" onclick="aplicarCensuraManual()">💾 Aplicar</button></div><div class="censura-info" id="censuraInfo">Zonas marcadas: 0</div></div></div>
 
+<!-- Modal Reglas Foto -->
 <div id="modalReglasFoto"><div class="modal-reglas-content"><h2>📸 Antes de la foto</h2><p class="sub">Acepta las reglas. Se muestran 1 vez por sesión.</p><div class="reglas-bloque rojo"><h4>🚫 NUNCA fotografíes:</h4><ul><li><span class="tag-no">Rostros de niños</span> (Ley 1098 de 2006)</li><li><span class="tag-no">Rostros de adultos</span> sin consentimiento</li><li><span class="tag-no">Interior de la vivienda</span></li><li><span class="tag-no">Documentos de identidad</span></li><li><span class="tag-no">Placas de vehículos</span> ajenos</li></ul></div><div class="reglas-bloque verde"><h4>✅ SÍ puedes fotografiar:</h4><ul><li><span class="tag-ok">Fachada exterior</span></li><li><span class="tag-ok">Paquete junto a la puerta</span></li><li><span class="tag-ok">Guía o sticker</span></li><li><span class="tag-ok">Aviso de visita</span></li></ul></div><label class="reglas-chk" id="lblReglasChk"><input type="checkbox" id="chkAceptoReglas" onchange="toggleBotonCamara(); this.parentNode.classList.toggle('activo', this.checked);"><span>Entiendo y acepto estas reglas.</span></label><div class="reglas-botones"><button type="button" class="btn-cancelar-reglas" onclick="cerrarModalReglasFoto()">✖ Cancelar</button><button type="button" class="btn-ok-reglas" id="btnAbrirCamara" onclick="confirmarYabrirCamara()" disabled>Continuar</button></div></div></div>
 
+<!-- ===== CONTENEDOR PRINCIPAL ===== -->
 <div class="container">
   <h1>📦 Reporte Diario de Ruta · Colserlog</h1>
 
+  <!-- Menú -->
   <div class="menu-dropdown" id="menuDropdown">
     <button type="button" class="menu-toggle" id="menuToggle" onclick="toggleMenu()"><span id="menuLabel">⚡ Reparto Rápido</span><span class="icon">▼</span></button>
     <div class="menu-items" id="menuItems">
@@ -449,7 +462,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
       <button type="button" data-tab="inicio" onclick="cambiarTab('inicio')">🏠 Inicio</button>
       <button type="button" data-tab="tiempos" onclick="cambiarTab('tiempos')">⏱️ Tiempos</button>
       <button type="button" data-tab="banco" onclick="cambiarTab('banco')">📥 Banco</button>
-      <button type="button" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita (clásico)</button>
+      <button type="button" data-tab="visita" onclick="cambiarTab('visita')">📝 Visita Detallada (respaldo)</button>
       <button type="button" data-tab="historial" onclick="cambiarTab('historial')">📋 Historial</button>
       <button type="button" data-tab="informes" onclick="cambiarTab('informes')">📊 Informes</button>
       <button type="button" data-tab="informe-empresarial" onclick="cambiarTab('informe-empresarial')">🏢 Informe Empresarial</button>
@@ -458,10 +471,13 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL REPARTO RÁPIDO ===== -->
   <div class="tab-panel active" data-tab="reparto">
     <div class="section no-print">
       <h2>⚡ Modo Reparto Rápido</h2>
-      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Escanea guías con IA, elige el estado y guarda. <strong>Objetivo: 20 segundos por visita.</strong></p>
+      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Escanea guías, elige el estado y guarda. <strong>Objetivo: 20 segundos por visita.</strong></p>
+
+      <!-- Barra de umbral -->
       <div class="barra-umbral-wrapper">
         <div class="barra-umbral-titulo"><span>🎯 Efectividad hacia el umbral</span><span class="valor" id="barraUmbralValor">—%</span></div>
         <div class="barra-umbral-container">
@@ -470,7 +486,10 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
         </div>
         <div class="barra-umbral-info"><span id="barraUmbralInfoEnt">✅ 0 / 0</span><span id="barraUmbralInfoUmbral">Meta: 80%</span></div>
       </div>
+
       <div id="alertaUmbral" class="alerta-umbral" style="display:none;"></div>
+
+      <!-- Resumen rápido -->
       <div style="display:flex;justify-content:space-around;text-align:center;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:10px;margin-bottom:14px;">
         <div><div style="font-size:.7rem;color:var(--text-secondary);font-weight:600;">HOY</div><div style="font-size:1.3rem;font-weight:800;color:var(--sys-blue);" id="repTotal">0</div></div>
         <div><div style="font-size:.7rem;color:var(--text-secondary);font-weight:600;">✅ OK</div><div style="font-size:1.3rem;font-weight:800;color:var(--sys-green);" id="repOK">0</div></div>
@@ -478,37 +497,65 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
         <div><div style="font-size:.7rem;color:var(--text-secondary);font-weight:600;">❌ NO</div><div style="font-size:1.3rem;font-weight:800;color:var(--sys-red);" id="repNO">0</div></div>
         <div><div style="font-size:.7rem;color:var(--text-secondary);font-weight:600;">💰 HOY</div><div style="font-size:1.1rem;font-weight:800;color:var(--sys-purple);" id="repValor">$0</div></div>
       </div>
-      <button type="button" class="btn-reparto-grande" onclick="document.getElementById('inputOCR').click()">📷 Escanear guías con OCR <span class="indicador-ia">IA</span></button>
+
+      <!-- Botón escanear cámara -->
+      <button type="button" class="btn-reparto-grande" onclick="iniciarEscaneo('reparto')">📷 Escanear guías (Cámara)</button>
+
+      <!-- ✅ NUEVO: Agregar guía manualmente -->
+      <div style="margin-top:16px;padding:14px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);">
+        <label style="margin-top:0;font-size:.9rem;font-weight:700;">➕ Agregar guía manualmente:</label>
+        <div class="input-group" style="margin-top:8px;">
+          <input type="text" id="inputGuiaManual" placeholder="12 dígitos de la guía" inputmode="numeric" maxlength="12" autocomplete="off" oninput="filtrarSoloDigitos(this);" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarGuiaManualReparto();}">
+          <button type="button" class="btn-agregar-codigo" onclick="agregarGuiaManualReparto()">➕</button>
+        </div>
+        <p style="font-size:.75em;color:var(--text-muted);margin-top:6px;">Escribe o pega los 12 dígitos y presiona ➕ o Enter.</p>
+      </div>
+
+      <!-- OCR por foto -->
+      <button type="button" class="btn-reparto-grande" style="background:var(--sys-teal);margin-top:12px;" onclick="document.getElementById('inputOCR').click()">📸 Escanear foto de guías (OCR)</button>
       <input type="file" id="inputOCR" accept="image/*" capture="environment" multiple style="display:none;" onchange="procesarFotosOCR(event)">
       <div id="ocrProgreso" class="ocr-progreso" style="display:none;"></div>
       <div class="ocr-info">💡 Toma 1 foto con <strong>varias guías juntas</strong>. Detecta códigos de barras (rápido) + OCR (fallback).</div>
+
+      <!-- Códigos pendientes -->
       <label style="margin-top:20px;font-size:1.05em;">📦 Códigos pendientes (<span id="repContadorPend">0</span>):</label>
       <div id="listaCodigosReparto" class="lista-codigos"></div>
+
+      <!-- Valor y dirección -->
       <label style="margin-top:20px;font-size:1.05em;">💰 Valor del paquete (COP):</label>
       <input type="number" id="precioReparto" placeholder="Ej: 50000" min="0" step="1000" inputmode="numeric">
       <p style="font-size:.75em;color:var(--text-muted);margin-top:4px;">Se autocompleta si el código ya tiene precio en el banco.</p>
+
       <label style="margin-top:12px;font-size:1.05em;">📍 Dirección:</label>
       <input type="text" id="direccionReparto" placeholder="Se autocompleta desde el banco" autocomplete="off">
+
+      <!-- Estado -->
       <label style="margin-top:20px;font-size:1.05em;">🎯 Estado del paquete:</label>
       <div id="gridEstadosReparto" class="grid-estados-reparto"></div>
       <select id="estadoPaqueteRepartoSelect" style="display:none;margin-top:10px;"></select>
+
+      <!-- Firma condicional -->
       <div id="firmaCondicionalReparto" style="display:none;margin-top:15px;">
         <label>✍️ Firma del cliente (obligatoria):</label>
         <div class="firma-wrapper"><canvas id="canvasFirmaReparto" width="500" height="180"></canvas><div class="firma-controles"><button type="button" class="btn-firma" onclick="limpiarFirmaReparto()">🗑️ Limpiar</button></div></div>
       </div>
+
       <label style="margin-top:12px;">📝 Notas (opcional):</label>
       <textarea id="descripcionReparto" placeholder="Se autocompleta según el estado..." style="min-height:60px;"></textarea>
+
       <label style="margin-top:15px;">📸 Fotos (opcional):</label>
       <div class="btn-foto-row">
         <button type="button" class="btn-foto" onclick="abrirModalReglasFoto('camara')">📷 Cámara</button>
         <button type="button" class="btn-foto btn-galeria" onclick="abrirModalReglasFoto('galeria')">🖼️ Galería</button>
       </div>
       <div id="galeriaFotosReparto" class="galeria-fotos" style="margin-top:8px;"></div>
+
       <button type="button" class="btn-reparto-guardar" id="btnGuardarReparto" onclick="guardarVisitaReparto()">💾 GUARDAR Y SIGUIENTE</button>
-      <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:10px;">💡 Se refleja también en Detalle y Visita Clásica.</p>
+      <p style="font-size:.75rem;color:var(--text-muted);text-align:center;margin-top:10px;">💡 Se refleja también en Detalle y Visita Detallada.</p>
     </div>
   </div>
 
+  <!-- ===== PANEL INICIO ===== -->
   <div class="tab-panel" data-tab="inicio">
     <div class="section">
       <h2>📊 Informe del Día</h2>
@@ -553,10 +600,12 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL TIEMPOS ===== -->
   <div class="tab-panel" data-tab="tiempos">
     <div class="section"><h2>1. Tiempos Base</h2><div class="no-print"><label>Inicio carga:</label><input type="time" id="inicioCarga"><label>Fin carga:</label><input type="time" id="finCarga"><label>Salida empresa:</label><input type="time" id="salidaEmpresa"><label>1ª entrega:</label><input type="time" id="primeraEntrega"><button type="button" onclick="calcularTiemposBase()">Confirmar Tiempos</button></div><div id="resumenTiempos" class="result-box" style="display:none;"></div></div>
   </div>
 
+  <!-- ===== PANEL BANCO ===== -->
   <div class="tab-panel" data-tab="banco">
     <div class="section no-print">
       <h2>2. 📥 Banco de Códigos</h2>
@@ -583,9 +632,11 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL VISITA DETALLADA (CLÁSICA) ===== -->
   <div class="tab-panel" data-tab="visita">
     <div class="section no-print">
-      <h2>3. Registrar Nueva Visita (Clásico)</h2>
+      <h2>3. Registrar Nueva Visita (Detallada)</h2>
+      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);">Usa esta opción para edición detallada o cuando necesites más control.</p>
       <label>Hora de llegada:</label>
       <div class="input-group"><input type="time" id="llegadaCliente"><button type="button" class="btn-ahora" onclick="marcarLlegada()">📥 Ahora</button></div>
       <label>Hora de salida:</label>
@@ -619,6 +670,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL HISTORIAL ===== -->
   <div class="tab-panel" data-tab="historial">
     <div class="section" id="seccionHistorial">
       <h2>4. Detalle de Visitas <span id="tituloUsuarioHistorial" style="font-size:.7em;color:var(--text-muted);"></span></h2>
@@ -627,6 +679,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL INFORMES ===== -->
   <div class="tab-panel" data-tab="informes">
     <div class="section"><h2>7. Promedios Históricos</h2><div class="promedio-card"><div>📅 Diario<br><span id="prom-dia">0</span></div><div>📆 Semanal<br><span id="prom-semana">0</span></div><div>📊 Mensual<br><span id="prom-mes">0</span></div></div><canvas id="graficaPromedios"></canvas></div>
     <div class="section"><h2>8. Semanal y Mensual</h2><div style="display:grid;grid-template-columns:1fr;gap:16px;"><div><h3>Por Semana</h3><canvas id="graficaSemana"></canvas></div><div><h3>Por Mes</h3><canvas id="graficaMes"></canvas></div></div></div>
@@ -640,14 +693,20 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL INFORME EMPRESARIAL ===== -->
   <div class="tab-panel" data-tab="informe-empresarial">
     <div class="section">
       <h2>🏢 Informe Empresarial</h2>
-      <div class="btn-group"><button type="button" class="btn-informe" onclick="generarInformeEmpresarial()">📄 Generar</button><button type="button" class="btn-pdf" onclick="exportarInformeEmpresarialPDF()">📥 PDF</button><button type="button" class="btn-whatsapp" onclick="compartirInformeEmpresarialWhatsApp()">💬</button></div>
+      <div class="btn-group">
+        <button type="button" class="btn-informe" onclick="generarInformeEmpresarial()">📄 Generar</button>
+        <button type="button" class="btn-pdf" onclick="exportarInformeEmpresarialPDF()">📥 PDF</button>
+        <button type="button" class="btn-whatsapp" onclick="compartirInformeEmpresarialWhatsApp()">💬</button>
+      </div>
       <div id="informeEmpresarialContenedor" style="margin-top:16px;"></div>
     </div>
   </div>
 
+  <!-- ===== PANEL NUBE ===== -->
   <div class="tab-panel" data-tab="nube">
     <div class="section no-print">
       <h2>9. ☁️ Sincronización</h2>
@@ -657,7 +716,11 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
       <div class="btn-group" style="margin-top:10px;"><button type="button" class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar</button><button type="button" class="btn-nube" onclick="cargarDeNube()">⬇️ Traer</button></div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>💾 Respaldo</h3>
-      <div class="btn-group" style="margin-top:10px;"><button type="button" class="btn-pdf" onclick="exportarRespaldoPDF()">📥 Respaldo PDF</button><button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Word</button><button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar</button></div>
+      <div class="btn-group" style="margin-top:10px;">
+        <button type="button" class="btn-pdf" onclick="exportarRespaldoPDF()">📥 Respaldo PDF</button>
+        <button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Word</button>
+        <button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar</button>
+      </div>
       <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,.rtf,.txt" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>📄 Exportar PDF</h3>
@@ -669,6 +732,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
     </div>
   </div>
 
+  <!-- ===== PANEL AJUSTES ===== -->
   <div class="tab-panel" data-tab="ajustes">
     <div class="section no-print">
       <h2>6. Control de Sesión</h2>
@@ -694,7 +758,7 @@ h3.rd-section-title{font-size:10pt;color:#1c1c1e;border-bottom:2px solid #1c1c1e
 <div id="areaImpresion" style="display:none"></div>
 
 <!-- ============================================================
-     FIREBASE
+     FIREBASE (idéntico al original)
      ============================================================ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
@@ -854,7 +918,7 @@ window.addEventListener('load', ()=>{
 </script>
 
 <!-- ============================================================
-     APP PRINCIPAL
+     APP PRINCIPAL (CON TODAS LAS CORRECCIONES)
      ============================================================ -->
 <script type="module">
 const ESTADOS_INFO = [
@@ -982,6 +1046,7 @@ function guardarBorrador(){ try{ const b={ llegadaCliente:document.getElementByI
 function restaurarBorrador(){ try{ const raw=localStorage.getItem(CLAVE_BORRADOR); if(!raw) return false; const b=JSON.parse(raw); if(b.timestamp && (Date.now()-b.timestamp)>24*60*60*1000){ localStorage.removeItem(CLAVE_BORRADOR); return false; } const set=(id,v)=>{ const el=document.getElementById(id); if(el && v) el.value=v; }; set('llegadaCliente',b.llegadaCliente); set('salidaCliente',b.salidaCliente); set('descripcionVisita',b.descripcionVisita); set('direccionVisita',b.direccionVisita); set('precioVisita',b.precioVisita); if(b.estadoPaquete){ const s=document.getElementById('estadoPaquete'); if(s) s.value=b.estadoPaquete; } return true; }catch(e){ return false; } }
 setInterval(()=>{ if(typeof window._guardarEstadoSilencioso==='function') window._guardarEstadoSilencioso(); guardarBorrador(); },20000);
 
+// ============ IndexedDB Fotos ============
 const DB_NOMBRE='colserlog_fotos_db'; const DB_VERSION=1; const STORE_FOTOS='fotos'; let fotosDB=null;
 const cacheFotos=new Map();
 function abrirFotosDB(){ return new Promise((resolve,reject)=>{ if(fotosDB && !fotosDB._closed){ try{ void fotosDB.objectStoreNames; resolve(fotosDB); return; }catch(e){ try{ fotosDB.close(); }catch(_){} fotosDB = null; } } if(!window.indexedDB){ reject(new Error('no IndexedDB')); return; } const req=indexedDB.open(DB_NOMBRE, DB_VERSION); req.onupgradeneeded = (e) => { try{ const db = e.target.result; if(!db.objectStoreNames.contains(STORE_FOTOS)) db.createObjectStore(STORE_FOTOS,{keyPath:'id'}); }catch(err){} }; req.onsuccess = (e) => { const db = e.target.result; db._closed = false; db.onclose = () => { db._closed = true; if(fotosDB === db) fotosDB = null; }; fotosDB = db; resolve(db); }; req.onerror = () => reject(req.error); }); }
@@ -1554,7 +1619,7 @@ window.iniciarEscaneo = function(modo){
   try{
     escaneoActivo=true;
     html5QrCode=new Html5Qrcode(divId);
-    html5QrCode.start({facingMode:'environment'},{ fps:5, qrbox:{width:300,height:120} },(txt)=>{
+    html5QrCode.start({facingMode:'environment'},{ fps:15, qrbox:{width:280,height:160}, aspectRatio:1.0 },(txt)=>{
       if(!escaneoActivo||sesionEscaneoYaAgrego) return;
       const cod=String(txt||'').trim().replace(/\D/g,'');
       if(!cod||cod.length!==12) return;
@@ -1570,6 +1635,18 @@ window.iniciarEscaneo = function(modo){
           _bancoIndex.add(cod);
           renderizarBanco(); guardarEstadoCompleto(); beepOk(); mostrarAviso('✅ '+cod,'ok');
         }
+      } else if(escaneoModo==='reparto') {
+        if(codigosPendientesReparto.includes(cod)) {
+          mostrarAviso('⚠️ Ya en lista: '+cod, 'warn');
+        } else if(codigosRegistradosHoy.has(cod)) {
+          mostrarAviso('⚠️ Ya registrado hoy: '+cod, 'warn');
+        } else {
+          if(!bancoContiene(cod)){ bancoCodigos.push({codigo:cod,direccion:'',precio:0}); _bancoIndex.add(cod); }
+          codigosPendientesReparto.push(cod);
+          renderizarBanco(); renderizarCodigosReparto(); actualizarResumenReparto();
+          beepOk(); mostrarAviso('✅ '+cod,'ok');
+          if(navigator.vibrate) navigator.vibrate(60);
+        }
       } else {
         if(codigosRegistradosHoy.has(cod)) {
           mostrarAviso('⚠️ Ya registrado hoy: '+cod, 'warn');
@@ -1583,7 +1660,29 @@ window.iniciarEscaneo = function(modo){
 };
 window.cancelarEscaneo = ()=>{ const i=html5QrCode; html5QrCode=null; const oc=()=>{ const a=document.getElementById('lectorQRBanco'); if(a) a.style.display='none'; const b=document.getElementById('lectorQR'); if(b) b.style.display='none'; const c=document.getElementById('btnCancelarEscaneoBanco'); if(c) c.style.display='none'; const d=document.getElementById('btnCancelarEscaneo'); if(d) d.style.display='none'; escaneoActivo=false; _codigosEscaneadosSesion=new Set(); }; if(i){ i.stop().then(()=>{ try{ i.clear(); }catch(_){} oc(); }).catch(()=>{ try{ i.clear(); }catch(_){} oc(); }); } else oc(); };
 
-// ✅ OCR OPTIMIZADO: ZXing (barcode) → Google Vision → Tesseract
+// ✅ NUEVA: Agregar guía manualmente en Reparto Rápido
+window.agregarGuiaManualReparto = function(){
+  const input = document.getElementById('inputGuiaManual');
+  if(!input) return;
+  const cod = (input.value || '').replace(/\D/g,'').slice(0,12);
+  if(cod.length !== 12){ mostrarAviso('⚠️ La guía debe tener 12 dígitos','error'); beepError(); return; }
+  if(codigosPendientesReparto.includes(cod)){ mostrarAviso('⚠️ Ya está en la lista','warn'); beepError(); input.value=''; return; }
+  if(codigosRegistradosHoy.has(cod)){ mostrarAviso('⚠️ Ya fue registrado hoy','warn'); beepError(); input.value=''; return; }
+  if(!bancoContiene(cod)){ bancoCodigos.push({codigo:cod,direccion:'',precio:0}); _bancoIndex.add(cod); }
+  codigosPendientesReparto.push(cod);
+  input.value = '';
+  renderizarBanco(); renderizarCodigosReparto(); actualizarResumenReparto(); guardarEstadoCompleto();
+  beepOk();
+  mostrarAviso('✅ Guía agregada: '+cod,'ok');
+  if(navigator.vibrate) navigator.vibrate(50);
+};
+
+/* ============================================================
+   OCR OPTIMIZADO: ZXing multi-código + Vision + Tesseract
+   Procesa GUÍA POR GUÍA con feedback inmediato
+   ============================================================ */
+
+// ✅ Preprocesar imagen para OCR
 async function preprocesarImagenParaOCR(file, maxDim = 1600){
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -1621,34 +1720,58 @@ async function preprocesarImagenParaOCR(file, maxDim = 1600){
   });
 }
 
-async function detectarCodigosConZXing(file){
+// ✅ ZXing multi-código (decodeMultiple + regiones)
+async function detectarCodigosConZXingMulti(file){
   return new Promise((resolve) => {
     const reader = new FileReader();
     reader.onload = (e) => {
       const img = new Image();
       img.onload = async () => {
+        const encontrados = new Set();
         try{
           if(typeof ZXing === 'undefined'){ resolve([]); return; }
           const hints = new Map();
           const formats = [
-            ZXing.BarcodeFormat.CODE_128,
-            ZXing.BarcodeFormat.CODE_39,
-            ZXing.BarcodeFormat.CODE_93,
-            ZXing.BarcodeFormat.ITF,
-            ZXing.BarcodeFormat.CODABAR,
-            ZXing.BarcodeFormat.EAN_13,
-            ZXing.BarcodeFormat.EAN_8,
-            ZXing.BarcodeFormat.UPC_A,
-            ZXing.BarcodeFormat.QR_CODE,
-            ZXing.BarcodeFormat.DATA_MATRIX
+            ZXing.BarcodeFormat.CODE_128, ZXing.BarcodeFormat.CODE_39, ZXing.BarcodeFormat.CODE_93,
+            ZXing.BarcodeFormat.ITF, ZXing.BarcodeFormat.CODABAR, ZXing.BarcodeFormat.EAN_13,
+            ZXing.BarcodeFormat.EAN_8, ZXing.BarcodeFormat.UPC_A, ZXing.BarcodeFormat.UPC_E,
+            ZXing.BarcodeFormat.QR_CODE, ZXing.BarcodeFormat.DATA_MATRIX, ZXing.BarcodeFormat.PDF_417,
+            ZXing.BarcodeFormat.AZTEC, ZXing.BarcodeFormat.MAXICODE
           ];
           hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, formats);
           hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-          const readerZx = new ZXing.BrowserMultiFormatReader(hints);
-          const result = await readerZx.decodeFromImageElement(img);
-          const txt = result && result.getText ? result.getText() : '';
-          resolve(txt ? [txt] : []);
-        }catch(e){ resolve([]); }
+          try{
+            const luminance = new ZXing.BrowserLuminanceSource(img);
+            const binarizer = new ZXing.HybridBinarizer(luminance);
+            const bitmap = new ZXing.BinaryBitmap(binarizer);
+            const multiReader = new ZXing.MultiFormatReader();
+            multiReader.setHints(hints);
+            const results = multiReader.decodeMultiple(bitmap);
+            if(results && results.length){ results.forEach(r => { const t = r && r.getText ? r.getText() : String(r); if(t) encontrados.add(t); }); }
+          }catch(e){}
+          if(encontrados.size === 0){
+            try{ const reader1 = new ZXing.BrowserMultiFormatReader(hints); const result = await reader1.decodeFromImageElement(img); const txt = result && result.getText ? result.getText() : ''; if(txt) encontrados.add(txt); }catch(e){}
+          }
+          if(encontrados.size < 4){
+            const regiones = [
+              {x:0, y:0, w:img.width/2, h:img.height},{x:img.width/2, y:0, w:img.width/2, h:img.height},
+              {x:0, y:0, w:img.width, h:img.height/2},{x:0, y:img.height/2, w:img.width, h:img.height/2},
+              {x:0, y:0, w:img.width/2, h:img.height/2},{x:img.width/2, y:0, w:img.width/2, h:img.height/2},
+              {x:0, y:img.height/2, w:img.width/2, h:img.height/2},{x:img.width/2, y:img.height/2, w:img.width/2, h:img.height/2}
+            ];
+            const readerR = new ZXing.BrowserMultiFormatReader(hints);
+            for(const reg of regiones){
+              try{
+                const canvas = document.createElement('canvas'); canvas.width = reg.w; canvas.height = reg.h;
+                const ctx = canvas.getContext('2d'); ctx.drawImage(img, reg.x, reg.y, reg.w, reg.h, 0, 0, reg.w, reg.h);
+                const r2 = await readerR.decodeFromImageUrl(canvas.toDataURL('image/jpeg', 0.9));
+                const txt2 = r2 && r2.getText ? r2.getText() : '';
+                if(txt2) encontrados.add(txt2);
+              }catch(e){}
+            }
+          }
+          resolve(Array.from(encontrados));
+        }catch(e){ resolve(Array.from(encontrados)); }
       };
       img.onerror = () => resolve([]);
       img.src = e.target.result;
@@ -1661,76 +1784,11 @@ async function detectarCodigosConZXing(file){
 async function ocrConTesseractRapido(dataUrlOrFile, onProgress){
   if(!window.Tesseract) throw new Error('Tesseract no disponible');
   const { data: { text } } = await Tesseract.recognize(dataUrlOrFile, 'eng', {
-    tessedit_char_whitelist: '0123456789',
-    tessedit_pageseg_mode: '11',
+    tessedit_char_whitelist: '0123456789', tessedit_pageseg_mode: '11',
     logger: (m) => { if(m.status === 'recognizing text' && onProgress) onProgress(m.progress); }
   });
   return text || '';
 }
-
-window.procesarFotosOCR = async function(event){
-  const files = Array.from(event.target.files || []);
-  if(!files.length) return;
-  const estadoOCR = document.getElementById('ocrProgreso');
-  const codigosEncontrados = new Set();
-  const visionKey = (localStorage.getItem(CLAVE_VISION_KEY) || '').trim();
-  const useVision = visionKey.length > 20;
-  if(estadoOCR){ estadoOCR.style.display='block'; estadoOCR.textContent = `🔍 Procesando ${files.length} imagen(es)...`; }
-  mostrarAviso(`⏳ Analizando ${files.length} imagen(es)...`,'ok');
-
-  for(let i = 0; i < files.length; i++){
-    const file = files[i];
-    try{
-      if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Buscando códigos de barras...`;
-      const zxCodes = await detectarCodigosConZXing(file);
-      const zxMatches = zxCodes.map(t => String(t).replace(/\D/g,'')).filter(c => c.length === 12);
-      zxMatches.forEach(m => codigosEncontrados.add(m));
-
-      if(zxMatches.length > 0){
-        if(estadoOCR) estadoOCR.textContent = `✅ ${i+1}/${files.length} · ${zxMatches.length} código(s) por ZXing`;
-        continue;
-      }
-
-      if(useVision){
-        if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Vision...`;
-        const texto = await ocrConGoogleVision(file, visionKey);
-        const matches = texto.match(/\d{12}/g) || [];
-        matches.forEach(m => codigosEncontrados.add(m));
-        continue;
-      }
-
-      if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · Preprocesando...`;
-      let pre;
-      try{
-        pre = await preprocesarImagenParaOCR(file, 1600);
-      }catch(e){
-        pre = { dataUrl: await new Promise((res)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }) };
-      }
-      if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · OCR...`;
-      const texto = await ocrConTesseractRapido(pre.dataUrl, (prog) => {
-        if(estadoOCR) estadoOCR.textContent = `🔍 ${i+1}/${files.length} · ${Math.round(prog*100)}%`;
-      });
-      const matches = texto.match(/\d{12}/g) || [];
-      matches.forEach(m => codigosEncontrados.add(m));
-    }catch(e){ console.warn('OCR error', e); }
-  }
-
-  if(codigosEncontrados.size === 0){
-    if(estadoOCR) estadoOCR.textContent = '❌ No se detectaron códigos.';
-    mostrarAviso('⚠️ No se detectaron códigos','warn'); beepError(); event.target.value=''; return;
-  }
-
-  let agregados=0;
-  for(const cod of codigosEncontrados){
-    if(!bancoContiene(cod)){ bancoCodigos.push({codigo:cod, direccion:'', precio:0}); _bancoIndex.add(cod); agregados++; }
-    if(!codigosPendientesReparto.includes(cod) && !codigosRegistradosHoy.has(cod)){ codigosPendientesReparto.push(cod); }
-  }
-  renderizarBanco(); renderizarCodigosReparto(); actualizarResumenReparto(); guardarEstadoCompleto(); beepOk();
-  if(navigator.vibrate) navigator.vibrate([80, 40, 80]);
-  if(estadoOCR) estadoOCR.textContent = `✅ ${codigosEncontrados.size} código(s). ${agregados} nuevo(s).`;
-  mostrarAviso(`✅ ${codigosEncontrados.size} código(s) con OCR`, 'ok');
-  event.target.value = '';
-};
 
 async function ocrConGoogleVision(file, apiKey){
   const base64 = await new Promise((resolve, reject) => { const r = new FileReader(); r.onload = () => resolve(r.result.split(',')[1]); r.onerror = reject; r.readAsDataURL(file); });
@@ -1740,6 +1798,69 @@ async function ocrConGoogleVision(file, apiKey){
   const data = await resp.json();
   return (data.responses?.[0]?.textAnnotations || []).map(d => d.description).join('\n');
 }
+
+// ✅ Extraer códigos de UNA imagen (pipeline unificado)
+async function extraerCodigosDeImagen(file, useVision, visionKey, estadoOCR, idx, total){
+  const codigos = new Set();
+  if(estadoOCR) estadoOCR.textContent = `🔍 ${idx+1}/${total} · ZXing...`;
+  try{ const zxCodes = await detectarCodigosConZXingMulti(file); zxCodes.forEach(c => { const limpio = String(c).replace(/\D/g,''); if(limpio.length === 12) codigos.add(limpio); }); if(codigos.size > 0) return Array.from(codigos); }catch(e){}
+  if(useVision){
+    if(estadoOCR) estadoOCR.textContent = `🔍 ${idx+1}/${total} · Vision...`;
+    try{ const texto = await ocrConGoogleVision(file, visionKey); (texto.match(/\d{12}/g) || []).forEach(m => codigos.add(m)); if(codigos.size > 0) return Array.from(codigos); }catch(e){}
+  }
+  if(estadoOCR) estadoOCR.textContent = `🔍 ${idx+1}/${total} · OCR...`;
+  try{
+    let dataUrl;
+    try{ const pre = await preprocesarImagenParaOCR(file, 1400); dataUrl = pre.dataUrl; }catch(e){ dataUrl = await new Promise((res)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.readAsDataURL(file); }); }
+    const texto = await ocrConTesseractRapido(dataUrl, (prog) => { if(estadoOCR) estadoOCR.textContent = `🔍 ${idx+1}/${total} · OCR ${Math.round(prog*100)}%`; });
+    (texto.match(/\d{12}/g) || []).forEach(m => codigos.add(m));
+  }catch(e){}
+  return Array.from(codigos);
+}
+
+window.procesarFotosOCR = async function(event){
+  const files = Array.from(event.target.files || []);
+  if(!files.length) return;
+  const estadoOCR = document.getElementById('ocrProgreso');
+  const visionKey = (localStorage.getItem(CLAVE_VISION_KEY) || '').trim();
+  const useVision = visionKey.length > 20;
+  if(estadoOCR) estadoOCR.style.display = 'block';
+  mostrarAviso(`⏳ Procesando ${files.length} guía(s) una por una...`, 'ok');
+  let totalAgregados = 0, totalDetectados = 0, totalDuplicados = 0;
+  const todosCodigos = new Set();
+  for(let i = 0; i < files.length; i++){
+    const file = files[i];
+    if(estadoOCR) estadoOCR.textContent = `🔍 Guía ${i+1}/${files.length} · Analizando...`;
+    try{
+      const codigos = await extraerCodigosDeImagen(file, useVision, visionKey, estadoOCR, i, files.length);
+      if(codigos.length === 0){ if(estadoOCR) estadoOCR.textContent = `⚠️ Guía ${i+1}/${files.length}: sin código detectado`; continue; }
+      for(const cod of codigos){
+        totalDetectados++;
+        if(codigosPendientesReparto.includes(cod)){ totalDuplicados++; if(estadoOCR) estadoOCR.textContent = `⚠️ ${cod} · ya en lista`; continue; }
+        if(codigosRegistradosHoy.has(cod)){ totalDuplicados++; if(estadoOCR) estadoOCR.textContent = `⚠️ ${cod} · ya registrado hoy`; continue; }
+        if(todosCodigos.has(cod)){ totalDuplicados++; continue; }
+        todosCodigos.add(cod);
+        if(!bancoContiene(cod)){ bancoCodigos.push({codigo:cod, direccion:'', precio:0}); _bancoIndex.add(cod); }
+        codigosPendientesReparto.push(cod);
+        totalAgregados++;
+        if(estadoOCR) estadoOCR.textContent = `✅ ${cod} agregado (${i+1}/${files.length})`;
+        beepOk();
+        if(navigator.vibrate) navigator.vibrate(40);
+      }
+      renderizarBanco(); renderizarCodigosReparto(); actualizarResumenReparto();
+    }catch(e){ if(estadoOCR) estadoOCR.textContent = `❌ Error en guía ${i+1}/${files.length}`; }
+  }
+  guardarEstadoCompleto();
+  if(estadoOCR){
+    if(totalAgregados === 0 && totalDetectados === 0) estadoOCR.textContent = '❌ No se detectó ningún código en las fotos.';
+    else if(totalAgregados === 0) estadoOCR.textContent = `⚠️ ${totalDetectados} detectado(s), pero todos duplicados.`;
+    else estadoOCR.textContent = `✅ ${totalAgregados} agregada(s) · ${totalDuplicados} duplicada(s)`;
+  }
+  if(totalAgregados > 0){ mostrarAviso(`✅ ${totalAgregados} agregada(s) · ${totalDuplicados} duplicada(s)`, 'ok'); if(navigator.vibrate) navigator.vibrate([80, 40, 80]); }
+  else if(totalDetectados > 0){ mostrarAviso(`⚠️ Todas duplicadas (${totalDuplicados})`, 'warn'); beepError(); }
+  else { mostrarAviso('❌ No se detectaron códigos', 'error'); beepError(); }
+  event.target.value = '';
+};
 
 window.guardarConfigIA = function(){
   const key = (document.getElementById('visionApiKey')?.value || '').trim();
@@ -1783,11 +1904,7 @@ function actualizarBarraUmbral(){
     if(efec >= umbral) valor.classList.add('verde');
     else if(totalVisitas >= 5) valor.classList.add('rojo');
   }
-  if(fill){
-    fill.classList.remove('ok','excelente');
-    if(efec >= umbral && efec < 90){ fill.classList.add('ok'); }
-    else if(efec >= 90){ fill.classList.add('excelente'); }
-  }
+  if(fill){ fill.classList.remove('ok','excelente'); if(efec >= umbral && efec < 90){ fill.classList.add('ok'); } else if(efec >= 90){ fill.classList.add('excelente'); } }
 }
 window.actualizarBarraUmbral = actualizarBarraUmbral;
 
@@ -1851,7 +1968,7 @@ window.seleccionarEstadoReparto = seleccionarEstadoReparto;
 function renderizarCodigosReparto(){
   const c = document.getElementById('listaCodigosReparto'); const cont = document.getElementById('repContadorPend');
   if(!c) return; c.innerHTML = ''; if(cont) cont.textContent = codigosPendientesReparto.length;
-  if(!codigosPendientesReparto.length){ const v = document.createElement('div'); v.className = 'lista-vacia'; v.textContent = 'Sin códigos. Escanea con OCR o agrégalos.'; c.appendChild(v); return; }
+  if(!codigosPendientesReparto.length){ const v = document.createElement('div'); v.className = 'lista-vacia'; v.textContent = 'Sin códigos. Escanea con cámara, OCR o agrega manualmente.'; c.appendChild(v); return; }
   codigosPendientesReparto.forEach((cod, i) => {
     const ch = document.createElement('span'); ch.className = 'chip-codigo';
     const sp = document.createElement('span'); sp.textContent = cod; ch.appendChild(sp);
@@ -1887,7 +2004,7 @@ window.limpiarFirmaReparto = function(){ if(!ctxFirmaReparto || !canvasFirmaRepa
 function capturarFirmaReparto(){ if(!canvasFirmaReparto || !ctxFirmaReparto) return null; const imageData = ctxFirmaReparto.getImageData(0, 0, canvasFirmaReparto.width, canvasFirmaReparto.height); const tieneContenido = imageData.data.some((v, i) => i % 4 === 3 && v > 0); return tieneContenido ? canvasFirmaReparto.toDataURL('image/png') : null; }
 
 window.guardarVisitaReparto = async function(){
-  if(codigosPendientesReparto.length === 0){ mostrarAviso('⚠️ Escanea al menos una guía','error'); beepError(); return; }
+  if(codigosPendientesReparto.length === 0){ mostrarAviso('⚠️ Escanea o agrega al menos una guía','error'); beepError(); return; }
   if(!estadoRepartoSeleccionado){ mostrarAviso('⚠️ Selecciona el estado','error'); beepError(); return; }
   const esEnt = esEstadoEntregado(estadoRepartoSeleccionado);
   let firma = null;
@@ -1964,43 +2081,20 @@ async function ejecutarImpresion(html,clasesExtra){
   const area = prepararAreaImpresion(html, clasesExtra);
   try { await esperarImgsEn(area); } catch(e){}
   await new Promise(r => setTimeout(r, 350));
-
   const estabaDark = document.body.classList.contains('dark');
-  if(estabaDark){
-    document.body.classList.remove('dark');
-    document.body.classList.add('theme-switching');
-  }
-
+  if(estabaDark){ document.body.classList.remove('dark'); document.body.classList.add('theme-switching'); }
   let limpiado = false;
-  const limpiar = () => {
-    if(limpiado) return;
-    limpiado = true;
-    if(estabaDark){ document.body.classList.add('dark'); document.body.classList.remove('theme-switching'); }
-    finalizarImpresion();
-  };
-
+  const limpiar = () => { if(limpiado) return; limpiado = true; if(estabaDark){ document.body.classList.add('dark'); document.body.classList.remove('theme-switching'); } finalizarImpresion(); };
   const afterPrintHandler = () => { limpiar(); };
   window.addEventListener('afterprint', afterPrintHandler, {once:true});
-
-  try {
-    window.print();
-  } catch(e) {
-    window.removeEventListener('afterprint', afterPrintHandler);
-    limpiar();
-    alert('❌ No se pudo imprimir: ' + (e.message||e));
-    return;
-  }
-  setTimeout(() => {
-    window.removeEventListener('afterprint', afterPrintHandler);
-    limpiar();
-  }, 20000);
+  try { window.print(); } catch(e) { window.removeEventListener('afterprint', afterPrintHandler); limpiar(); alert('❌ No se pudo imprimir: ' + (e.message||e)); return; }
+  setTimeout(() => { window.removeEventListener('afterprint', afterPrintHandler); limpiar(); }, 20000);
 }
 window.ejecutarImpresion = ejecutarImpresion;
 
 async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   if(!window.html2canvas || !window.jspdf){ alert('⚠️ Librerías PDF no cargadas.'); return; }
   const { jsPDF } = window.jspdf;
-
   const modalProg = document.getElementById('modalProcesando');
   const titulo = document.getElementById('procesandoTituloGrande');
   const paso = document.getElementById('procesandoPaso');
@@ -2010,47 +2104,30 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
   if(barra) barra.style.width = '5%';
   if(modalProg) modalProg.classList.add('visible');
   await new Promise(r => setTimeout(r, 300));
-
   const cont = document.createElement('div');
   cont.id = 'pdf-render-container';
   cont.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:15px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;';
   cont.innerHTML = htmlCompleto;
   document.body.appendChild(cont);
-
   function forzarModoClaro(clonedDoc){
     try{
-      if(clonedDoc.documentElement){
-        clonedDoc.documentElement.classList.remove('dark','theme-switching');
-        clonedDoc.documentElement.style.background = '#ffffff';
-        clonedDoc.documentElement.style.backgroundColor = '#ffffff';
-        clonedDoc.documentElement.style.color = '#000000';
-      }
-      if(clonedDoc.body){
-        clonedDoc.body.classList.remove('dark','theme-switching');
-        clonedDoc.body.style.background = '#ffffff';
-        clonedDoc.body.style.backgroundColor = '#ffffff';
-        clonedDoc.body.style.color = '#000000';
-      }
-      clonedDoc.querySelectorAll('#pdf-render-container, #pdf-render-principal, #pdf-render-fotos, .reporte-diario, .rd-fotos-page, .rd-album-page').forEach(el => {
-        el.style.background = '#ffffff'; el.style.backgroundColor = '#ffffff'; el.style.color = '#000000'; el.style.opacity = '1';
-      });
+      if(clonedDoc.documentElement){ clonedDoc.documentElement.classList.remove('dark','theme-switching'); clonedDoc.documentElement.style.background = '#ffffff'; clonedDoc.documentElement.style.backgroundColor = '#ffffff'; clonedDoc.documentElement.style.color = '#000000'; }
+      if(clonedDoc.body){ clonedDoc.body.classList.remove('dark','theme-switching'); clonedDoc.body.style.background = '#ffffff'; clonedDoc.body.style.backgroundColor = '#ffffff'; clonedDoc.body.style.color = '#000000'; }
+      clonedDoc.querySelectorAll('#pdf-render-container, #pdf-render-principal, #pdf-render-fotos, .reporte-diario, .rd-fotos-page, .rd-album-page').forEach(el => { el.style.background = '#ffffff'; el.style.backgroundColor = '#ffffff'; el.style.color = '#000000'; el.style.opacity = '1'; });
       clonedDoc.querySelectorAll('.rd-tabla, table').forEach(t => { t.style.tableLayout = 'auto'; t.style.width = '100%'; });
-    }catch(e){ console.warn('onclone:', e); }
+    }catch(e){}
   }
-
   try {
     if(paso) paso.textContent = 'Cargando imágenes…';
     if(barra) barra.style.width = '15%';
     await esperarImgsEn(cont);
     await new Promise(r => setTimeout(r, 500));
-
     const pdf = new jsPDF({ orientation: 'portrait', unit:'mm', format:'a4' });
     const anchoPagina = pdf.internal.pageSize.getWidth();
     const altoPagina = pdf.internal.pageSize.getHeight();
     const margen = 5;
     const anchoUtil = anchoPagina - margen*2;
     const altoUtil = altoPagina - margen*2;
-
     if(paso) paso.textContent = 'Renderizando contenido…';
     if(barra) barra.style.width = '30%';
     const principalClone = cont.cloneNode(true);
@@ -2060,25 +2137,16 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
     document.body.appendChild(principalClone);
     await esperarImgsEn(principalClone);
     await new Promise(r => setTimeout(r, 200));
-
     let primeraPagina = true;
     if(principalClone.innerText.trim().length > 0 || principalClone.querySelector('table, canvas, svg')){
-      const canvasPrincipal = await html2canvas(principalClone, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
-        scrollX: 0, scrollY: 0,
-        windowWidth: principalClone.scrollWidth, windowHeight: principalClone.scrollHeight,
-        foreignObjectRendering: false,
-        onclone: forzarModoClaro
-      });
+      const canvasPrincipal = await html2canvas(principalClone, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0, windowWidth: principalClone.scrollWidth, windowHeight: principalClone.scrollHeight, foreignObjectRendering: false, onclone: forzarModoClaro });
       const ratioMMporPX = anchoUtil / canvasPrincipal.width;
       const altoPaginaPx = altoUtil / ratioMMporPX;
       let yOffset = 0;
       while(yOffset < canvasPrincipal.height){
         const altoActual = Math.min(altoPaginaPx, canvasPrincipal.height - yOffset);
-        const c2 = document.createElement('canvas');
-        c2.width = canvasPrincipal.width; c2.height = Math.ceil(altoActual);
-        const ctx = c2.getContext('2d');
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c2.width, c2.height);
+        const c2 = document.createElement('canvas'); c2.width = canvasPrincipal.width; c2.height = Math.ceil(altoActual);
+        const ctx = c2.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c2.width, c2.height);
         ctx.drawImage(canvasPrincipal, 0, Math.floor(yOffset), canvasPrincipal.width, Math.ceil(altoActual), 0, 0, canvasPrincipal.width, Math.ceil(altoActual));
         const dataImg = c2.toDataURL('image/jpeg', 0.92);
         if(!primeraPagina) pdf.addPage();
@@ -2087,48 +2155,31 @@ async function exportarHTMLaPDF(htmlCompleto, nombreArchivo){
       }
     }
     document.body.removeChild(principalClone);
-
     const paginasFoto = Array.from(cont.querySelectorAll('.rd-fotos-page, .rd-album-page'));
     for(let i = 0; i < paginasFoto.length; i++){
       const pag = paginasFoto[i];
       if(paso) paso.textContent = `Renderizando fotos ${i+1}/${paginasFoto.length}…`;
       if(barra) barra.style.width = Math.min(85, 30 + (i/paginasFoto.length)*55) + '%';
-
-      const bloque = pag.cloneNode(true);
-      bloque.id = 'pdf-render-fotos';
+      const bloque = pag.cloneNode(true); bloque.id = 'pdf-render-fotos';
       bloque.style.cssText = 'position:fixed;top:0;left:0;width:794px;background:#ffffff;color:#000000;padding:6px;box-sizing:border-box;font-family:Helvetica,Arial,sans-serif;z-index:99990;pointer-events:none;';
       document.body.appendChild(bloque);
-
       await esperarImgsEn(bloque);
       await new Promise(r => setTimeout(r, 600));
-
-      const canvasFoto = await html2canvas(bloque, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
-        scrollX: 0, scrollY: 0,
-        windowWidth: bloque.scrollWidth, windowHeight: bloque.scrollHeight,
-        foreignObjectRendering: false,
-        onclone: forzarModoClaro
-      });
+      const canvasFoto = await html2canvas(bloque, { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false, scrollX: 0, scrollY: 0, windowWidth: bloque.scrollWidth, windowHeight: bloque.scrollHeight, foreignObjectRendering: false, onclone: forzarModoClaro });
       document.body.removeChild(bloque);
-
       const r = Math.min(anchoUtil / canvasFoto.width, altoUtil / canvasFoto.height);
-      const wMM = canvasFoto.width * r;
-      const hMM = canvasFoto.height * r;
-      const xMM = margen + (anchoUtil - wMM) / 2;
-      const yMM = margen + (altoUtil - hMM) / 2;
+      const wMM = canvasFoto.width * r; const hMM = canvasFoto.height * r;
+      const xMM = margen + (anchoUtil - wMM) / 2; const yMM = margen + (altoUtil - hMM) / 2;
       if(!primeraPagina) pdf.addPage();
       pdf.addImage(canvasFoto.toDataURL('image/jpeg', 0.92), 'JPEG', xMM, yMM, wMM, hMM);
       primeraPagina = false;
     }
-
     if(paso) paso.textContent = 'Guardando PDF…';
     if(barra) barra.style.width = '100%';
     pdf.save(nombreArchivo);
     await new Promise(r => setTimeout(r, 400));
-  } catch(e){
-    console.error(e);
-    alert('❌ Error PDF: ' + (e.message||e));
-  } finally {
+  } catch(e){ alert('❌ Error PDF: ' + (e.message||e)); }
+  finally {
     const conts = document.querySelectorAll('#pdf-render-container, #pdf-render-principal, #pdf-render-fotos');
     conts.forEach(c => { if(c.parentNode) c.parentNode.removeChild(c); });
     if(barra) barra.style.width = '0%';
@@ -2159,21 +2210,10 @@ async function generarHTMLReporteDiario(){
   let html=`<div class="reporte-diario">${headerEmpresarialHTML('Reporte Diario', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Reporte Diario de Entregas</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entregados</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link Pago</div><div class="rd-kpi-valor">${entLink}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom</div><div class="rd-kpi-valor">${prom}m</div></div><div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Tiempo</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div><div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${cUnicos}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${tFotos}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">✅ Normales</div><div class="rd-kpi-valor">${entNorm}</div></div></section><section><h3 class="rd-section-title">💰 Resumen Económico</h3><table class="rd-economic-table"><tr><td><div class="eco-label">📦 Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td><td><div class="eco-label">✅ Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td><td><div class="eco-label">❌ No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td></tr></table></section><section class="rd-charts"><div class="rd-chart-box"><img src="${chartEstados}"></div><div class="rd-chart-box"><img src="${chartDona}"></div></section>`;
   html+=`<section><h3 class="rd-section-title">📋 Detalle (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:3%">#</th><th style="width:6%">Lleg.</th><th style="width:12%">Código</th><th style="width:18%">Dirección</th><th style="width:10%">Precio</th><th style="width:15%">Estado</th><th>Descripción</th></tr></thead><tbody>`;
   if(!visitas.length){ html+=`<tr><td colspan="7" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas</td></tr>`; }
-  else {
-    visitas.forEach((v,i)=>{
-      const precio=Number(v.precio)||0;
-      const colorPrecio = esEstadoEntregado(v.estado) ? '#1e8449' : (precio>0?'#a02015':'#666');
-      html+=`<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||'—'}</td><td style="font-family:'Courier New',monospace;font-size:6.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.direccion)||'—'}</td><td style="font-weight:700;color:${colorPrecio};">${precio?formatCOP(precio):'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.estado)||'—'}</td><td style="text-align:left;font-size:5.5pt;">${escapeHtml(v.descripcion)||'—'}</td></tr>`;
-    });
-    html+=`<tr class="rd-total"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td><td></td></tr>`;
-  }
+  else { visitas.forEach((v,i)=>{ const precio=Number(v.precio)||0; const colorPrecio = esEstadoEntregado(v.estado) ? '#1e8449' : (precio>0?'#a02015':'#666'); html+=`<tr><td>${i+1}</td><td>${escapeHtml(v.llegada)||'—'}</td><td style="font-family:'Courier New',monospace;font-size:6.5pt;">${escapeHtml(v.codigo)||'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.direccion)||'—'}</td><td style="font-weight:700;color:${colorPrecio};">${precio?formatCOP(precio):'—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.estado)||'—'}</td><td style="text-align:left;font-size:5.5pt;">${escapeHtml(v.descripcion)||'—'}</td></tr>`; }); html+=`<tr class="rd-total"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td><strong>${totalVisitas}</strong></td><td></td></tr>`; }
   html+=`</tbody></table></section>`;
   const visitasConFirma=visitas.filter(v=>v.firma);
-  if(visitasConFirma.length){
-    html+=`<section><h3 class="rd-section-title">✍️ Firmas (${visitasConFirma.length})</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;">`;
-    visitasConFirma.forEach(v=>{ html+=`<div style="border:1px solid #999;padding:3px;text-align:center;background:#f8f9fa;"><img src="${v.firma}" style="max-width:100%;max-height:20mm;object-fit:contain;display:block;"><div style="font-size:5.5pt;color:#555;margin-top:1px;">#${visitas.indexOf(v)+1} · ${escapeHtml(v.codigo||'')}</div></div>`; });
-    html+=`</div></section>`;
-  }
+  if(visitasConFirma.length){ html+=`<section><h3 class="rd-section-title">✍️ Firmas (${visitasConFirma.length})</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;">`; visitasConFirma.forEach(v=>{ html+=`<div style="border:1px solid #999;padding:3px;text-align:center;background:#f8f9fa;"><img src="${v.firma}" style="max-width:100%;max-height:20mm;object-fit:contain;display:block;"><div style="font-size:5.5pt;color:#555;margin-top:1px;">#${visitas.indexOf(v)+1} · ${escapeHtml(v.codigo||'')}</div></div>`; }); html+=`</div></section>`; }
   const vCF=visitas.filter(v=>Array.isArray(v.fotos)&&v.fotos.length>0);
   if(vCF.length){
     const ids=[]; vCF.forEach(v=>{ v.fotos.forEach(f=>{ if(f.id) ids.push(f.id); }); });
@@ -2181,18 +2221,7 @@ async function generarHTMLReporteDiario(){
     vCF.forEach(v=>{ const nv=visitas.indexOf(v)+1; v.fotos.forEach((foto,idx)=>{ if(df[foto.id]) planas.push({dataUrl:df[foto.id],numVisita:nv,codigo:v.codigo||'',direccion:v.direccion||'',idxFoto:idx+1,totalFotosVisita:v.fotos.length,censurada:foto.censurada}); }); });
     const FPP=20; const totalP=Math.ceil(planas.length/FPP);
     html+=`<section><h3 class="rd-section-title">📸 Evidencia Fotográfica (${planas.length})</h3>`;
-    for(let p=0;p<planas.length;p+=FPP){
-      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Página ${np} de ${totalP} · ${planas.length} foto(s)</div><div class="rd-fotos-grid">`;
-      fp.forEach(f=>{
-        const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`;
-        const guia = f.codigo ? `<span class="foto-guia">📦 ${escapeHtml(f.codigo)}</span>` : `<em>Sin guía</em>`;
-        const dir = f.direccion ? `<span class="foto-dir">📍 ${escapeHtml(f.direccion)}</span>` : '';
-        const cs = f.censurada ? ` <span style="color:#c0392b;font-weight:bold;">🛡️</span>` : '';
-        html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><span class="foto-visita">${cap}</span>${guia}${dir}${cs}</div></div>`;
-      });
-      html+=`</div></div>`;
-    }
+    for(let p=0;p<planas.length;p+=FPP){ const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1; html+=`<div class="rd-fotos-page"><div class="rd-fotos-page-header">📸 Página ${np} de ${totalP} · ${planas.length} foto(s)</div><div class="rd-fotos-grid">`; fp.forEach(f=>{ const cap=f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; const guia = f.codigo ? `<span class="foto-guia">📦 ${escapeHtml(f.codigo)}</span>` : `<em>Sin guía</em>`; const dir = f.direccion ? `<span class="foto-dir">📍 ${escapeHtml(f.direccion)}</span>` : ''; const cs = f.censurada ? ` <span style="color:#c0392b;font-weight:bold;">🛡️</span>` : ''; html+=`<div class="rd-foto-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-foto-caption"><span class="foto-visita">${cap}</span>${guia}${dir}${cs}</div></div>`; }); html+=`</div></div>`; }
     html+=`</section>`;
   }
   html+=`<section class="rd-firmas"><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Mensajero</div><div class="rd-firma-nombre">${escapeHtml(usuario)}</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Supervisor</div><div class="rd-firma-nombre">_____</div></div><div class="rd-firma"><div class="rd-firma-linea"></div><div class="rd-firma-rol">Auditor</div><div class="rd-firma-nombre">_____</div></div></section><div class="rd-footer"><div class="rd-confidencial">Confidencial</div><div>${DATOS_EMPRESA.colserlog.nombre}</div><div>Hash: ${escapeHtml(hash)}</div></div></div>`;
@@ -2205,7 +2234,7 @@ window.imprimirReporteDiario = async function(modo){
     const html = await generarHTMLReporteDiario();
     if(modo === 'pdf'){ mostrarAviso('⏳ Generando PDF...','ok'); await exportarHTMLaPDF(html, `Reporte_${fechaLocalISO()}.pdf`); mostrarAviso('✅ PDF descargado','ok'); }
     else { await ejecutarImpresion(html,['modo-reporte-diario']); }
-  }catch(err){ console.error(err); finalizarImpresion(); alert('❌ Error: '+err.message); }
+  }catch(err){ finalizarImpresion(); alert('❌ Error: '+err.message); }
 };
 
 window.imprimirAlbumFotografico = async function(modo){
@@ -2223,22 +2252,11 @@ window.imprimirAlbumFotografico = async function(modo){
     const FPP=12; const totalP=Math.ceil(planas.length/FPP);
     const codigoDoc=`ALB-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
     let html=`<div class="reporte-diario">${headerEmpresarialHTML('Álbum Fotográfico', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Álbum Fotográfico</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fotos:</strong> ${planas.length}</div><div><strong>Páginas:</strong> ${totalP}</div></div></header>`;
-    for(let p=0;p<planas.length;p+=FPP){
-      const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1;
-      html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Pág. ${np}/${totalP}</div><div class="rd-album-grid">`;
-      fp.forEach(f=>{
-        const guia = f.codigo ? `<span class="foto-guia">📦 ${escapeHtml(f.codigo)}</span>` : `<em>Sin guía</em>`;
-        const dir = f.direccion ? `<span class="foto-dir">📍 ${escapeHtml(f.direccion)}</span>` : '';
-        const cs=f.censurada?` <span style="color:#c0392b;">🛡️</span>`:'';
-        const cap = f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`;
-        html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-album-caption"><strong>${cap}</strong>${guia}${dir}${cs}</div></div>`;
-      });
-      html+=`</div></div>`;
-    }
+    for(let p=0;p<planas.length;p+=FPP){ const fp=planas.slice(p,p+FPP); const np=Math.floor(p/FPP)+1; html+=`<div class="rd-album-page"><div class="rd-album-page-header">📸 Pág. ${np}/${totalP}</div><div class="rd-album-grid">`; fp.forEach(f=>{ const guia = f.codigo ? `<span class="foto-guia">📦 ${escapeHtml(f.codigo)}</span>` : `<em>Sin guía</em>`; const dir = f.direccion ? `<span class="foto-dir">📍 ${escapeHtml(f.direccion)}</span>` : ''; const cs=f.censurada?` <span style="color:#c0392b;">🛡️</span>`:''; const cap = f.totalFotosVisita>1?`V#${f.numVisita} · ${f.idxFoto}/${f.totalFotosVisita}`:`V#${f.numVisita}`; html+=`<div class="rd-album-item"><img src="${f.dataUrl}" alt="Foto"><div class="rd-album-caption"><strong>${cap}</strong>${guia}${dir}${cs}</div></div>`; }); html+=`</div></div>`; }
     html+=`<div class="rd-footer"><div class="rd-confidencial">Confidencial</div></div></div>`;
     if(modo === 'pdf'){ mostrarAviso('⏳ Generando PDF...','ok'); await exportarHTMLaPDF(html, `Album_${fechaLocalISO()}.pdf`); mostrarAviso('✅ PDF descargado','ok'); }
     else { await ejecutarImpresion(html,['modo-album']); }
-  }catch(err){ console.error(err); finalizarImpresion(); alert('❌ Error: '+err.message); }
+  }catch(err){ finalizarImpresion(); alert('❌ Error: '+err.message); }
 };
 
 window.imprimirInformeMensual = async function(modo){
@@ -2254,19 +2272,64 @@ window.imprimirInformeMensual = async function(modo){
   }catch(err){ finalizarImpresion(); alert('❌ Error.'); }
 };
 
+// ✅ INFORME EMPRESARIAL COMPLETO
 window.generarInformeEmpresarial = async function(){
-  const contenedor=document.getElementById('informeEmpresarialContenedor'); if(!contenedor) return;
-  const usuario=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'Sin usuario';
-  const ahora=new Date(); const fecha=ahora.toLocaleDateString('es'); const horaGen=ahora.toLocaleTimeString('es');
-  const entNorm=contadores[ESTADO_ENTREGADO]||0; const entLink=contadores[ESTADO_ENTREGADO_LINK]||0; const ent=entNorm+entLink; const noEnt=totalVisitas-ent;
-  const efec=totalVisitas>0?((ent/totalVisitas)*100).toFixed(1):'0.0';
-  const visitasConFirma=visitas.filter(v=>v.firma).length;
+  const contenedor = document.getElementById('informeEmpresarialContenedor');
+  if(!contenedor) return;
+  const usuario = (typeof window.getUsuarioActual === 'function' ? window.getUsuarioActual() : '') || 'Sin usuario';
+  const ahora = new Date();
+  const fecha = ahora.toLocaleDateString('es', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const horaGen = ahora.toLocaleTimeString('es');
+  const entNorm = contadores[ESTADO_ENTREGADO] || 0;
+  const entLink = contadores[ESTADO_ENTREGADO_LINK] || 0;
+  const ent = entNorm + entLink;
+  const noEnt = totalVisitas - ent;
+  const efec = totalVisitas > 0 ? ((ent / totalVisitas) * 100).toFixed(1) : '0.0';
+  const prom = totalVisitas > 0 ? Math.round(totalMinutosVisitas / totalVisitas) : 0;
+  const visitasConFirma = visitas.filter(v => v.firma).length;
+  const totalFotos = visitas.reduce((s, v) => s + (Array.isArray(v.fotos) ? v.fotos.length : 0), 0);
+  const codigosUnicos = new Set(visitas.map(v => (v.codigo || '').trim()).filter(Boolean)).size;
   const T = calcularTotalesPrecios();
-  const codigoDoc=`INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
-  let html=`<div class="reporte-diario">${headerEmpresarialHTML('Informe Empresarial', codigoDoc, fecha, horaGen)}<header class="rd-header"><h1>Informe Empresarial</h1><div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div></div></header><section class="rd-kpis"><div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div><div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link</div><div class="rd-kpi-valor">${entLink}</div></div><div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div><div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div><div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div><div class="rd-kpi naranja"><div class="rd-kpi-label">💰 Total</div><div class="rd-kpi-valor">${formatCOP(T.totalGeneral)}</div></div><div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div></section></div>`;
+  const horas = Math.floor(totalMinutosVisitas / 60);
+  const mins = totalMinutosVisitas % 60;
+  const codigoDoc = `INF-${fechaLocalISO().replace(/-/g,'')}-${String(Date.now()).slice(-6)}`;
+  const hash = hashSync(JSON.stringify({ u: usuario, f: fechaLocalISO(), t: totalVisitas }));
+  const desglose = Object.entries(contadores).filter(([k, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  let html = `${headerEmpresarialHTML('Informe Empresarial', codigoDoc, fecha, horaGen)}
+    <header class="rd-header">
+      <h1>🏢 Informe Empresarial</h1>
+      <div class="rd-info"><div><strong>Mensajero:</strong> ${escapeHtml(usuario)}</div><div><strong>Fecha:</strong> ${escapeHtml(fecha)}</div><div><strong>Generado:</strong> ${horaGen}</div></div>
+    </header>
+    <section class="rd-kpis">
+      <div class="rd-kpi verde"><div class="rd-kpi-label">✅ Entreg.</div><div class="rd-kpi-valor">${ent}</div></div>
+      <div class="rd-kpi teal"><div class="rd-kpi-label">🔗 Link</div><div class="rd-kpi-valor">${entLink}</div></div>
+      <div class="rd-kpi rojo"><div class="rd-kpi-label">❌ No Ent.</div><div class="rd-kpi-valor">${noEnt}</div></div>
+      <div class="rd-kpi azul"><div class="rd-kpi-label">📦 Total</div><div class="rd-kpi-valor">${totalVisitas}</div></div>
+      <div class="rd-kpi morado"><div class="rd-kpi-label">🎯 Efect.</div><div class="rd-kpi-valor">${efec}%</div></div>
+      <div class="rd-kpi naranja"><div class="rd-kpi-label">⏱️ Prom</div><div class="rd-kpi-valor">${prom}m</div></div>
+      <div class="rd-kpi cyan"><div class="rd-kpi-label">🔢 Únicos</div><div class="rd-kpi-valor">${codigosUnicos}</div></div>
+      <div class="rd-kpi gris"><div class="rd-kpi-label">🕒 Jornada</div><div class="rd-kpi-valor">${horas}h ${mins}m</div></div>
+      <div class="rd-kpi dark"><div class="rd-kpi-label">✍️ Firmas</div><div class="rd-kpi-valor">${visitasConFirma}</div></div>
+      <div class="rd-kpi teal"><div class="rd-kpi-label">📸 Fotos</div><div class="rd-kpi-valor">${totalFotos}</div></div>
+    </section>
+    <section><h3 class="rd-section-title">💰 Resumen Económico</h3><table class="rd-economic-table"><tr>
+      <td><div class="eco-label">📦 Total Paquetes</div><div class="eco-valor azul">${formatCOP(T.totalGeneral)}</div></td>
+      <td><div class="eco-label">✅ Entregado</div><div class="eco-valor verde">${formatCOP(T.totalEntregado)}</div></td>
+      <td><div class="eco-label">❌ No Entregado</div><div class="eco-valor rojo">${formatCOP(T.totalNoEntregado)}</div></td>
+      <td><div class="eco-label">📊 Paquetes OK</div><div class="eco-valor">${T.cantEntregado} / ${totalVisitas}</div></td>
+    </tr></table></section>
+    <section><h3 class="rd-section-title">📊 Desglose por Estado (${desglose.length})</h3><table class="rd-tabla"><thead><tr><th style="width:60%">Estado</th><th style="width:20%">Cantidad</th><th style="width:20%">% del Total</th></tr></thead><tbody>`;
+  if(desglose.length === 0){ html += `<tr><td colspan="3" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin datos de estados</td></tr>`; }
+  else { desglose.forEach(([estado, cant]) => { const pct = totalVisitas > 0 ? ((cant / totalVisitas) * 100).toFixed(1) : '0.0'; const esEnt = esEstadoEntregado(estado); const color = esEnt ? '#1e8449' : '#a02015'; html += `<tr><td style="text-align:left;font-size:7pt;">${escapeHtml(estado)}</td><td style="font-weight:700;color:${color};font-size:8pt;">${cant}</td><td style="font-size:7pt;">${pct}%</td></tr>`; }); html += `<tr class="rd-total"><td><strong>TOTAL</strong></td><td><strong>${totalVisitas}</strong></td><td><strong>100%</strong></td></tr>`; }
+  html += `</tbody></table></section>
+    <section><h3 class="rd-section-title">📋 Detalle de Visitas (${totalVisitas})</h3><table class="rd-tabla"><thead><tr><th style="width:3%">#</th><th style="width:6%">Hora</th><th style="width:12%">Guía</th><th style="width:18%">Dirección</th><th style="width:10%">Precio</th><th style="width:14%">Estado</th><th style="width:7%">📸</th><th style="width:6%">✍️</th><th>Descripción</th></tr></thead><tbody>`;
+  if(visitas.length === 0){ html += `<tr><td colspan="9" style="text-align:center;font-style:italic;color:#888;padding:15px;">Sin visitas registradas</td></tr>`; }
+  else { visitas.forEach((v, i) => { const precio = Number(v.precio) || 0; const colorPrecio = esEstadoEntregado(v.estado) ? '#1e8449' : (precio > 0 ? '#a02015' : '#666'); const nFotos = Array.isArray(v.fotos) ? v.fotos.length : 0; html += `<tr><td>${i+1}</td><td>${escapeHtml(v.llegada) || '—'}</td><td style="font-family:'Courier New',monospace;font-size:6.5pt;">${escapeHtml(v.codigo) || '—'}</td><td style="text-align:left;font-size:6pt;">${escapeHtml(v.direccion) || '—'}</td><td style="font-weight:700;color:${colorPrecio};">${precio ? formatCOP(precio) : '—'}</td><td style="text-align:left;font-size:5.5pt;">${escapeHtml(v.estado) || '—'}</td><td style="font-size:7pt;">${nFotos > 0 ? '📸' + nFotos : '—'}</td><td>${v.firma ? '✅' : '—'}</td><td style="text-align:left;font-size:5.5pt;">${escapeHtml(v.descripcion) || '—'}</td></tr>`; }); html += `<tr class="rd-total"><td colspan="4"><strong>TOTAL</strong></td><td><strong>${formatCOP(T.totalGeneral)}</strong></td><td colspan="4"><strong>${totalVisitas} visita(s) · ${ent} entregada(s)</strong></td></tr>`; }
+  html += `</tbody></table></section>
+    <div class="rd-footer"><div class="rd-confidencial">Documento Confidencial</div><div>${DATOS_EMPRESA.colserlog.nombre} · NIT: ${DATOS_EMPRESA.colserlog.nit}</div><div>Generado: ${horaGen} · Hash: ${escapeHtml(hash)}</div></div>`;
   _ultimoInformeEmpresarialHTML = html;
-  contenedor.innerHTML=html;
-  mostrarAviso('✅ Informe generado','ok');
+  contenedor.innerHTML = html;
+  mostrarAviso('✅ Informe generado', 'ok');
 };
 window.exportarInformeEmpresarialPDF = async function(){
   if(!_ultimoInformeEmpresarialHTML){ await window.generarInformeEmpresarial(); if(!_ultimoInformeEmpresarialHTML){ alert('⚠️ Genera el informe primero.'); return; } }
@@ -2293,6 +2356,50 @@ window.exportarMesAWord = function(){ descargarWord('Informe.doc','<h1>Informe M
 window.exportarHistorialCompletoAWord = function(){ descargarWord('Historial.doc','<h1>Historial</h1>'); };
 window.descargarRespaldoWord = async function(){ const u=getUsuarioActual()||'sin-usuario'; let e=null; try{ e=JSON.parse(localStorage.getItem('estadoSesion')||'null'); }catch(e2){} const json=JSON.stringify({version:9,usuario:u,fecha_respaldo:new Date().toISOString(),estadoSesion:e}); const b64=btoa(unescape(encodeURIComponent(json))); descargarWord(`Respaldo_${u}_${fechaLocalISO()}.doc`,`<h1>Respaldo</h1><p style="word-break:break-all;font-size:6pt;">${b64}</p>`); };
 
+// ✅ IMPORTAR CORREGIDO: acepta JSON directo o Word con base64
+window.cargarRespaldoDesdeArchivo = async function(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file){ return; }
+  if(!confirm('⚠️ Esto reemplazará los datos actuales de la sesión. ¿Continuar?')){ event.target.value = ''; return; }
+  const modalProg = document.getElementById('modalProcesando');
+  const paso = document.getElementById('procesandoPaso');
+  const tituloG = document.getElementById('procesandoTituloGrande');
+  if(tituloG) tituloG.textContent = '📂 Importando…';
+  if(paso) paso.textContent = 'Leyendo archivo...';
+  if(modalProg) modalProg.classList.add('visible');
+  try{
+    let json = null; let origen = '';
+    // ✅ Intento 1: JSON directo
+    if(file.name.toLowerCase().endsWith('.json') || file.type === 'application/json'){
+      try{ const txt = await file.text(); json = JSON.parse(txt); origen = 'JSON'; }catch(e){}
+    }
+    // ✅ Intento 2: Word/RTF con blob base64 embebido
+    if(!json){
+      try{
+        const txt = await file.text();
+        const match = txt.match(/([A-Za-z0-9+/=]{500,})/);
+        if(match){ try{ const decoded = decodeURIComponent(escape(atob(match[1]))); json = JSON.parse(decoded); origen = 'Word (base64)'; }catch(e){} }
+      }catch(e){}
+    }
+    if(!json){ throw new Error('Archivo no válido. Debe ser .json o respaldo Word generado por la app.'); }
+    if(paso) paso.textContent = `Restaurando desde ${origen}...`;
+    const estado = json.estadoSesion || json;
+    const tieneDatos = estado.visitas || estado.contadores || estado.bancoCodigos;
+    if(!tieneDatos && !json.entregasDiariasDetallado){ throw new Error('El archivo no contiene datos de sesión válidos.'); }
+    if(estado.visitas !== undefined || estado.contadores !== undefined){ localStorage.setItem('estadoSesion', JSON.stringify(estado)); }
+    if(json.entregasDiariasDetallado){ localStorage.setItem('entregasDiariasDetallado', JSON.stringify(json.entregasDiariasDetallado)); }
+    if(json.tiemposBase){ for(const k in json.tiemposBase){ if(json.tiemposBase[k]) localStorage.setItem('tiempoBase_' + k, json.tiemposBase[k]); } }
+    if(paso) paso.textContent = 'Recargando datos...';
+    if(typeof window.recargarUIDesdeStorage === 'function'){ window.recargarUIDesdeStorage(); }
+    if(typeof window.generarInformeEmpresarial === 'function'){ setTimeout(() => { try{ window.generarInformeEmpresarial(); }catch(e){} }, 400); }
+    if(typeof window.cambiarTab === 'function'){ setTimeout(() => { try{ window.cambiarTab('informe-empresarial'); }catch(e){} }, 700); }
+    await new Promise(r => setTimeout(r, 500));
+    alert('✅ Respaldo restaurado correctamente.\n\n' + `Origen: ${origen}\n` + `Visitas: ${estado.visitas ? estado.visitas.length : (json.entregasDiariasDetallado ? Object.keys(json.entregasDiariasDetallado).length : 0)}\n` + `Banco: ${estado.bancoCodigos ? estado.bancoCodigos.length : 0}`);
+    mostrarAviso('✅ Datos importados', 'ok');
+  }catch(e){ alert('❌ Error al importar: ' + (e.message || e)); mostrarAviso('❌ Error al importar', 'error'); }
+  finally { if(modalProg) modalProg.classList.remove('visible'); event.target.value = ''; }
+};
+
 window.verEstadoAlmacenamiento = async function(){ const tf=await contarFotosDB(); alert(`💾 Fotos: ${tf}\n🧠 OCR: ${localStorage.getItem(CLAVE_VISION_KEY)?'Google Vision':(window.ZXing?'ZXing + Tesseract':'Tesseract')}\n📊 Umbral: ${localStorage.getItem(CLAVE_UMBRAL)||80}%`); };
 window.eliminarFotosAntiguas = async function(){ const d=prompt('Días:','60'); if(!d) return; const n=parseInt(d); if(!n||n<1) return; const todas=await obtenerTodasLasFotosDB(); const cut=Date.now()-(n*24*60*60*1000); const ab=todas.filter(f=>new Date(f.fecha||0).getTime()<cut); if(!ab.length){ alert('Ninguna.'); return; } if(!confirm(`Eliminar ${ab.length}?`)) return; await eliminarFotosMultiples(ab.map(f=>f.id)); alert(`✅ ${ab.length}`); };
 window.vaciarTodasLasFotos = async function(){ const t=await contarFotosDB(); if(!t){ alert('Sin fotos.'); return; } if(!confirm(`¿Todas las ${t}?`)) return; const todas=await obtenerTodasLasFotosDB(); await eliminarFotosMultiples(todas.map(f=>f.id)); cacheFotos.clear(); alert('✅'); };
@@ -2306,7 +2413,7 @@ window.ocultarInforme = ()=>{ document.getElementById('seccionInforme').style.di
 window.recargarUIDesdeStorage = function(){ try{ const raw=localStorage.getItem('estadoSesion'); if(raw){ const e=JSON.parse(raw); visitas=(e.visitas||[]).map(v=>({...v,codigo:(v.codigo||'').replace(/\D/g,'').slice(0,12),fotos:Array.isArray(v.fotos)?v.fotos:[]})); bancoCodigos=(e.bancoCodigos||[]).map(x=>normalizarCodigoBanco(x)).filter(x=>/^\d{12}$/.test(x.codigo)); _reindexarBanco(); codigosPendientes=(e.codigosPendientes||[]).filter(c=>/^\d{12}$/.test(c)); codigosPendientesReparto=(e.codigosPendientesReparto||[]).filter(c=>/^\d{12}$/.test(c)); fotosPendientes=Array.isArray(e.fotosPendientes)?e.fotosPendientes:[]; ESTADOS.forEach(k=>{ contadores[k]=(e.contadores && e.contadores[k])||0; }); totalMinutosVisitas=e.totalMinutosVisitas||0; totalVisitas=e.totalVisitas||0; filaEditando=null; cargarCodigosRegistradosHoy(); } cargarTiemposBase(); renderizarTabla(); renderizarBanco(); renderizarCodigosPendientes(); renderizarGaleriaFotos(); renderizarGaleriaFotosReparto(); actualizarDashboard(); actualizarGraficaPromedios(); actualizarInformesSemanalesMensuales(); verificarUmbralEfectividad(); actualizarBarraUmbral(); actualizarResumenReparto(); renderizarCodigosReparto(); }catch(e){} };
 window.reiniciarUIOffline = function(){ ESTADOS.forEach(k=>contadores[k]=0); totalMinutosVisitas=0; totalVisitas=0; visitas=[]; filaEditando=null; codigosPendientes=[]; bancoCodigos=[]; _bancoIndex.clear(); codigosRegistradosHoy.clear(); fotosPendientes=[]; codigosPendientesReparto=[]; renderizarGaleriaFotos(); renderizarGaleriaFotosReparto(); renderizarCodigosPendientes(); renderizarBanco(); renderizarCodigosReparto(); try{ actualizarDashboard(); renderizarTabla(); actualizarBarraUmbral(); actualizarResumenReparto(); }catch(e){} };
 window.compactarHistorial = function(){ const h=cargarHistorialDetallado(); const f=Object.keys(h).sort(); if(!f.length){ alert('Sin historial.'); return; } const op=prompt(`Tienes ${f.length}. ¿Cuántos conservar?`,'90'); if(!op) return; const n=parseInt(op); if(!n||n<1){ alert('Inválido'); return; } const ab=f.slice(0,f.length-n); if(!confirm(`Borrar ${ab.length}?`)) return; ab.forEach(k=>{ delete h[k]; }); try{ localStorage.setItem('entregasDiariasDetallado',JSON.stringify(h)); }catch(e){} alert(`✅ ${ab.length}`); };
-window.cargarRespaldoDesdeArchivo = async function(event){ const file=event.target.files && event.target.files[0]; if(!file) return; try{ const txt=await file.text(); const match=txt.match(/([A-Za-z0-9+/=]{2000,})/); if(!match){ alert('❌ Sin respaldo'); return; } const json=decodeURIComponent(escape(atob(match[1]))); const obj=JSON.parse(json); if(obj.estadoSesion) localStorage.setItem('estadoSesion',JSON.stringify(obj.estadoSesion)); alert('✅ Restaurado'); setTimeout(()=>location.reload(),500); }catch(e){ alert('❌ '+e.message); } finally{ event.target.value=''; } };
+
 function poblarSelectEstados(){ const sel = document.getElementById('estadoPaquete'); if(!sel) return; while(sel.options.length > 1) sel.remove(1); ESTADOS.forEach(estado => { const opt = document.createElement('option'); opt.value = estado; opt.textContent = estado; sel.appendChild(opt); }); }
 function cargarConfigIA(){ const keyEl = document.getElementById('visionApiKey'); const umbralEl = document.getElementById('umbralEfectividad'); if(keyEl) keyEl.value = localStorage.getItem(CLAVE_VISION_KEY) || ''; if(umbralEl) umbralEl.value = localStorage.getItem(CLAVE_UMBRAL) || '80'; }
 
