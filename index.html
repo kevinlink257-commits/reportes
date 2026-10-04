@@ -19,7 +19,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
-/* ============ APPLE DS · COLSERLOG v3 (Amazon-audited) ============ */
+/* =================================================================
+   APPLE DESIGN SYSTEM · COLSERLOG v3.0
+   Amazon-audited · Offline-first · GPS · Voice · Driving Mode
+   ================================================================= */
 :root{
   --sys-blue:#0071e3;--sys-blue-dark:#0066cc;--sys-green:#34c759;--sys-green-dark:#248a3d;
   --sys-red:#ff3b30;--sys-red-dark:#c92c20;--sys-orange:#ff9500;--sys-yellow:#ffcc00;
@@ -232,12 +235,13 @@ body.dark #barraUsuario button{background:var(--gray-7);color:#fff}
 #indicadorRed{display:inline-block;font-size:.72rem;padding:4px 10px;border-radius:var(--radius-pill);font-weight:600}
 #indicadorRed.online{background:rgba(52,199,89,.15);color:#1e7a35}
 #indicadorRed.offline{background:rgba(255,59,48,.15);color:#a02015;animation:scanPulse 1.5s ease-in-out infinite}
-#modalUsuario,#modalPWA,#modalProcesando,#modalReglasFoto,#modalPrivacidad{position:fixed;inset:0;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px;opacity:0;transition:opacity .25s var(--ease)}
-#modalUsuario.visible,#modalPWA.visible,#modalProcesando.visible,#modalReglasFoto.visible,#modalPrivacidad.visible{display:flex;opacity:1}
-#modalUsuario>div,#modalPWA>div,#modalProcesando>div,#modalReglasFoto>div,#modalPrivacidad>div{animation:modalIn .3s var(--ease)}
+#modalUsuario,#modalPWA,#modalProcesando,#modalReglasFoto,#modalPrivacidad,#modalVisionMision,#modalVisionFuturo{position:fixed;inset:0;background:rgba(0,0,0,.5);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px;opacity:0;transition:opacity .25s var(--ease)}
+#modalUsuario.visible,#modalPWA.visible,#modalProcesando.visible,#modalReglasFoto.visible,#modalPrivacidad.visible,#modalVisionMision.visible,#modalVisionFuturo.visible{display:flex;opacity:1}
+#modalUsuario>div,#modalPWA>div,#modalProcesando>div,#modalReglasFoto>div,#modalPrivacidad>div,#modalVisionMision>div,#modalVisionFuturo>div{animation:modalIn .3s var(--ease)}
 @keyframes modalIn{from{opacity:0;transform:translateY(20px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
 #modalProcesando{z-index:100010;background:rgba(0,0,0,.85)}
 #modalPWA{z-index:100001}#modalReglasFoto{z-index:100003;overflow-y:auto}#modalPrivacidad{z-index:100005}
+#modalVisionMision{z-index:100006}#modalVisionFuturo{z-index:100007;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 .modal-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:32px;max-width:440px;width:100%;box-shadow:var(--shadow-lg);max-height:92vh;overflow-y:auto;border:1px solid var(--border-light)}
 .modal-content h2{color:var(--text-heading);margin:0 0 8px 0;text-align:center;font-size:1.5rem}
 .modal-content p{color:var(--text-secondary);font-size:.9rem;text-align:center;margin:0 0 20px 0}
@@ -397,7 +401,6 @@ body.dark .barra-umbral-marker{background:#fff}
 #btnVolverArriba.visible{opacity:1;visibility:visible;transform:translateY(0)}
 #btnVolverArriba:hover{background:var(--sys-blue-dark);box-shadow:0 8px 24px rgba(0,113,227,.45);transform:translateY(-3px)}
 #btnVolverArriba:active{transform:translateY(0) scale(.9)}
-/* ============ DRIVING MODE (Amazon P1) ============ */
 body.driving-mode{font-size:20px}
 body.driving-mode .container{max-width:100%;padding:16px 12px;border-radius:0;border-left:none;border-right:none}
 body.driving-mode h1{font-size:1.4rem}
@@ -412,17 +415,13 @@ body.driving-mode .stat-card span{font-size:2rem}
 body.driving-mode .chip-codigo{font-size:1rem;padding:10px 10px 10px 18px}
 body.driving-mode .chip-codigo button{width:32px;height:32px;min-width:32px;font-size:16px}
 body.driving-mode .input-group{gap:10px}
-/* ============ VOICE NOTE ============ */
 .btn-voz{background:var(--sys-pink);color:#fff;margin-top:10px;padding:12px 18px;font-size:.9rem;border-radius:var(--radius-pill);display:inline-flex;align-items:center;gap:8px;justify-content:center;width:auto}
 .btn-voz.grabando{background:var(--sys-red);animation:scanPulse 1.2s ease-in-out infinite}
-/* ============ GPS BADGE ============ */
 .gps-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(48,176,199,.15);color:#0e5f6f;padding:3px 10px;border-radius:var(--radius-pill);font-size:.7rem;font-weight:600;letter-spacing:-0.01em;white-space:nowrap}
 .gps-badge.warn{background:rgba(255,149,0,.15);color:#7a5b0f}
 .gps-badge.error{background:rgba(255,59,48,.12);color:#a02015}
-/* ============ SKELETON ============ */
 .skeleton{background:linear-gradient(90deg,var(--border-light) 25%,var(--bg-section) 50%,var(--border-light) 75%);background-size:200% 100%;animation:skeletonLoad 1.5s infinite;border-radius:var(--radius-md);min-height:80px}
 @keyframes skeletonLoad{0%{background-position:200% 0}100%{background-position:-200% 0}}
-/* ============ REPORTE DIARIO (impresión / PDF) ============ */
 .reporte-diario{width:100%;max-width:194mm;margin:0 auto;font-family:var(--font-text);color:#1d1d1f;font-size:9pt;background:#fff}
 .rd-header{text-align:center;border-bottom:2px solid #1d1d1f;padding-bottom:8px;margin-bottom:10px}
 .rd-header h1{color:#1d1d1f;font-size:14pt;margin:0 0 5px 0;text-align:center;font-weight:600;letter-spacing:-0.02em}
@@ -479,13 +478,94 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
 .rd-album-caption{font-size:5.5pt;text-align:center;padding:3px 2px;background:#f5f5f7;color:#474747;line-height:1.25;overflow:hidden;flex-grow:1;word-break:break-word}
 .rd-album-caption .foto-guia{font-family:'SF Mono','Courier New',monospace;font-weight:600;font-size:6.5pt;color:#0053a8;display:block;margin-top:1px}
 .rd-album-caption .foto-dir{font-size:5.5pt;color:#707070;display:block;margin-top:1px}
+/* ============ VISIÓN Y MISIÓN ============ */
+.vision-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:0;max-width:680px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:var(--shadow-lg);border:1px solid var(--border-light)}
+.vision-hero{background:linear-gradient(135deg,#0071e3 0%,#af52de 100%);color:#fff;padding:36px 32px 30px;text-align:center;border-radius:var(--radius-xl) var(--radius-xl) 0 0;position:relative;overflow:hidden}
+.vision-hero::before{content:"";position:absolute;top:-50%;right:-30%;width:80%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 60%);pointer-events:none}
+.vision-hero::after{content:"";position:absolute;bottom:-40%;left:-20%;width:60%;height:180%;background:radial-gradient(circle,rgba(255,255,255,.10) 0%,transparent 60%);pointer-events:none}
+.vision-hero .logo-circle{display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:38px;margin-bottom:14px;position:relative;z-index:1;border:2px solid rgba(255,255,255,.35)}
+.vision-hero h2{margin:0 0 6px 0;font-size:1.5rem;font-weight:600;color:#fff;letter-spacing:-0.02em;position:relative;z-index:1}
+.vision-hero .sub{margin:0;font-size:.85rem;color:rgba(255,255,255,.9);letter-spacing:-0.01em;position:relative;z-index:1}
+.vision-body{padding:28px 32px 32px}
+.vm-block{margin-bottom:24px;padding:20px;border-radius:var(--radius-lg);border:1px solid var(--border-light);background:var(--bg-section);position:relative;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.vm-block:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.06)}
+.vm-block.vision{border-left:4px solid var(--sys-blue);background:linear-gradient(135deg,rgba(0,113,227,.05),transparent)}
+.vm-block.mision{border-left:4px solid var(--sys-green);background:linear-gradient(135deg,rgba(52,199,89,.05),transparent)}
+.vm-block.valores{border-left:4px solid var(--sys-purple);background:linear-gradient(135deg,rgba(175,82,222,.05),transparent)}
+.vm-block .vm-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.vm-block .vm-icon{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;font-size:20px;flex-shrink:0}
+.vm-block.vision .vm-icon{background:rgba(0,113,227,.15);color:var(--sys-blue)}
+.vm-block.mision .vm-icon{background:rgba(52,199,89,.15);color:var(--sys-green)}
+.vm-block.valores .vm-icon{background:rgba(175,82,222,.15);color:var(--sys-purple)}
+.vm-block .vm-title{font-family:var(--font-display);font-size:1.15rem;font-weight:600;color:var(--text-heading);letter-spacing:-0.02em;margin:0}
+.vm-block .vm-text{font-size:.9rem;line-height:1.65;color:var(--text-secondary);margin:0;letter-spacing:-0.01em}
+.vm-block .vm-text strong{color:var(--text-heading);font-weight:600}
+.vm-valores-list{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+@media(max-width:520px){.vm-valores-list{grid-template-columns:1fr}}
+.vm-valor-item{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:var(--bg-card);border-radius:var(--radius-md);border:1px solid var(--border-light);transition:transform .15s var(--ease),border-color .15s var(--ease)}
+.vm-valor-item:hover{transform:translateX(3px);border-color:var(--sys-purple)}
+.vm-valor-item .v-emoji{font-size:1.3rem;flex-shrink:0;line-height:1;margin-top:2px}
+.vm-valor-item .v-info{flex:1;min-width:0}
+.vm-valor-item .v-name{font-size:.82rem;font-weight:600;color:var(--text-heading);margin:0 0 2px 0;letter-spacing:-0.01em}
+.vm-valor-item .v-desc{font-size:.72rem;color:var(--text-muted);margin:0;line-height:1.4}
+.vm-footer{margin-top:22px;padding-top:16px;border-top:1px solid var(--border-light);text-align:center;font-size:.75rem;color:var(--text-muted);line-height:1.6;letter-spacing:-0.01em}
+.vm-footer .vm-quote{font-style:italic;color:var(--text-secondary);font-size:.85rem;margin-bottom:6px;display:block}
+.vm-close-row{display:flex;gap:10px;margin-top:22px}
+.vm-close-row button{flex:1;margin:0;padding:14px;font-size:.95rem;border-radius:var(--radius-pill)}
+.vm-close-row .btn-compartir-vm{background:var(--sys-green)}
+.vm-close-row .btn-ok-vm{background:var(--sys-blue);font-weight:600}
+/* ============ VISIÓN DE FUTURO ============ */
+.vf-content{background:var(--bg-container);color:var(--text-primary);border-radius:var(--radius-xl);padding:0;max-width:720px;width:100%;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.4);border:1px solid var(--border-light)}
+.vf-hero{background:linear-gradient(135deg,#000 0%,#1d1d1f 50%,#0a3d62 100%);color:#fff;padding:44px 32px 36px;text-align:center;border-radius:var(--radius-xl) var(--radius-xl) 0 0;position:relative;overflow:hidden}
+.vf-hero::before{content:"";position:absolute;top:-50%;left:-20%;width:100%;height:200%;background:radial-gradient(circle at 20% 30%,rgba(0,113,227,.35) 0%,transparent 45%),radial-gradient(circle at 80% 70%,rgba(175,82,222,.30) 0%,transparent 45%),radial-gradient(circle at 50% 100%,rgba(48,176,199,.20) 0%,transparent 50%);pointer-events:none;animation:vfAura 12s ease-in-out infinite alternate}
+@keyframes vfAura{0%{transform:rotate(0deg) scale(1)}100%{transform:rotate(8deg) scale(1.15)}}
+.vf-hero .vf-eyebrow{display:inline-block;padding:5px 14px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.20);border-radius:var(--radius-pill);font-size:.68rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:16px;position:relative;z-index:1;color:rgba(255,255,255,.95)}
+.vf-hero .vf-brain{display:inline-flex;align-items:center;justify-content:center;width:88px;height:88px;border-radius:50%;background:linear-gradient(135deg,rgba(0,113,227,.4),rgba(175,82,222,.4));backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-size:46px;margin-bottom:16px;position:relative;z-index:1;border:2px solid rgba(255,255,255,.25);box-shadow:0 0 40px rgba(0,113,227,.5);animation:vfPulse 3s ease-in-out infinite}
+@keyframes vfPulse{0%,100%{box-shadow:0 0 40px rgba(0,113,227,.5)}50%{box-shadow:0 0 60px rgba(175,82,222,.7)}}
+.vf-hero h2{margin:0 0 10px 0;font-size:1.55rem;font-weight:600;color:#fff;letter-spacing:-0.02em;line-height:1.2;position:relative;z-index:1}
+.vf-hero .vf-tagline{margin:0;font-size:.85rem;color:rgba(255,255,255,.75);letter-spacing:-0.01em;position:relative;z-index:1;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.5}
+.vf-body{padding:32px}
+.vf-manifesto{padding:24px;background:linear-gradient(135deg,rgba(0,113,227,.06),rgba(175,82,222,.04));border-radius:var(--radius-lg);border:1px solid rgba(0,113,227,.15);margin-bottom:28px;position:relative;overflow:hidden}
+.vf-manifesto::before{content:'"';position:absolute;top:-30px;left:14px;font-size:8rem;color:rgba(0,113,227,.08);font-family:Georgia,serif;line-height:1;pointer-events:none}
+.vf-manifesto p{font-size:.95rem;line-height:1.7;color:var(--text-secondary);margin:0 0 12px 0;letter-spacing:-0.01em;position:relative;z-index:1}
+.vf-manifesto p:last-child{margin-bottom:0}
+.vf-manifesto p strong{color:var(--text-heading);font-weight:600}
+.vf-manifesto .vf-highlight{display:block;margin-top:16px;padding-top:16px;border-top:1px dashed rgba(0,113,227,.25);color:var(--sys-blue);font-weight:600;font-style:italic;font-size:.95rem}
+.vf-roadmap-title{display:flex;align-items:center;gap:10px;margin:28px 0 16px 0;font-size:1.05rem;font-weight:600;color:var(--text-heading);letter-spacing:-0.02em}
+.vf-roadmap-title .icon{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--sys-blue),var(--sys-purple));color:#fff;font-size:16px;flex-shrink:0}
+.vf-phases{display:grid;grid-template-columns:1fr;gap:12px}
+.vf-phase{display:flex;gap:14px;padding:16px;background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius-lg);position:relative;overflow:hidden;transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.vf-phase:hover{transform:translateX(4px);border-color:var(--sys-blue);box-shadow:0 4px 16px rgba(0,113,227,.10)}
+.vf-phase::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--phase-color,var(--sys-blue))}
+.vf-phase .vf-phase-num{display:flex;align-items:center;justify-content:center;width:48px;height:48px;min-width:48px;border-radius:50%;background:linear-gradient(135deg,var(--phase-color,var(--sys-blue)),rgba(255,255,255,.15));color:#fff;font-weight:700;font-size:1.1rem;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.vf-phase .vf-phase-info{flex:1;min-width:0}
+.vf-phase .vf-phase-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--phase-color,var(--sys-blue));margin:0 0 3px 0}
+.vf-phase .vf-phase-name{font-size:.95rem;font-weight:600;color:var(--text-heading);margin:0 0 4px 0;letter-spacing:-0.01em;line-height:1.25}
+.vf-phase .vf-phase-desc{font-size:.78rem;color:var(--text-secondary);line-height:1.5;margin:0}
+.vf-phase .vf-phase-kpi{display:inline-block;margin-top:6px;padding:2px 8px;background:rgba(52,199,89,.12);color:#1e7a35;border-radius:var(--radius-pill);font-size:.65rem;font-weight:600}
+.vf-pillars{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:14px}
+.vf-pillar{padding:14px 12px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);text-align:center;transition:transform .15s var(--ease),border-color .15s var(--ease)}
+.vf-pillar:hover{transform:translateY(-3px);border-color:var(--sys-teal)}
+.vf-pillar .p-emoji{font-size:1.6rem;display:block;margin-bottom:6px}
+.vf-pillar .p-name{font-size:.78rem;font-weight:600;color:var(--text-heading);margin:0 0 3px 0;letter-spacing:-0.01em}
+.vf-pillar .p-desc{font-size:.65rem;color:var(--text-muted);margin:0;line-height:1.35}
+.vf-quote{margin:32px 0 0 0;padding:24px 20px;background:linear-gradient(135deg,#000,#1d1d1f);color:#fff;border-radius:var(--radius-lg);text-align:center;position:relative;overflow:hidden}
+.vf-quote::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(0,113,227,.15),transparent 70%);pointer-events:none}
+.vf-quote .q-icon{font-size:1.8rem;margin-bottom:10px;display:block;position:relative;z-index:1}
+.vf-quote .q-text{font-size:.95rem;font-style:italic;line-height:1.6;margin:0 0 8px 0;letter-spacing:-0.01em;position:relative;z-index:1;color:rgba(255,255,255,.95)}
+.vf-quote .q-text strong{color:var(--sys-blue);font-style:normal}
+.vf-quote .q-author{font-size:.72rem;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:0.12em;font-weight:600;margin:0;position:relative;z-index:1}
+.vf-close-row{display:flex;gap:10px;margin-top:24px}
+.vf-close-row button{flex:1;margin:0;padding:14px;font-size:.92rem;border-radius:var(--radius-pill)}
+.vf-close-row .btn-compartir-vf{background:var(--sys-green)}
+.vf-close-row .btn-ok-vf{background:linear-gradient(135deg,var(--sys-blue),var(--sys-purple));font-weight:600}
 @media print{
   @page{size:A4 portrait;margin:8mm 6mm 10mm 6mm}
   html,body{background:#fff!important;color:#000!important}
   body.modo-impresion>*:not(#areaImpresion){display:none!important}
   body.modo-impresion #areaImpresion{display:block!important;position:static!important;width:100%!important}
   #areaImpresion{color:#000!important;background:#fff!important;width:100%;max-width:196mm;margin:0 auto}
-  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.quick-actions,.filtros-visitas,#modalProcesando,.menu-dropdown,.firma-wrapper,#modalCensura,#btnVolverArriba,#modalPrivacidad{display:none!important}
+  .no-print,#barraUsuario,#modalUsuario,#modalPWA,#avisoDuplicado,#modalFoto,#modalReglasFoto,#lectorQR,#lectorQRBanco,.busqueda-box,.btn-group,.btn-foto,.fotos-wrapper input[type="file"],.aviso-reglas-inline,.quick-actions,.filtros-visitas,#modalProcesando,.menu-dropdown,.firma-wrapper,#modalCensura,#btnVolverArriba,#modalPrivacidad,#modalVisionMision,#modalVisionFuturo{display:none!important}
   *{-webkit-print-color-adjust:exact!important;color-adjust:exact!important;print-color-adjust:exact!important}
 }
 </style>
@@ -502,6 +582,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
   </div>
   <div class="acciones-bar">
     <button type="button" class="btn-driving" onclick="toggleModoConduccion()" id="btnModoConduccion" title="Modo Conducción">🚗</button>
+    <button type="button" onclick="abrirModalVisionFuturo()" title="Visión de Futuro" aria-label="Visión de Futuro" style="background:linear-gradient(135deg,#000,#0071e3);color:#fff;width:auto;padding:8px 12px;margin:0;border-radius:var(--radius-pill);font-size:1rem;border:none;cursor:pointer;">🌌</button>
     <button type="button" class="btn-darkmode" onclick="toggleDarkMode()" id="btnDarkMode" aria-label="Cambiar tema">🌙</button>
     <button type="button" class="btn-pwa" onclick="instalarPWA()" id="btnInstalarPWA" style="display:none;" aria-label="Instalar app">📲</button>
     <button type="button" class="btn-logout" onclick="cerrarSesion()" id="btnCerrarSesion" style="display:none;" aria-label="Cerrar sesión">🚪</button>
@@ -548,8 +629,8 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
     <ul>
       <li><strong>Mensajero:</strong> usuario, contraseña cifrada (PBKDF2-SHA256 con salt).</li>
       <li><strong>Operativos:</strong> guías, direcciones, precios, estados, horarios.</li>
-      <li><strong>Ubicación GPS:</strong> sellada en cada entrega (lat/lng/precisión) para auditoría de disputas.</li>
-      <li><strong>Fotografías:</strong> fachada, paquete y guía (NUNCA rostros, documentos ni interior de viviendas).</li>
+      <li><strong>Ubicación GPS:</strong> sellada en cada entrega para auditoría de disputas.</li>
+      <li><strong>Fotografías:</strong> fachada, paquete y guía (NUNCA rostros, documentos ni interior).</li>
       <li><strong>Firma digital:</strong> trazo del destinatario como acuse de recibo.</li>
       <li><strong>Notas de voz:</strong> opcionales, transcritas localmente, no se envían a terceros.</li>
     </ul>
@@ -589,6 +670,154 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
     </ul>
     <p class="priv-footer">Al usar esta app el usuario acepta estos términos.<br>© 2026 COLSERLOG S.A.S.</p>
     <button type="button" onclick="cerrarModalPrivacidad()" style="margin-top:16px;">Entendido</button>
+  </div>
+</div>
+
+<!-- ===== MODAL VISIÓN Y MISIÓN ===== -->
+<div id="modalVisionMision">
+  <div class="vision-content">
+    <div class="vision-hero">
+      <div class="logo-circle">📦</div>
+      <h2>COLSERLOG S.A.S.</h2>
+      <p class="sub">Nuestro Propósito, Visión y Misión</p>
+    </div>
+    <div class="vision-body">
+      <div class="vm-block vision">
+        <div class="vm-header">
+          <span class="vm-icon">🎯</span>
+          <h3 class="vm-title">Visión</h3>
+        </div>
+        <p class="vm-text">
+          Ser en <strong>2030</strong> el operador logístico de última milla <strong>más confiable y eficiente de Colombia</strong>, reconocido por entregar cada paquete <strong>a tiempo, con trazabilidad total y con la mejor experiencia para el cliente final</strong>, integrando tecnología de clase mundial en cada ruta, cada mensajero y cada entrega.
+        </p>
+      </div>
+      <div class="vm-block mision">
+        <div class="vm-header">
+          <span class="vm-icon">🚀</span>
+          <h3 class="vm-title">Misión</h3>
+        </div>
+        <p class="vm-text">
+          <strong>Conectar a las empresas remitentes con sus clientes</strong> mediante una operación de reparto ágil, segura y humana. Entregamos cada envío con <strong>rapidez, evidencia digital y respeto por los datos personales</strong>, empoderando a nuestros mensajeros con tecnología simple y confiable que les permita cumplir su trabajo con orgullo y eficiencia, generando valor sostenible para colaboradores, aliados (COLVANES · ENVÍA COLVANES) y la comunidad.
+        </p>
+      </div>
+      <div class="vm-block valores">
+        <div class="vm-header">
+          <span class="vm-icon">💎</span>
+          <h3 class="vm-title">Valores</h3>
+        </div>
+        <p class="vm-text" style="margin-bottom:2px;">Los principios que guían cada decisión, cada ruta y cada entrega:</p>
+        <div class="vm-valores-list">
+          <div class="vm-valor-item"><span class="v-emoji">⚡</span><div class="v-info"><p class="v-name">Rapidez con propósito</p><p class="v-desc">Cada minuto cuenta para el cliente.</p></div></div>
+          <div class="vm-valor-item"><span class="v-emoji">🛡️</span><div class="v-info"><p class="v-name">Confianza y transparencia</p><p class="v-desc">Evidencia, GPS y firma en cada entrega.</p></div></div>
+          <div class="vm-valor-item"><span class="v-emoji">🔒</span><div class="v-info"><p class="v-name">Respeto a los datos</p><p class="v-desc">Cumplimos la Ley 1581 de 2012.</p></div></div>
+          <div class="vm-valor-item"><span class="v-emoji">🤝</span><div class="v-info"><p class="v-name">Compromiso humano</p><p class="v-desc">Tratamos a cada cliente con dignidad.</p></div></div>
+          <div class="vm-valor-item"><span class="v-emoji">📈</span><div class="v-info"><p class="v-name">Mejora continua</p><p class="v-desc">Optimizamos cada ruta, cada día.</p></div></div>
+          <div class="vm-valor-item"><span class="v-emoji">🌱</span><div class="v-info"><p class="v-name">Sostenibilidad</p><p class="v-desc">Menos km, menos emisiones.</p></div></div>
+        </div>
+      </div>
+      <div class="vm-footer">
+        <span class="vm-quote">"Cada entrega es una promesa que cumplimos."</span>
+        <div><strong>COLSERLOG S.A.S.</strong> · NIT 900.496.469-3</div>
+        <div>Bogotá D.C., Colombia · © 2026</div>
+      </div>
+      <div class="vm-close-row">
+        <button type="button" class="btn-compartir-vm" onclick="compartirVisionMisionWhatsApp()">💬 Compartir</button>
+        <button type="button" class="btn-ok-vm" onclick="cerrarModalVisionMision()">Entendido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL VISIÓN DE FUTURO ===== -->
+<div id="modalVisionFuturo">
+  <div class="vf-content">
+    <div class="vf-hero">
+      <span class="vf-eyebrow">Hoja de Ruta 2026 – 2028</span>
+      <div class="vf-brain">🧠</div>
+      <h2>El Sistema Nervioso Operativo</h2>
+      <p class="vf-tagline">De una PWA de campo a una operación que aprende de sí misma</p>
+    </div>
+    <div class="vf-body">
+      <div class="vf-manifesto">
+        <p>
+          La PWA actual es la <strong>"primera milla" de un sistema nervioso operativo</strong>.
+          Amazon no ganó en last-mile por tener la mejor app — ganó porque
+          <strong>cada decisión (qué ruta, qué hora, qué mensajero, qué paquete)
+          la toma un algoritmo entrenado con billones de datos históricos</strong>.
+        </p>
+        <p>
+          Colserlog tiene el activo más valioso: <strong>una operación real con datos reales</strong>.
+          El siguiente paso no es más código — es <strong>arquitectura para capturar, procesar
+          y aprender de esos datos</strong>.
+        </p>
+        <span class="vf-highlight">
+          El objetivo no es una app más rápida. Es una operación que se vuelve más inteligente cada día que pasa.
+        </span>
+      </div>
+      <div class="vf-roadmap-title">
+        <span class="icon">🚀</span>
+        <span>Nuestra Misión Futura · 4 Fases</span>
+      </div>
+      <div class="vf-phases">
+        <div class="vf-phase" style="--phase-color:#0071e3">
+          <div class="vf-phase-num">1</div>
+          <div class="vf-phase-info">
+            <p class="vf-phase-label">Fase 1 · Fundación</p>
+            <p class="vf-phase-name">Digitalizar el 100% de la operación</p>
+            <p class="vf-phase-desc">Backend propio con PostgreSQL + PostGIS · Auth empresarial (SSO) · Telemetría continua · Dashboard dispatcher en tiempo real.</p>
+            <span class="vf-phase-kpi">🎯 100% entregas con evidencia digital</span>
+          </div>
+        </div>
+        <div class="vf-phase" style="--phase-color:#34c759">
+          <div class="vf-phase-num">2</div>
+          <div class="vf-phase-info">
+            <p class="vf-phase-label">Fase 2 · Optimización</p>
+            <p class="vf-phase-name">Motor de rutas + ML predictivo</p>
+            <p class="vf-phase-desc">Google OR-Tools · Secuenciación algorítmica de paradas · Priorización inteligente · Predicción de ETA por Machine Learning.</p>
+            <span class="vf-phase-kpi">📈 +55% paradas por hora · -27% km por ruta</span>
+          </div>
+        </div>
+        <div class="vf-phase" style="--phase-color:#af52de">
+          <div class="vf-phase-num">3</div>
+          <div class="vf-phase-info">
+            <p class="vf-phase-label">Fase 3 · Inteligencia</p>
+            <p class="vf-phase-name">Sistema que aprende y se auto-optimiza</p>
+            <p class="vf-phase-desc">Motor de excepciones predictivo · Computer Vision en cabina · Geofencing auto-timestamp · Driver Scorecard en tiempo real.</p>
+            <span class="vf-phase-kpi">🎯 -40% llamadas al call center</span>
+          </div>
+        </div>
+        <div class="vf-phase" style="--phase-color:#ff9500">
+          <div class="vf-phase-num">4</div>
+          <div class="vf-phase-info">
+            <p class="vf-phase-label">Fase 4 · Network Effects</p>
+            <p class="vf-phase-name">Operación multi-regional inteligente</p>
+            <p class="vf-phase-desc">Orquestación multi-bodega · Re-ruteo dinámico · Data Warehouse + BI · Feeds B2B a COLVANES y ENVÍA.</p>
+            <span class="vf-phase-kpi">🚀 ROI 5.2x en 24 meses</span>
+          </div>
+        </div>
+      </div>
+      <div class="vf-roadmap-title" style="margin-top:32px;">
+        <span class="icon" style="background:linear-gradient(135deg,#34c759,#30b0c7);">⚙️</span>
+        <span>Pilares Técnicos</span>
+      </div>
+      <div class="vf-pillars">
+        <div class="vf-pillar"><span class="p-emoji">🗺️</span><p class="p-name">Route Engine</p><p class="p-desc">OR-Tools · VRP</p></div>
+        <div class="vf-pillar"><span class="p-emoji">🤖</span><p class="p-name">ML Predictivo</p><p class="p-desc">XGBoost · ETA</p></div>
+        <div class="vf-pillar"><span class="p-emoji">📍</span><p class="p-name">Geofencing</p><p class="p-desc">Auto-timestamp</p></div>
+        <div class="vf-pillar"><span class="p-emoji">📸</span><p class="p-name">Vision AI</p><p class="p-desc">TensorFlow Lite</p></div>
+        <div class="vf-pillar"><span class="p-emoji">📊</span><p class="p-name">Data Lake</p><p class="p-desc">Snowflake · BI</p></div>
+        <div class="vf-pillar"><span class="p-emoji">⚡</span><p class="p-name">Event Stream</p><p class="p-desc">Kafka · Real-time</p></div>
+      </div>
+      <div class="vf-quote">
+        <span class="q-icon">🌟</span>
+        <p class="q-text">El objetivo no es una app más rápida.<br>Es una <strong>operación que se vuelve más inteligente</strong><br>cada día que pasa.</p>
+        <p class="q-author">— Manifiesto Colserlog 2030</p>
+      </div>
+      <div class="vf-close-row">
+        <button type="button" class="btn-compartir-vf" onclick="compartirVisionFuturoWhatsApp()">💬 Compartir</button>
+        <button type="button" class="btn-ok-vf" onclick="cerrarModalVisionFuturo()">Entendido</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -736,16 +965,15 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
     </div>
   </div>
 
-  <!-- ===== MANIFIESTO (NUEVO) ===== -->
+  <!-- ===== MANIFIESTO ===== -->
   <div class="tab-panel" data-tab="manifiesto">
     <div class="section no-print">
       <h2>📋 Importar Manifiesto de Ruta</h2>
-      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Pega el manifiesto de tu ruta asignada. Formatos soportados: CSV, TXT, Excel (pegado).</p>
+      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Pega el manifiesto de tu ruta asignada. Formatos: CSV, TXT, Excel (pegado).</p>
       <label>Formato esperado (una línea por paquete):</label>
       <code style="display:block;background:var(--bg-section);padding:8px 12px;border-radius:var(--radius-sm);font-size:.75rem;margin-top:6px;overflow-x:auto;white-space:nowrap;">GUIA,DIRECCION,PRECIO,ESTADO_SUGERIDO(opt)</code>
       <textarea id="manifiestoTexto" placeholder="123456789012,Calle 10 # 20-30,50000
-123456789013,Carrera 45 # 12-34,35000,02
-123456789014,Avenida 68 # 22-10,75000" style="min-height:180px;font-family:'SF Mono','Courier New',monospace;font-size:.8rem;"></textarea>
+123456789013,Carrera 45 # 12-34,35000,02" style="min-height:180px;font-family:'SF Mono','Courier New',monospace;font-size:.8rem;"></textarea>
       <div class="btn-group" style="margin-top:12px;">
         <button type="button" class="btn-guardar" onclick="procesarManifiesto()">✅ Procesar manifiesto</button>
         <button type="button" class="btn-cancelar" onclick="document.getElementById('manifiestoTexto').value=''">🗑️ Limpiar</button>
@@ -910,6 +1138,12 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <div class="btn-group"><button type="button" class="btn-informe" onclick="verEstadoAlmacenamiento()">💾 Almacenamiento</button><button type="button" class="btn-reiniciar" onclick="eliminarFotosAntiguas()">🗑️ Antiguas</button></div>
       <div class="btn-group" style="margin-top:8px;"><button type="button" class="btn-eliminar" onclick="vaciarTodasLasFotos()">🔥 Vaciar todas</button></div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
+      <h3>🏢 Nuestra Empresa</h3>
+      <button type="button" class="btn-informe" onclick="abrirModalVisionMision()" style="margin-top:10px;background:linear-gradient(135deg,#0071e3,#af52de);color:#fff;font-weight:600;">✨ Visión, Misión y Valores</button>
+      <p style="font-size:.75em;color:var(--text-muted);margin-top:8px;text-align:center;">Nuestro propósito que guía cada entrega</p>
+      <button type="button" class="btn-informe" onclick="abrirModalVisionFuturo()" style="margin-top:10px;background:linear-gradient(135deg,#000,#0071e3,#af52de);color:#fff;font-weight:600;">🌌 Visión de Futuro · El Sistema Nervioso</button>
+      <p style="font-size:.75em;color:var(--text-muted);margin-top:8px;text-align:center;">Hoja de ruta 2026-2028 hacia una operación inteligente</p>
+      <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>🔒 Legal</h3>
       <button type="button" class="btn-informe" onclick="abrirModalPrivacidad()" style="margin-top:10px;">📜 Política de Privacidad</button>
       <p style="font-size:.75em;color:var(--text-muted);margin-top:8px;text-align:center;">Habeas Data · Ley 1581 de 2012 (Colombia)</p>
@@ -928,7 +1162,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
 <div id="areaImpresion" style="display:none"></div>
 
 <!-- ============================================================
-     FIREBASE + AUTH (PBKDF2)
+     FIREBASE + AUTH + UTILIDADES DE UI
      ============================================================ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
@@ -936,7 +1170,7 @@ import { initializeFirestore, doc, setDoc, getDoc, onSnapshot, serverTimestamp, 
 
 const firebaseConfig={apiKey:"AIzaSyCINy28c8Ga2V1VWPzPXfvcOaEpbrnKnyk",authDomain:"colserlog-65de9.firebaseapp.com",projectId:"colserlog-65de9",storageBucket:"colserlog-65de9.firebasestorage.app",messagingSenderId:"593319427038",appId:"1:593319427038:web:dddae0742e979b5640bb4f"};
 const CODIGO_GRUPO="data-archi", CLAVE_USUARIO_LOCAL="colserlog_usuario_actual", CLAVE_USUARIOS_REGISTRADOS="colserlog_usuarios_registrados", CLAVE_DARK_MODE="colserlog_dark_mode", CLAVE_FOTOS_NUBE="syncFotosNube", CLAVE_DRIVING="colserlog_driving_mode", CLAVE_SESION_TS="colserlog_sesion_ts";
-const SESION_TTL = 12*60*60*1000; // 12h
+const SESION_TTL = 12*60*60*1000;
 let db,syncActivo=false,guardadoPendiente=null,ultimaVersionLocal=0,syncAutomaticoActivo=true,unsubscribeEscucha=null,intentosSync=0,guardadoEnProgreso=false;
 try{const app=initializeApp(firebaseConfig);db=initializeFirestore(app,{experimentalForceLongPolling:true,useFetchStreams:false});}catch(e){console.error('Firebase:',e);}
 
@@ -948,7 +1182,6 @@ function setUsuarioActual(n){try{localStorage.setItem(CLAVE_USUARIO_LOCAL,n.trim
 function refUsuario(){const u=getUsuarioActual();if(!u||!db)return null;return doc(db,'colserlog_usuarios',CODIGO_GRUPO,'mensajeros',slugify(u)||'sin-nombre');}
 window.refUsuario=refUsuario;window.getUsuarioActual=getUsuarioActual;
 
-// 🔐 PBKDF2-SHA256 con salt único (reemplazo de SHA-256 plano)
 async function hashPasswordPBKDF2(password, saltB64){
   if(!window.isSecureContext||!crypto||!crypto.subtle) throw new Error('Requiere HTTPS.');
   const enc=new TextEncoder();
@@ -1000,7 +1233,6 @@ function cargarDarkMode(){
 }
 window.cargarDarkMode=cargarDarkMode;
 
-// 🚗 Modo Conducción
 window.toggleModoConduccion=function(){
   const activo = document.body.classList.toggle('driving-mode');
   try{localStorage.setItem(CLAVE_DRIVING,activo?'1':'0');}catch(e){}
@@ -1021,7 +1253,6 @@ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPro
 window.addEventListener('appinstalled',()=>{deferredPrompt=null;const b=document.getElementById('btnInstalarPWA');if(b)b.style.display='none';});
 window.instalarPWA=async function(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;const b=document.getElementById('btnInstalarPWA');if(b)b.style.display='none';return;}const modal=document.getElementById('modalPWA'),cont=document.getElementById('pwaInstrucciones');const esIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent);if(esIOS)cont.innerHTML='<p>En Safari:</p><ol><li>Compartir ⬆️</li><li>"Añadir a pantalla inicio"</li></ol>';else cont.innerHTML='<p>Chrome: ⋮ → "Instalar app"</p>';modal.classList.add('visible');};
 
-// ============ Auth UI ============
 function getUsuariosRegistrados(){try{return JSON.parse(localStorage.getItem(CLAVE_USUARIOS_REGISTRADOS)||'[]');}catch{return [];}}
 function guardarUsuariosRegistrados(l){try{localStorage.setItem(CLAVE_USUARIOS_REGISTRADOS,JSON.stringify(l));}catch(e){}}
 function buscarUsuario(n){const x=(n||'').trim().toLowerCase();return getUsuariosRegistrados().find(u=>u.nombre.toLowerCase()===x)||null;}
@@ -1031,7 +1262,6 @@ function mostrarErrorUser(m){const el=document.getElementById('msjErrorUser');if
 function ocultarErrorUser(){const el=document.getElementById('msjErrorUser');if(el)el.classList.remove('visible');}
 function mostrarInfoUser(m){const el=document.getElementById('msjInfoUser');if(el){el.textContent='ℹ️ '+m;el.classList.add('visible');}}
 
-// Password strength validation
 function validarPassword(p){
   if(p.length<8) return 'Mínimo 8 caracteres.';
   if(!/[A-Z]/.test(p)) return 'Debe incluir mayúscula.';
@@ -1082,12 +1312,10 @@ window.hacerLogin=async function(){
     if(user.algo==='PBKDF2-SHA256-60k' && user.salt){
       ok = await verificarPasswordPBKDF2(p, user.hash, user.salt);
     } else {
-      // Legacy SHA-256 (pre-migration) — fallback temporal
       const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(p));
       const legacyHash = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
       ok = legacyHash === user.hash;
       if(ok){
-        // Migrar automáticamente a PBKDF2
         const newRes = await hashPasswordPBKDF2(p);
         user.hash=newRes.hash; user.salt=newRes.salt; user.algo='PBKDF2-SHA256-60k';
         const lista=getUsuariosRegistrados().map(u=>u.nombre.toLowerCase()===user.nombre.toLowerCase()?user:u);
@@ -1171,7 +1399,22 @@ document.addEventListener('click',function(e){const menu=document.getElementById
 window.abrirModalPrivacidad=function(){const m=document.getElementById('modalPrivacidad');if(m)m.classList.add('visible');};
 window.cerrarModalPrivacidad=function(){const m=document.getElementById('modalPrivacidad');if(m)m.classList.remove('visible');};
 
-// Scroll + red indicator
+// ✨ Visión y Misión
+window.abrirModalVisionMision=function(){const m=document.getElementById('modalVisionMision');if(m)m.classList.add('visible');};
+window.cerrarModalVisionMision=function(){const m=document.getElementById('modalVisionMision');if(m)m.classList.remove('visible');};
+window.compartirVisionMisionWhatsApp=function(){
+  const texto = `📦 *COLSERLOG S.A.S.*\n\n🎯 *NUESTRA VISIÓN*\nSer en 2030 el operador logístico de última milla más confiable y eficiente de Colombia, entregando cada paquete a tiempo, con trazabilidad total y la mejor experiencia para el cliente.\n\n🚀 *NUESTRA MISIÓN*\nConectar a las empresas remitentes con sus clientes mediante una operación ágil, segura y humana, entregando cada envío con rapidez, evidencia digital y respeto por los datos personales.\n\n💎 *NUESTROS VALORES*\n⚡ Rapidez con propósito\n🛡️ Confianza y transparencia\n🔒 Respeto a los datos\n🤝 Compromiso humano\n📈 Mejora continua\n🌱 Sostenibilidad\n\n_"Cada entrega es una promesa que cumplimos."_\n\n© 2026 · COLSERLOG S.A.S. · NIT 900.496.469-3`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`,'_blank','noopener,noreferrer');
+};
+
+// 🌌 Visión de Futuro
+window.abrirModalVisionFuturo=function(){const m=document.getElementById('modalVisionFuturo');if(m)m.classList.add('visible');};
+window.cerrarModalVisionFuturo=function(){const m=document.getElementById('modalVisionFuturo');if(m)m.classList.remove('visible');};
+window.compartirVisionFuturoWhatsApp=function(){
+  const texto = `🌌 *VISIÓN DE FUTURO · COLSERLOG*\n\n🧠 *El Sistema Nervioso Operativo*\n\nLa PWA actual es la "primera milla" de un sistema nervioso operativo. Amazon no ganó en last-mile por tener la mejor app — ganó porque cada decisión (qué ruta, qué hora, qué mensajero, qué paquete) la toma un algoritmo entrenado con billones de datos históricos.\n\nColserlog tiene el activo más valioso: una operación real con datos reales. El siguiente paso no es más código — es arquitectura para capturar, procesar y aprender de esos datos.\n\n_El objetivo no es una app más rápida. Es una operación que se vuelve más inteligente cada día que pasa._\n\n🚀 *MISIÓN FUTURA · 4 FASES*\n\n1️⃣ *Fundación* (0-3m)\n   Backend propio · Auth SSO · Telemetría\n\n2️⃣ *Optimización* (3-9m)\n   Motor de rutas (OR-Tools) · ML predictivo\n   → +55% paradas/hora · -27% km/ruta\n\n3️⃣ *Inteligencia* (9-15m)\n   Excepciones predictivas · Computer Vision\n   → -40% llamadas call center\n\n4️⃣ *Network Effects* (15-24m)\n   Multi-bodega · Re-ruteo · BI\n   → ROI 5.2x en 24 meses\n\n⚙️ *PILARES TÉCNICOS*\n🗺️ Route Engine (OR-Tools)\n🤖 ML Predictivo (XGBoost)\n📍 Geofencing (auto-timestamp)\n📸 Vision AI (TensorFlow Lite)\n📊 Data Lake (Snowflake + BI)\n⚡ Event Stream (Kafka)\n\n© 2026 · COLSERLOG S.A.S.`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`,'_blank','noopener,noreferrer');
+};
+
 window.addEventListener('scroll',function(){const btn=document.getElementById('btnVolverArriba');if(!btn)return;btn.classList.toggle('visible',window.scrollY>400);},{passive:true});
 function actualizarIndicadorRed(){
   const el=document.getElementById('indicadorRed');if(!el)return;
@@ -1181,7 +1424,6 @@ function actualizarIndicadorRed(){
 window.addEventListener('online',actualizarIndicadorRed);
 window.addEventListener('offline',actualizarIndicadorRed);
 
-// Auto-logout tras 12h
 function verificarExpiracionSesion(){
   try{
     const ts=parseInt(localStorage.getItem(CLAVE_SESION_TS)||'0');
@@ -1204,7 +1446,6 @@ window.addEventListener('load',()=>{
   const pref=localStorage.getItem('syncAutomaticoFirebase');
   syncAutomaticoActivo=pref===null?true:pref==='true';
   const tgl=document.getElementById('toggleSync');if(tgl)tgl.checked=syncAutomaticoActivo;
-  // Poblar meses
   const me=document.getElementById('mesInforme');
   if(me){
     const meses=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
@@ -1230,7 +1471,7 @@ window.addEventListener('load',()=>{
 </script>
 
 <!-- ============================================================
-     APP PRINCIPAL (con fixes P0/P1 + GPS + offline queue + voz)
+     APP PRINCIPAL
      ============================================================ -->
 <script type="module">
 'use strict';
@@ -1250,7 +1491,7 @@ const LONGITUD_CODIGO=12;
 const TIEMPO_BLOQUEO_MS=8000;
 const MAX_FOTOS_POR_VISITA=20,FOTO_MAX_DIM=1200,FOTO_JPEG_QUALITY=0.75;
 const CLAVE_BORRADOR='colserlog_borrador',CLAVE_VISION_KEY='colserlog_vision_key',CLAVE_UMBRAL='colserlog_umbral_efectividad',CLAVE_REGLAS_SESION='colserlog_reglas_aceptadas';
-const TTL_SCAN_CACHE=60000; // 60s cleanup
+const TTL_SCAN_CACHE=60000;
 
 const DATOS_EMPRESA={
   colserlog:{nombre:'COLSERLOG S.A.S.',nit:'900.496.469-3',direccion:'Avenida Calle 24 # 81-13, Bogotá D.C.',telefono:'(571) 2637734 / 314 304 6374',email:'contacto@colserglog.com'},
@@ -1306,7 +1547,6 @@ function actualizarContadorDigitos(i,idc){const el=document.getElementById(idc);
 function validarCodigo(c){if(!c)return 'Código vacío';if(!/^\d+$/.test(c))return 'Solo números';if(c.length!==LONGITUD_CODIGO)return `Debe tener ${LONGITUD_CODIGO} dígitos`;return null;}
 window.filtrarSoloDigitos=filtrarSoloDigitos;window.actualizarContadorDigitos=actualizarContadorDigitos;
 
-// ============ STATE ============
 let contadores={};ESTADOS.forEach(e=>contadores[e]=0);
 let totalMinutosVisitas=0,totalVisitas=0,visitas=[];
 let charts={};
@@ -1323,7 +1563,7 @@ let censuraActual={fotoId:null,img:null,canvas:null,ctx:null,rectangulos:[],dibu
 let _ultimoInformeEmpresarialHTML='';
 let codigosPendientesReparto=[],estadoRepartoSeleccionado='',firmaRepartoGuardada=null;
 let canvasFirmaReparto,ctxFirmaReparto,dibujandoFirmaReparto=false,ultimoXRep=0,ultimoYRep=0;
-let bancoIndex=new Map(); // guia -> {idx,item}
+let bancoIndex=new Map();
 let coordenadasActuales=null;
 let vozGrabando=false,reconocimientoVoz=null;
 
@@ -1332,17 +1572,14 @@ function bancoBuscar(codigo){return bancoIndex.get(codigo)||null;}
 function bancoContiene(codigo){return !!codigo&&bancoIndex.has(codigo);}
 window._getBancoIndex=()=>bancoIndex;
 
-// 🔧 FIX P0: limpieza automática de codesScannedRecently
 setInterval(()=>{const ahora=Date.now();for(const [k,v] of codesScannedRecently.entries()){if(ahora-v>TTL_SCAN_CACHE)codesScannedRecently.delete(k);}},30000);
 
-// 🔧 FIX P0: batch renders con rAF
 let _renderPending={};
 function scheduleRender(key,fn){
   if(_renderPending[key]) return;
   _renderPending[key]=requestAnimationFrame(()=>{fn();delete _renderPending[key];});
 }
 
-// GPS
 async function obtenerUbicacion(timeoutMs=5000){
   if(!navigator.geolocation) return null;
   return new Promise(resolve=>{
@@ -1377,7 +1614,6 @@ function guardarBorrador(){try{const b={llegadaCliente:document.getElementById('
 function restaurarBorrador(){try{const raw=localStorage.getItem(CLAVE_BORRADOR);if(!raw)return false;const b=JSON.parse(raw);if(b.timestamp&&(Date.now()-b.timestamp)>24*60*60*1000){localStorage.removeItem(CLAVE_BORRADOR);return false;}const set=(id,v)=>{const el=document.getElementById(id);if(el&&v)el.value=v;};set('llegadaCliente',b.llegadaCliente);set('salidaCliente',b.salidaCliente);set('descripcionVisita',b.descripcionVisita);set('direccionVisita',b.direccionVisita);set('precioVisita',b.precioVisita);if(b.estadoPaquete){const s=document.getElementById('estadoPaquete');if(s)s.value=b.estadoPaquete;}return true;}catch(e){return false;}}
 setInterval(()=>{if(typeof window._guardarEstadoSilencioso==='function')window._guardarEstadoSilencioso();guardarBorrador();},15000);
 
-// ============ IndexedDB ============
 const DB_NOMBRE='colserlog_fotos_db',DB_VERSION=1,STORE_FOTOS='fotos',STORE_QUEUE='offline_queue';
 let fotosDB=null;
 const cacheFotos=new Map();
@@ -1402,7 +1638,6 @@ async function contarFotosDB(){return withDB(db=>new Promise(res=>{const r=db.tr
 async function obtenerTodasLasFotosDB(){return withDB(db=>new Promise(res=>{const r=db.transaction(STORE_FOTOS,'readonly').objectStore(STORE_FOTOS).getAll();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([]);}));}
 window.precargarFotosEnCache=precargarFotosEnCache;
 
-// ============ Modales foto ============
 window.abrirModalFoto=function(lista,indice){if(!lista||!lista.length)return;modalFotosActual.lista=lista;modalFotosActual.indice=indice||0;actualizarModalFoto();document.getElementById('modalFoto').classList.add('visible');};
 function actualizarModalFoto(){const{lista,indice}=modalFotosActual;const f=lista[indice];if(!f)return;const img=document.getElementById('modalFotoImg');img.src=f.data||f;document.getElementById('modalFotoContador').textContent=`${indice+1} / ${lista.length}`;const l=document.getElementById('modalFotoDescargar');l.href=f.data||f;l.download=`foto_${(f.id||Date.now())}.jpg`;const n=document.querySelector('.modal-foto-nav');if(n)n.style.display=lista.length>1?'flex':'none';}
 window.navegarFoto=function(dir){const t=modalFotosActual.lista.length;if(t<=1)return;modalFotosActual.indice=(modalFotosActual.indice+dir+t)%t;actualizarModalFoto();};
@@ -1480,7 +1715,6 @@ async function renderizarGaleria(contId,contadorId,mostrarTotal){
 }
 window.renderizarGaleriaFotos=renderizarGaleriaFotos;window.renderizarGaleriaFotosReparto=renderizarGaleriaFotosReparto;
 
-// Censura
 window.abrirModalCensura=async function(fotoId){
   const foto=await obtenerFotoDB(fotoId);if(!foto||!foto.data){mostrarAviso('⚠️ Foto no encontrada','error');return;}
   const img=new Image();
@@ -1523,7 +1757,6 @@ window.aplicarCensuraManual=async function(){
 };
 document.addEventListener('DOMContentLoaded',()=>{const canvas=document.getElementById('censuraCanvas');if(!canvas)return;canvas.addEventListener('mousedown',iniciarTrazoCensura);canvas.addEventListener('mousemove',moverTrazoCensura);canvas.addEventListener('mouseup',terminarTrazoCensura);canvas.addEventListener('touchstart',iniciarTrazoCensura,{passive:false});canvas.addEventListener('touchmove',moverTrazoCensura,{passive:false});canvas.addEventListener('touchend',terminarTrazoCensura);});
 
-// ============ BANCO ============
 function codigosEnVisitas(){const s=new Set();visitas.forEach(v=>{if(v.codigo&&v.codigo.trim())s.add(v.codigo.trim());});return s;}
 window.agregarCodigoBanco=function(){
   const iCod=document.getElementById('codigoBanco'),iDir=document.getElementById('direccionBanco'),iPre=document.getElementById('precioBanco');if(!iCod)return;
@@ -1619,7 +1852,6 @@ function actualizarContadorUnicos(){const el=document.querySelector('#contadorUn
 function motivoDuplicado(c){if(!c)return null;if(codigosPendientes.includes(c))return 'Ya está en pendientes';if(codigosRegistradosHoy.has(c))return 'Ya fue registrado hoy';return null;}
 window.actualizarPlaceholderDescripcion=function(){const s=document.getElementById('estadoPaquete'),t=document.getElementById('descripcionVisita');if(!s||!t)return;t.placeholder=s.value?`Detalles del estado "${s.value}"...`:'Al seleccionar un estado se autocompletará...';};
 
-// ============ STATE PERSIST ============
 let guardandoEstado=false;
 function guardarEstadoCompleto(){
   if(guardandoEstado)return;guardandoEstado=true;
@@ -1651,7 +1883,6 @@ function agregarCodigoPendiente(c){if(!c)return;c=c.trim();const e=validarCodigo
 window.eliminarCodigoPendiente=function(i){codigosPendientes.splice(i,1);renderizarCodigosPendientes();guardarEstadoCompleto();};
 function renderizarCodigosPendientes(){const c=document.getElementById('listaCodigosPendientes'),ct=document.getElementById('contadorCodigos');if(!c)return;c.innerHTML='';if(!codigosPendientes.length){const v=document.createElement('div');v.className='lista-vacia';v.textContent='Sin códigos.';c.appendChild(v);if(ct)ct.textContent='';return;}const frag=document.createDocumentFragment();codigosPendientes.forEach((cod,i)=>{const ch=document.createElement('span');ch.className='chip-codigo';const sp=document.createElement('span');sp.textContent=cod;ch.appendChild(sp);const b=document.createElement('button');b.type='button';b.textContent='✕';b.onclick=()=>window.eliminarCodigoPendiente(i);ch.appendChild(b);frag.appendChild(ch);});c.appendChild(frag);if(ct)ct.textContent=`📦 ${codigosPendientes.length} pedido(s)`;}
 
-// ============ TABLA HISTORIAL ============
 function renderizarTabla(){
   const t=document.getElementById('cuerpoTabla');if(!t)return;t.innerHTML='';
   const f=(document.getElementById('busquedaGuia')?.value||'').trim().toLowerCase(),cb=document.getElementById('contadorBusqueda');
@@ -1691,7 +1922,6 @@ window.guardarEdicion=index=>{
 };
 window.eliminarVisita=async index=>{const v=visitas[index];if(v&&Array.isArray(v.fotos)&&v.fotos.length){const ids=v.fotos.map(f=>f.id||f).filter(Boolean);await eliminarFotosMultiples(ids);}visitas.splice(index,1);if(filaEditando===index)filaEditando=null;recalcularEstadisticas();renderizarTabla();guardarEstadoCompleto();};
 
-// ============ VISTA DÍA + STAT CARDS ============
 let filtroVistaDia='todas';
 window.filtrarVistaDia=function(filtro){filtroVistaDia=filtro||'todas';document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.toggle('active',b.dataset.filtro===filtroVistaDia));window.renderizarVistaDia();};
 window.limpiarBusquedaDia=function(){const i=document.getElementById('busquedaDia');if(i){i.value='';i.focus();}window.renderizarVistaDia();};
@@ -1731,13 +1961,12 @@ function _renderizarVistaDiaExcel(){
     const esLink=esEstadoEntregadoLink(v.estado),esEnt=esEstadoEntregado(v.estado);
     const badgeClass=esLink?'badge-estado link':(esEnt?'badge-estado ok':'badge-estado no');
     const nFotos=Array.isArray(v.fotos)?v.fotos.length:0,precio=Number(v.precio)||0;
-    const gpsIcon = (v.gps&&v.gps.lat) ? '<span class="gps-badge">📍</span>' : '—';
+    const gpsIcon=(v.gps&&v.gps.lat)?'<span class="gps-badge">📍</span>':'—';
     html+='<tr>'+`<td>${idxOriginal+1}</td>`+`<td>${escapeHtml(v.llegada)||'—'}</td>`+`<td>${escapeHtml(v.salida)||'—'}</td>`+`<td><strong>${Number(v.tiempo)||0} min</strong></td>`+`<td class="col-codigo">${escapeHtml(v.codigo)||'—'}</td>`+`<td class="col-dir">${escapeHtml(v.direccion)||'—'}</td>`+`<td class="col-precio">${precio?formatCOP(precio):'—'}</td>`+`<td class="col-estado"><span class="${badgeClass}">${escapeHtml(v.estado)||'—'}</span></td>`+`<td>${gpsIcon}</td>`+`<td class="col-desc">${escapeHtml(v.descripcion)||'—'}</td>`+`<td>${nFotos>0?'📸 '+nFotos:'—'}</td>`+'</tr>';
   });
   html+='</tbody></table>';contenedor.innerHTML=html;
 }
 
-// ============ DASHBOARD ============
 function actualizarDashboard(){
   const totalEnt=contarEntregadosActuales(),entLink=contadores[ESTADO_ENTREGADO_LINK]||0,n=totalVisitas-totalEnt;
   const p=totalVisitas>0?Math.round(totalMinutosVisitas/totalVisitas):0;
@@ -1756,7 +1985,6 @@ function actualizarDashboard(){
   if(typeof window.renderizarVistaDia==='function')window.renderizarVistaDia();
 }
 function coloresGrafica(){return['#30b0c7','#34c759','#ff3b30','#ff9500','#0071e3','#8e8e93','#ffcc00','#af52de','#ff2d55'];}
-// 🔧 Chart.js reuse
 function renderizarGrafica(){
   const c=document.getElementById('graficaInforme');if(!c||typeof Chart==='undefined')return;
   const tc=esDarkMode()?'#f5f5f7':'#1d1d1f';
@@ -1787,7 +2015,6 @@ window.calcularTiemposBase=function(silencioso){
 window.marcarLlegada=()=>{document.getElementById('llegadaCliente').value=horaActual();};
 window.marcarSalidaYRegistrar=()=>{const l=document.getElementById('llegadaCliente').value;if(!l){alert('Marca llegada primero');return;}const e=document.getElementById('estadoPaquete').value;if(!e){alert('Selecciona estado');return;}document.getElementById('salidaCliente').value=horaActual();window.registrarVisita();};
 
-// ============ FIRMA ============
 let canvasFirma,ctxFirma,dibujandoFirma=false,firmaGuardada=null;
 let ultimoX=0,ultimoY=0;
 window.inicializarFirma=function(){
@@ -1823,7 +2050,6 @@ window.registrarVisita=async()=>{
   mostrarAviso('✅ Visita guardada','ok');beepOk();
 };
 
-// ============ ESCANEO ============
 let escaneoModo='reparto';
 window.iniciarEscaneo=function(modo){
   if(escaneoActivo){cancelarEscaneo();return;}
@@ -1894,7 +2120,6 @@ window.agregarGuiaManualReparto=function(){
   if(navigator.vibrate)navigator.vibrate(50);
 };
 
-// ============ OCR ============
 async function preprocesarImagenParaOCR(file,maxDim=1600){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{try{let{width,height}=img;if(width>maxDim||height>maxDim){if(width>height){height=Math.round(height*maxDim/width);width=maxDim;}else{width=Math.round(width*maxDim/height);height=maxDim;}}const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,width,height);const imageData=ctx.getImageData(0,0,width,height);const data=imageData.data,factor=1.6;for(let i=0;i<data.length;i+=4){const gray=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];let c=(gray-128)*factor+128;if(c<0)c=0;if(c>255)c=255;data[i]=data[i+1]=data[i+2]=c;}ctx.putImageData(imageData,0,0);resolve({dataUrl:canvas.toDataURL('image/jpeg',0.85),width,height});}catch(err){reject(err);}};img.onerror=()=>reject(new Error('No se pudo decodificar'));img.src=e.target.result;};reader.onerror=()=>reject(new Error('No se pudo leer'));reader.readAsDataURL(file);});}
 async function detectarCodigosConZXingMulti(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=async()=>{const encontrados=new Set();try{if(typeof ZXing==='undefined'){resolve([]);return;}const hints=new Map();const formats=[ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.CODE_93,ZXing.BarcodeFormat.ITF,ZXing.BarcodeFormat.CODABAR,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.DATA_MATRIX,ZXing.BarcodeFormat.PDF_417,ZXing.BarcodeFormat.AZTEC,ZXing.BarcodeFormat.MAXICODE];hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,formats);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{const luminance=new ZXing.BrowserLuminanceSource(img),binarizer=new ZXing.HybridBinarizer(luminance),bitmap=new ZXing.BinaryBitmap(binarizer),multiReader=new ZXing.MultiFormatReader();multiReader.setHints(hints);const results=multiReader.decodeMultiple(bitmap);if(results&&results.length)results.forEach(r=>{const t=r&&r.getText?r.getText():String(r);if(t)encontrados.add(t);});}catch(e){}if(encontrados.size===0){try{const reader1=new ZXing.BrowserMultiFormatReader(hints);const result=await reader1.decodeFromImageElement(img);const txt=result&&result.getText?result.getText():'';if(txt)encontrados.add(txt);}catch(e){}}if(encontrados.size<4){const regiones=[{x:0,y:0,w:img.width/2,h:img.height},{x:img.width/2,y:0,w:img.width/2,h:img.height},{x:0,y:0,w:img.width,h:img.height/2},{x:0,y:img.height/2,w:img.width,h:img.height/2},{x:0,y:0,w:img.width/2,h:img.height/2},{x:img.width/2,y:0,w:img.width/2,h:img.height/2},{x:0,y:img.height/2,w:img.width/2,h:img.height/2},{x:img.width/2,y:img.height/2,w:img.width/2,h:img.height/2}];const readerR=new ZXing.BrowserMultiFormatReader(hints);for(const reg of regiones){try{const canvas=document.createElement('canvas');canvas.width=reg.w;canvas.height=reg.h;const ctx=canvas.getContext('2d');ctx.drawImage(img,reg.x,reg.y,reg.w,reg.h,0,0,reg.w,reg.h);const r2=await readerR.decodeFromImageUrl(canvas.toDataURL('image/jpeg',0.9));const txt2=r2&&r2.getText?r2.getText():'';if(txt2)encontrados.add(txt2);}catch(e){}}}resolve(Array.from(encontrados));}catch(e){resolve(Array.from(encontrados));}};img.onerror=()=>resolve([]);img.src=e.target.result;};reader.onerror=()=>resolve([]);reader.readAsDataURL(file);});}
 async function ocrConTesseractRapido(dataUrlOrFile,onProgress){if(!window.Tesseract)throw new Error('Tesseract no disponible');const{data:{text}}=await Tesseract.recognize(dataUrlOrFile,'eng',{tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'11',logger:m=>{if(m.status==='recognizing text'&&onProgress)onProgress(m.progress);}});return text||'';}
@@ -1941,7 +2166,6 @@ window.procesarFotosOCR=async function(event){
   event.target.value='';
 };
 
-// ============ MANIFIESTO (nuevo) ============
 window.procesarManifiesto=function(){
   const ta=document.getElementById('manifiestoTexto');if(!ta)return;
   const cont=document.getElementById('manifiestoResultado');
@@ -1954,7 +2178,6 @@ window.procesarManifiesto=function(){
     if(bancoContiene(cod)){dup++;return;}
     const direccion=partes[1]||'',precio=parseFloat((partes[2]||'').replace(/[^0-9]/g,''))||0;
     bancoCodigos.push({codigo:cod,direccion,precio});
-    if(partes[3] && ESTADOS.includes(partes[3])){ /* sugerido — no se aplica automáticamente */ }
     agregados++;
   });
   reindexarBanco();renderizarBanco();guardarEstadoCompleto();
@@ -1962,7 +2185,6 @@ window.procesarManifiesto=function(){
   mostrarAviso(`✅ ${agregados} agregados`,agregados>0?'ok':'warn');
 };
 
-// ============ VOZ (nuevo) ============
 window.toggleGrabacionVoz=function(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){mostrarAviso('⚠️ Reconocimiento de voz no soportado','error');return;}
@@ -1996,7 +2218,6 @@ window.toggleGrabacionVoz=function(){
   try{reconocimientoVoz.start();vozGrabando=true;if(btn){btn.classList.add('grabando');btn.textContent='🔴 Detener grabación';}mostrarAviso('🎤 Grabando... habla claro','ok');}catch(e){mostrarAviso('⚠️ '+(e.message||e),'error');}
 };
 
-// ============ UMBRAL ============
 window.guardarConfigIA=function(){
   const key=(document.getElementById('visionApiKey')?.value||'').trim();
   const umbral=parseFloat(document.getElementById('umbralEfectividad')?.value)||80;
@@ -2075,7 +2296,6 @@ function seleccionarEstadoReparto(estado){
   }
   beepOk();
   if(navigator.vibrate)navigator.vibrate(40);
-  // 🚗 Pre-cargar GPS
   refrescarCoordenadas();
 }
 window.seleccionarEstadoReparto=seleccionarEstadoReparto;
@@ -2138,7 +2358,6 @@ window.guardarVisitaReparto=async function(){
   }
   const hora=horaActual(),desc=(document.getElementById('descripcionReparto')?.value||'').trim(),dirManual=(document.getElementById('direccionReparto')?.value||'').trim(),precioManual=parseFloat(document.getElementById('precioReparto')?.value||'0')||0,hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
-  // GPS sellado
   const gps=coordenadasActuales||await obtenerUbicacion(3000);
   codigosPendientesReparto.forEach(cod=>{
     const b=bancoBuscar(cod);
@@ -2159,11 +2378,9 @@ window.guardarVisitaReparto=async function(){
   actualizarResumenReparto();verificarUmbralEfectividad();actualizarBarraUmbral();guardarEstadoCompleto();
   mostrarAviso('✅ Visita guardada','ok');beepOk();
   if(navigator.vibrate)navigator.vibrate([60,30,60]);
-  // Pre-cargar siguiente GPS
   refrescarCoordenadas();
 };
 
-// ============ GRÁFICAS HTML PARA PDF ============
 function generarChartEstadosHorizontal(ancho,alto){
   const c=document.createElement('canvas');c.width=ancho;c.height=alto;
   const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,ancho,alto);
@@ -2452,9 +2669,7 @@ function cargarConfigIA(){const keyEl=document.getElementById('visionApiKey'),um
 document.addEventListener('touchstart',function ua(){try{const c=new (window.AudioContext||window.webkitAudioContext)();c.resume();}catch(e){}document.removeEventListener('touchstart',ua);},{once:true});
 document.addEventListener('click',e=>{const c=document.getElementById('resultadosBusquedaCodigo'),i=document.getElementById('busquedaCodigoBanco');if(!c||!i)return;if(!c.contains(e.target)&&e.target!==i){c.innerHTML='';c.style.display='none';}});
 
-// ============ ATAJOS TECLADO ============
 document.addEventListener('keydown',e=>{
-  // Enter en Reparto → guardar
   if(e.key==='Enter'&&document.querySelector('.tab-panel[data-tab="reparto"]')?.classList.contains('active')){
     const target=e.target;
     if(target && (target.tagName==='TEXTAREA'||target.id==='inputGuiaManual')) return;
@@ -2463,18 +2678,15 @@ document.addEventListener('keydown',e=>{
       window.guardarVisitaReparto();
     }
   }
-  // Ctrl+K → buscar
   if((e.ctrlKey||e.metaKey)&&e.key==='k'){
     e.preventDefault();
     const inp = document.querySelector('.tab-panel.active #busquedaDia, .tab-panel.active #busquedaGuia');
     if(inp) inp.focus();
   }
-  // Ctrl+D → modo conducción
   if((e.ctrlKey||e.metaKey)&&e.key==='d'){
     e.preventDefault();
     window.toggleModoConduccion();
   }
-  // Esc → cerrar modales
   if(e.key==='Escape'){
     document.querySelectorAll('.visible').forEach(el=>{
       if(el.id && el.id.startsWith('modal') && el.id!=='modalProcesando') el.classList.remove('visible');
@@ -2482,7 +2694,6 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-// ============ INIT ============
 window.addEventListener('load',()=>{
   document.getElementById('btnPDFDiario')?.addEventListener('click',()=>window.imprimirReporteDiario('pdf'));
   document.getElementById('btnImprimirDiario')?.addEventListener('click',()=>window.imprimirReporteDiario('print'));
@@ -2508,7 +2719,6 @@ window.addEventListener('load',async()=>{
   actualizarContadorDigitos(document.getElementById('codigoBanco'),'contadorDigitosBanco');
   ['llegadaCliente','salidaCliente'].forEach(id=>{document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();window.registrarVisita();}});});
   if(document.querySelector('.tab-panel[data-tab="visita"]')?.classList.contains('active'))window.inicializarFirma();
-  // GPS inicial
   refrescarCoordenadas();
 });
 </script>
