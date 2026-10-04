@@ -1918,6 +1918,7 @@ function cargarCodigosRegistradosHoy(){codigosRegistradosHoy.clear();visitas.for
 function actualizarContadorUnicos(){const el=document.querySelector('#contadorUnicos span');if(el)el.textContent=codigosRegistradosHoy.size;}
 function motivoDuplicado(c){if(!c)return null;if(codigosPendientes.includes(c))return 'Ya está en pendientes';if(codigosRegistradosHoy.has(c))return 'Ya fue registrado hoy';return null;}
 window.actualizarPlaceholderDescripcion=function(){const s=document.getElementById('estadoPaquete'),t=document.getElementById('descripcionVisita');if(!s||!t)return;t.placeholder=s.value?`Detalles del estado "${s.value}"...`:'Al seleccionar un estado se autocompletará...';};
+window.alCambiarEstado=function(){const s=document.getElementById('estadoPaquete'),t=document.getElementById('descripcionVisita');if(!s||!t)return;const sugerida=DESCRIPCIONES_RECOMENDADAS[s.value]||'';if(!t.value.trim()||t.dataset.autocompletada==='1'){t.value=sugerida;t.dataset.autocompletada=sugerida?'1':'0';}actualizarPlaceholderDescripcion();};
 
 let guardandoEstado=false;
 function guardarEstadoCompleto(){
@@ -2144,8 +2145,20 @@ window.iniciarEscaneo=function(modo){
       codesScannedRecently.set(cod,ahora);_codigosEscaneadosSesion.add(cod);sesionEscaneoYaAgrego=true;
       procesarCodigoEscaneado(cod);
       setTimeout(()=>{sesionEscaneoYaAgrego=false;},1500);
-    },()=>{}).catch(err=>{alert('No se pudo acceder a cámara: '+err);escaneoActivo=false;if(btnPrincipal)btnPrincipal.classList.remove('escaneando');});
-  }catch(e){alert('⚠️ '+e.message);escaneoActivo=false;if(btnPrincipal)btnPrincipal.classList.remove('escaneando');}
+    },()=>{}).catch(err=>{
+      alert('No se pudo acceder a cámara: '+(err&&err.message||err));
+      html5QrCode=null;escaneoActivo=false;
+      if(btnPrincipal){btnPrincipal.classList.remove('escaneando');btnPrincipal.textContent='📷 Escanear guías (Cámara)';}
+      if(btnCancel)btnCancel.style.display='none';
+      div.style.display='none';
+    });
+  }catch(e){
+    alert('⚠️ '+(e&&e.message||'No se pudo iniciar la cámara'));
+    html5QrCode=null;escaneoActivo=false;
+    if(btnPrincipal){btnPrincipal.classList.remove('escaneando');btnPrincipal.textContent='📷 Escanear guías (Cámara)';}
+    if(btnCancel)btnCancel.style.display='none';
+    div.style.display='none';
+  }
 };
 function procesarCodigoEscaneado(cod){
   if(escaneoModo==='banco'){
@@ -2171,7 +2184,13 @@ window.cancelarEscaneo=()=>{
   const btnPrincipal=document.getElementById('btnEscanearReparto');
   if(btnPrincipal){btnPrincipal.classList.remove('escaneando');btnPrincipal.textContent='📷 Escanear guías (Cámara)';}
   const oc=()=>{const a=document.getElementById('lectorQRBanco');if(a)a.style.display='none';const b=document.getElementById('lectorQR');if(b)b.style.display='none';const c=document.getElementById('btnCancelarEscaneoBanco');if(c)c.style.display='none';const d=document.getElementById('btnCancelarEscaneo');if(d)d.style.display='none';escaneoActivo=false;_codigosEscaneadosSesion=new Set();};
-  if(i){i.stop().then(()=>{try{i.clear();}catch(_){}oc();}).catch(()=>{try{i.clear();}catch(_){}oc();});}else oc();
+  if(!i){oc();return;}
+  const limpiar=()=>{try{if(typeof i.clear==='function')i.clear();}catch(_){}oc();};
+  try{
+    const resultado=typeof i.stop==='function'?i.stop():null;
+    if(resultado&&typeof resultado.then==='function')resultado.then(limpiar).catch(limpiar);
+    else limpiar();
+  }catch(_){limpiar();}
 };
 
 window.agregarGuiaManualReparto=function(){
