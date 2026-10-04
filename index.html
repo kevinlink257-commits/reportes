@@ -11,13 +11,11 @@
 <title>Colserlog · Ruta</title>
 <link rel="manifest" id="manifestLink">
 <link rel="apple-touch-icon" id="appleIcon">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js"></script>
 <style>
 /* =================================================================
    APPLE DESIGN SYSTEM · COLSERLOG v3.0
@@ -2790,6 +2788,193 @@ window.addEventListener('load',async()=>{
   if(document.querySelector('.tab-panel[data-tab="visita"]')?.classList.contains('active'))window.inicializarFirma();
   refrescarCoordenadas();
 });
+
+
+/* ===== LAZY LOADING: Chart.js + Tesseract.js ===== */
+/*
+ * Colserlog · integración de carga diferida para Chart.js y Tesseract.js
+ *
+ * Este bloque está diseñado para pegarse DENTRO del <script> principal de
+ * index.html, después de las constantes y del estado (contadores/charts).
+ * No debe cargarse como un <script src> independiente porque el index actual
+ * usa variables internas con let/const.
+ *
+ * Antes de insertar este bloque, eliminar del <head>:
+ *   carga eager de Chart.js desde el head
+ *   carga eager de Tesseract.js desde el head
+ *
+ * Sustituir las funciones existentes con el mismo nombre por las versiones de
+ * este archivo. El resto del flujo de la aplicación permanece igual.
+ */
+
+const LAZY_CHART_URL = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
+const LAZY_TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js';
+const lazyLibraryPromises = new Map();
+
+function cargarLibreriaDiferida(url, globalName){
+  if(globalName && window[globalName])return Promise.resolve(window[globalName]);
+  if(lazyLibraryPromises.has(url))return lazyLibraryPromises.get(url);
+
+  const promise=new Promise((resolve,reject)=>{
+    const existente=document.querySelector(`script[data-lazy-src="${url}"]`);
+    const cargar=()=>{
+      if(globalName && !window[globalName]){
+        reject(new Error(`${globalName} no está disponible después de cargar la librería.`));
+        return;
+      }
+      resolve(globalName?window[globalName]:true);
+    };
+    const fallar=()=>reject(new Error(`No se pudo cargar la librería: ${url}`));
+
+    if(existente){
+      existente.addEventListener('load',cargar,{once:true});
+      existente.addEventListener('error',fallar,{once:true});
+      return;
+    }
+
+    const script=document.createElement('script');
+    script.src=url;
+    script.async=true;
+    script.dataset.lazySrc=url;
+    script.addEventListener('load',cargar,{once:true});
+    script.addEventListener('error',fallar,{once:true});
+    document.head.appendChild(script);
+  });
+
+  lazyLibraryPromises.set(url,promise.catch(error=>{
+    lazyLibraryPromises.delete(url);
+    throw error;
+  }));
+  return lazyLibraryPromises.get(url);
+}
+
+function asegurarChart(){
+  return cargarLibreriaDiferida(LAZY_CHART_URL,'Chart');
+}
+
+function asegurarTesseract(){
+  return cargarLibreriaDiferida(LAZY_TESSERACT_URL,'Tesseract');
+}
+
+function avisarErrorCarga(mensaje){
+  if(typeof mostrarAviso==='function')mostrarAviso(mensaje,'error');
+  else console.error(mensaje);
+}
+
+async function renderizarGrafica(){
+  const c=document.getElementById('graficaInforme');
+  if(!c || c.offsetParent===null)return;
+  try{await asegurarChart();}
+  catch(error){console.error(error);avisarErrorCarga('No se pudo cargar Chart.js para la gráfica diaria.');return;}
+
+  const tc=esDarkMode()?'#f5f5f7':'#1d1d1f';
+  const labels=Object.keys(contadores),data=Object.values(contadores);
+  if(charts.informe){
+    charts.informe.data.labels=labels;
+    charts.informe.data.datasets[0].data=data;
+    charts.informe.options.scales.y.ticks.color=tc;
+    charts.informe.options.scales.x.ticks.color=tc;
+    charts.informe.update('none');
+  }else{
+    charts.informe=new Chart(c.getContext('2d'),{type:'bar',data:{labels,datasets:[{label:'Cantidad',data,backgroundColor:coloresGrafica(),borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true,ticks:{stepSize:1,color:tc}},x:{ticks:{color:tc},grid:{display:false}}},plugins:{legend:{display:false}}}});
+  }
+}
+
+async function actualizarGraficaPromedios(){
+  const{promedioDia,promedioSemana,promedioMes}=calcularPromedios();
+  const dia=document.getElementById('prom-dia'),semana=document.getElementById('prom-semana'),mes=document.getElementById('prom-mes');
+  if(dia)dia.textContent=promedioDia.toFixed(1);
+  if(semana)semana.textContent=promedioSemana.toFixed(1);
+  if(mes)mes.textContent=promedioMes.toFixed(1);
+
+  const c=document.getElementById('graficaPromedios');
+  if(!c || c.offsetParent===null)return;
+  try{await asegurarChart();}
+  catch(error){console.error(error);avisarErrorCarga('No se pudo cargar Chart.js para los promedios.');return;}
+
+  const tc=esDarkMode()?'#f5f5f7':'#1d1d1f';
+  const data=[promedioDia,promedioSemana,promedioMes];
+  if(charts.promedios){
+    charts.promedios.data.datasets[0].data=data;
+    charts.promedios.options.scales.y.ticks.color=tc;
+    charts.promedios.options.scales.x.ticks.color=tc;
+    charts.promedios.update('none');
+  }else{
+    charts.promedios=new Chart(c.getContext('2d'),{type:'bar',data:{labels:['Diario','Semanal','Mensual'],datasets:[{label:'Promedio',data,backgroundColor:['#0071e3','#34c759','#ffcc00'],borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{beginAtZero:true,ticks:{color:tc}},x:{ticks:{color:tc},grid:{display:false}}}}});
+  }
+}
+
+async function actualizarInformesSemanalesMensuales(){
+  const h=cargarHistorialDetallado(),f=Object.keys(h).sort();
+  if(!f.length)return;
+  const sem={},mes={};
+  for(const k of f){
+    const d=new Date(k+'T00:00:00');
+    const s=d.getFullYear()+' · Sem '+String(getWeekNumber(d)).padStart(2,'0');
+    const m=d.toLocaleString('es',{month:'long',year:'numeric'});
+    sem[s]=(sem[s]||0)+contarEntregadosEnContadores(h[k].contadores);
+    mes[m]=(mes[m]||0)+contarEntregadosEnContadores(h[k].contadores);
+  }
+
+  const cs=document.getElementById('graficaSemana'),cm=document.getElementById('graficaMes');
+  if((!cs || cs.offsetParent===null) && (!cm || cm.offsetParent===null))return;
+  try{await asegurarChart();}
+  catch(error){console.error(error);avisarErrorCarga('No se pudo cargar Chart.js para los informes históricos.');return;}
+
+  const tc=esDarkMode()?'#f5f5f7':'#1d1d1f';
+  if(cs){
+    const labs=Object.keys(sem),dat=Object.values(sem);
+    if(charts.semana){
+      charts.semana.data.labels=labs;charts.semana.data.datasets[0].data=dat;
+      charts.semana.options.scales.y.ticks.color=tc;charts.semana.options.scales.x.ticks.color=tc;
+      charts.semana.update('none');
+    }else{
+      charts.semana=new Chart(cs.getContext('2d'),{type:'bar',data:{labels:labs,datasets:[{label:'Semana',data:dat,backgroundColor:'#0071e3',borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{ticks:{color:tc}},x:{ticks:{color:tc},grid:{display:false}}}}});
+    }
+  }
+  if(cm){
+    const labs=Object.keys(mes),dat=Object.values(mes);
+    if(charts.mes){
+      charts.mes.data.labels=labs;charts.mes.data.datasets[0].data=dat;
+      charts.mes.options.scales.y.ticks.color=tc;charts.mes.options.scales.x.ticks.color=tc;
+      charts.mes.update('none');
+    }else{
+      charts.mes=new Chart(cm.getContext('2d'),{type:'bar',data:{labels:labs,datasets:[{label:'Mes',data:dat,backgroundColor:'#34c759',borderRadius:6}]},options:{responsive:true,animation:false,scales:{y:{ticks:{color:tc}},x:{ticks:{color:tc},grid:{display:false}}}}});
+    }
+  }
+}
+
+window.recargarGraficas=function(){
+  void renderizarGrafica();
+  void actualizarGraficaPromedios();
+  void actualizarInformesSemanalesMensuales();
+};
+
+async function ocrConTesseractRapido(dataUrlOrFile,onProgress){
+  try{await asegurarTesseract();}
+  catch(error){console.error(error);throw new Error('No se pudo cargar Tesseract.js.');}
+  const{data:{text}}=await window.Tesseract.recognize(dataUrlOrFile,'eng',{
+    tessedit_char_whitelist:'0123456789',
+    tessedit_pageseg_mode:'11',
+    logger:m=>{
+      if(m.status==='recognizing text'&&onProgress)onProgress(m.progress);
+    }
+  });
+  return text||'';
+}
+
+window.testOCR=async function(){
+  const key=(localStorage.getItem(CLAVE_VISION_KEY)||'').trim();
+  if(key.length>20){mostrarAviso('✅ Google Vision configurado','ok');return;}
+  try{
+    await asegurarTesseract();
+    mostrarAviso('✅ Tesseract listo','ok');
+  }catch(error){
+    console.error(error);
+    mostrarAviso('⚠️ OCR no disponible','error');
+  }
+};
+
 </script>
 </body>
 </html>
