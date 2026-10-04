@@ -2861,7 +2861,7 @@ function avisarErrorCarga(mensaje){
   else console.error(mensaje);
 }
 
-async function renderizarGrafica(){
+async function renderizarGraficaLazy(){
   const c=document.getElementById('graficaInforme');
   if(!c || c.offsetParent===null)return;
   try{await asegurarChart();}
@@ -2880,7 +2880,7 @@ async function renderizarGrafica(){
   }
 }
 
-async function actualizarGraficaPromedios(){
+async function actualizarGraficaPromediosLazy(){
   const{promedioDia,promedioSemana,promedioMes}=calcularPromedios();
   const dia=document.getElementById('prom-dia'),semana=document.getElementById('prom-semana'),mes=document.getElementById('prom-mes');
   if(dia)dia.textContent=promedioDia.toFixed(1);
@@ -2904,7 +2904,7 @@ async function actualizarGraficaPromedios(){
   }
 }
 
-async function actualizarInformesSemanalesMensuales(){
+async function actualizarInformesSemanalesMensualesLazy(){
   const h=cargarHistorialDetallado(),f=Object.keys(h).sort();
   if(!f.length)return;
   const sem={},mes={};
@@ -2945,12 +2945,18 @@ async function actualizarInformesSemanalesMensuales(){
 }
 
 window.recargarGraficas=function(){
-  void renderizarGrafica();
-  void actualizarGraficaPromedios();
-  void actualizarInformesSemanalesMensuales();
+  void renderizarGraficaLazy();
+  void actualizarGraficaPromediosLazy();
+  void actualizarInformesSemanalesMensualesLazy();
 };
 
-async function ocrConTesseractRapido(dataUrlOrFile,onProgress){
+// Sustituir las funciones internas usadas por el resto del módulo.
+renderizarGrafica=renderizarGraficaLazy;
+actualizarGraficaPromedios=actualizarGraficaPromediosLazy;
+actualizarInformesSemanalesMensuales=actualizarInformesSemanalesMensualesLazy;
+ocrConTesseractRapido=ocrConTesseractRapidoLazy;
+
+async function ocrConTesseractRapidoLazy(dataUrlOrFile,onProgress){
   try{await asegurarTesseract();}
   catch(error){console.error(error);throw new Error('No se pudo cargar Tesseract.js.');}
   const{data:{text}}=await window.Tesseract.recognize(dataUrlOrFile,'eng',{
