@@ -1,83 +1,61 @@
 # 📦 Reporte Diario de Ruta – Colserlog
 
-Aplicación web progresiva para el registro y seguimiento de entregas diarias de paquetes. Permite capturar tiempos de ruta, estados de cada visita, visualizar estadísticas del día y promedios históricos, todo almacenado localmente en el navegador.
+PWA para registrar y analizar entregas de última milla. Captura tiempos de ruta, estados de visita, evidencia fotográfica, firma, GPS y reportes, con persistencia local en el navegador.
 
 [![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-blue)](https://kevinlink257-commits.github.io/reportes/)
-_Reemplaza el enlace con la URL de tu GitHub Pages._
 
----
+## 🚀 Características
 
-## 🚀 Características principales
+- Registro de tiempos base: carga, preparación, salida y llegada a la primera entrega.
+- Reparto rápido con captura manual, cámara, lector QR y OCR.
+- Estados de paquete, firma, fotografías, notas de voz y evidencia de visita.
+- Dashboard diario con entregados, no entregados, valor, duración y gráfica.
+- Estadísticas históricas en `localStorage`.
+- Manifiesto de paquetes y consulta de datos cargados.
+- Diseño responsive, modo oscuro, modo conducción e instalación PWA.
+- Impresión, PDF, álbum fotográfico y compartir resumen por WhatsApp.
+- Modal **Visión de Futuro** con roadmap 2026–2028, pilares last-mile, KPIs, arquitectura, inversión/ROI y plan de 30 días.
 
-- **Registro de tiempos base** – Calcula# 📦 Reporte Diario de Ruta – Colserlog
+## 🧭 Hoja de ruta estratégica
 
-Aplicación web progresiva para el registro y seguimiento de entregas diarias de paquetes. Permite capturar tiempos de ruta, estados de cada visita, visualizar estadísticas del día y promedios históricos, todo almacenado localmente en el navegador.
+El plan completo está en [`ROADMAP.md`](ROADMAP.md) y también se puede consultar desde la aplicación mediante **🌌 Visión de Futuro**.
 
-[![Demo](https://img.shields.io/badge/demo-GitHub%20Pages-blue)](https://tusuario.github.io/reporte-entregas/)
-_Reemplaza el enlace con la URL de tu GitHub Pages._
+| Fase | Horizonte | Enfoque |
+|---|---:|---|
+| Fundación | 0–3 meses | Backend propio, PostgreSQL + PostGIS, API, SSO, roles y telemetría |
+| Optimización | 3–9 meses | OR-Tools/VRP, secuenciación, priorización y ETA predictivo |
+| Inteligencia | 9–15 meses | Excepciones predictivas, visión computacional, geofencing y scorecards |
+| Network Effects | 15–24 meses | Multi-bodega, re-ruteo, BI, data warehouse y feeds B2B |
 
----
+### KPIs objetivo
 
-## 🚀 Características principales
+- SPH: **11 → 17 → 22** paradas por hora (baseline / 12m / 24m).
+- First-time delivery: **78% → 92% → 97%**.
+- Costo por entrega: **$2.800 → $2.200 → $1.750 COP**.
+- SLA menor a 24 horas: **82% → 95% → 99%**.
 
-- **Registro de tiempos base** – Calcula automáticamente los minutos invertidos en carga, preparación, viaje y total hasta la primera entrega.
-- **Captura de visitas** – Con botones que insertan la hora actual del navegador para agilizar el registro. Soporta seis estados de paquete.
-- **Tabla de detalle** – Muestra en tiempo real cada visita con su duración en minutos.
-- **Dashboard diario** – Gráfica de barras con la cantidad de paquetes por estado, y tarjetas con entregados, no entregados, total visitas y promedio de tiempo por visita.
-- **Estadísticas históricas** – Guarda automáticamente el total de entregas por día en `localStorage`. Calcula y muestra el promedio de entregas diario, semanal y mensual, con su propia gráfica.
-- **Diseño responsive** – Adaptado para móviles y tablets.
-- **Impresión / PDF** – Botón que genera una vista optimizada para imprimir o guardar como PDF.
+> Las cifras de inversión, ahorro y ROI son hipótesis de planeación. Deben validarse con datos reales antes de comprometer presupuesto.
 
----
+## 🧠 Datos y privacidad
 
-## 🧠 ¿Cómo funciona?
+La aplicación actual guarda la información en el almacenamiento local del navegador; no requiere una base de datos externa para funcionar. Las fotografías deben seguir las reglas de privacidad mostradas por la aplicación y la Ley 1581 de 2012.
 
-### Almacenamiento de datos
-Toda la información (visitas registradas, conteos diarios) se guarda en el **almacenamiento local del navegador** (`localStorage`). Esto significa que los datos persisten incluso si cierras o recargas la página. No se requiere conexión a internet ni base de datos externa.
+La arquitectura futura contempla backend propio, autenticación empresarial, PostgreSQL + PostGIS, Redis, almacenamiento de objetos y un flujo de eventos para analítica y ML.
 
-### Flujo de uso típico
-1. **Tiempos base**: Al iniciar la ruta, ingresa las cuatro horas clave (inicio/fin de carga, salida empresa, llegada a primera entrega). El sistema te muestra los intervalos en minutos.
-2. **Registro de visitas**: Para cada cliente:
-- Pulsa **"Llegada ahora"** para registrar la hora de llegada con la hora exacta.
-- Selecciona el estado del paquete en el desplegable.
-- Al terminar la visita, pulsa **"Salida y Registrar"** – esto registra la hora de salida actual y guarda automáticamente la visita.
-- También puedes ingresar las horas manualmente y usar el botón **"Guardar Visita"**.
-3. **Visualización**: La tabla de detalle se actualiza, las tarjetas de resumen cambian y la gráfica diaria se refresca.
-4. **Historial**: Al final del día, el sistema guarda el total de entregas. Al abrir la página en días siguientes, los promedios históricos (diario, semanal y mensual) se calculan con todos los días registrados.
+## 🛠️ Tecnologías
 
-### Tecnologías utilizadas
-- **HTML5 + CSS3** – Estructura y estilos responsive.
-- **JavaScript (ES6)** – Lógica de negocio y manipulación del DOM.
-- **Chart.js** – Generación de gráficos de barras.
-- **localStorage** – Persistencia de datos en el cliente.
-- **Media queries** – Adaptación a impresión. automáticamente los minutos invertidos en carga, preparación, viaje y total hasta la primera entrega.
-- **Captura de visitas** – Con botones que insertan la hora actual del navegador para agilizar el registro. Soporta seis estados de paquete.
-- **Tabla de detalle** – Muestra en tiempo real cada visita con su duración en minutos.
-- **Dashboard diario** – Gráfica de barras con la cantidad de paquetes por estado, y tarjetas con entregados, no entregados, total visitas y promedio de tiempo por visita.
-- **Estadísticas históricas** – Guarda automáticamente el total de entregas por día en `localStorage`. Calcula y muestra el promedio de entregas diario, semanal y mensual, con su propia gráfica.
-- **Diseño responsive** – Adaptado para móviles y tablets.
-- **Impresión / PDF** – Botón que genera una vista optimizada para imprimir o guardar como PDF.
+- HTML5, CSS3 y JavaScript ES6.
+- Chart.js para gráficos.
+- `localStorage` para persistencia local.
+- HTML5 QR / ZXing para códigos.
+- Tesseract.js para OCR.
+- jsPDF, JSZip y html2canvas para reportes y exportaciones.
+- GitHub Pages mediante GitHub Actions.
 
----
+## ▶️ Uso local
 
-## 🧠 ¿Cómo funciona?
+Abrir `index.html` en un navegador moderno. Para probar cámara, PWA y APIs del navegador se recomienda servirlo mediante HTTPS o un servidor local.
 
-### Almacenamiento de datos
-Toda la información (visitas registradas, conteos diarios) se guarda en el **almacenamiento local del navegador** (`localStorage`). Esto significa que los datos persisten incluso si cierras o recargas la página. No se requiere conexión a internet ni base de datos externa.
+## 📄 Licencia y operación
 
-### Flujo de uso típico
-1. **Tiempos base**: Al iniciar la ruta, ingresa las cuatro horas clave (inicio/fin de carga, salida empresa, llegada a primera entrega). El sistema te muestra los intervalos en minutos.
-2. **Registro de visitas**: Para cada cliente:
-- Pulsa **"Llegada ahora"** para registrar la hora de llegada con la hora exacta.
-- Selecciona el estado del paquete en el desplegable.
-- Al terminar la visita, pulsa **"Salida y Registrar"** – esto registra la hora de salida actual y guarda automáticamente la visita.
-- También puedes ingresar las horas manualmente y usar el botón **"Guardar Visita"**.
-3. **Visualización**: La tabla de detalle se actualiza, las tarjetas de resumen cambian y la gráfica diaria se refresca.
-4. **Historial**: Al final del día, el sistema guarda el total de entregas. Al abrir la página en días siguientes, los promedios históricos (diario, semanal y mensual) se calculan con todos los días registrados.
-
-### Tecnologías utilizadas
-- **HTML5 + CSS3** – Estructura y estilos responsive.
-- **JavaScript (ES6)** – Lógica de negocio y manipulación del DOM.
-- **Chart.js** – Generación de gráficos de barras.
-- **localStorage** – Persistencia de datos en el cliente.
-- **Media queries** – Adaptación a impresión.
+Este repositorio contiene la aplicación operativa de Colserlog. Revisar permisos, tratamiento de datos y configuración de despliegue antes de incorporar servicios backend o integraciones empresariales.

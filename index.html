@@ -549,6 +549,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
 .vf-pillar .p-emoji{font-size:1.6rem;display:block;margin-bottom:6px}
 .vf-pillar .p-name{font-size:.78rem;font-weight:600;color:var(--text-heading);margin:0 0 3px 0;letter-spacing:-0.01em}
 .vf-pillar .p-desc{font-size:.65rem;color:var(--text-muted);margin:0;line-height:1.35}
+.vf-insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0 24px}.vf-insight{padding:14px 12px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);text-align:left}.vf-insight .i-label{display:block;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);font-weight:700;margin-bottom:5px}.vf-insight .i-value{display:block;font-size:1.05rem;font-weight:700;color:var(--text-heading);line-height:1.2}.vf-insight .i-note{display:block;margin-top:5px;font-size:.68rem;color:var(--text-secondary);line-height:1.35}.vf-table-wrap{overflow-x:auto;border:1px solid var(--border-light);border-radius:var(--radius-md);margin-top:12px}.vf-data-table{width:100%;min-width:520px;border-collapse:collapse;font-size:.72rem;background:var(--bg-card)}.vf-data-table th,.vf-data-table td{padding:9px 10px;text-align:left;border-bottom:1px solid var(--border-light);white-space:normal}.vf-data-table th{background:var(--table-header-bg);color:var(--table-header-color);font-size:.63rem;text-transform:uppercase;letter-spacing:.05em}.vf-data-table tr:last-child td{border-bottom:0}.vf-data-table td strong{color:var(--text-heading)}.vf-action-list{display:grid;gap:8px;margin:14px 0 0;padding:0;list-style:none}.vf-action-list li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius-md);font-size:.75rem;color:var(--text-secondary);line-height:1.45}.vf-action-list b{color:var(--sys-blue);white-space:nowrap}.vf-architecture{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-top:14px}.vf-arch-node{padding:12px 10px;text-align:center;border-radius:var(--radius-md);background:linear-gradient(135deg,rgba(0,113,227,.08),rgba(48,176,199,.08));border:1px solid rgba(0,113,227,.18);font-size:.7rem;color:var(--text-secondary);line-height:1.35}.vf-arch-node strong{display:block;color:var(--text-heading);font-size:.75rem;margin-bottom:3px}.vf-note{padding:12px 14px;margin-top:14px;border-left:3px solid var(--sys-orange);background:rgba(255,149,0,.08);border-radius:0 var(--radius-md) var(--radius-md) 0;color:var(--text-secondary);font-size:.73rem;line-height:1.45}.vf-section-caption{margin:0 0 8px;color:var(--text-secondary);font-size:.78rem;line-height:1.45}@media(max-width:520px){.vf-body{padding:20px}.vf-table-wrap{margin-left:-4px;margin-right:-4px}.vf-action-list li{display:block}.vf-action-list b{display:block;margin-bottom:3px}}
 .vf-quote{margin:32px 0 0 0;padding:24px 20px;background:linear-gradient(135deg,#000,#1d1d1f);color:#fff;border-radius:var(--radius-lg);text-align:center;position:relative;overflow:hidden}
 .vf-quote::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(0,113,227,.15),transparent 70%);pointer-events:none}
 .vf-quote .q-icon{font-size:1.8rem;margin-bottom:10px;display:block;position:relative;z-index:1}
@@ -808,6 +809,74 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
         <div class="vf-pillar"><span class="p-emoji">📊</span><p class="p-name">Data Lake</p><p class="p-desc">Snowflake · BI</p></div>
         <div class="vf-pillar"><span class="p-emoji">⚡</span><p class="p-name">Event Stream</p><p class="p-desc">Kafka · Real-time</p></div>
       </div>
+      <div class="vf-roadmap-title" style="margin-top:32px;">
+        <span class="icon" style="background:linear-gradient(135deg,#ff9500,#ff3b30);">🏛️</span>
+        <span>Los 5 Pilares de la Excelencia en Last-Mile</span>
+      </div>
+      <p class="vf-section-caption">La operación actual ya captura escaneo, fotos, firma, GPS y reportes PDF. Estas metas convierten esa evidencia en una ventaja operativa medible.</p>
+      <div class="vf-insight-grid">
+        <div class="vf-insight"><span class="i-label">Velocidad por parada</span><span class="i-value">8–12 → 18–25</span><span class="i-note">paradas por hora</span></div>
+        <div class="vf-insight"><span class="i-label">Primera entrega</span><span class="i-value">75–85% → 98.5%</span><span class="i-note">tasa objetivo</span></div>
+        <div class="vf-insight"><span class="i-label">Costo por paquete</span><span class="i-value">Baseline → −22%</span><span class="i-note">medición y mejora</span></div>
+        <div class="vf-insight"><span class="i-label">Trazabilidad</span><span class="i-value">Evidencia total</span><span class="i-note">foto + GPS + firma</span></div>
+        <div class="vf-insight"><span class="i-label">Inteligencia</span><span class="i-value">ML en ruta</span><span class="i-note">de cero a predictivo</span></div>
+      </div>
+      <div class="vf-roadmap-title" style="margin-top:28px;">
+        <span class="icon" style="background:linear-gradient(135deg,#0071e3,#30b0c7);">📊</span>
+        <span>Métricas de éxito</span>
+      </div>
+      <div class="vf-table-wrap">
+        <table class="vf-data-table">
+          <thead><tr><th>KPI</th><th>Baseline típico</th><th>Meta 12 meses</th><th>Meta 24 meses</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SPH</strong> · paradas/hora</td><td>11</td><td>17</td><td>22</td></tr>
+            <tr><td><strong>First-time delivery</strong></td><td>78%</td><td>92%</td><td>97%</td></tr>
+            <tr><td><strong>Costo por entrega</strong></td><td>$2.800</td><td>$2.200</td><td>$1.750</td></tr>
+            <tr><td><strong>NPS cliente final</strong></td><td>45</td><td>68</td><td>80</td></tr>
+            <tr><td><strong>SLA &lt;24h</strong></td><td>82%</td><td>95%</td><td>99%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="vf-roadmap-title" style="margin-top:28px;">
+        <span class="icon" style="background:linear-gradient(135deg,#34c759,#30b0c7);">🏗️</span>
+        <span>Arquitectura objetivo</span>
+      </div>
+      <div class="vf-architecture">
+        <div class="vf-arch-node"><strong>Canales</strong>PWA mensajero · Panel dispatcher · API B2B</div>
+        <div class="vf-arch-node"><strong>Gateway</strong>Kong / AWS · API versionada</div>
+        <div class="vf-arch-node"><strong>Servicios</strong>Auth · Delivery · Route Engine</div>
+        <div class="vf-arch-node"><strong>Datos</strong>PostgreSQL + PostGIS · Redis · S3/MinIO</div>
+        <div class="vf-arch-node"><strong>Inteligencia</strong>Kafka/RabbitMQ · Snowflake/BI · ML</div>
+      </div>
+      <div class="vf-note"><strong>Decisión de fundación:</strong> migrar gradualmente de Firebase directo a un backend propio, con datos limpios, autenticación empresarial, telemetría cada 30 segundos y latencia de sincronización menor a 5 segundos.</div>
+      <div class="vf-roadmap-title" style="margin-top:28px;">
+        <span class="icon" style="background:linear-gradient(135deg,#af52de,#ff9500);">🎯</span>
+        <span>Próximos 30 días</span>
+      </div>
+      <ul class="vf-action-list">
+        <li><b>Semana 1</b><span>Auditoría técnica externa del código y la arquitectura actual.</span></li>
+        <li><b>Semana 2</b><span>Contratar o asignar CTO/Arquitecto y DevOps responsables de la fundación.</span></li>
+        <li><b>Semana 3</b><span>Diseñar el esquema PostgreSQL + PostGIS y el contrato de la API.</span></li>
+        <li><b>Semana 4</b><span>Prototipar Route Optimization con OR-Tools usando datos dummy.</span></li>
+        <li><b>Semana 4</b><span>Definir KPIs contractuales con clientes B2B como COLVANES y ENVÍA.</span></li>
+      </ul>
+      <div class="vf-roadmap-title" style="margin-top:28px;">
+        <span class="icon" style="background:linear-gradient(135deg,#ff9500,#ff3b30);">💰</span>
+        <span>Inversión y retorno estimado</span>
+      </div>
+      <div class="vf-table-wrap">
+        <table class="vf-data-table">
+          <thead><tr><th>Fase</th><th>Inversión</th><th>Duración</th><th>Ahorro anual estimado</th></tr></thead>
+          <tbody>
+            <tr><td><strong>F1 · Fundación</strong></td><td>$180M COP</td><td>3 meses</td><td>Habilitador</td></tr>
+            <tr><td><strong>F2 · Optimización</strong></td><td>$320M COP</td><td>6 meses</td><td>$1.500M COP</td></tr>
+            <tr><td><strong>F3 · Inteligencia</strong></td><td>$450M COP</td><td>6 meses</td><td>$2.400M COP</td></tr>
+            <tr><td><strong>F4 · Network Effects</strong></td><td>$600M COP</td><td>9 meses</td><td>$4.200M COP</td></tr>
+            <tr><td><strong>Total</strong></td><td><strong>$1.550M COP</strong></td><td>24 meses</td><td><strong>$8.100M COP</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="vf-section-caption" style="margin-top:10px;"><strong>Hipótesis de negocio:</strong> ROI global estimado de 5.2x en 24 meses, con payback alrededor del mes 11. Validar cifras con datos operativos reales antes de comprometer inversión.</p>
       <div class="vf-quote">
         <span class="q-icon">🌟</span>
         <p class="q-text">El objetivo no es una app más rápida.<br>Es una <strong>operación que se vuelve más inteligente</strong><br>cada día que pasa.</p>
