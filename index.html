@@ -574,6 +574,8 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
 .alerta-analitica{display:none;padding:14px 16px;border-radius:var(--radius-md);margin:12px 0;border-left:4px solid var(--sys-red);background:rgba(255,59,48,.10);color:#7a1f1f;font-size:.86rem;line-height:1.5}.alerta-analitica.visible{display:block}.alerta-analitica.info{border-left-color:var(--sys-orange);background:rgba(255,149,0,.10);color:#7a5b0f}.alerta-analitica.ok{border-left-color:var(--sys-green);background:rgba(52,199,89,.10);color:#246b36}.analitica-kpi.critico{border-color:var(--sys-red);background:rgba(255,59,48,.08);box-shadow:0 0 0 2px rgba(255,59,48,.12)}.analitica-kpi.critico .kpi-value{color:var(--sys-red)}.analitica-kpi.cumple{border-color:var(--sys-green);background:rgba(52,199,89,.06)}.analitica-alerta-config{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end;padding:12px;background:var(--bg-card);border:1px dashed var(--border-main);border-radius:var(--radius-md);margin:12px 0}.analitica-alerta-config label{margin:0;font-size:.75rem;color:var(--text-secondary);font-weight:600}.analitica-alerta-config input[type=number]{margin-top:5px;padding:9px}.analitica-alerta-config .check-alerta{display:flex;align-items:center;gap:7px;min-height:38px}.analitica-alerta-config .check-alerta input{width:auto;margin:0}.analitica-alerta-config button{width:auto;margin:0;padding:9px 13px}@media(max-width:640px){.analitica-alerta-config{grid-template-columns:1fr 1fr}.analitica-alerta-config button{grid-column:1/-1}}
 
 .selector-banco-reparto{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px}.selector-banco-reparto select{min-height:112px;margin:0}.selector-banco-reparto button{width:auto;margin:0;padding:10px 14px}.selector-banco-vacio{font-size:.78rem;color:var(--text-muted);padding:10px 0}.gps-estado-reparto{margin-top:10px;justify-content:center}.gps-estado-reparto.cargando{background:rgba(0,113,227,.12);color:var(--sys-blue)}
+
+.busqueda-guia-reparto{margin-top:14px;padding:12px;background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius-md)}.busqueda-guia-reparto label{margin:0;font-size:.86rem;font-weight:700}.busqueda-guia-reparto input{margin-top:7px}.resultados-guia-reparto{display:grid;gap:6px;margin-top:8px}.resultado-guia-reparto{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 10px;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-card);font-size:.78rem}.resultado-guia-reparto button{width:auto;margin:0;padding:7px 10px;font-size:.75rem}.resultado-guia-reparto .codigo-match{font-family:monospace;font-weight:700;color:var(--sys-blue)}.resultado-guia-reparto small{display:block;color:var(--text-secondary);margin-top:2px}.perfil-cuenta{padding:14px;background:var(--bg-section);border:1px solid var(--border-light);border-radius:var(--radius-md);margin:12px 0}.perfil-cuenta .perfil-meta{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:.8rem;color:var(--text-secondary);margin-bottom:10px}.perfil-cuenta input{margin-top:6px}.perfil-cuenta button{width:auto;margin:10px 0 0;padding:10px 14px}
 </style>
 </head>
 <body>
@@ -949,6 +951,11 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <button type="button" class="btn-reparto-grande" id="btnEscanearReparto" onclick="iniciarEscaneo('reparto')">📷 Escanear guías (Cámara)</button>
       <div id="lectorQR"><div class="escaneo-mensaje">🔍 Escaneando...</div></div>
       <div style="text-align:center;margin-top:5px;"><button type="button" class="btn-cancelar no-print" onclick="cancelarEscaneo()" style="display:none;" id="btnCancelarEscaneo">Cancelar</button></div>
+      <div class="busqueda-guia-reparto">
+        <label>🔎 Buscar guía del banco por algunos números:</label>
+        <input type="text" id="inputBuscarGuiaReparto" inputmode="numeric" maxlength="12" autocomplete="off" placeholder="Ejemplo: 4821" oninput="buscarGuiasReparto(this.value)">
+        <div id="resultadosGuiasReparto" class="resultados-guia-reparto" aria-live="polite"></div>
+      </div>
       <div style="margin-top:16px;padding:14px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);">
         <label style="margin-top:0;font-size:.9rem;font-weight:700;">➕ Agregar guía manualmente:</label>
         <div class="input-group" style="margin-top:8px;">
@@ -1211,6 +1218,20 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
   <div class="tab-panel" data-tab="ajustes">
     <div class="section no-print">
       <h2>6. Control de Sesión</h2>
+      <div class="perfil-cuenta">
+        <h3 style="margin:0 0 6px 0;">👤 Mi cuenta</h3>
+        <div class="perfil-meta"><span>Usuario: <strong id="perfilUsuarioActual">Sin usuario</strong></span><span>Rol: <strong id="perfilRolActual">Repartidor</strong></span></div>
+        <label>Nuevo nombre de usuario (opcional):</label>
+        <input type="text" id="perfilNuevoNombre" maxlength="40" autocomplete="username" placeholder="Nombre visible">
+        <label style="margin-top:10px;">Contraseña actual:</label>
+        <input type="password" id="perfilPasswordActual" autocomplete="current-password" placeholder="Necesaria para guardar cambios">
+        <label style="margin-top:10px;">Nueva contraseña (opcional):</label>
+        <input type="password" id="perfilPasswordNueva" autocomplete="new-password" placeholder="Mín. 8, mayúscula, minúscula y número">
+        <label style="margin-top:10px;">Repetir nueva contraseña:</label>
+        <input type="password" id="perfilPasswordNueva2" autocomplete="new-password" placeholder="Repite la nueva contraseña">
+        <button type="button" class="btn-guardar" onclick="actualizarPerfilCuenta()">💾 Guardar cambios de cuenta</button>
+        <div id="perfilCuentaMensaje" class="msj-info-user" style="margin-top:8px;"></div>
+      </div>
       <div class="btn-group">
         <button type="button" class="btn-guardar" onclick="guardarDia()">💾 Guardar Día</button>
         <button type="button" class="btn-reiniciar" onclick="reiniciarDia()">🔄 Reiniciar Día</button>
@@ -1271,6 +1292,8 @@ function actualizarEstadoNube(txt,tipo='ok'){const el=document.getElementById('e
 window.actualizarEstadoNube=actualizarEstadoNube;
 function slugify(txt){const s=(txt||'').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');if(s)return s;let h=0;const raw=(txt||'').toString();for(let i=0;i<raw.length;i++)h=((h<<5)-h+raw.charCodeAt(i))|0;return 'u-'+(h>>>0).toString(36);}
 function getUsuarioActual(){try{return (localStorage.getItem(CLAVE_USUARIO_LOCAL)||'').trim()||null;}catch{return null;}}
+function getRolActual(){const u=getUsuarioActual(),r=u&&buscarUsuario(u);return r?.rol||'repartidor';}
+window.getRolActual=getRolActual;
 function setUsuarioActual(n){try{localStorage.setItem(CLAVE_USUARIO_LOCAL,n.trim());}catch(e){}}
 function refUsuario(){const u=getUsuarioActual();if(!u||!db)return null;return doc(db,'colserlog_usuarios',CODIGO_GRUPO,'mensajeros',slugify(u)||'sin-nombre');}
 window.refUsuario=refUsuario;window.getUsuarioActual=getUsuarioActual;
@@ -1290,11 +1313,11 @@ async function verificarPasswordPBKDF2(password, hashGuardado, saltB64){
   return hash === hashGuardado;
 }
 
-async function guardarCuentaEnNube(nombre, hash, salt){
+async function guardarCuentaEnNube(nombre, hash, salt, rol='repartidor'){
   if(!db) return false;
   try{
     const slug=slugify(nombre)||'sin-nombre';
-    await setDoc(doc(db,'colserlog_usuarios',CODIGO_GRUPO,'cuentas',slug),{nombre:nombre.trim(),hash,salt,algo:'PBKDF2-SHA256-60k',fechaRegistro:new Date().toISOString(),ultimaSesion:new Date().toISOString()},{merge:true});
+    await setDoc(doc(db,'colserlog_usuarios',CODIGO_GRUPO,'cuentas',slug),{nombre:nombre.trim(),hash,salt,rol,algo:'PBKDF2-SHA256-60k',fechaRegistro:new Date().toISOString(),ultimaSesion:new Date().toISOString()},{merge:true});
     return true;
   }catch(e){return false;}
 }
@@ -1377,9 +1400,9 @@ window.hacerRegistro=async function(){
   let hashRes;
   try{ hashRes = await hashPasswordPBKDF2(p1); }catch(e){ return mostrarErrorUser(e.message); }
   const lista=getUsuariosRegistrados();
-  lista.push({nombre:n.trim(),hash:hashRes.hash,salt:hashRes.salt,algo:'PBKDF2-SHA256-60k',fechaRegistro:new Date().toISOString()});
+  lista.push({nombre:n.trim(),hash:hashRes.hash,salt:hashRes.salt,rol:'repartidor',algo:'PBKDF2-SHA256-60k',fechaRegistro:new Date().toISOString()});
   guardarUsuariosRegistrados(lista);
-  guardarCuentaEnNube(n.trim(), hashRes.hash, hashRes.salt).catch(()=>{});
+  guardarCuentaEnNube(n.trim(), hashRes.hash, hashRes.salt, 'repartidor').catch(()=>{});
   setUsuarioActual(n.trim()); actualizarBarraUsuario();
   await new Promise(r=>setTimeout(r,200));
   await iniciarSesionConUsuario(n.trim());
@@ -1397,7 +1420,7 @@ window.hacerLogin=async function(){
       const nubeUser = await Promise.race([buscarCuentaEnNube(n), new Promise(r=>setTimeout(()=>r(null),8000))]);
       if(nubeUser){
         const lista=getUsuariosRegistrados();
-        lista.push({nombre:nubeUser.nombre,hash:nubeUser.hash,salt:nubeUser.salt,algo:nubeUser.algo||'SHA-256-LEGACY',fechaRegistro:nubeUser.fechaRegistro});
+        lista.push({nombre:nubeUser.nombre,hash:nubeUser.hash,salt:nubeUser.salt,rol:nubeUser.rol||'repartidor',algo:nubeUser.algo||'SHA-256-LEGACY',fechaRegistro:nubeUser.fechaRegistro});
         guardarUsuariosRegistrados(lista); user=nubeUser;
       } else { return mostrarErrorUser('Usuario no encontrado.'); }
     }
@@ -1459,7 +1482,8 @@ window.cerrarSesion=async function(){
 window.olvidarUsuariosLocales=function(){if(!confirm('⚠️ ¿Borrar todos los usuarios locales?'))return;try{localStorage.removeItem(CLAVE_USUARIOS_REGISTRADOS);}catch(e){}renderizarListaUsuarios();};
 function limpiarTodoLocalStorage(){try{localStorage.removeItem('estadoSesion');localStorage.removeItem('entregasDiariasDetallado');localStorage.removeItem('colserlog_borrador');for(let i=localStorage.length-1;i>=0;i--){const k=localStorage.key(i);if(k&&k.startsWith('tiempoBase_'))localStorage.removeItem(k);}}catch(e){}}
 window.limpiarTodoLocalStorage=limpiarTodoLocalStorage;
-function actualizarBarraUsuario(){const u=getUsuarioActual();const s=document.getElementById('infoUsuario'),a=document.getElementById('avatarUsuario'),t=document.getElementById('tituloUsuarioHistorial');if(!s||!a)return;if(u){s.textContent=u;a.textContent=u.charAt(0).toUpperCase();if(t)t.textContent='— '+u;mostrarBotonCerrarSesion(true);}else{s.textContent='Sin usuario';a.textContent='👤';if(t)t.textContent='';mostrarBotonCerrarSesion(false);}}
+function actualizarBarraUsuario(){const u=getUsuarioActual();const s=document.getElementById('infoUsuario'),a=document.getElementById('avatarUsuario'),t=document.getElementById('tituloUsuarioHistorial'),pu=document.getElementById('perfilUsuarioActual'),pr=document.getElementById('perfilRolActual');if(!s||!a)return;if(u){s.textContent=u;a.textContent=u.charAt(0).toUpperCase();if(t)t.textContent='— '+u;if(pu)pu.textContent=u;if(pr)pr.textContent=getRolActual()==='admin'?'Administrador':'Repartidor';mostrarBotonCerrarSesion(true);}else{s.textContent='Sin usuario';a.textContent='👤';if(t)t.textContent='';if(pu)pu.textContent='Sin usuario';if(pr)pr.textContent='—';mostrarBotonCerrarSesion(false);}}
+window.actualizarPerfilCuenta=async function(){const msg=document.getElementById('perfilCuentaMensaje'),actual=getUsuarioActual(),actualEl=document.getElementById('perfilPasswordActual'),nuevoNombreEl=document.getElementById('perfilNuevoNombre'),nuevaEl=document.getElementById('perfilPasswordNueva'),nueva2El=document.getElementById('perfilPasswordNueva2');const aviso=m=>{if(msg){msg.textContent=m;msg.classList.add('visible');}};if(!actual){aviso('⚠️ Inicia sesión para editar tu cuenta.');return;}const user=buscarUsuario(actual);if(!user){aviso('⚠️ No se encontró la cuenta local.');return;}const actualPass=actualEl?.value||'';if(!actualPass){aviso('⚠️ Escribe tu contraseña actual para autorizar el cambio.');return;}let credOk=false;try{if(user.algo==='PBKDF2-SHA256-60k'&&user.salt)credOk=await verificarPasswordPBKDF2(actualPass,user.hash,user.salt);else{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(actualPass));credOk=Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')===user.hash;}}catch(e){}if(!credOk){aviso('⚠️ La contraseña actual no coincide.');return;}const nuevoNombre=(nuevoNombreEl?.value||'').trim()||actual,nuevaPass=nuevaEl?.value||'',nuevaPass2=nueva2El?.value||'';if(nuevoNombre!==actual){if(nuevoNombre.length<3||!/^[a-zA-Z0-9áéíóúñÑ\s._-]+$/.test(nuevoNombre)){aviso('⚠️ El nuevo nombre no es válido.');return;}if(buscarUsuario(nuevoNombre)){aviso('⚠️ Ese nombre de usuario ya existe.');return;}}if(nuevaPass||nuevaPass2){const err=validarPassword(nuevaPass);if(err){aviso('⚠️ '+err);return;}if(nuevaPass!==nuevaPass2){aviso('⚠️ Las nuevas contraseñas no coinciden.');return;}}let cuenta={...user,nombre:nuevoNombre};if(nuevaPass){const h=await hashPasswordPBKDF2(nuevaPass);cuenta.hash=h.hash;cuenta.salt=h.salt;cuenta.algo='PBKDF2-SHA256-60k';}const lista=getUsuariosRegistrados().filter(x=>x.nombre.toLowerCase()!==actual.toLowerCase());lista.push(cuenta);guardarUsuariosRegistrados(lista);const nombreCambio=nuevoNombre!==actual;let nubeAnterior=null;if(nombreCambio&&db){try{const oldSnap=await getDoc(doc(db,'colserlog_usuarios',CODIGO_GRUPO,'mensajeros',slugify(actual)));if(oldSnap.exists())nubeAnterior=oldSnap.data();}catch(e){}}if(nombreCambio)setUsuarioActual(nuevoNombre);await guardarCuentaEnNube(nuevoNombre,cuenta.hash,cuenta.salt,cuenta.rol||'repartidor');if(nombreCambio&&db&&nubeAnterior){try{await setDoc(doc(db,'colserlog_usuarios',CODIGO_GRUPO,'mensajeros',slugify(nuevoNombre)),{...nubeAnterior,nombre:nuevoNombre},{merge:true});}catch(e){}}if(nombreCambio&&syncActivo){if(unsubscribeEscucha){try{unsubscribeEscucha();}catch(e){}unsubscribeEscucha=null;}iniciarEscucha();}actualEl.value='';nuevoNombreEl.value='';nuevaEl.value='';nueva2El.value='';actualizarBarraUsuario();aviso('✅ Datos de cuenta actualizados.');};
 function renderizarListaUsuarios(){const c=document.getElementById('listaUsuariosGuardados');if(!c)return;c.innerHTML='';const us=getUsuariosRegistrados();if(!us.length)return;us.slice().reverse().forEach(u=>{const b=document.createElement('button');b.type='button';b.textContent='👤 '+u.nombre;b.style.width='100%';b.onclick=()=>{document.getElementById('loginNombre').value=u.nombre;window.cambiarTabUser('login');document.getElementById('loginPassword').focus();};c.appendChild(b);});}
 function mostrarModalUsuario(){const m=document.getElementById('modalUsuario');if(!m)return;renderizarListaUsuarios();m.classList.add('visible');}
 window.mostrarModalUsuario=mostrarModalUsuario;
@@ -2425,6 +2449,9 @@ function seleccionarEstadoReparto(estado){
 }
 window.seleccionarEstadoReparto=seleccionarEstadoReparto;
 
+function puntuarCoincidenciaGuia(codigo,consulta){if(!consulta)return 0;if(codigo===consulta)return 10000;if(codigo.startsWith(consulta))return 7000+consulta.length*100;if(codigo.includes(consulta))return 4000+consulta.length*100;let i=0;for(const ch of consulta){const pos=codigo.indexOf(ch,i);if(pos<0)return -1;i=pos+1;}return 1000+consulta.length;}
+window.buscarGuiasReparto=function(valor){const root=document.getElementById('resultadosGuiasReparto');if(!root)return;root.innerHTML='';const q=String(valor||'').replace(/\D/g,'').slice(0,12);if(q.length<2)return;const usados=codigosEnVisitas(),pendientes=new Set(codigosPendientesReparto),resultados=bancoCodigos.map(normalizarCodigoBanco).filter(x=>x.codigo&&!usados.has(x.codigo)&&!pendientes.has(x.codigo)).map(x=>({...x,puntaje:puntuarCoincidenciaGuia(x.codigo,q)})).filter(x=>x.puntaje>=0).sort((a,b)=>b.puntaje-a.puntaje||a.codigo.localeCompare(b.codigo)).slice(0,8);if(!resultados.length){root.textContent='No hay coincidencias en el banco.';return;}resultados.forEach(item=>{const row=document.createElement('div');row.className='resultado-guia-reparto';const info=document.createElement('div'),code=document.createElement('span');code.className='codigo-match';code.textContent=item.codigo;info.appendChild(code);const detail=document.createElement('small');detail.textContent=[item.direccion,item.precio?formatCOP(item.precio):''].filter(Boolean).join(' · ')||'Guía disponible';info.appendChild(detail);const btn=document.createElement('button');btn.type='button';btn.className='btn-agregar-codigo';btn.textContent='➕ Seleccionar';btn.onclick=()=>window.seleccionarGuiaBusquedaReparto(item.codigo);row.append(info,btn);root.appendChild(row);});};
+window.seleccionarGuiaBusquedaReparto=function(cod){const b=bancoBuscar(cod);if(!b||!b.item){mostrarAviso('⚠️ Guía no disponible en el banco','warn');return;}if(codigosRegistradosHoy.has(cod)){mostrarAviso('⚠️ La guía '+cod+' ya está guardada','warn');return;}if(codigosPendientesReparto.includes(cod)){mostrarAviso('⚠️ La guía '+cod+' ya está seleccionada','warn');return;}codigosPendientesReparto.push(cod);renderizarCodigosReparto();actualizarResumenReparto();guardarEstadoCompleto();const inp=document.getElementById('inputBuscarGuiaReparto');if(inp)inp.value='';const root=document.getElementById('resultadosGuiasReparto');if(root)root.innerHTML='';beepOk();mostrarAviso('✅ Guía '+cod+' seleccionada','ok');};
 window.agregarGuiasBancoReparto=function(){const sel=document.getElementById('selectorGuiasReparto');if(!sel)return;const disponibles=[...sel.selectedOptions].map(o=>o.value);let agregadas=0;disponibles.forEach(cod=>{if(codigosPendientesReparto.includes(cod)||codigosRegistradosHoy.has(cod))return;codigosPendientesReparto.push(cod);agregadas++;});if(agregadas){renderizarCodigosReparto();actualizarResumenReparto();guardarEstadoCompleto();beepOk();mostrarAviso(`✅ ${agregadas} guía(s) agregada(s) desde el banco`,'ok');if(navigator.vibrate)navigator.vibrate(50);}sel.selectedIndex=-1;renderizarSelectorBancoReparto();};
 window.renderizarSelectorBancoReparto=function(){const root=document.getElementById('selectorBancoReparto');if(!root)return;root.innerHTML='';const usados=codigosEnVisitas(),pendientes=new Set(codigosPendientesReparto),items=bancoCodigos.map(normalizarCodigoBanco).filter(x=>x.codigo&&!usados.has(x.codigo)&&!pendientes.has(x.codigo));if(!items.length){const empty=document.createElement('div');empty.className='selector-banco-vacio';empty.textContent='No hay guías disponibles en el banco.';root.appendChild(empty);return;}const sel=document.createElement('select');sel.id='selectorGuiasReparto';sel.multiple=true;sel.size=Math.min(5,Math.max(3,items.length));sel.title='Usa Ctrl/Cmd para seleccionar varias guías';items.forEach(item=>{const op=document.createElement('option');op.value=item.codigo;op.textContent=`${item.codigo}${item.direccion?' · '+item.direccion:''}${item.precio?' · '+formatCOP(item.precio):''}`;sel.appendChild(op);});const btn=document.createElement('button');btn.type='button';btn.className='btn-agregar-codigo';btn.textContent='➕ Agregar';btn.onclick=()=>window.agregarGuiasBancoReparto();root.appendChild(sel);root.appendChild(btn);};
 function renderizarCodigosReparto(){

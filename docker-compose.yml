@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_DB: colserlog
+      POSTGRES_USER: colserlog
+      POSTGRES_PASSWORD: colserlog
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/sql:/docker-entrypoint-initdb.d:ro
+  api:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://colserlog:colserlog@db:5432/colserlog
+      CORS_ORIGINS: https://kevinlink257-commits.github.io,http://localhost:8080
+      DEV_AUTH: "true"
+    ports: ["8000:8000"]
+    depends_on: [db]
+volumes:
+  postgres_data:

@@ -59,3 +59,9 @@ Abrir `index.html` en un navegador moderno. Para probar cámara, PWA y APIs del 
 ## 📄 Licencia y operación
 
 Este repositorio contiene la aplicación operativa de Colserlog. Revisar permisos, tratamiento de datos y configuración de despliegue antes de incorporar servicios backend o integraciones empresariales.
+
+## Plataforma y cuenta
+
+La aplicación ahora incorpora una base de migración a backend propio en [`backend/`](backend/): FastAPI, PostgreSQL + PostGIS, perfiles, roles, búsqueda de guías y telemetría. El despliegue local se inicia con `docker compose up --build`; GitHub Pages continúa funcionando como frontend offline mientras se configura el endpoint productivo y SSO/OIDC.
+
+En **Ajustes → Mi cuenta**, el usuario puede cambiar su nombre y contraseña después de validar la contraseña actual. En **Reparto Rápido** puede escribir algunos dígitos y seleccionar la guía con mayor coincidencia desde el banco.
