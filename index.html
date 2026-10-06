@@ -572,6 +572,8 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
 .filtros-avanzados{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:end;background:var(--bg-section);padding:14px;border:1px solid var(--border-light);border-radius:var(--radius-md);margin:12px 0 16px}.filtros-avanzados label{margin:0;font-size:.76rem;color:var(--text-secondary);font-weight:600}.filtros-avanzados input,.filtros-avanzados select{margin-top:5px;font-size:.84rem;padding:10px}.filtros-avanzados .filtros-acoes{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;align-items:center}.filtros-avanzados .filtros-acoes button{width:auto;margin:0;padding:9px 14px}.filtros-resultado{font-size:.78rem;color:var(--text-secondary);margin-left:auto}.analitica-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:12px 0 18px}.analitica-kpi{border:1px solid var(--border-light);border-radius:var(--radius-md);padding:12px;text-align:center;background:var(--bg-card)}.analitica-kpi .kpi-label{font-size:.68rem;text-transform:uppercase;color:var(--text-secondary);font-weight:600;letter-spacing:.04em}.analitica-kpi .kpi-value{display:block;margin-top:5px;font-size:1.25rem;color:var(--text-heading);font-weight:700}.analitica-graficas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.analitica-grafica{min-width:0;border:1px solid var(--border-light);border-radius:var(--radius-md);padding:12px;background:var(--bg-card)}.analitica-grafica h3{font-size:.88rem;margin:0 0 8px;color:var(--text-heading)}.analitica-grafica canvas{width:100%!important;min-height:230px;max-height:300px}@media(max-width:640px){.filtros-avanzados{grid-template-columns:1fr 1fr}.analitica-graficas{grid-template-columns:1fr}.analitica-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .alerta-analitica{display:none;padding:14px 16px;border-radius:var(--radius-md);margin:12px 0;border-left:4px solid var(--sys-red);background:rgba(255,59,48,.10);color:#7a1f1f;font-size:.86rem;line-height:1.5}.alerta-analitica.visible{display:block}.alerta-analitica.info{border-left-color:var(--sys-orange);background:rgba(255,149,0,.10);color:#7a5b0f}.alerta-analitica.ok{border-left-color:var(--sys-green);background:rgba(52,199,89,.10);color:#246b36}.analitica-kpi.critico{border-color:var(--sys-red);background:rgba(255,59,48,.08);box-shadow:0 0 0 2px rgba(255,59,48,.12)}.analitica-kpi.critico .kpi-value{color:var(--sys-red)}.analitica-kpi.cumple{border-color:var(--sys-green);background:rgba(52,199,89,.06)}.analitica-alerta-config{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:end;padding:12px;background:var(--bg-card);border:1px dashed var(--border-main);border-radius:var(--radius-md);margin:12px 0}.analitica-alerta-config label{margin:0;font-size:.75rem;color:var(--text-secondary);font-weight:600}.analitica-alerta-config input[type=number]{margin-top:5px;padding:9px}.analitica-alerta-config .check-alerta{display:flex;align-items:center;gap:7px;min-height:38px}.analitica-alerta-config .check-alerta input{width:auto;margin:0}.analitica-alerta-config button{width:auto;margin:0;padding:9px 13px}@media(max-width:640px){.analitica-alerta-config{grid-template-columns:1fr 1fr}.analitica-alerta-config button{grid-column:1/-1}}
+
+.selector-banco-reparto{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin-top:10px}.selector-banco-reparto select{min-height:112px;margin:0}.selector-banco-reparto button{width:auto;margin:0;padding:10px 14px}.selector-banco-vacio{font-size:.78rem;color:var(--text-muted);padding:10px 0}.gps-estado-reparto{margin-top:10px;justify-content:center}.gps-estado-reparto.cargando{background:rgba(0,113,227,.12);color:var(--sys-blue)}
 </style>
 </head>
 <body>
@@ -953,6 +955,8 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
           <input type="text" id="inputGuiaManual" placeholder="12 dígitos" inputmode="numeric" maxlength="12" autocomplete="off" oninput="filtrarSoloDigitos(this);" onkeydown="if(event.key==='Enter'){event.preventDefault();agregarGuiaManualReparto();}">
           <button type="button" class="btn-agregar-codigo" onclick="agregarGuiaManualReparto()">➕</button>
         </div>
+        <label style="margin-top:14px;font-size:.9rem;font-weight:700;">📥 Seleccionar guías del banco:</label>
+        <div id="selectorBancoReparto" class="selector-banco-reparto"></div>
       </div>
       <button type="button" class="btn-reparto-grande" style="background:var(--sys-teal);margin-top:12px;" onclick="document.getElementById('inputOCR').click()">📸 Escanear foto de guías (OCR)</button>
       <input type="file" id="inputOCR" accept="image/*" capture="environment" multiple style="display:none;" onchange="procesarFotosOCR(event)">
@@ -966,6 +970,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <input type="text" id="direccionReparto" placeholder="Se autocompleta desde el banco" autocomplete="off">
       <label style="margin-top:12px;font-size:1.05em;">🗺️ Zona (opcional):</label>
       <input type="text" id="zonaReparto" placeholder="Barrio, localidad o zona" autocomplete="off">
+      <div id="estadoGpsReparto" class="gps-badge gps-estado-reparto warn" role="status" aria-live="polite">📍 Ubicación pendiente</div>
       <label style="margin-top:20px;font-size:1.05em;">🎯 Estado del paquete:</label>
       <div id="gridEstadosReparto" class="grid-estados-reparto"></div>
       <select id="estadoPaqueteRepartoSelect" style="display:none;margin-top:10px;"></select>
@@ -1477,7 +1482,7 @@ window.cambiarTab=function(tab){
   if(tab==='informes'&&typeof window.actualizarFiltrosAvanzados==='function')setTimeout(()=>window.actualizarFiltrosAvanzados(),0);
   if(tab==='inicio'){if(typeof window.recargarGraficas==='function')window.recargarGraficas();if(typeof window.renderizarVistaDia==='function')window.renderizarVistaDia();}
   if(tab==='visita'&&typeof window.inicializarFirma==='function')setTimeout(()=>window.inicializarFirma(),200);
-  if(tab==='reparto'&&typeof window.renderizarGridEstadosReparto==='function'){window.renderizarGridEstadosReparto();window.renderizarCodigosReparto();window.verificarUmbralEfectividad();window.actualizarResumenReparto();window.actualizarBarraUmbral();}
+  if(tab==='reparto'&&typeof window.renderizarGridEstadosReparto==='function'){window.renderizarGridEstadosReparto();window.renderizarCodigosReparto();window.renderizarSelectorBancoReparto?.();window.verificarUmbralEfectividad();window.actualizarResumenReparto();window.actualizarBarraUmbral();window.refrescarCoordenadas?.();}
   if(tab==='banco'&&typeof window.renderizarBanco==='function')window.renderizarBanco();
   try{localStorage.setItem('colserlog_tab_actual',tab);}catch(e){}
   window.scrollTo({top:0,behavior:'smooth'});
@@ -1669,18 +1674,22 @@ function scheduleRender(key,fn){
   _renderPending[key]=requestAnimationFrame(()=>{fn();delete _renderPending[key];});
 }
 
-async function obtenerUbicacion(timeoutMs=5000){
+async function obtenerUbicacion(timeoutMs=5000,forzarActual=false){
   if(!navigator.geolocation) return null;
   return new Promise(resolve=>{
-    const t=setTimeout(()=>resolve(null),timeoutMs);
+    let finalizado=false;
+    const terminar=valor=>{if(finalizado)return;finalizado=true;clearTimeout(t);resolve(valor);};
+    const t=setTimeout(()=>terminar(null),timeoutMs);
     navigator.geolocation.getCurrentPosition(
-      pos=>{clearTimeout(t);resolve({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:Date.now()});},
-      err=>{clearTimeout(t);resolve(null);},
-      {enableHighAccuracy:true,timeout:timeoutMs,maximumAge:30000}
+      pos=>terminar({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:Date.now()}),
+      err=>terminar(null),
+      {enableHighAccuracy:true,timeout:timeoutMs,maximumAge:forzarActual?0:30000}
     );
   });
 }
-async function refrescarCoordenadas(){coordenadasActuales=await obtenerUbicacion();return coordenadasActuales;}
+function actualizarEstadoGpsReparto(gps,cargando=false){const el=document.getElementById('estadoGpsReparto');if(!el)return;el.className='gps-badge gps-estado-reparto'+(cargando?' cargando':gps?'':' warn');if(cargando){el.textContent='📍 Obteniendo ubicación precisa…';return;}if(gps){const acc=Number.isFinite(gps.acc)?Math.round(gps.acc):null;el.textContent=acc?`📍 GPS listo · precisión ±${acc} m`:'📍 GPS listo';el.title=`Lat ${gps.lat.toFixed(6)}, Lon ${gps.lng.toFixed(6)}`;}else{el.textContent='⚠️ GPS no disponible · se solicitará al guardar';el.title='Verifica permisos de ubicación del navegador';}}
+async function refrescarCoordenadas(){actualizarEstadoGpsReparto(null,true);coordenadasActuales=await obtenerUbicacion();actualizarEstadoGpsReparto(coordenadasActuales);return coordenadasActuales;}
+window.refrescarCoordenadas=refrescarCoordenadas;
 
 function calcularTotalesPrecios(){let tg=0,te=0,tne=0,ce=0,cne=0;visitas.forEach(v=>{const p=Number(v.precio)||0;tg+=p;if(esEstadoEntregado(v.estado)){te+=p;ce++;}else{tne+=p;cne++;}});return {totalGeneral:tg,totalEntregado:te,totalNoEntregado:tne,cantEntregado:ce,cantNoEntregado:cne};}
 window.calcularTotalesPrecios=calcularTotalesPrecios;
@@ -1897,6 +1906,7 @@ function renderizarBanco(){
   });
   c.appendChild(frag);
   if(ct){const uc=bancoCodigos.filter(x=>usadosSet.has(normalizarCodigoBanco(x).codigo)).length;ct.innerHTML=`📦 ${bancoCodigos.length} · <span class="usados">${uc}</span> usados`;}
+  if(typeof window.renderizarSelectorBancoReparto==='function')window.renderizarSelectorBancoReparto();
 }
 window.renderizarBanco=renderizarBanco;
 window.toggleCargaMasiva=function(){const el=document.getElementById('cargaMasivaContenedor');if(!el)return;el.style.display=(el.style.display==='none'||el.style.display==='')?'block':'none';};
@@ -2408,6 +2418,8 @@ function seleccionarEstadoReparto(estado){
 }
 window.seleccionarEstadoReparto=seleccionarEstadoReparto;
 
+window.agregarGuiasBancoReparto=function(){const sel=document.getElementById('selectorGuiasReparto');if(!sel)return;const disponibles=[...sel.selectedOptions].map(o=>o.value);let agregadas=0;disponibles.forEach(cod=>{if(codigosPendientesReparto.includes(cod)||codigosRegistradosHoy.has(cod))return;codigosPendientesReparto.push(cod);agregadas++;});if(agregadas){renderizarCodigosReparto();actualizarResumenReparto();guardarEstadoCompleto();beepOk();mostrarAviso(`✅ ${agregadas} guía(s) agregada(s) desde el banco`,'ok');if(navigator.vibrate)navigator.vibrate(50);}sel.selectedIndex=-1;renderizarSelectorBancoReparto();};
+window.renderizarSelectorBancoReparto=function(){const root=document.getElementById('selectorBancoReparto');if(!root)return;root.innerHTML='';const usados=codigosEnVisitas(),pendientes=new Set(codigosPendientesReparto),items=bancoCodigos.map(normalizarCodigoBanco).filter(x=>x.codigo&&!usados.has(x.codigo)&&!pendientes.has(x.codigo));if(!items.length){const empty=document.createElement('div');empty.className='selector-banco-vacio';empty.textContent='No hay guías disponibles en el banco.';root.appendChild(empty);return;}const sel=document.createElement('select');sel.id='selectorGuiasReparto';sel.multiple=true;sel.size=Math.min(5,Math.max(3,items.length));sel.title='Usa Ctrl/Cmd para seleccionar varias guías';items.forEach(item=>{const op=document.createElement('option');op.value=item.codigo;op.textContent=`${item.codigo}${item.direccion?' · '+item.direccion:''}${item.precio?' · '+formatCOP(item.precio):''}`;sel.appendChild(op);});const btn=document.createElement('button');btn.type='button';btn.className='btn-agregar-codigo';btn.textContent='➕ Agregar';btn.onclick=()=>window.agregarGuiasBancoReparto();root.appendChild(sel);root.appendChild(btn);};
 function renderizarCodigosReparto(){
   const c=document.getElementById('listaCodigosReparto'),cont=document.getElementById('repContadorPend');
   if(!c)return;c.innerHTML='';if(cont)cont.textContent=codigosPendientesReparto.length;
@@ -2421,6 +2433,7 @@ function renderizarCodigosReparto(){
     ch.appendChild(b);frag.appendChild(ch);
   });
   c.appendChild(frag);
+  if(typeof window.renderizarSelectorBancoReparto==='function')window.renderizarSelectorBancoReparto();
   if(codigosPendientesReparto.length===1){
     const b=bancoBuscar(codigosPendientesReparto[0]);
     if(b&&b.item){
@@ -2466,7 +2479,10 @@ window.guardarVisitaReparto=async function(){
   }
   const hora=horaActual(),desc=(document.getElementById('descripcionReparto')?.value||'').trim(),dirManual=(document.getElementById('direccionReparto')?.value||'').trim(),zonaManual=(document.getElementById('zonaReparto')?.value||'').trim(),precioManual=parseFloat(document.getElementById('precioReparto')?.value||'0')||0,hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
-  const gps=coordenadasActuales||await obtenerUbicacion(3000);
+  actualizarEstadoGpsReparto(null,true);
+  const gpsReciente=await obtenerUbicacion(8000,true),gps=gpsReciente||coordenadasActuales||null;
+  actualizarEstadoGpsReparto(gps);
+  if(!gps)mostrarAviso('⚠️ No se obtuvo ubicación; revisa el permiso de GPS','warn');
   codigosPendientesReparto.forEach(cod=>{
     const b=bancoBuscar(cod);
     const dir=(b&&b.item&&b.item.direccion)?b.item.direccion:(dirManual||'');
