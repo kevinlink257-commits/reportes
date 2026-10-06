@@ -1860,7 +1860,8 @@ window.agregarCodigoBanco=function(){
   const iCod=document.getElementById('codigoBanco'),iDir=document.getElementById('direccionBanco'),iPre=document.getElementById('precioBanco');if(!iCod)return;
   const c=(iCod.value||'').trim();if(!c){mostrarAviso('⚠️ Ingresa un código','error');beepError();return;}
   const e=validarCodigo(c);if(e){mostrarAviso('⚠️ '+e,'error');beepError();return;}
-  if(bancoContiene(c)){mostrarAviso('⚠️ Ya está en banco','error');beepError();iCod.value='';return;}
+  if(codigosRegistradosHoy.has(c)){mostrarAviso('⚠️ La guía '+c+' ya está guardada en una visita','warn');beepError();iCod.value='';return;}
+  if(bancoContiene(c)){mostrarAviso('⚠️ La guía '+c+' ya está en el banco','warn');beepError();iCod.value='';return;}
   const direccion=(iDir?.value||'').trim(),precio=parseFloat(iPre?.value)||0;
   bancoCodigos.push({codigo:c,direccion,precio});reindexarBanco();
   iCod.value='';if(iDir)iDir.value='';if(iPre)iPre.value='';
@@ -2197,13 +2198,14 @@ function procesarCodigoEscaneado(cod){
     if(!bancoContiene(cod)){bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();scheduleRender('banco',renderizarBanco);guardarEstadoCompleto();beepOk();mostrarAviso('✅ '+cod,'ok');}
     else mostrarAviso('⚠️ Ya existe: '+cod,'warn');
   } else if(escaneoModo==='reparto'){
-    if(codigosPendientesReparto.includes(cod))mostrarAviso('⚠️ Ya en lista: '+cod,'warn');
-    else if(codigosRegistradosHoy.has(cod))mostrarAviso('⚠️ Ya registrado hoy: '+cod,'warn');
+    if(codigosPendientesReparto.includes(cod))mostrarAviso('⚠️ La guía '+cod+' ya está seleccionada','warn');
+    else if(codigosRegistradosHoy.has(cod))mostrarAviso('⚠️ La guía '+cod+' ya está guardada en una visita','warn');
+    else if(bancoContiene(cod))mostrarAviso('⚠️ La guía '+cod+' ya está en el banco; selecciónala desde la lista','warn');
     else{
-      if(!bancoContiene(cod)){bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();}
+      bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();
       codigosPendientesReparto.push(cod);
       renderizarBanco();renderizarCodigosReparto();actualizarResumenReparto();
-      beepOk();mostrarAviso('✅ '+cod,'ok');
+      beepOk();mostrarAviso('✅ '+cod+' agregada al banco y a la lista','ok');
       if(navigator.vibrate)navigator.vibrate(60);
     }
   } else {
@@ -2229,9 +2231,10 @@ window.agregarGuiaManualReparto=function(){
   const input=document.getElementById('inputGuiaManual');if(!input)return;
   const cod=(input.value||'').replace(/\D/g,'').slice(0,12);
   if(cod.length!==12){mostrarAviso('⚠️ La guía debe tener 12 dígitos','error');beepError();return;}
-  if(codigosPendientesReparto.includes(cod)){mostrarAviso('⚠️ Ya está en la lista','warn');beepError();input.value='';return;}
-  if(codigosRegistradosHoy.has(cod)){mostrarAviso('⚠️ Ya fue registrado hoy','warn');beepError();input.value='';return;}
-  if(!bancoContiene(cod)){bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();}
+  if(codigosPendientesReparto.includes(cod)){mostrarAviso('⚠️ La guía '+cod+' ya está seleccionada','warn');beepError();input.value='';return;}
+  if(codigosRegistradosHoy.has(cod)){mostrarAviso('⚠️ La guía '+cod+' ya está guardada en una visita','warn');beepError();input.value='';return;}
+  if(bancoContiene(cod)){mostrarAviso('⚠️ La guía '+cod+' ya está en el banco; selecciónala desde la lista','warn');beepError();input.value='';return;}
+  bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();
   codigosPendientesReparto.push(cod);input.value='';
   renderizarBanco();renderizarCodigosReparto();actualizarResumenReparto();guardarEstadoCompleto();
   beepOk();mostrarAviso('✅ Guía agregada: '+cod,'ok');
@@ -2260,11 +2263,12 @@ window.procesarFotosOCR=async function(event){
       if(codigos.length===0){if(estadoOCR)estadoOCR.textContent=`⚠️ Guía ${i+1}/${files.length}: sin código detectado`;continue;}
       for(const cod of codigos){
         totalDetectados++;
-        if(codigosPendientesReparto.includes(cod)){totalDuplicados++;if(estadoOCR)estadoOCR.textContent=`⚠️ ${cod} · ya en lista`;continue;}
-        if(codigosRegistradosHoy.has(cod)){totalDuplicados++;if(estadoOCR)estadoOCR.textContent=`⚠️ ${cod} · ya registrado hoy`;continue;}
+        if(codigosPendientesReparto.includes(cod)){totalDuplicados++;if(estadoOCR)estadoOCR.textContent=`⚠️ ${cod} · ya seleccionado`;continue;}
+        if(codigosRegistradosHoy.has(cod)){totalDuplicados++;if(estadoOCR)estadoOCR.textContent=`⚠️ ${cod} · ya guardado`;continue;}
+        if(bancoContiene(cod)){totalDuplicados++;if(estadoOCR)estadoOCR.textContent=`⚠️ ${cod} · ya está en banco`;continue;}
         if(todosCodigos.has(cod)){totalDuplicados++;continue;}
         todosCodigos.add(cod);
-        if(!bancoContiene(cod)){bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();}
+        bancoCodigos.push({codigo:cod,direccion:'',precio:0});reindexarBanco();
         codigosPendientesReparto.push(cod);totalAgregados++;
         if(estadoOCR)estadoOCR.textContent=`✅ ${cod} agregado (${i+1}/${files.length})`;
         beepOk();if(navigator.vibrate)navigator.vibrate(40);
@@ -2389,13 +2393,16 @@ function renderizarGridEstadosReparto(){
   btnMas.onclick=()=>{const sel=document.getElementById('estadoPaqueteRepartoSelect');if(sel){sel.style.display='block';sel.focus();}};
   grid.appendChild(btnMas);
   let sel=document.getElementById('estadoPaqueteRepartoSelect');
-  if(sel){while(sel.options.length>1)sel.remove(1);}else{sel=document.createElement('select');sel.id='estadoPaqueteRepartoSelect';sel.style.cssText='display:none;margin-top:10px;';sel.innerHTML='<option value="">-- Seleccione un estado --</option>';sel.onchange=()=>{if(sel.value)seleccionarEstadoReparto(sel.value);};grid.parentNode.insertBefore(sel,grid.nextSibling);}
+  if(!sel){sel=document.createElement('select');sel.id='estadoPaqueteRepartoSelect';sel.style.cssText='display:none;margin-top:10px;';grid.parentNode.insertBefore(sel,grid.nextSibling);}
+  sel.innerHTML='';const base=document.createElement('option');base.value='';base.textContent='-- Seleccione un estado --';sel.appendChild(base);
   ESTADOS.forEach(e=>{const opt=document.createElement('option');opt.value=e;opt.textContent=e;sel.appendChild(opt);});
+  sel.onchange=()=>{if(sel.value)seleccionarEstadoReparto(sel.value);};
 }
 window.renderizarGridEstadosReparto=renderizarGridEstadosReparto;
 
 function seleccionarEstadoReparto(estado){
   estadoRepartoSeleccionado=estado;
+  const estadoExtra=document.getElementById('estadoPaqueteRepartoSelect');if(estadoExtra){estadoExtra.value=estado;if(!document.querySelector(`.btn-estado-reparto[data-estado="${CSS.escape(estado)}"]`))estadoExtra.style.display='block';}
   document.querySelectorAll('.btn-estado-reparto').forEach(b=>{b.classList.toggle('activo',b.dataset.estado===estado);});
   const firmaDiv=document.getElementById('firmaCondicionalReparto');
   if(firmaDiv){
