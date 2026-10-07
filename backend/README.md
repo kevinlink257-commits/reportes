@@ -25,6 +25,25 @@ pytest -q
 
 Para pruebas de integración, conserva una segunda suite que arranque PostGIS y ejecute consultas reales con `EXPLAIN (ANALYZE, BUFFERS)`. Las unitarias deben ejecutarse en cada commit; las de integración pueden ejecutarse en CI con un servicio PostgreSQL/PostGIS.
 
+### Integración con PostGIS en GitHub Actions
+
+El workflow `.github/workflows/backend-integration.yml` levanta `postgis/postgis:16-3.4` como servicio, espera su healthcheck, aplica `sql/001_init.sql` y `sql/002_performance_indexes.sql`, y ejecuta `tests/integration/` contra una base efímera. La suite inserta una visita con coordenadas reales y valida `ST_DWithin`, `ST_Distance` y `ST_Intersects`.
+
+Para ejecutarla localmente necesitas Docker:
+
+```bash
+docker run --rm --name colserlog-postgis \
+  -e POSTGRES_DB=colserlog_test \
+  -e POSTGRES_USER=colserlog \
+  -e POSTGRES_PASSWORD=colserlog \
+  -p 5432:5432 postgis/postgis:16-3.4
+
+export DATABASE_URL=postgresql://colserlog:colserlog@localhost:5432/colserlog_test
+psql "$DATABASE_URL" -f sql/001_init.sql
+psql "$DATABASE_URL" -f sql/002_performance_indexes.sql
+python -m pytest -q tests/integration -m integration
+```
+
 ## Endpoints incluidos
 
 - `GET /health`
