@@ -112,6 +112,43 @@ ST_Intersects(
 
 El polígono se recibe como parámetro SQL, no se concatena en la consulta, y las visitas se filtran por `organization_id` obtenido del JWT.
 
+### Optimización con índices
+
+La migración `backend/sql/002_performance_indexes.sql` agrega:
+
+- `visits_org_location_gix`: índice GiST compuesto por organización y ubicación.
+- `visits_org_visited_at_idx`: filtro de organización más rango de fechas.
+- `visits_org_zone_lower_idx`: búsqueda de zonas sin distinguir mayúsculas.
+
+Es importante que el predicado no convierta la columna indexada a geometría. La consulta optimizada compara `geography` con `geography`:
+
+```sql
+ST_Intersects(v.location, polygon_geography)
+```
+
+En cambio, esta forma puede impedir el uso directo del índice GiST de `location`:
+
+```sql
+ST_Intersects(v.location::geometry, polygon_geometry)
+```
+
+Después de cargar datos representativos, revisa el plan real:
+
+```sql
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT v.id
+FROM visits v
+WHERE v.organization_id = '00000000-0000-0000-0000-000000000001'
+  AND v.location IS NOT NULL
+  AND ST_DWithin(
+        v.location,
+        ST_SetSRID(ST_MakePoint(-74.0721, 4.711), 4326)::geography,
+        1000
+      );
+```
+
+Busca `Index Scan`, `Bitmap Index Scan` o `BitmapAnd` usando los índices `visits_*`. Si aparece un `Seq Scan` con muchas filas, ejecuta `ANALYZE visits;`, confirma que las coordenadas estén almacenadas como `geography(Point,4326)` y revisa la selectividad del filtro por organización.
+
 Si necesitas límites geográficos reales —por ejemplo un polígono de localidad— crea una tabla `zones` con `geometry(MultiPolygon,4326)` y consulta:
 
 ```sql

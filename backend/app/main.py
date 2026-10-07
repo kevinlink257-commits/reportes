@@ -213,12 +213,12 @@ def visits_within_radius(
         rows = conn.execute(
             f"""SELECT v.id, g.code, v.status, v.zone, v.visited_at,
                        ST_Y(v.location::geometry), ST_X(v.location::geometry),
-                       v.gps_accuracy_m, ST_Distance(v.location, q.point)
+                       v.gps_accuracy_m, ST_Distance(v.location, q.point) AS distance_m
                 FROM visits v
                 JOIN guides g ON g.id=v.guide_id
                 CROSS JOIN LATERAL (SELECT ST_SetSRID(ST_MakePoint(%s,%s),4326)::geography AS point) q
                 WHERE {' AND '.join(conditions)}
-                ORDER BY ST_Distance(v.location, q.point)
+                ORDER BY distance_m
                 LIMIT %s""",
             params,
         ).fetchall()
@@ -268,7 +268,7 @@ def visits_within_polygon(
     if geojson.get("type") not in {"Polygon", "MultiPolygon"} or "coordinates" not in geojson:
         raise HTTPException(422, "El campo polygon debe ser un GeoJSON Polygon o MultiPolygon")
     geojson_text = json.dumps(geojson, separators=(",", ":"))
-    conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "ST_Intersects(v.location::geometry, z.geom)"]
+    conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "ST_Intersects(v.location, z.geom)"]
     params: list[Any] = [geojson_text, user["organization_id"]]
     if body.from_date:
         conditions.append("v.visited_at >= %s")
@@ -295,7 +295,7 @@ def visits_within_polygon(
                 FROM visits v
                 JOIN guides g ON g.id=v.guide_id
                 CROSS JOIN LATERAL (
-                  SELECT ST_SetSRID(ST_GeomFromGeoJSON(%s),4326)::geometry AS geom
+                  SELECT ST_SetSRID(ST_GeomFromGeoJSON(%s),4326)::geography AS geom
                 ) z
                 WHERE {' AND '.join(conditions)}
                 ORDER BY v.visited_at DESC
