@@ -11,6 +11,20 @@ curl http://localhost:8000/health
 
 La documentación queda en `http://localhost:8000/docs`.
 
+## Pruebas unitarias
+
+Las pruebas geoespaciales están en `backend/tests/test_geo_endpoints.py`. Son unitarias: reemplazan `db()` por una conexión falsa y verifican la validación, los parámetros SQL, el aislamiento por organización y los predicados `ST_DWithin`/`ST_Intersects`, sin necesitar PostgreSQL.
+
+```bash
+cd backend
+python -m venv .venv
+. .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest -q
+```
+
+Para pruebas de integración, conserva una segunda suite que arranque PostGIS y ejecute consultas reales con `EXPLAIN (ANALYZE, BUFFERS)`. Las unitarias deben ejecutarse en cada commit; las de integración pueden ejecutarse en CI con un servicio PostgreSQL/PostGIS.
+
 ## Endpoints incluidos
 
 - `GET /health`

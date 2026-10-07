@@ -269,6 +269,8 @@ def visits_within_polygon(
         raise HTTPException(422, "El campo polygon debe ser un GeoJSON Polygon o MultiPolygon")
     geojson_text = json.dumps(geojson, separators=(",", ":"))
     conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "ST_Intersects(v.location, z.geom)"]
+    # La consulta principal recibe primero el GeoJSON del CROSS JOIN y luego
+    # los parámetros de los predicados del WHERE.
     params: list[Any] = [geojson_text, user["organization_id"]]
     if body.from_date:
         conditions.append("v.visited_at >= %s")
