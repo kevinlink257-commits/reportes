@@ -77,6 +77,22 @@ class GuideSearchResult(BaseModel):
     score: int
 
 
+class GPSPoint(BaseModel):
+    lat: float = Field(ge=-90, le=90)
+    lng: float = Field(ge=-180, le=180)
+    accuracy_m: float | None = Field(default=None, ge=0, le=100000)
+
+
+class VisitCreate(BaseModel):
+    code: str = Field(min_length=12, max_length=12, pattern=r"^[0-9]{12}$")
+    status: str = Field(min_length=1, max_length=80)
+    description: str | None = Field(default=None, max_length=2000)
+    zone: str | None = Field(default=None, max_length=160)
+    price: float = Field(default=0, ge=0)
+    visited_at: datetime | None = None
+    gps: GPSPoint | None = None
+
+
 @app.get("/health")
 def health():
     with db() as conn:
@@ -95,6 +111,44 @@ def search_guides(digits: str = Query(min_length=2, max_length=12, pattern=r"^[0
             ORDER BY score DESC, code LIMIT 20
         """, (digits, digits+'%', digits, digits, digits, user["organization_id"], digits, digits+'%', digits)).fetchall()
     return [GuideSearchResult(code=r[0], address=r[1], zone=r[2], price=float(r[3] or 0), score=r[4]) for r in rows]
+
+
+@app.post("/api/v1/visits", status_code=status.HTTP_201_CREATED)
+def create_visit(body: VisitCreate, user=Depends(require_roles("admin", "supervisor", "repartidor"))):
+    visited_at = body.visited_at or datetime.now(timezone.utc)
+    with db() as conn:
+        guide = conn.execute(
+            "SELECT id, price FROM guides WHERE organization_id=%s AND code=%s",
+            (user["organization_id"], body.code),
+        ).fetchone()
+        if not guide:
+            raise HTTPException(404, "Guía no encontrada en la organización")
+        account = conn.execute("SELECT id FROM users WHERE sso_subject=%s", (user["sub"],)).fetchone()
+        gps = body.gps
+        row = conn.execute(
+            """INSERT INTO visits
+              (organization_id, guide_id, user_id, status, description, zone, price,
+               visited_at, location, gps_accuracy_m)
+              VALUES (%s,%s,%s,%s,%s,%s,%s,%s,
+                CASE WHEN %s IS NULL OR %s IS NULL THEN NULL
+                     ELSE ST_SetSRID(ST_MakePoint(%s,%s),4326)::geography END,
+                %s)
+              RETURNING id, visited_at, ST_Y(location::geometry), ST_X(location::geometry), gps_accuracy_m""",
+            (
+                user["organization_id"], guide[0], account[0] if account else None,
+                body.status, body.description, body.zone,
+                body.price or float(guide[1] or 0), visited_at,
+                gps.lng if gps else None, gps.lat if gps else None,
+                gps.lng if gps else None, gps.lat if gps else None,
+                gps.accuracy_m if gps else None,
+            ),
+        ).fetchone()
+    return {
+        "id": str(row[0]),
+        "code": body.code,
+        "visited_at": row[1].isoformat(),
+        "gps": {"lat": row[2], "lng": row[3], "accuracy_m": row[4]} if row[2] is not None else None,
+    }
 
 
 @app.get("/api/v1/profile")
