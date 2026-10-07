@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import psycopg
+import jwt
 from psycopg.types.json import Jsonb
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -17,6 +18,9 @@ from pydantic import BaseModel, Field
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://colserlog:colserlog@localhost:5432/colserlog")
 CORS_ORIGINS = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:8080,https://kevinlink257-commits.github.io").split(",") if x.strip()]
 DEV_AUTH = os.getenv("DEV_AUTH", "false").lower() == "true"
+OIDC_JWKS_URL = os.getenv("OIDC_JWKS_URL", "").strip()
+OIDC_ISSUER = os.getenv("OIDC_ISSUER", "").strip()
+OIDC_AUDIENCE = os.getenv("OIDC_AUDIENCE", "").strip()
 PBKDF2_ITERATIONS = 310_000
 
 app = FastAPI(title="Colserlog API", version="1.0.0", docs_url="/docs")
@@ -33,12 +37,27 @@ def current_user(request: Request) -> dict[str, Any]:
     """Temporary development identity; production must use OIDC/SSO middleware."""
     if DEV_AUTH:
         return {"sub": request.headers.get("x-dev-user", "local-dev"), "role": request.headers.get("x-dev-role", "admin"), "organization_id": request.headers.get("x-dev-org", "00000000-0000-0000-0000-000000000001")}
-    # The production deployment should validate the Bearer token with the configured OIDC JWKS.
-    # Failing closed prevents accidental exposure of the API.
     auth = request.headers.get("authorization", "")
     if not auth.startswith("Bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token OIDC requerido")
-    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="Configura OIDC_JWKS_URL antes de usar autenticación productiva")
+    if not all((OIDC_JWKS_URL, OIDC_ISSUER, OIDC_AUDIENCE)):
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="OIDC no está configurado")
+    token = auth.removeprefix("Bearer ").strip()
+    try:
+        jwks = jwt.PyJWKClient(OIDC_JWKS_URL)
+        signing_key = jwks.get_signing_key_from_jwt(token).key
+        claims = jwt.decode(token, signing_key, algorithms=["RS256", "RS384", "RS512", "ES256", "ES384", "ES512"], audience=OIDC_AUDIENCE, issuer=OIDC_ISSUER)
+        subject = claims.get("sub")
+        organization_id = claims.get("organization_id", claims.get("org_id"))
+        if not subject or not organization_id:
+            raise ValueError("sub u organization_id ausente")
+        return {
+            "sub": subject,
+            "role": claims.get("role", claims.get("https://colserlog.com/role", "repartidor")),
+            "organization_id": organization_id,
+        }
+    except Exception as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token OIDC inválido") from exc
 
 
 def require_roles(*roles: str):
@@ -91,6 +110,18 @@ class VisitCreate(BaseModel):
     price: float = Field(default=0, ge=0)
     visited_at: datetime | None = None
     gps: GPSPoint | None = None
+
+
+class VisitQueryResult(BaseModel):
+    id: str
+    code: str
+    status: str
+    zone: str | None = None
+    visited_at: datetime
+    lat: float
+    lng: float
+    accuracy_m: float | None = None
+    distance_m: float | None = None
 
 
 @app.get("/health")
@@ -149,6 +180,81 @@ def create_visit(body: VisitCreate, user=Depends(require_roles("admin", "supervi
         "visited_at": row[1].isoformat(),
         "gps": {"lat": row[2], "lng": row[3], "accuracy_m": row[4]} if row[2] is not None else None,
     }
+
+
+@app.get("/api/v1/visits/within-radius", response_model=list[VisitQueryResult])
+def visits_within_radius(
+    lat: float = Query(ge=-90, le=90),
+    lng: float = Query(ge=-180, le=180),
+    radius_m: float = Query(gt=0, le=100000),
+    from_date: datetime | None = Query(default=None, alias="from"),
+    to_date: datetime | None = Query(default=None, alias="to"),
+    limit: int = Query(default=500, ge=1, le=5000),
+    user=Depends(require_roles("admin", "supervisor", "analyst", "auditor")),
+):
+    conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "ST_DWithin(v.location, q.point, %s)"]
+    params: list[Any] = [lng, lat, user["organization_id"], radius_m]
+    if from_date:
+        conditions.append("v.visited_at >= %s")
+        params.append(from_date)
+    if to_date:
+        conditions.append("v.visited_at < %s")
+        params.append(to_date)
+    params.append(limit)
+    with db() as conn:
+        rows = conn.execute(
+            f"""SELECT v.id, g.code, v.status, v.zone, v.visited_at,
+                       ST_Y(v.location::geometry), ST_X(v.location::geometry),
+                       v.gps_accuracy_m, ST_Distance(v.location, q.point)
+                FROM visits v
+                JOIN guides g ON g.id=v.guide_id
+                CROSS JOIN LATERAL (SELECT ST_SetSRID(ST_MakePoint(%s,%s),4326)::geography AS point) q
+                WHERE {' AND '.join(conditions)}
+                ORDER BY ST_Distance(v.location, q.point)
+                LIMIT %s""",
+            params,
+        ).fetchall()
+    return [_visit_query_result(r) for r in rows]
+
+
+@app.get("/api/v1/visits/in-zone", response_model=list[VisitQueryResult])
+def visits_in_zone(
+    zone: str = Query(min_length=1, max_length=160),
+    from_date: datetime | None = Query(default=None, alias="from"),
+    to_date: datetime | None = Query(default=None, alias="to"),
+    limit: int = Query(default=500, ge=1, le=5000),
+    user=Depends(require_roles("admin", "supervisor", "analyst", "auditor")),
+):
+    conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "lower(v.zone)=lower(%s)"]
+    params: list[Any] = [user["organization_id"], zone]
+    if from_date:
+        conditions.append("v.visited_at >= %s")
+        params.append(from_date)
+    if to_date:
+        conditions.append("v.visited_at < %s")
+        params.append(to_date)
+    params.append(limit)
+    with db() as conn:
+        rows = conn.execute(
+            f"""SELECT v.id, g.code, v.status, v.zone, v.visited_at,
+                       ST_Y(v.location::geometry), ST_X(v.location::geometry),
+                       v.gps_accuracy_m, NULL::double precision
+                FROM visits v
+                JOIN guides g ON g.id=v.guide_id
+                WHERE {' AND '.join(conditions)}
+                ORDER BY v.visited_at DESC
+                LIMIT %s""",
+            params,
+        ).fetchall()
+    return [_visit_query_result(r) for r in rows]
+
+
+def _visit_query_result(row) -> VisitQueryResult:
+    return VisitQueryResult(
+        id=str(row[0]), code=row[1], status=row[2], zone=row[3], visited_at=row[4],
+        lat=float(row[5]), lng=float(row[6]), accuracy_m=float(row[7]) if row[7] is not None else None,
+        distance_m=float(row[8]) if row[8] is not None else None,
+    )
 
 
 @app.get("/api/v1/profile")

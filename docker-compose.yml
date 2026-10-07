@@ -14,7 +14,10 @@ services:
     environment:
       DATABASE_URL: postgresql://colserlog:colserlog@db:5432/colserlog
       CORS_ORIGINS: https://kevinlink257-commits.github.io,http://localhost:8080
-      DEV_AUTH: "true"
+      DEV_AUTH: "false"
+      OIDC_JWKS_URL: ${OIDC_JWKS_URL:-}
+      OIDC_ISSUER: ${OIDC_ISSUER:-}
+      OIDC_AUDIENCE: ${OIDC_AUDIENCE:-}
     ports: ["8000:8000"]
     depends_on: [db]
 volumes:
