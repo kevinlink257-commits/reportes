@@ -1702,6 +1702,15 @@ async function obtenerUbicacion(timeoutMs=5000,forzarActual=false){
     );
   });
 }
+function gpsValido(gps,maxEdadMs=120000){
+  return !!gps&&Number.isFinite(Number(gps.lat))&&Number.isFinite(Number(gps.lng))&&Number(gps.lat)>=-90&&Number(gps.lat)<=90&&Number(gps.lng)>=-180&&Number(gps.lng)<=180&&Number.isFinite(Number(gps.ts))&&(Date.now()-Number(gps.ts)<=maxEdadMs);
+}
+async function obtenerGpsParaRegistro(timeoutMs=8000){
+  const reciente=await obtenerUbicacion(timeoutMs,true);
+  if(gpsValido(reciente)){coordenadasActuales=reciente;return reciente;}
+  return gpsValido(coordenadasActuales)?coordenadasActuales:null;
+}
+window.obtenerGpsParaRegistro=obtenerGpsParaRegistro;
 function actualizarEstadoGpsReparto(gps,cargando=false){const el=document.getElementById('estadoGpsReparto');if(!el)return;el.className='gps-badge gps-estado-reparto'+(cargando?' cargando':gps?'':' warn');if(cargando){el.textContent='📍 Obteniendo ubicación precisa…';return;}if(gps){const acc=Number.isFinite(gps.acc)?Math.round(gps.acc):null;el.textContent=acc?`📍 GPS listo · precisión ±${acc} m`:'📍 GPS listo';el.title=`Lat ${gps.lat.toFixed(6)}, Lon ${gps.lng.toFixed(6)}`;}else{el.textContent='⚠️ GPS no disponible · se solicitará al guardar';el.title='Verifica permisos de ubicación del navegador';}}
 async function refrescarCoordenadas(){actualizarEstadoGpsReparto(null,true);coordenadasActuales=await obtenerUbicacion();actualizarEstadoGpsReparto(coordenadasActuales);return coordenadasActuales;}
 window.refrescarCoordenadas=refrescarCoordenadas;
@@ -2159,7 +2168,7 @@ window.registrarVisita=async()=>{
   const codigos=[...codigosPendientes],t=calcularMinutos(l,s),hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   const firmaAdjunta=esEstadoEntregado(es)?(firmaGuardada||null):null;
-  const gps=coordenadasActuales||await obtenerUbicacion(3000);
+  const gps=await obtenerGpsParaRegistro(8000);
   codigos.forEach(co=>{visitas.push({llegada:l,salida:s,tiempo:t,estado:es,codigo:co,descripcion:desc,direccion:direccion,zona,precio:precio,firma:firmaAdjunta,horaRegistro:hr,grupo:codigos.length>1?hr:null,fotos:fv,gps});});
   ultimoEstadoUsado=es;cancelarEscaneo();limpiarFormularioVisita();
   recalcularEstadisticas();renderizarTabla();scheduleRender('banco',renderizarBanco);guardarEstadoCompleto();
@@ -2489,7 +2498,7 @@ window.guardarVisitaReparto=async function(){
   const hora=horaActual(),desc=(document.getElementById('descripcionReparto')?.value||'').trim(),dirManual=(document.getElementById('direccionReparto')?.value||'').trim(),zonaManual=(document.getElementById('zonaReparto')?.value||'').trim(),precioManual=parseFloat(document.getElementById('precioReparto')?.value||'0')||0,hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   actualizarEstadoGpsReparto(null,true);
-  const gpsReciente=await obtenerUbicacion(8000,true),gps=gpsReciente||coordenadasActuales||null;
+  const gps=await obtenerGpsParaRegistro(8000);
   actualizarEstadoGpsReparto(gps);
   if(!gps)mostrarAviso('⚠️ No se obtuvo ubicación; revisa el permiso de GPS','warn');
   codigosPendientesReparto.forEach(cod=>{
