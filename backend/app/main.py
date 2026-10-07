@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import json
 import os
 import secrets
 from contextlib import contextmanager
@@ -124,6 +125,13 @@ class VisitQueryResult(BaseModel):
     distance_m: float | None = None
 
 
+class PolygonVisitQuery(BaseModel):
+    polygon: dict[str, Any]
+    from_date: datetime | None = Field(default=None, alias="from")
+    to_date: datetime | None = Field(default=None, alias="to")
+    limit: int = Field(default=500, ge=1, le=5000)
+
+
 @app.get("/health")
 def health():
     with db() as conn:
@@ -241,6 +249,54 @@ def visits_in_zone(
                        v.gps_accuracy_m, NULL::double precision
                 FROM visits v
                 JOIN guides g ON g.id=v.guide_id
+                WHERE {' AND '.join(conditions)}
+                ORDER BY v.visited_at DESC
+                LIMIT %s""",
+            params,
+        ).fetchall()
+    return [_visit_query_result(r) for r in rows]
+
+
+@app.post("/api/v1/visits/within-polygon", response_model=list[VisitQueryResult])
+def visits_within_polygon(
+    body: PolygonVisitQuery,
+    user=Depends(require_roles("admin", "supervisor", "analyst", "auditor")),
+):
+    geojson = body.polygon
+    if geojson.get("type") == "Feature":
+        geojson = geojson.get("geometry") or {}
+    if geojson.get("type") not in {"Polygon", "MultiPolygon"} or "coordinates" not in geojson:
+        raise HTTPException(422, "El campo polygon debe ser un GeoJSON Polygon o MultiPolygon")
+    geojson_text = json.dumps(geojson, separators=(",", ":"))
+    conditions = ["v.organization_id=%s", "v.location IS NOT NULL", "ST_Intersects(v.location::geometry, z.geom)"]
+    params: list[Any] = [geojson_text, user["organization_id"]]
+    if body.from_date:
+        conditions.append("v.visited_at >= %s")
+        params.append(body.from_date)
+    if body.to_date:
+        conditions.append("v.visited_at < %s")
+        params.append(body.to_date)
+    params.append(body.limit)
+    with db() as conn:
+        try:
+            geometry_check = conn.execute(
+                """SELECT ST_IsValid(g.geom), ST_IsEmpty(g.geom), GeometryType(g.geom)
+                   FROM (SELECT ST_SetSRID(ST_GeomFromGeoJSON(%s),4326)::geometry AS geom) g""",
+                (geojson_text,),
+            ).fetchone()
+        except psycopg.Error as exc:
+            raise HTTPException(422, "GeoJSON inválido para PostGIS") from exc
+        if not geometry_check or not geometry_check[0] or geometry_check[1] or geometry_check[2] not in {"POLYGON", "MULTIPOLYGON"}:
+            raise HTTPException(422, "El polígono debe ser válido, no vacío y tener tipo Polygon o MultiPolygon")
+        rows = conn.execute(
+            f"""SELECT v.id, g.code, v.status, v.zone, v.visited_at,
+                       ST_Y(v.location::geometry), ST_X(v.location::geometry),
+                       v.gps_accuracy_m, NULL::double precision
+                FROM visits v
+                JOIN guides g ON g.id=v.guide_id
+                CROSS JOIN LATERAL (
+                  SELECT ST_SetSRID(ST_GeomFromGeoJSON(%s),4326)::geometry AS geom
+                ) z
                 WHERE {' AND '.join(conditions)}
                 ORDER BY v.visited_at DESC
                 LIMIT %s""",

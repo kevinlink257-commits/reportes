@@ -18,6 +18,7 @@ La documentación queda en `http://localhost:8000/docs`.
 - `POST /api/v1/visits` — guarda una visita y su ubicación GPS en PostGIS.
 - `GET /api/v1/visits/within-radius?lat=4.711&lng=-74.0721&radius_m=1000` — visitas dentro de un radio en metros.
 - `GET /api/v1/visits/in-zone?zone=Chapinero` — visitas cuyo campo operativo `zone` coincide.
+- `POST /api/v1/visits/within-polygon` — visitas contenidas en un polígono o multipolígono GeoJSON.
 - `GET/PATCH /api/v1/profile`
 - `POST /api/v1/profile/password`
 - `GET /api/v1/telemetry/ping`
@@ -76,6 +77,40 @@ curl -G 'https://api.example.com/api/v1/visits/in-zone' \
   -H "Authorization: Bearer $TOKEN" \
   --data-urlencode 'zone=Chapinero'
 ```
+
+Para consultar un polígono personalizado, envía un `Polygon` GeoJSON en el cuerpo:
+
+```bash
+curl -X POST 'https://api.example.com/api/v1/visits/within-polygon' \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-74.0800, 4.7050],
+        [-74.0650, 4.7050],
+        [-74.0650, 4.7200],
+        [-74.0800, 4.7200],
+        [-74.0800, 4.7050]
+      ]]
+    },
+    "from": "2026-10-01T00:00:00Z",
+    "to": "2026-11-01T00:00:00Z",
+    "limit": 100
+  }'
+```
+
+El orden de las coordenadas GeoJSON es siempre **[longitud, latitud]**, no `[latitud, longitud]`. El endpoint acepta también un `Feature` cuyo `geometry` sea `Polygon` o `MultiPolygon`, valida la geometría con `ST_IsValid` y ejecuta:
+
+```sql
+ST_Intersects(
+  visits.location::geometry,
+  ST_SetSRID(ST_GeomFromGeoJSON($1), 4326)
+)
+```
+
+El polígono se recibe como parámetro SQL, no se concatena en la consulta, y las visitas se filtran por `organization_id` obtenido del JWT.
 
 Si necesitas límites geográficos reales —por ejemplo un polígono de localidad— crea una tabla `zones` con `geometry(MultiPolygon,4326)` y consulta:
 
