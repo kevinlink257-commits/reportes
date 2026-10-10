@@ -11,11 +11,13 @@
 <title>Colserlog · Ruta</title>
 <link rel="manifest" id="manifestLink">
 <link rel="apple-touch-icon" id="appleIcon">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 /* =================================================================
    APPLE DESIGN SYSTEM · COLSERLOG v3.0
@@ -149,6 +151,7 @@ canvas{margin-top:20px;background:var(--bg-card);padding:16px;border-radius:var(
 .btn-group button{flex:1;min-width:100px}
 #lectorQR,#lectorQRBanco{width:100%;max-width:420px;margin:12px auto;display:none;border:2px solid var(--sys-blue);border-radius:var(--radius-lg);overflow:hidden;background:#000;animation:scannerIn .3s var(--ease)}
 @keyframes scannerIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.mapa-visitas{width:100%;height:380px;margin-top:14px;border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden;background:var(--gray-1);z-index:1}.mapa-visitas .leaflet-control-attribution{font-size:10px}.controles-mapa{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.controles-mapa button{flex:1;min-width:150px;margin-top:0}.marcador-visita{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;border:3px solid #fff;background:var(--sys-blue);color:#fff;font-size:12px;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.35)}.marcador-visita.actual{background:var(--sys-green)}.marcador-visita.destino{background:var(--sys-red)}.resumen-mapa{font-size:.82rem;color:var(--text-secondary);margin:10px 0 0}.leaflet-popup-content{min-width:180px;line-height:1.45}@media(max-width:640px){.mapa-visitas{height:330px}}
 .escaneo-mensaje{text-align:center;color:#fff;background:rgba(0,0,0,.7);padding:10px;font-weight:600;font-size:.9rem;animation:scanPulse 1.8s ease-in-out infinite}
 @keyframes scanPulse{0%,100%{opacity:1}50%{opacity:.55}}
 .busqueda-box{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);padding:16px;margin-bottom:14px}
@@ -969,6 +972,13 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <label style="margin-top:12px;font-size:1.05em;">🗺️ Zona (opcional):</label>
       <input type="text" id="zonaReparto" placeholder="Barrio, localidad o zona" autocomplete="off">
       <div id="estadoGpsReparto" class="gps-badge gps-estado-reparto warn" role="status" aria-live="polite">📍 Ubicación pendiente</div>
+      <div id="estadoMapaVisitas" class="resumen-mapa" role="status" aria-live="polite">🗺️ El mapa se actualizará al guardar una visita.</div>
+      <div id="mapaVisitas" class="mapa-visitas" aria-label="Mapa de visitas y ruta hasta el destino"></div>
+      <div class="controles-mapa">
+        <button type="button" class="btn-guardar" onclick="actualizarMapaYPosicion()">📍 Mi posición</button>
+        <button type="button" class="btn-informe" onclick="trazarRutaUltimaVisita()">🧭 Ruta última visita</button>
+        <button type="button" class="btn-cancelar" onclick="limpiarMapaVisitas()">🧹 Limpiar ruta</button>
+      </div>
       <label style="margin-top:20px;font-size:1.05em;">🎯 Estado del paquete:</label>
       <div id="gridEstadosReparto" class="grid-estados-reparto"></div>
       <select id="estadoPaqueteRepartoSelect" style="display:none;margin-top:10px;"></select>
@@ -1715,6 +1725,60 @@ function actualizarEstadoGpsReparto(gps,cargando=false){const el=document.getEle
 async function refrescarCoordenadas(){actualizarEstadoGpsReparto(null,true);coordenadasActuales=await obtenerUbicacion();actualizarEstadoGpsReparto(coordenadasActuales);return coordenadasActuales;}
 window.refrescarCoordenadas=refrescarCoordenadas;
 
+let mapaVisitas=null,capaMarcadoresVisitas=null,capaRutaVisitas=null,ultimaVisitaConRuta=null,ultimaRutaOrigen=null,ultimaSolicitudNominatim=0;
+function mapaApiBase(){try{return (localStorage.getItem('colserlog_api_url')||'').replace(/\/+$/,'');}catch(e){return '';}}
+function tokenMapa(){try{return localStorage.getItem('access_token')||localStorage.getItem('token')||sessionStorage.getItem('access_token')||'';}catch(e){return '';}}
+function actualizarEstadoMapa(texto,tipo=''){const el=document.getElementById('estadoMapaVisitas');if(!el)return;el.textContent=texto;el.style.color=tipo==='error'?'var(--sys-red)':tipo==='ok'?'var(--sys-green-dark)':'var(--text-secondary)';}
+function escaparMapa(valor){return String(valor??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
+function gpsMapaValido(g){return !!g&&Number.isFinite(Number(g.lat))&&Number.isFinite(Number(g.lng))&&Number(g.lat)>=-90&&Number(g.lat)<=90&&Number(g.lng)>=-180&&Number(g.lng)<=180;}
+function inicializarMapaVisitas(){
+  if(mapaVisitas)return mapaVisitas;
+  const el=document.getElementById('mapaVisitas');
+  if(!el)return null;
+  if(typeof L==='undefined'){actualizarEstadoMapa('⚠️ El mapa no pudo cargar Leaflet','error');return null;}
+  mapaVisitas=L.map(el,{preferCanvas:true,zoomControl:true}).setView([4.711,-74.072],12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(mapaVisitas);
+  capaMarcadoresVisitas=L.layerGroup().addTo(mapaVisitas);capaRutaVisitas=L.layerGroup().addTo(mapaVisitas);
+  setTimeout(()=>mapaVisitas.invalidateSize(),100);
+  return mapaVisitas;
+}
+function iconoMapa(clase,texto){return L.divIcon({className:'',html:`<div class="marcador-visita ${clase||''}">${escaparMapa(texto)}</div>`,iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-15]});}
+function direccionDeVisita(v){return String(v?.direccion||v?.address||'').trim();}
+function pintarMarcadoresVisitas(){
+  const mapa=inicializarMapaVisitas();if(!mapa||!capaMarcadoresVisitas)return;
+  capaMarcadoresVisitas.clearLayers();const limites=[];
+  const actual=gpsMapaValido(coordenadasActuales)?coordenadasActuales:null;
+  if(actual){L.marker([actual.lat,actual.lng],{icon:iconoMapa('actual','A')}).bindPopup('<strong>Mi posición</strong>').addTo(capaMarcadoresVisitas);limites.push([actual.lat,actual.lng]);}
+  (Array.isArray(visitas)?visitas:[]).forEach((v,i)=>{if(!gpsMapaValido(v.gps))return;const codigo=v.codigo||`Visita ${i+1}`;L.marker([v.gps.lat,v.gps.lng],{icon:iconoMapa('',i+1)}).bindPopup(`<strong>${escaparMapa(codigo)}</strong><br>${escaparMapa(direccionDeVisita(v)||'Sin dirección')}<br>Estado: ${escaparMapa(v.estado||'Pendiente')}`).addTo(capaMarcadoresVisitas);limites.push([v.gps.lat,v.gps.lng]);});
+  if(limites.length)mapa.fitBounds(limites,{padding:[24,24],maxZoom:16});
+  setTimeout(()=>mapa.invalidateSize(),100);
+}
+async function geocodificarMapa(direccion){
+  const clave=`mapaGeocode:${direccion.toLowerCase()}`;try{const guardado=JSON.parse(localStorage.getItem(clave)||'null');if(gpsMapaValido(guardado))return guardado;}catch(e){}
+  const base=mapaApiBase(),token=tokenMapa();let url,opciones={headers:{Accept:'application/json'}};
+  if(base&&token){url=`${base}/api/v1/maps/geocode?q=${encodeURIComponent(direccion)}`;opciones.headers.Authorization=`Bearer ${token}`;}
+  else {const espera=1100-(Date.now()-ultimaSolicitudNominatim);if(espera>0)await new Promise(resolve=>setTimeout(resolve,espera));ultimaSolicitudNominatim=Date.now();url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=co&q=${encodeURIComponent(direccion)}`;}
+  const r=await fetch(url,opciones);if(!r.ok)throw new Error('No se pudo ubicar la dirección');const data=await r.json();const item=Array.isArray(data)?data[0]:data;if(!item)throw new Error('No se encontró la dirección');const gps={lat:Number(item.lat),lng:Number(item.lng),label:item.display_name||direccion};if(!gpsMapaValido(gps))throw new Error('La dirección devolvió coordenadas inválidas');try{localStorage.setItem(clave,JSON.stringify(gps));}catch(e){}return gps;
+}
+async function obtenerGeometriaRuta(origen,destino,direccion){
+  const base=mapaApiBase(),token=tokenMapa();
+  if(base&&token){const r=await fetch(`${base}/api/v1/routes/daily`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({start:{gps:{lat:origen.lat,lng:origen.lng,accuracy_m:origen.acc||null}},stops:[{gps:{lat:destino.lat,lng:destino.lng,accuracy_m:destino.acc||null},address:direccion||null,label:'Destino'}],return_to_start:false})});if(r.ok){const data=await r.json();if(data.geometry)return data.geometry;}}
+  const coords=`${origen.lng},${origen.lat};${destino.lng},${destino.lat}`;const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson&steps=true`);if(!r.ok)throw new Error('No se pudo calcular la ruta');const data=await r.json();if(data.code!=='Ok'||!data.routes?.[0]?.geometry)throw new Error('No existe una ruta para este destino');return data.routes[0].geometry;
+}
+async function trazarRutaParaVisita(v,origen){
+  if(!origen||!gpsMapaValido(origen)){actualizarEstadoMapa('⚠️ Activa el GPS para trazar la ruta desde tu posición','error');return;}
+  const direccion=direccionDeVisita(v);let destino=gpsMapaValido(v.gps)?{lat:Number(v.gps.lat),lng:Number(v.gps.lng)}:null;
+  try{actualizarEstadoMapa('🧭 Ubicando dirección y calculando ruta…');if(!destino){if(!direccion)throw new Error('La visita no tiene dirección');destino=await geocodificarMapa(direccion);v.mapaGps={lat:destino.lat,lng:destino.lng};}const geometria=await obtenerGeometriaRuta(origen,destino,direccion);const mapa=inicializarMapaVisitas();if(!mapa)return;capaRutaVisitas.clearLayers();L.geoJSON(geometria,{style:{color:'#0071e3',weight:5,opacity:.9}}).addTo(capaRutaVisitas);L.marker([destino.lat,destino.lng],{icon:iconoMapa('destino','D')}).bindPopup(`<strong>Destino</strong><br>${escaparMapa(v.codigo||'Visita')}<br>${escaparMapa(direccion||destino.label||'GPS')}`).addTo(capaRutaVisitas);mapa.fitBounds([[origen.lat,origen.lng],[destino.lat,destino.lng]],{padding:[30,30],maxZoom:17});ultimaVisitaConRuta=v;ultimaRutaOrigen=origen;actualizarEstadoMapa(`✅ Ruta trazada hasta ${v.codigo||'la visita'}${direccion?` · ${direccion}`:''}`,'ok');setTimeout(()=>mapa.invalidateSize(),100);}catch(e){console.error('Ruta de visita:',e);actualizarEstadoMapa(`⚠️ ${e.message||'No se pudo trazar la ruta'}`,'error');}
+}
+async function actualizarMapaYPosicion(){actualizarEstadoMapa('📍 Obteniendo ubicación precisa…');coordenadasActuales=await obtenerUbicacion(10000,true);actualizarEstadoGpsReparto(coordenadasActuales);pintarMarcadoresVisitas();if(coordenadasActuales&&ultimaVisitaConRuta)await trazarRutaParaVisita(ultimaVisitaConRuta,coordenadasActuales);else if(coordenadasActuales)actualizarEstadoMapa('✅ Posición actualizada. Guarda una visita para trazar su ruta','ok');else actualizarEstadoMapa('⚠️ No se obtuvo permiso o señal GPS','error');return coordenadasActuales;}
+window.actualizarMapaYPosicion=actualizarMapaYPosicion;
+async function trazarRutaUltimaVisita(){const v=ultimaVisitaConRuta||(Array.isArray(visitas)?visitas[visitas.length-1]:null);if(!v){actualizarEstadoMapa('No hay visitas registradas para trazar','error');return;}const origen=await actualizarMapaYPosicion();if(origen)await trazarRutaParaVisita(v,origen);}
+window.trazarRutaUltimaVisita=trazarRutaUltimaVisita;
+function actualizarMapaVisitas(v,origen){pintarMarcadoresVisitas();if(v){ultimaVisitaConRuta=v;trazarRutaParaVisita(v,origen||coordenadasActuales);}}
+window.actualizarMapaVisitas=actualizarMapaVisitas;
+function limpiarMapaVisitas(){if(capaRutaVisitas)capaRutaVisitas.clearLayers();ultimaVisitaConRuta=null;actualizarEstadoMapa('🗺️ Ruta limpiada. El mapa conserva las visitas guardadas');pintarMarcadoresVisitas();}
+window.limpiarMapaVisitas=limpiarMapaVisitas;
+
 function calcularTotalesPrecios(){let tg=0,te=0,tne=0,ce=0,cne=0;visitas.forEach(v=>{const p=Number(v.precio)||0;tg+=p;if(esEstadoEntregado(v.estado)){te+=p;ce++;}else{tne+=p;cne++;}});return {totalGeneral:tg,totalEntregado:te,totalNoEntregado:tne,cantEntregado:ce,cantNoEntregado:cne};}
 window.calcularTotalesPrecios=calcularTotalesPrecios;
 function formatCOP(n){return '$'+(Number(n)||0).toLocaleString('es-CO');}
@@ -2168,10 +2232,12 @@ window.registrarVisita=async()=>{
   const codigos=[...codigosPendientes],t=calcularMinutos(l,s),hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   const firmaAdjunta=esEstadoEntregado(es)?(firmaGuardada||null):null;
+  const origenRuta=gpsMapaValido(coordenadasActuales)?{...coordenadasActuales}:null;
   const gps=await obtenerGpsParaRegistro(8000);
   codigos.forEach(co=>{visitas.push({llegada:l,salida:s,tiempo:t,estado:es,codigo:co,descripcion:desc,direccion:direccion,zona,precio:precio,firma:firmaAdjunta,horaRegistro:hr,grupo:codigos.length>1?hr:null,fotos:fv,gps});});
   ultimoEstadoUsado=es;cancelarEscaneo();limpiarFormularioVisita();
   recalcularEstadisticas();renderizarTabla();scheduleRender('banco',renderizarBanco);guardarEstadoCompleto();
+  actualizarMapaVisitas(visitas[visitas.length-1],origenRuta||gps);
   mostrarAviso('✅ Visita guardada','ok');beepOk();
 };
 
@@ -2497,6 +2563,7 @@ window.guardarVisitaReparto=async function(){
   }
   const hora=horaActual(),desc=(document.getElementById('descripcionReparto')?.value||'').trim(),dirManual=(document.getElementById('direccionReparto')?.value||'').trim(),zonaManual=(document.getElementById('zonaReparto')?.value||'').trim(),precioManual=parseFloat(document.getElementById('precioReparto')?.value||'0')||0,hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
+  const origenRuta=gpsMapaValido(coordenadasActuales)?{...coordenadasActuales}:null;
   actualizarEstadoGpsReparto(null,true);
   const gps=await obtenerGpsParaRegistro(8000);
   actualizarEstadoGpsReparto(gps);
@@ -2507,6 +2574,7 @@ window.guardarVisitaReparto=async function(){
     const pre=(b&&b.item&&b.item.precio>0)?b.item.precio:(precioManual||0);
     visitas.push({llegada:hora,salida:hora,tiempo:0,estado:estadoRepartoSeleccionado,codigo:cod,descripcion:desc,direccion:dir,zona:zonaManual,precio:pre,firma:firma,firmaRapida:firmaRapida,horaRegistro:hr,grupo:codigosPendientesReparto.length>1?hr:null,fotos:fv,gps});
   });
+  const visitaParaMapa=visitas[visitas.length-1];
   codigosPendientesReparto=[];estadoRepartoSeleccionado='';firmaRapidaFlag=false;
   document.getElementById('descripcionReparto').value='';
   document.getElementById('direccionReparto').value='';
@@ -2519,6 +2587,7 @@ window.guardarVisitaReparto=async function(){
   await renderizarGaleriaFotos();await renderizarGaleriaFotosReparto();
   recalcularEstadisticas();renderizarTabla();renderizarBanco();renderizarCodigosReparto();
   actualizarResumenReparto();verificarUmbralEfectividad();actualizarBarraUmbral();guardarEstadoCompleto();
+  actualizarMapaVisitas(visitaParaMapa,origenRuta||gps);
   mostrarAviso('✅ Visita guardada','ok');beepOk();
   if(navigator.vibrate)navigator.vibrate([60,30,60]);
   refrescarCoordenadas();
@@ -2856,6 +2925,7 @@ window.addEventListener('load',async()=>{
   renderizarCodigosPendientes();actualizarContadorUnicos();
   renderizarGridEstadosReparto();renderizarCodigosReparto();actualizarResumenReparto();
   verificarUmbralEfectividad();actualizarBarraUmbral();
+  pintarMarcadoresVisitas();
   window.actualizarPlaceholderDescripcion();
   const ahora=new Date(),me=document.getElementById('mesInforme'),ae=document.getElementById('anioInforme');
   if(me)me.value=ahora.getMonth()+1;if(ae)ae.value=ahora.getFullYear();
