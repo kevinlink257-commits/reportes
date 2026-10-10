@@ -5,6 +5,8 @@ import hmac
 import json
 import os
 import secrets
+import threading
+import time
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any
@@ -28,7 +30,11 @@ GEOCODER_URL = os.getenv("GEOCODER_URL", "https://nominatim.openstreetmap.org/se
 ROUTING_URL = os.getenv("ROUTING_URL", "https://router.project-osrm.org").rstrip("/")
 MAP_USER_AGENT = os.getenv("MAP_USER_AGENT", "Colserlog/1.0 (+https://github.com/kevinlink257-commits/reportes)").strip()
 GEOCODER_COUNTRYCODES = os.getenv("GEOCODER_COUNTRYCODES", "co").strip()
+GEOCODER_MIN_INTERVAL_SECONDS = float(os.getenv("GEOCODER_MIN_INTERVAL_SECONDS", "1.0"))
 PBKDF2_ITERATIONS = 310_000
+_geocoder_lock = threading.Lock()
+_geocoder_cache: dict[str, dict[str, Any]] = {}
+_last_geocoder_request = 0.0
 
 app = FastAPI(title="Colserlog API", version="1.0.0", docs_url="/docs")
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
@@ -338,8 +344,23 @@ def _visit_query_result(row) -> VisitQueryResult:
 
 
 def _geocode_address(address: str) -> dict[str, Any]:
+    global _last_geocoder_request
     if not GEOCODER_URL:
         raise HTTPException(503, "El geocodificador no está configurado")
+    cache_key = f"{GEOCODER_URL}|{GEOCODER_COUNTRYCODES}|{address.strip().lower()}"
+    with _geocoder_lock:
+        if cache_key in _geocoder_cache:
+            return _geocoder_cache[cache_key]
+        wait_seconds = GEOCODER_MIN_INTERVAL_SECONDS - (time.monotonic() - _last_geocoder_request)
+        if wait_seconds > 0:
+            time.sleep(wait_seconds)
+        _last_geocoder_request = time.monotonic()
+        result = _request_geocode(address)
+        _geocoder_cache[cache_key] = result
+        return result
+
+
+def _request_geocode(address: str) -> dict[str, Any]:
     params = {"q": address, "format": "jsonv2", "limit": 1, "addressdetails": 1}
     if GEOCODER_COUNTRYCODES:
         params["countrycodes"] = GEOCODER_COUNTRYCODES
