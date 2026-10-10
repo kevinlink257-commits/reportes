@@ -977,6 +977,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <div class="controles-mapa">
         <button type="button" class="btn-guardar" onclick="actualizarMapaYPosicion()">📍 Mi posición</button>
         <button type="button" class="btn-informe" onclick="trazarRutaUltimaVisita()">🧭 Ruta última visita</button>
+        <button type="button" class="btn-informe" onclick="optimizarRutaVisitas()">🚚 Optimizar todas</button>
         <button type="button" class="btn-cancelar" onclick="limpiarMapaVisitas()">🧹 Limpiar ruta</button>
       </div>
       <label style="margin-top:20px;font-size:1.05em;">🎯 Estado del paquete:</label>
@@ -1725,7 +1726,7 @@ function actualizarEstadoGpsReparto(gps,cargando=false){const el=document.getEle
 async function refrescarCoordenadas(){actualizarEstadoGpsReparto(null,true);coordenadasActuales=await obtenerUbicacion();actualizarEstadoGpsReparto(coordenadasActuales);return coordenadasActuales;}
 window.refrescarCoordenadas=refrescarCoordenadas;
 
-let mapaVisitas=null,capaMarcadoresVisitas=null,capaRutaVisitas=null,ultimaVisitaConRuta=null,ultimaRutaOrigen=null,ultimaSolicitudNominatim=0;
+let mapaVisitas=null,capaMarcadoresVisitas=null,capaRutaVisitas=null,ultimaVisitaConRuta=null,ultimaRutaOrigen=null,ultimaSolicitudNominatim=0,ordenMapaVisitas=null;
 function mapaApiBase(){try{return (localStorage.getItem('colserlog_api_url')||'').replace(/\/+$/,'');}catch(e){return '';}}
 function tokenMapa(){try{return localStorage.getItem('access_token')||localStorage.getItem('token')||sessionStorage.getItem('access_token')||'';}catch(e){return '';}}
 function actualizarEstadoMapa(texto,tipo=''){const el=document.getElementById('estadoMapaVisitas');if(!el)return;el.textContent=texto;el.style.color=tipo==='error'?'var(--sys-red)':tipo==='ok'?'var(--sys-green-dark)':'var(--text-secondary)';}
@@ -1749,7 +1750,7 @@ function pintarMarcadoresVisitas(){
   capaMarcadoresVisitas.clearLayers();const limites=[];
   const actual=gpsMapaValido(coordenadasActuales)?coordenadasActuales:null;
   if(actual){L.marker([actual.lat,actual.lng],{icon:iconoMapa('actual','A')}).bindPopup('<strong>Mi posición</strong>').addTo(capaMarcadoresVisitas);limites.push([actual.lat,actual.lng]);}
-  (Array.isArray(visitas)?visitas:[]).forEach((v,i)=>{if(!gpsMapaValido(v.gps))return;const codigo=v.codigo||`Visita ${i+1}`;L.marker([v.gps.lat,v.gps.lng],{icon:iconoMapa('',i+1)}).bindPopup(`<strong>${escaparMapa(codigo)}</strong><br>${escaparMapa(direccionDeVisita(v)||'Sin dirección')}<br>Estado: ${escaparMapa(v.estado||'Pendiente')}`).addTo(capaMarcadoresVisitas);limites.push([v.gps.lat,v.gps.lng]);});
+  (Array.isArray(ordenMapaVisitas)?ordenMapaVisitas:(Array.isArray(visitas)?visitas:[])).forEach((v,i)=>{if(!gpsMapaValido(v.gps))return;const codigo=v.codigo||`Visita ${i+1}`,numero=v._secuencia||i+1;L.marker([v.gps.lat,v.gps.lng],{icon:iconoMapa('',numero)}).bindPopup(`<strong>Parada ${numero}</strong><br>${escaparMapa(codigo)}<br>${escaparMapa(direccionDeVisita(v)||'Sin dirección')}<br>Estado: ${escaparMapa(v.estado||'Pendiente')}`).addTo(capaMarcadoresVisitas);limites.push([v.gps.lat,v.gps.lng]);});
   if(limites.length)mapa.fitBounds(limites,{padding:[24,24],maxZoom:16});
   setTimeout(()=>mapa.invalidateSize(),100);
 }
@@ -1774,9 +1775,23 @@ async function actualizarMapaYPosicion(){actualizarEstadoMapa('📍 Obteniendo u
 window.actualizarMapaYPosicion=actualizarMapaYPosicion;
 async function trazarRutaUltimaVisita(){const v=ultimaVisitaConRuta||(Array.isArray(visitas)?visitas[visitas.length-1]:null);if(!v){actualizarEstadoMapa('No hay visitas registradas para trazar','error');return;}const origen=await actualizarMapaYPosicion();if(origen)await trazarRutaParaVisita(v,origen);}
 window.trazarRutaUltimaVisita=trazarRutaUltimaVisita;
+async function optimizarRutaVisitas(){
+  const lista=(Array.isArray(visitas)?visitas:[]).filter(v=>gpsMapaValido(v.gps)||direccionDeVisita(v));
+  if(lista.length<2){actualizarEstadoMapa('⚠️ Necesitas al menos dos visitas con GPS o dirección','error');return;}
+  const origen=await actualizarMapaYPosicion();if(!origen)return;
+  try{
+    actualizarEstadoMapa(`🚚 Preparando ${lista.length} visitas para optimizar…`);
+    const puntos=await Promise.all(lista.map(async v=>{if(gpsMapaValido(v.gps))return{visita:v,lat:Number(v.gps.lat),lng:Number(v.gps.lng),address:direccionDeVisita(v)};const g=await geocodificarMapa(direccionDeVisita(v));return{visita:v,lat:g.lat,lng:g.lng,address:direccionDeVisita(v)};}));
+    const base=mapaApiBase(),token=tokenMapa();let geometria=null,orden=[];
+    if(base&&token){const respuesta=await fetch(`${base}/api/v1/routes/daily`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({start:{gps:{lat:origen.lat,lng:origen.lng,accuracy_m:origen.acc||null}},stops:puntos.map(p=>({gps:{lat:p.lat,lng:p.lng,accuracy_m:p.visita.gps?.acc||null},address:p.address||null,label:p.visita.codigo||'Visita'})),return_to_start:false})});if(!respuesta.ok)throw new Error('El backend no pudo optimizar las visitas');const data=await respuesta.json();geometria=data.geometry;orden=(data.stops||[]).map((s,i)=>{const p=puntos.find(x=>String(x.visita.codigo||'')===String(s.code||s.label||''))||puntos[i];return{...p,lat:Number(s.lat??p.lat),lng:Number(s.lng??p.lng),sequence:s.sequence||i+1};});}
+    if(!geometria){const coordenadas=[origen,...puntos].map(p=>`${p.lng},${p.lat}`).join(';');const respuesta=await fetch(`https://router.project-osrm.org/trip/v1/driving/${coordenadas}?source=first&destination=last&roundtrip=false&overview=full&geometries=geojson&steps=true`);if(!respuesta.ok)throw new Error('No se pudo consultar el optimizador de rutas');const data=await respuesta.json();if(data.code!=='Ok'||!data.trips?.[0])throw new Error('No existe una ruta para las visitas seleccionadas');geometria=data.trips[0].geometry;const waypoints=data.waypoints||[];orden=waypoints.slice(1).map((w,i)=>({...(puntos[w.waypoint_index-1]||puntos[i]),sequence:i+1}));if(orden.length!==puntos.length)orden=puntos.map((p,i)=>({...p,sequence:i+1}));}
+    ordenMapaVisitas=orden.map((p,i)=>({...p.visita,gps:{lat:p.lat,lng:p.lng},_secuencia:p.sequence||i+1}));pintarMarcadoresVisitas();capaRutaVisitas.clearLayers();L.geoJSON(geometria,{style:{color:'#af52de',weight:6,opacity:.9}}).addTo(capaRutaVisitas);mapaVisitas.fitBounds([[origen.lat,origen.lng],...orden.map(p=>[p.lat,p.lng])],{padding:[30,30],maxZoom:16});ultimaRutaOrigen=origen;ultimaVisitaConRuta=ordenMapaVisitas[ordenMapaVisitas.length-1];actualizarEstadoMapa(`✅ Ruta optimizada: ${ordenMapaVisitas.length} paradas desde tu posición`,'ok');setTimeout(()=>mapaVisitas.invalidateSize(),100);
+  }catch(e){console.error('Optimización de ruta:',e);actualizarEstadoMapa(`⚠️ ${e.message||'No se pudo optimizar la ruta'}`,'error');}
+}
+window.optimizarRutaVisitas=optimizarRutaVisitas;
 function actualizarMapaVisitas(v,origen){pintarMarcadoresVisitas();if(v){ultimaVisitaConRuta=v;trazarRutaParaVisita(v,origen||coordenadasActuales);}}
 window.actualizarMapaVisitas=actualizarMapaVisitas;
-function limpiarMapaVisitas(){if(capaRutaVisitas)capaRutaVisitas.clearLayers();ultimaVisitaConRuta=null;actualizarEstadoMapa('🗺️ Ruta limpiada. El mapa conserva las visitas guardadas');pintarMarcadoresVisitas();}
+function limpiarMapaVisitas(){if(capaRutaVisitas)capaRutaVisitas.clearLayers();ultimaVisitaConRuta=null;ordenMapaVisitas=null;actualizarEstadoMapa('🗺️ Ruta limpiada. El mapa conserva las visitas guardadas');pintarMarcadoresVisitas();}
 window.limpiarMapaVisitas=limpiarMapaVisitas;
 
 function calcularTotalesPrecios(){let tg=0,te=0,tne=0,ce=0,cne=0;visitas.forEach(v=>{const p=Number(v.precio)||0;tg+=p;if(esEstadoEntregado(v.estado)){te+=p;ce++;}else{tne+=p;cne++;}});return {totalGeneral:tg,totalEntregado:te,totalNoEntregado:tne,cantEntregado:ce,cantNoEntregado:cne};}
