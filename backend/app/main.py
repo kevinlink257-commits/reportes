@@ -8,7 +8,9 @@ import secrets
 from contextlib import contextmanager
 from datetime import datetime, timezone
 from typing import Any
+from uuid import UUID
 
+import httpx
 import psycopg
 import jwt
 from psycopg.types.json import Jsonb
@@ -22,6 +24,10 @@ DEV_AUTH = os.getenv("DEV_AUTH", "false").lower() == "true"
 OIDC_JWKS_URL = os.getenv("OIDC_JWKS_URL", "").strip()
 OIDC_ISSUER = os.getenv("OIDC_ISSUER", "").strip()
 OIDC_AUDIENCE = os.getenv("OIDC_AUDIENCE", "").strip()
+GEOCODER_URL = os.getenv("GEOCODER_URL", "https://nominatim.openstreetmap.org/search").strip()
+ROUTING_URL = os.getenv("ROUTING_URL", "https://router.project-osrm.org").rstrip("/")
+MAP_USER_AGENT = os.getenv("MAP_USER_AGENT", "Colserlog/1.0 (+https://github.com/kevinlink257-commits/reportes)").strip()
+GEOCODER_COUNTRYCODES = os.getenv("GEOCODER_COUNTRYCODES", "co").strip()
 PBKDF2_ITERATIONS = 310_000
 
 app = FastAPI(title="Colserlog API", version="1.0.0", docs_url="/docs")
@@ -130,6 +136,22 @@ class PolygonVisitQuery(BaseModel):
     from_date: datetime | None = Field(default=None, alias="from")
     to_date: datetime | None = Field(default=None, alias="to")
     limit: int = Field(default=500, ge=1, le=5000)
+
+
+class RoutePoint(BaseModel):
+    address: str | None = Field(default=None, min_length=5, max_length=300)
+    gps: GPSPoint | None = None
+
+
+class RouteStop(RoutePoint):
+    visit_id: UUID | None = None
+    label: str | None = Field(default=None, max_length=120)
+
+
+class DailyRouteRequest(BaseModel):
+    start: RoutePoint
+    stops: list[RouteStop] = Field(min_length=1, max_length=50)
+    return_to_start: bool = True
 
 
 @app.get("/health")
@@ -313,6 +335,117 @@ def _visit_query_result(row) -> VisitQueryResult:
         lat=float(row[5]), lng=float(row[6]), accuracy_m=float(row[7]) if row[7] is not None else None,
         distance_m=float(row[8]) if row[8] is not None else None,
     )
+
+
+def _geocode_address(address: str) -> dict[str, Any]:
+    if not GEOCODER_URL:
+        raise HTTPException(503, "El geocodificador no está configurado")
+    params = {"q": address, "format": "jsonv2", "limit": 1, "addressdetails": 1}
+    if GEOCODER_COUNTRYCODES:
+        params["countrycodes"] = GEOCODER_COUNTRYCODES
+    try:
+        with httpx.Client(timeout=12, headers={"User-Agent": MAP_USER_AGENT}) as client:
+            response = client.get(GEOCODER_URL, params=params)
+            response.raise_for_status()
+            results = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(502, "No fue posible consultar el geocodificador") from exc
+    if not results:
+        raise HTTPException(422, f"No se encontró la dirección: {address}")
+    item = results[0]
+    try:
+        return {
+            "lat": float(item["lat"]),
+            "lng": float(item["lon"]),
+            "display_name": item.get("display_name", address),
+            "address": item.get("address", {}),
+        }
+    except (KeyError, TypeError, ValueError) as exc:
+        raise HTTPException(502, "Respuesta inválida del geocodificador") from exc
+
+
+def _resolve_point(point: RoutePoint) -> dict[str, Any]:
+    if point.gps:
+        return {"lat": point.gps.lat, "lng": point.gps.lng, "source": "gps", "label": point.address}
+    if point.address:
+        geocoded = _geocode_address(point.address)
+        return {**geocoded, "source": "geocoder"}
+    raise HTTPException(422, "Cada punto debe incluir address o gps")
+
+
+def _resolve_visit_stop(stop: RouteStop, user: dict[str, Any]) -> dict[str, Any]:
+    if not stop.visit_id:
+        point = _resolve_point(stop)
+        return {**point, "visit_id": None, "label": stop.label or point.get("display_name")}
+    with db() as conn:
+        row = conn.execute(
+            """SELECT v.id, g.code, g.address, ST_Y(v.location::geometry), ST_X(v.location::geometry)
+               FROM visits v JOIN guides g ON g.id=v.guide_id
+               WHERE v.id=%s AND v.organization_id=%s""",
+            (stop.visit_id, user["organization_id"]),
+        ).fetchone()
+    if not row:
+        raise HTTPException(404, "Visita no encontrada en la organización")
+    if row[3] is not None and row[4] is not None:
+        point = {"lat": float(row[3]), "lng": float(row[4]), "source": "visit_gps"}
+    elif stop.gps or stop.address:
+        point = _resolve_point(stop)
+    elif row[2]:
+        point = _resolve_point(RoutePoint(address=row[2]))
+    else:
+        raise HTTPException(422, f"La visita {row[1]} no tiene GPS ni dirección")
+    return {**point, "visit_id": str(row[0]), "code": row[1], "label": stop.label or row[1]}
+
+
+@app.get("/api/v1/maps/geocode")
+def geocode_address(q: str = Query(min_length=5, max_length=300), user=Depends(current_user)):
+    """Busca una dirección completa y devuelve el primer punto geográfico."""
+    return _geocode_address(q)
+
+
+@app.post("/api/v1/routes/daily")
+def plan_daily_route(
+    body: DailyRouteRequest,
+    user=Depends(require_roles("admin", "supervisor", "repartidor")),
+):
+    origin = _resolve_point(body.start)
+    stops = [_resolve_visit_stop(stop, user) for stop in body.stops]
+    points = [origin, *stops]
+    coordinates = ";".join(f"{point['lng']},{point['lat']}" for point in points)
+    params = {
+        "overview": "full",
+        "geometries": "geojson",
+        "steps": "true",
+        "source": "first",
+        "roundtrip": "true" if body.return_to_start else "false",
+    }
+    if not body.return_to_start:
+        params["destination"] = "last"
+    try:
+        with httpx.Client(timeout=30, headers={"User-Agent": MAP_USER_AGENT}) as client:
+            response = client.get(f"{ROUTING_URL}/trip/v1/driving/{coordinates}", params=params)
+            response.raise_for_status()
+            payload = response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        raise HTTPException(502, "No fue posible calcular la ruta") from exc
+    if payload.get("code") != "Ok" or not payload.get("trips"):
+        raise HTTPException(422, f"El motor de rutas no encontró un recorrido: {payload.get('code', 'Unknown')}")
+    trip = payload["trips"][0]
+    waypoints = payload.get("waypoints", [])
+    ordered_indices = sorted(
+        (index for index in range(1, len(points))),
+        key=lambda index: waypoints[index].get("waypoint_index", index) if index < len(waypoints) else index,
+    )
+    ordered_stops = [{**stops[index - 1], "sequence": sequence} for sequence, index in enumerate(ordered_indices, start=1)]
+    return {
+        "provider": "osrm",
+        "origin": origin,
+        "stops": ordered_stops,
+        "distance_m": trip.get("distance"),
+        "duration_s": trip.get("duration"),
+        "geometry": trip.get("geometry"),
+        "legs": trip.get("legs", []),
+    }
 
 
 @app.get("/api/v1/profile")

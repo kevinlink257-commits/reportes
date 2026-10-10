@@ -52,6 +52,8 @@ python -m pytest -q tests/integration -m integration
 - `GET /api/v1/visits/within-radius?lat=4.711&lng=-74.0721&radius_m=1000` — visitas dentro de un radio en metros.
 - `GET /api/v1/visits/in-zone?zone=Chapinero` — visitas cuyo campo operativo `zone` coincide.
 - `POST /api/v1/visits/within-polygon` — visitas contenidas en un polígono o multipolígono GeoJSON.
+- `GET /api/v1/maps/geocode?q=...` — convierte una dirección en coordenadas.
+- `POST /api/v1/routes/daily` — ordena las paradas y devuelve la geometría GeoJSON de la ruta.
 - `GET/PATCH /api/v1/profile`
 - `POST /api/v1/profile/password`
 - `GET /api/v1/telemetry/ping`
@@ -181,6 +183,59 @@ WHERE v.organization_id = '00000000-0000-0000-0000-000000000001'
 ```
 
 Busca `Index Scan`, `Bitmap Index Scan` o `BitmapAnd` usando los índices `visits_*`. Si aparece un `Seq Scan` con muchas filas, ejecuta `ANALYZE visits;`, confirma que las coordenadas estén almacenadas como `geography(Point,4326)` y revisa la selectividad del filtro por organización.
+
+## Geolocalización y ruta diaria
+
+La implementación usa **OpenStreetMap + Nominatim + OSRM** como configuración inicial. Nominatim geocodifica direcciones y OSRM calcula una ruta de conducción con el servicio `Trip`, que puede optimizar el orden de las paradas. OSRM espera coordenadas en formato `[longitud, latitud]` y devuelve la geometría en GeoJSON.
+
+Para una dirección, usa una sola cadena completa y específica:
+
+```text
+Calle 93B # 13-45, Chapinero, Bogotá, Cundinamarca, Colombia
+```
+
+También puedes enviar barrio, ciudad, departamento y país:
+
+```text
+Carrera 7 # 72-41, Chapinero, Bogotá, Colombia
+```
+
+Evita formatos ambiguos como `Calle 10`, sólo un código interno o una dirección sin ciudad. Para máxima precisión, guarda directamente el GPS del dispositivo:
+
+```json
+{"gps": {"lat": 4.7110, "lng": -74.0721, "accuracy_m": 7}}
+```
+
+Geocodificación individual:
+
+```bash
+curl -G 'https://api.example.com/api/v1/maps/geocode' \
+  -H "Authorization: Bearer $TOKEN" \
+  --data-urlencode 'q=Calle 93B # 13-45, Chapinero, Bogotá, Colombia'
+```
+
+Planificación de la ruta del día:
+
+```bash
+curl -X POST 'https://api.example.com/api/v1/routes/daily' \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "start": {"address": "Carrera 7 # 72-41, Bogotá, Colombia"},
+    "stops": [
+      {"visit_id": "11111111-1111-1111-1111-111111111111"},
+      {"address": "Calle 93B # 13-45, Bogotá, Colombia", "label": "Cliente nuevo"},
+      {"gps": {"lat": 4.695, "lng": -74.055, "accuracy_m": 8}, "label": "Punto GPS"}
+    ],
+    "return_to_start": true
+  }'
+```
+
+Una parada puede tener `visit_id`, `address` o `gps`. Si se entrega `visit_id`, el backend usa primero el GPS almacenado en la visita; si no existe, usa la dirección de la guía o la dirección enviada. La respuesta incluye el orden optimizado, distancia total, duración estimada, tramos y `geometry` GeoJSON para dibujarla en Leaflet, MapLibre o cualquier mapa compatible.
+
+El endpoint admite hasta 50 paradas por solicitud. El proveedor por defecto es adecuado para comenzar y no requiere clave, pero no debe tratarse como garantía de tráfico en tiempo real. Para operación comercial, conviene cambiar `GEOCODER_URL` y `ROUTING_URL` por un proveedor con SLA, tráfico y límites adecuados, o desplegar instancias propias. La política pública de Nominatim exige máximo 1 solicitud por segundo, un `User-Agent` identificable, caching y prohíbe el autocompletado; por eso el endpoint sólo hace búsquedas explícitas y la configuración se puede sustituir sin cambiar el frontend.
+
+Fuentes: [Nominatim Usage Policy](https://operations.osmfoundation.org/policies/nominatim/), [OSRM HTTP API](https://project-osrm.org/docs/v5.5.1/api/), [Google Route Optimization API](https://developers.google.com/maps/documentation/route-optimization).
 
 Si necesitas límites geográficos reales —por ejemplo un polígono de localidad— crea una tabla `zones` con `geometry(MultiPolygon,4326)` y consulta:
 
