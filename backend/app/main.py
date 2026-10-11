@@ -23,6 +23,9 @@ from pydantic import BaseModel, Field
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://colserlog:colserlog@localhost:5432/colserlog")
 CORS_ORIGINS = [x.strip() for x in os.getenv("CORS_ORIGINS", "http://localhost:8080,https://kevinlink257-commits.github.io").split(",") if x.strip()]
 DEV_AUTH = os.getenv("DEV_AUTH", "false").lower() == "true"
+APP_ENV = os.getenv("APP_ENV", "development").strip().lower()
+if DEV_AUTH and APP_ENV not in {"development", "local", "test"}:
+    raise RuntimeError("DEV_AUTH sólo puede habilitarse en desarrollo, local o test")
 OIDC_JWKS_URL = os.getenv("OIDC_JWKS_URL", "").strip()
 OIDC_ISSUER = os.getenv("OIDC_ISSUER", "").strip()
 OIDC_AUDIENCE = os.getenv("OIDC_AUDIENCE", "").strip()
@@ -31,6 +34,7 @@ ROUTING_URL = os.getenv("ROUTING_URL", "https://router.project-osrm.org").rstrip
 MAP_USER_AGENT = os.getenv("MAP_USER_AGENT", "Colserlog/1.0 (+https://github.com/kevinlink257-commits/reportes)").strip()
 GEOCODER_COUNTRYCODES = os.getenv("GEOCODER_COUNTRYCODES", "co").strip()
 GEOCODER_MIN_INTERVAL_SECONDS = float(os.getenv("GEOCODER_MIN_INTERVAL_SECONDS", "1.0"))
+GEOCODER_CACHE_MAX_ENTRIES = max(1, int(os.getenv("GEOCODER_CACHE_MAX_ENTRIES", "512")))
 PBKDF2_ITERATIONS = 310_000
 _geocoder_lock = threading.Lock()
 _geocoder_cache: dict[str, dict[str, Any]] = {}
@@ -356,6 +360,8 @@ def _geocode_address(address: str) -> dict[str, Any]:
             time.sleep(wait_seconds)
         _last_geocoder_request = time.monotonic()
         result = _request_geocode(address)
+        if len(_geocoder_cache) >= GEOCODER_CACHE_MAX_ENTRIES:
+            _geocoder_cache.pop(next(iter(_geocoder_cache)))
         _geocoder_cache[cache_key] = result
         return result
 

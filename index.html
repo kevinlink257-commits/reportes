@@ -12,11 +12,6 @@
 <link rel="manifest" id="manifestLink">
 <link rel="apple-touch-icon" id="appleIcon">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
-<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
 /* =================================================================
@@ -1012,11 +1007,11 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
     <div class="section">
       <h2>📊 Informe del Día</h2>
       <div class="stats-grid">
-        <button type="button" class="stat-card ok" data-stat="entregados" onclick="clickStatCard(this,'entregados')">✅ Entregados: <span id="c-entregados">0</span></button>
-        <button type="button" class="stat-card link" data-stat="linkpago" onclick="clickStatCard(this,'linkpago')">🔗 Link Pago: <span id="c-linkpago">0</span></button>
-        <button type="button" class="stat-card" data-stat="no-entregados" onclick="clickStatCard(this,'no-entregados')">❌ No Entregados: <span id="c-noentregados">0</span></button>
-        <button type="button" class="stat-card total" data-stat="todas" onclick="clickStatCard(this,'todas')">📦 Total: <span id="c-total">0</span></button>
-        <button type="button" class="stat-card prom" data-stat="todas" onclick="clickStatCard(this,'todas')">⏱️ Prom: <span id="c-promedio">0 min</span></button>
+        <button type="button" class="stat-card ok" data-stat="entregados" onclick="clickStatCard(event,this,'entregados')">✅ Entregados: <span id="c-entregados">0</span></button>
+        <button type="button" class="stat-card link" data-stat="linkpago" onclick="clickStatCard(event,this,'linkpago')">🔗 Link Pago: <span id="c-linkpago">0</span></button>
+        <button type="button" class="stat-card" data-stat="no-entregados" onclick="clickStatCard(event,this,'no-entregados')">❌ No Entregados: <span id="c-noentregados">0</span></button>
+        <button type="button" class="stat-card total" data-stat="todas" onclick="clickStatCard(event,this,'todas')">📦 Total: <span id="c-total">0</span></button>
+        <button type="button" class="stat-card prom" data-stat="todas" onclick="clickStatCard(event,this,'todas')">⏱️ Prom: <span id="c-promedio">0 min</span></button>
       </div>
       <h2 style="margin-top:20px;">💰 Resumen Económico</h2>
       <div class="economic-grid">
@@ -1707,7 +1702,7 @@ async function obtenerUbicacion(timeoutMs=5000,forzarActual=false){
     const terminar=valor=>{if(finalizado)return;finalizado=true;clearTimeout(t);resolve(valor);};
     const t=setTimeout(()=>terminar(null),timeoutMs);
     navigator.geolocation.getCurrentPosition(
-      pos=>terminar({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:Date.now()}),
+      pos=>terminar({lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy,ts:pos.timestamp||Date.now()}),
       err=>terminar(null),
       {enableHighAccuracy:true,timeout:timeoutMs,maximumAge:forzarActual?0:30000}
     );
@@ -1729,6 +1724,13 @@ window.refrescarCoordenadas=refrescarCoordenadas;
 let mapaVisitas=null,capaMarcadoresVisitas=null,capaRutaVisitas=null,ultimaVisitaConRuta=null,ultimaRutaOrigen=null,ultimaSolicitudNominatim=0,ordenMapaVisitas=null;
 function mapaApiBase(){try{return (localStorage.getItem('colserlog_api_url')||'').replace(/\/+$/,'');}catch(e){return '';}}
 function tokenMapa(){try{return localStorage.getItem('access_token')||localStorage.getItem('token')||sessionStorage.getItem('access_token')||'';}catch(e){return '';}}
+async function sincronizarVisitaBackend(visita){
+  const base=mapaApiBase(),token=tokenMapa();if(!base||!token)return{status:'not-configured'};
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),15000);
+  try{const g=gpsMapaValido(visita?.gps)?{lat:Number(visita.gps.lat),lng:Number(visita.gps.lng),accuracy_m:Number.isFinite(Number(visita.gps.acc))?Number(visita.gps.acc):null}:null;const respuesta=await fetch(`${base}/api/v1/visits`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({code:String(visita.codigo||''),status:String(visita.estado||''),description:visita.descripcion||null,zone:visita.zona||null,price:Number(visita.precio)||0,visited_at:visita.horaRegistro||null,gps:g}),signal:controller.signal});if(!respuesta.ok)throw new Error(`Backend HTTP ${respuesta.status}`);const data=await respuesta.json();visita.backendSync='synced';visita.backendId=data.id;guardarEstadoCompleto();return{status:'synced',data};}catch(error){visita.backendSync='pending';guardarEstadoCompleto();throw error;}finally{clearTimeout(timer);}
+}
+window.sincronizarVisitaBackend=sincronizarVisitaBackend;
+function sincronizarVisitasNuevas(lista){if(!mapaApiBase()||!tokenMapa()||!Array.isArray(lista)||!lista.length)return;void Promise.allSettled(lista.map(sincronizarVisitaBackend)).then(resultados=>{if(resultados.some(r=>r.status==='rejected'))mostrarAviso('⚠️ Algunas visitas quedaron pendientes de sincronizar con el backend','warn');});}
 function actualizarEstadoMapa(texto,tipo=''){const el=document.getElementById('estadoMapaVisitas');if(!el)return;el.textContent=texto;el.style.color=tipo==='error'?'var(--sys-red)':tipo==='ok'?'var(--sys-green-dark)':'var(--text-secondary)';}
 function escaparMapa(valor){return String(valor??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
 function gpsMapaValido(g){return !!g&&Number.isFinite(Number(g.lat))&&Number.isFinite(Number(g.lng))&&Number(g.lat)>=-90&&Number(g.lat)<=90&&Number(g.lng)>=-180&&Number(g.lng)<=180;}
@@ -1778,10 +1780,11 @@ window.trazarRutaUltimaVisita=trazarRutaUltimaVisita;
 async function optimizarRutaVisitas(){
   const lista=(Array.isArray(visitas)?visitas:[]).filter(v=>gpsMapaValido(v.gps)||direccionDeVisita(v));
   if(lista.length<2){actualizarEstadoMapa('⚠️ Necesitas al menos dos visitas con GPS o dirección','error');return;}
+  if(lista.length>50){actualizarEstadoMapa('⚠️ La ruta admite máximo 50 visitas. Divide la operación en dos rutas','error');return;}
   const origen=await actualizarMapaYPosicion();if(!origen)return;
   try{
     actualizarEstadoMapa(`🚚 Preparando ${lista.length} visitas para optimizar…`);
-    const puntos=await Promise.all(lista.map(async v=>{if(gpsMapaValido(v.gps))return{visita:v,lat:Number(v.gps.lat),lng:Number(v.gps.lng),address:direccionDeVisita(v)};const g=await geocodificarMapa(direccionDeVisita(v));return{visita:v,lat:g.lat,lng:g.lng,address:direccionDeVisita(v)};}));
+    const puntos=[];for(const v of lista){if(gpsMapaValido(v.gps)){puntos.push({visita:v,lat:Number(v.gps.lat),lng:Number(v.gps.lng),address:direccionDeVisita(v)});continue;}const g=await geocodificarMapa(direccionDeVisita(v));puntos.push({visita:v,lat:g.lat,lng:g.lng,address:direccionDeVisita(v)});}
     const base=mapaApiBase(),token=tokenMapa();let geometria=null,orden=[];
     if(base&&token){const respuesta=await fetch(`${base}/api/v1/routes/daily`,{method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({start:{gps:{lat:origen.lat,lng:origen.lng,accuracy_m:origen.acc||null}},stops:puntos.map(p=>({gps:{lat:p.lat,lng:p.lng,accuracy_m:p.visita.gps?.acc||null},address:p.address||null,label:p.visita.codigo||'Visita'})),return_to_start:false})});if(!respuesta.ok)throw new Error('El backend no pudo optimizar las visitas');const data=await respuesta.json();geometria=data.geometry;orden=(data.stops||[]).map((s,i)=>{const p=puntos.find(x=>String(x.visita.codigo||'')===String(s.code||s.label||''))||puntos[i];return{...p,lat:Number(s.lat??p.lat),lng:Number(s.lng??p.lng),sequence:s.sequence||i+1};});}
     if(!geometria){const coordenadas=[origen,...puntos].map(p=>`${p.lng},${p.lat}`).join(';');const respuesta=await fetch(`https://router.project-osrm.org/trip/v1/driving/${coordenadas}?source=first&destination=last&roundtrip=false&overview=full&geometries=geojson&steps=true`);if(!respuesta.ok)throw new Error('No se pudo consultar el optimizador de rutas');const data=await respuesta.json();if(data.code!=='Ok'||!data.trips?.[0])throw new Error('No existe una ruta para las visitas seleccionadas');geometria=data.trips[0].geometry;const waypoints=data.waypoints||[];orden=waypoints.slice(1).map((w,i)=>({...(puntos[w.waypoint_index-1]||puntos[i]),sequence:i+1}));if(orden.length!==puntos.length)orden=puntos.map((p,i)=>({...p,sequence:i+1}));}
@@ -1789,7 +1792,7 @@ async function optimizarRutaVisitas(){
   }catch(e){console.error('Optimización de ruta:',e);actualizarEstadoMapa(`⚠️ ${e.message||'No se pudo optimizar la ruta'}`,'error');}
 }
 window.optimizarRutaVisitas=optimizarRutaVisitas;
-function actualizarMapaVisitas(v,origen){pintarMarcadoresVisitas();if(v){ultimaVisitaConRuta=v;trazarRutaParaVisita(v,origen||coordenadasActuales);}}
+function actualizarMapaVisitas(v,origen){ordenMapaVisitas=null;pintarMarcadoresVisitas();if(v){ultimaVisitaConRuta=v;trazarRutaParaVisita(v,origen||coordenadasActuales);}}
 window.actualizarMapaVisitas=actualizarMapaVisitas;
 function limpiarMapaVisitas(){if(capaRutaVisitas)capaRutaVisitas.clearLayers();ultimaVisitaConRuta=null;ordenMapaVisitas=null;actualizarEstadoMapa('🗺️ Ruta limpiada. El mapa conserva las visitas guardadas');pintarMarcadoresVisitas();}
 window.limpiarMapaVisitas=limpiarMapaVisitas;
@@ -1978,6 +1981,7 @@ window.guardarEdicionBanco=function(index){
   const iCod=document.getElementById('editBancoCodigo'),iDir=document.getElementById('editBancoDireccion'),iPre=document.getElementById('editBancoPrecio');if(!iCod)return;
   const nuevoCod=(iCod.value||'').trim(),nuevaDir=(iDir.value||'').trim(),nuevoPre=parseFloat(iPre.value)||0;
   const e=validarCodigo(nuevoCod);if(e){mostrarAviso('⚠️ '+e,'error');return;}
+  if(bancoCodigos.some((item,i)=>i!==index&&item.codigo===nuevoCod)){mostrarAviso('⚠️ Ese código ya está en el banco','warn');return;}
   bancoCodigos[index]={codigo:nuevoCod,direccion:nuevaDir,precio:nuevoPre};reindexarBanco();
   bancoCodigoEditando=null;renderizarBanco();guardarEstadoCompleto();mostrarAviso('✅ Guardado','ok');
 };
@@ -2120,16 +2124,16 @@ window.limpiarBusqueda=()=>{const i=document.getElementById('busquedaGuia');if(i
 window.guardarEdicion=index=>{
   const ic=document.getElementById(`edit-codigo-${index}`),se=document.getElementById(`edit-estado-${index}`),de=document.getElementById(`edit-desc-${index}`),dirInp=document.getElementById(`edit-direccion-${index}`),preInp=document.getElementById(`edit-precio-${index}`);
   if(!ic||!se)return;
-  const nc=ic.value.trim();visitas[index].codigo=nc;visitas[index].estado=se.value;visitas[index].descripcion=de?de.value.trim():(visitas[index].descripcion||'');
+  const nc=ic.value.trim(),errorCodigo=validarCodigo(nc);if(errorCodigo){mostrarAviso('⚠️ '+errorCodigo,'error');return;}if(visitas.some((v,i)=>i!==index&&(v.codigo||'').trim()===nc)){mostrarAviso('⚠️ Ese código ya pertenece a otra visita','warn');return;}visitas[index].codigo=nc;visitas[index].estado=se.value;visitas[index].descripcion=de?de.value.trim():(visitas[index].descripcion||'');
   if(dirInp)visitas[index].direccion=dirInp.value.trim();if(preInp)visitas[index].precio=parseFloat(preInp.value)||0;
   filaEditando=null;recalcularEstadisticas();renderizarTabla();guardarEstadoCompleto();
 };
-window.eliminarVisita=async index=>{const v=visitas[index];if(v&&Array.isArray(v.fotos)&&v.fotos.length){const ids=v.fotos.map(f=>f.id||f).filter(Boolean);await eliminarFotosMultiples(ids);}visitas.splice(index,1);if(filaEditando===index)filaEditando=null;recalcularEstadisticas();renderizarTabla();guardarEstadoCompleto();};
+window.eliminarVisita=async index=>{const v=visitas[index];if(v&&Array.isArray(v.fotos)&&v.fotos.length){const ids=v.fotos.map(f=>f.id||f).filter(Boolean);await eliminarFotosMultiples(ids);}visitas.splice(index,1);ordenMapaVisitas=null;if(filaEditando===index)filaEditando=null;recalcularEstadisticas();renderizarTabla();guardarEstadoCompleto();pintarMarcadoresVisitas();};
 
 let filtroVistaDia='todas';
 window.filtrarVistaDia=function(filtro){filtroVistaDia=filtro||'todas';document.querySelectorAll('.filtro-btn').forEach(b=>b.classList.toggle('active',b.dataset.filtro===filtroVistaDia));window.renderizarVistaDia();};
 window.limpiarBusquedaDia=function(){const i=document.getElementById('busquedaDia');if(i){i.value='';i.focus();}window.renderizarVistaDia();};
-window.clickStatCard=function(btn,tipo){
+window.clickStatCard=function(event,btn,tipo){
   if(btn){const rect=btn.getBoundingClientRect();btn.style.setProperty('--rx',((event.clientX-rect.left)/rect.width*100)+'%');btn.style.setProperty('--ry',((event.clientY-rect.top)/rect.height*100)+'%');btn.classList.add('pulse');setTimeout(()=>btn.classList.remove('pulse'),500);}
   document.querySelectorAll('button.stat-card').forEach(b=>b.classList.toggle('activa',b===btn));
   const filtroMap={entregados:'entregados',linkpago:'linkpago','no-entregados':'no-entregados',todas:'todas'};
@@ -2247,19 +2251,20 @@ window.registrarVisita=async()=>{
   const codigos=[...codigosPendientes],t=calcularMinutos(l,s),hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
   const firmaAdjunta=esEstadoEntregado(es)?(firmaGuardada||null):null;
-  const origenRuta=gpsMapaValido(coordenadasActuales)?{...coordenadasActuales}:null;
+  const origenRuta=gpsValido(coordenadasActuales,30000)?{...coordenadasActuales}:null;
   const gps=await obtenerGpsParaRegistro(8000);
   codigos.forEach(co=>{visitas.push({llegada:l,salida:s,tiempo:t,estado:es,codigo:co,descripcion:desc,direccion:direccion,zona,precio:precio,firma:firmaAdjunta,horaRegistro:hr,grupo:codigos.length>1?hr:null,fotos:fv,gps});});
   ultimoEstadoUsado=es;cancelarEscaneo();limpiarFormularioVisita();
   recalcularEstadisticas();renderizarTabla();scheduleRender('banco',renderizarBanco);guardarEstadoCompleto();
   actualizarMapaVisitas(visitas[visitas.length-1],origenRuta||gps);
+  sincronizarVisitasNuevas(visitas.slice(-codigos.length));
   mostrarAviso('✅ Visita guardada','ok');beepOk();
 };
 
 let escaneoModo='reparto';
-window.iniciarEscaneo=function(modo){
+window.iniciarEscaneo=async function(modo){
   if(escaneoActivo){cancelarEscaneo();return;}
-  if(typeof Html5Qrcode==='undefined'){alert('⚠️ Lector no disponible.');return;}
+  try{await asegurarHtml5Qrcode();}catch(e){alert('⚠️ No se pudo cargar el lector de cámara.');return;}
   escaneoModo=modo||'reparto';
   const divId=(escaneoModo==='banco')?'lectorQRBanco':'lectorQR';
   const btnId=(escaneoModo==='banco')?'btnCancelarEscaneoBanco':'btnCancelarEscaneo';
@@ -2333,7 +2338,7 @@ window.cancelarEscaneo=()=>{
 };
 
 async function preprocesarImagenParaOCR(file,maxDim=1600){return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=()=>{try{let{width,height}=img;if(width>maxDim||height>maxDim){if(width>height){height=Math.round(height*maxDim/width);width=maxDim;}else{width=Math.round(width*maxDim/height);height=maxDim;}}const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0,width,height);const imageData=ctx.getImageData(0,0,width,height);const data=imageData.data,factor=1.6;for(let i=0;i<data.length;i+=4){const gray=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];let c=(gray-128)*factor+128;if(c<0)c=0;if(c>255)c=255;data[i]=data[i+1]=data[i+2]=c;}ctx.putImageData(imageData,0,0);resolve({dataUrl:canvas.toDataURL('image/jpeg',0.85),width,height});}catch(err){reject(err);}};img.onerror=()=>reject(new Error('No se pudo decodificar'));img.src=e.target.result;};reader.onerror=()=>reject(new Error('No se pudo leer'));reader.readAsDataURL(file);});}
-async function detectarCodigosConZXingMulti(file){return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=async()=>{const encontrados=new Set();try{if(typeof ZXing==='undefined'){resolve([]);return;}const hints=new Map();const formats=[ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.CODE_93,ZXing.BarcodeFormat.ITF,ZXing.BarcodeFormat.CODABAR,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.DATA_MATRIX,ZXing.BarcodeFormat.PDF_417,ZXing.BarcodeFormat.AZTEC,ZXing.BarcodeFormat.MAXICODE];hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,formats);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{const luminance=new ZXing.BrowserLuminanceSource(img),binarizer=new ZXing.HybridBinarizer(luminance),bitmap=new ZXing.BinaryBitmap(binarizer),multiReader=new ZXing.MultiFormatReader();multiReader.setHints(hints);const results=multiReader.decodeMultiple(bitmap);if(results&&results.length)results.forEach(r=>{const t=r&&r.getText?r.getText():String(r);if(t)encontrados.add(t);});}catch(e){}if(encontrados.size===0){try{const reader1=new ZXing.BrowserMultiFormatReader(hints);const result=await reader1.decodeFromImageElement(img);const txt=result&&result.getText?result.getText():'';if(txt)encontrados.add(txt);}catch(e){}}if(encontrados.size<4){const regiones=[{x:0,y:0,w:img.width/2,h:img.height},{x:img.width/2,y:0,w:img.width/2,h:img.height},{x:0,y:0,w:img.width,h:img.height/2},{x:0,y:img.height/2,w:img.width,h:img.height/2},{x:0,y:0,w:img.width/2,h:img.height/2},{x:img.width/2,y:0,w:img.width/2,h:img.height/2},{x:0,y:img.height/2,w:img.width/2,h:img.height/2},{x:img.width/2,y:img.height/2,w:img.width/2,h:img.height/2}];const readerR=new ZXing.BrowserMultiFormatReader(hints);for(const reg of regiones){try{const canvas=document.createElement('canvas');canvas.width=reg.w;canvas.height=reg.h;const ctx=canvas.getContext('2d');ctx.drawImage(img,reg.x,reg.y,reg.w,reg.h,0,0,reg.w,reg.h);const r2=await readerR.decodeFromImageUrl(canvas.toDataURL('image/jpeg',0.9));const txt2=r2&&r2.getText?r2.getText():'';if(txt2)encontrados.add(txt2);}catch(e){}}}resolve(Array.from(encontrados));}catch(e){resolve(Array.from(encontrados));}};img.onerror=()=>resolve([]);img.src=e.target.result;};reader.onerror=()=>resolve([]);reader.readAsDataURL(file);});}
+async function detectarCodigosConZXingMulti(file){try{await asegurarZXing();}catch(e){return [];}return new Promise(resolve=>{const reader=new FileReader();reader.onload=e=>{const img=new Image();img.onload=async()=>{const encontrados=new Set();try{if(typeof ZXing==='undefined'){resolve([]);return;}const hints=new Map();const formats=[ZXing.BarcodeFormat.CODE_128,ZXing.BarcodeFormat.CODE_39,ZXing.BarcodeFormat.CODE_93,ZXing.BarcodeFormat.ITF,ZXing.BarcodeFormat.CODABAR,ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E,ZXing.BarcodeFormat.QR_CODE,ZXing.BarcodeFormat.DATA_MATRIX,ZXing.BarcodeFormat.PDF_417,ZXing.BarcodeFormat.AZTEC,ZXing.BarcodeFormat.MAXICODE];hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,formats);hints.set(ZXing.DecodeHintType.TRY_HARDER,true);try{const luminance=new ZXing.BrowserLuminanceSource(img),binarizer=new ZXing.HybridBinarizer(luminance),bitmap=new ZXing.BinaryBitmap(binarizer),multiReader=new ZXing.MultiFormatReader();multiReader.setHints(hints);const results=multiReader.decodeMultiple(bitmap);if(results&&results.length)results.forEach(r=>{const t=r&&r.getText?r.getText():String(r);if(t)encontrados.add(t);});}catch(e){}if(encontrados.size===0){try{const reader1=new ZXing.BrowserMultiFormatReader(hints);const result=await reader1.decodeFromImageElement(img);const txt=result&&result.getText?result.getText():'';if(txt)encontrados.add(txt);}catch(e){}}if(encontrados.size<4){const regiones=[{x:0,y:0,w:img.width/2,h:img.height},{x:img.width/2,y:0,w:img.width/2,h:img.height},{x:0,y:0,w:img.width,h:img.height/2},{x:0,y:img.height/2,w:img.width,h:img.height/2},{x:0,y:0,w:img.width/2,h:img.height/2},{x:img.width/2,y:0,w:img.width/2,h:img.height/2},{x:0,y:img.height/2,w:img.width/2,h:img.height/2},{x:img.width/2,y:img.height/2,w:img.width/2,h:img.height/2}];const readerR=new ZXing.BrowserMultiFormatReader(hints);for(const reg of regiones){try{const canvas=document.createElement('canvas');canvas.width=reg.w;canvas.height=reg.h;const ctx=canvas.getContext('2d');ctx.drawImage(img,reg.x,reg.y,reg.w,reg.h,0,0,reg.w,reg.h);const r2=await readerR.decodeFromImageUrl(canvas.toDataURL('image/jpeg',0.9));const txt2=r2&&r2.getText?r2.getText():'';if(txt2)encontrados.add(txt2);}catch(e){}}}resolve(Array.from(encontrados));}catch(e){resolve(Array.from(encontrados));}};img.onerror=()=>resolve([]);img.src=e.target.result;};reader.onerror=()=>resolve([]);reader.readAsDataURL(file);});}
 async function ocrConTesseractRapido(dataUrlOrFile,onProgress){if(!window.Tesseract)throw new Error('Tesseract no disponible');const{data:{text}}=await Tesseract.recognize(dataUrlOrFile,'eng',{tessedit_char_whitelist:'0123456789',tessedit_pageseg_mode:'11',logger:m=>{if(m.status==='recognizing text'&&onProgress)onProgress(m.progress);}});return text||'';}
 async function ocrConGoogleVision(file,apiKey){const base64=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result.split(',')[1]);r.onerror=reject;r.readAsDataURL(file);});const body={requests:[{image:{content:base64},features:[{type:'TEXT_DETECTION',maxResults:10}]}]};const resp=await fetch(`https://vision.googleapis.com/v1/images:annotate?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});if(!resp.ok)throw new Error('Vision: '+(await resp.text()).slice(0,120));const data=await resp.json();return(data.responses?.[0]?.textAnnotations||[]).map(d=>d.description).join('\n');}
 async function extraerCodigosDeImagen(file,useVision,visionKey,estadoOCR,idx,total){const codigos=new Set();if(estadoOCR)estadoOCR.textContent=`🔍 ${idx+1}/${total} · ZXing...`;try{const zxCodes=await detectarCodigosConZXingMulti(file);zxCodes.forEach(c=>{const limpio=String(c).replace(/\D/g,'');if(limpio.length===12)codigos.add(limpio);});if(codigos.size>0)return Array.from(codigos);}catch(e){}if(useVision){if(estadoOCR)estadoOCR.textContent=`🔍 ${idx+1}/${total} · Vision...`;try{const texto=await ocrConGoogleVision(file,visionKey);(texto.match(/\d{12}/g)||[]).forEach(m=>codigos.add(m));if(codigos.size>0)return Array.from(codigos);}catch(e){}}if(estadoOCR)estadoOCR.textContent=`🔍 ${idx+1}/${total} · OCR...`;try{let dataUrl;try{const pre=await preprocesarImagenParaOCR(file,1400);dataUrl=pre.dataUrl;}catch(e){dataUrl=await new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.readAsDataURL(file);});}const texto=await ocrConTesseractRapido(dataUrl,prog=>{if(estadoOCR)estadoOCR.textContent=`🔍 ${idx+1}/${total} · OCR ${Math.round(prog*100)}%`;});(texto.match(/\d{12}/g)||[]).forEach(m=>codigos.add(m));}catch(e){}return Array.from(codigos);}
@@ -2578,11 +2583,12 @@ window.guardarVisitaReparto=async function(){
   }
   const hora=horaActual(),desc=(document.getElementById('descripcionReparto')?.value||'').trim(),dirManual=(document.getElementById('direccionReparto')?.value||'').trim(),zonaManual=(document.getElementById('zonaReparto')?.value||'').trim(),precioManual=parseFloat(document.getElementById('precioReparto')?.value||'0')||0,hr=new Date().toISOString();
   const fv=fotosPendientes.map(f=>({id:f.id,tamanoKB:f.tamanoKB,fecha:f.fecha,censurada:f.censurada,rostros:f.rostros,vehiculos:f.vehiculos,manual:f.manual||false}));
-  const origenRuta=gpsMapaValido(coordenadasActuales)?{...coordenadasActuales}:null;
+  const origenRuta=gpsValido(coordenadasActuales,30000)?{...coordenadasActuales}:null;
   actualizarEstadoGpsReparto(null,true);
   const gps=await obtenerGpsParaRegistro(8000);
   actualizarEstadoGpsReparto(gps);
   if(!gps)mostrarAviso('⚠️ No se obtuvo ubicación; revisa el permiso de GPS','warn');
+  const cantidadVisitasNuevas=codigosPendientesReparto.length;
   codigosPendientesReparto.forEach(cod=>{
     const b=bancoBuscar(cod);
     const dir=(b&&b.item&&b.item.direccion)?b.item.direccion:(dirManual||'');
@@ -2603,6 +2609,7 @@ window.guardarVisitaReparto=async function(){
   recalcularEstadisticas();renderizarTabla();renderizarBanco();renderizarCodigosReparto();
   actualizarResumenReparto();verificarUmbralEfectividad();actualizarBarraUmbral();guardarEstadoCompleto();
   actualizarMapaVisitas(visitaParaMapa,origenRuta||gps);
+  sincronizarVisitasNuevas(visitas.slice(-cantidadVisitasNuevas));
   mostrarAviso('✅ Visita guardada','ok');beepOk();
   if(navigator.vibrate)navigator.vibrate([60,30,60]);
   refrescarCoordenadas();
@@ -2658,7 +2665,7 @@ async function ejecutarImpresion(html,clasesExtra){
 window.ejecutarImpresion=ejecutarImpresion;
 
 async function exportarHTMLaPDF(htmlCompleto,nombreArchivo){
-  if(!window.html2canvas||!window.jspdf){alert('⚠️ Librerías PDF no cargadas.');return;}
+  try{await Promise.all([asegurarHtml2Canvas(),asegurarJsPdf()]);}catch(e){alert('⚠️ No se pudieron cargar las librerías PDF.');return;}
   const{jsPDF}=window.jspdf;
   const modalProg=document.getElementById('modalProcesando'),titulo=document.getElementById('procesandoTituloGrande'),paso=document.getElementById('procesandoPaso'),barra=document.getElementById('procesandoBarra');
   if(titulo)titulo.textContent='📄 Generando PDF…';if(paso)paso.textContent='Preparando contenido…';if(barra)barra.style.width='5%';if(modalProg)modalProg.classList.add('visible');
@@ -2988,6 +2995,10 @@ document.addEventListener('DOMContentLoaded',()=>{cargarConfigAlertasAnalitica()
 
 const LAZY_CHART_URL = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js';
 const LAZY_TESSERACT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/dist/tesseract.min.js';
+const LAZY_QR_URL = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
+const LAZY_ZXING_URL = 'https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js';
+const LAZY_HTML2CANVAS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+const LAZY_JSPDF_URL = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
 const lazyLibraryPromises = new Map();
 
 function cargarLibreriaDiferida(url, globalName){
@@ -3033,6 +3044,18 @@ function asegurarChart(){
 
 function asegurarTesseract(){
   return cargarLibreriaDiferida(LAZY_TESSERACT_URL,'Tesseract');
+}
+function asegurarHtml5Qrcode(){
+  return cargarLibreriaDiferida(LAZY_QR_URL,'Html5Qrcode');
+}
+function asegurarZXing(){
+  return cargarLibreriaDiferida(LAZY_ZXING_URL,'ZXing');
+}
+function asegurarHtml2Canvas(){
+  return cargarLibreriaDiferida(LAZY_HTML2CANVAS_URL,'html2canvas');
+}
+function asegurarJsPdf(){
+  return cargarLibreriaDiferida(LAZY_JSPDF_URL,'jspdf');
 }
 
 function avisarErrorCarga(mensaje){
