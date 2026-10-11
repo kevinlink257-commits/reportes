@@ -377,13 +377,19 @@ def _request_geocode(address: str) -> dict[str, Any]:
             results = response.json()
     except (httpx.HTTPError, ValueError) as exc:
         raise HTTPException(502, "No fue posible consultar el geocodificador") from exc
+    if not isinstance(results, list):
+        raise HTTPException(502, "Respuesta inválida del geocodificador")
     if not results:
         raise HTTPException(422, f"No se encontró la dirección: {address}")
     item = results[0]
     try:
+        lat = float(item["lat"])
+        lng = float(item["lon"])
+        if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+            raise ValueError("coordenadas fuera de rango")
         return {
-            "lat": float(item["lat"]),
-            "lng": float(item["lon"]),
+            "lat": lat,
+            "lng": lng,
             "display_name": item.get("display_name", address),
             "address": item.get("address", {}),
         }

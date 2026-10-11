@@ -1191,7 +1191,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
       <h2>9. ☁️ Sincronización</h2>
       <div id="estadoNube" class="estado-nube loading">⏳ Esperando usuario...</div>
       <div class="toggle-wrapper"><label class="toggle-label" for="toggleSync">🔄 Sync automática</label><div class="switch"><input type="checkbox" id="toggleSync" onchange="toggleSyncAutomatico()" checked><span class="slider"></span></div></div>
-      <div class="toggle-wrapper" style="margin-top:8px;"><label class="toggle-label" for="toggleFotosNube">📸 Sync fotos</label><div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div></div>
+      <div class="toggle-wrapper" style="margin-top:8px;"><label class="toggle-label" for="toggleFotosNube">📸 Fotos locales (IndexedDB)</label><div class="switch"><input type="checkbox" id="toggleFotosNube" onchange="toggleFotosNube()"><span class="slider"></span></div></div>
       <div class="btn-group" style="margin-top:10px;"><button type="button" class="btn-nube" onclick="forzarSincronizacion()">🔄 Sincronizar</button><button type="button" class="btn-nube" onclick="cargarDeNube()">⬇️ Traer</button></div>
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>💾 Respaldo</h3>
@@ -1200,7 +1200,7 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
         <button type="button" class="btn-imprimir" onclick="descargarRespaldoWord()">💾 Word</button>
         <button type="button" class="btn-informe" onclick="document.getElementById('inputCargarJSON').click()">📂 Importar</button>
       </div>
-      <input type="file" id="inputCargarJSON" accept=".doc,.docx,.json,.rtf,.txt" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
+      <input type="file" id="inputCargarJSON" accept=".json,.doc,application/json,application/msword" style="display:none;" onchange="cargarRespaldoDesdeArchivo(event)">
       <hr style="margin:20px 0;border:none;border-top:1px dashed var(--border-main);">
       <h3>📄 Exportar PDF</h3>
       <div class="btn-group"><button type="button" class="btn-pdf" onclick="exportarDiaPDF()">📥 Día</button><button type="button" class="btn-pdf" onclick="exportarMesPDF()">📥 Mes</button><button type="button" class="btn-pdf" onclick="exportarHistorialPDF()">📥 Historial</button></div>
@@ -1400,6 +1400,7 @@ window.hacerRegistro=async function(){
   lista.push({nombre:n.trim(),hash:hashRes.hash,salt:hashRes.salt,rol:'repartidor',algo:'PBKDF2-SHA256-60k',fechaRegistro:new Date().toISOString()});
   guardarUsuariosRegistrados(lista);
   guardarCuentaEnNube(n.trim(), hashRes.hash, hashRes.salt, 'repartidor').catch(()=>{});
+  try{localStorage.setItem(CLAVE_SESION_TS, String(Date.now()));}catch(e){}
   setUsuarioActual(n.trim()); actualizarBarraUsuario();
   await new Promise(r=>setTimeout(r,200));
   await iniciarSesionConUsuario(n.trim());
@@ -1731,6 +1732,9 @@ async function sincronizarVisitaBackend(visita){
 }
 window.sincronizarVisitaBackend=sincronizarVisitaBackend;
 function sincronizarVisitasNuevas(lista){if(!mapaApiBase()||!tokenMapa()||!Array.isArray(lista)||!lista.length)return;void Promise.allSettled(lista.map(sincronizarVisitaBackend)).then(resultados=>{if(resultados.some(r=>r.status==='rejected'))mostrarAviso('⚠️ Algunas visitas quedaron pendientes de sincronizar con el backend','warn');});}
+async function reintentarVisitasPendientes(){if(!mapaApiBase()||!tokenMapa()||!Array.isArray(visitas))return;const pendientes=visitas.filter(v=>v&&v.backendSync==='pending');if(pendientes.length)sincronizarVisitasNuevas(pendientes);}
+window.addEventListener('online',()=>void reintentarVisitasPendientes());
+setTimeout(()=>void reintentarVisitasPendientes(),1500);
 function actualizarEstadoMapa(texto,tipo=''){const el=document.getElementById('estadoMapaVisitas');if(!el)return;el.textContent=texto;el.style.color=tipo==='error'?'var(--sys-red)':tipo==='ok'?'var(--sys-green-dark)':'var(--text-secondary)';}
 function escaparMapa(valor){return String(valor??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#039;','"':'&quot;'}[c]));}
 function gpsMapaValido(g){return !!g&&Number.isFinite(Number(g.lat))&&Number.isFinite(Number(g.lng))&&Number(g.lat)>=-90&&Number(g.lat)<=90&&Number(g.lng)>=-180&&Number(g.lng)<=180;}
@@ -1863,7 +1867,7 @@ window.cerrarModalReglasFoto=function(){const m=document.getElementById('modalRe
 window.toggleBotonCamara=function(){const chk=document.getElementById('chkAceptoReglas'),btn=document.getElementById('btnAbrirCamara');if(btn)btn.disabled=!(chk&&chk.checked);};
 window.confirmarYabrirCamara=function(){const chk=document.getElementById('chkAceptoReglas');if(!chk||!chk.checked){mostrarAviso('⚠️ Debes aceptar las reglas','error');return;}try{sessionStorage.setItem(CLAVE_REGLAS_SESION,'1');}catch(e){}cerrarModalReglasFoto();const targetId=modoFotoPendiente==='galeria'?'inputFotoGaleria':'inputFotoCamara';setTimeout(()=>{document.getElementById(targetId)?.click();},250);};
 window.resetReglasFotoSesion=function(){try{sessionStorage.removeItem(CLAVE_REGLAS_SESION);}catch(e){}mostrarAviso('✅ Reglas reseteadas','ok');};
-window.toggleFotosNube=function(){const t=document.getElementById('toggleFotosNube');if(!t)return;sincronizarFotosNube=t.checked;try{localStorage.setItem(CLAVE_FOTOS_NUBE,sincronizarFotosNube?'true':'false');}catch(e){}mostrarAviso(sincronizarFotosNube?'📸 Fotos se sincronizarán':'📸 Fotos solo locales','ok');};
+window.toggleFotosNube=function(){const t=document.getElementById('toggleFotosNube');if(!t)return;t.checked=false;sincronizarFotosNube=false;try{localStorage.setItem(CLAVE_FOTOS_NUBE,'false');}catch(e){}mostrarAviso('📸 Las fotos se guardan localmente en este dispositivo; sincronización en nube no disponible','warn');};
 
 function comprimirImagen(file,maxDim=FOTO_MAX_DIM,quality=FOTO_JPEG_QUALITY){
   return new Promise((resolve,reject)=>{
@@ -2241,7 +2245,7 @@ window.guardarFirma=function(){if(!canvasFirma)return;const imageData=ctxFirma.g
 
 function limpiarFormularioVisita(){['llegadaCliente','salidaCliente','descripcionVisita','estadoPaquete','busquedaCodigoBanco','direccionVisita','zonaVisita','precioVisita'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});codigosPendientes=[];renderizarCodigosPendientes();fotosPendientes=[];renderizarGaleriaFotos();renderizarGaleriaFotosReparto();window.limpiarBusquedaCodigo();window.limpiarFirma();}
 
-window.registrarVisita=async()=>{
+async function registrarVisitaInterna(){
   let l=document.getElementById('llegadaCliente').value,s=document.getElementById('salidaCliente').value;
   const es=document.getElementById('estadoPaquete').value,desc=(document.getElementById('descripcionVisita').value||'').trim(),direccion=(document.getElementById('direccionVisita')?.value||'').trim(),zona=(document.getElementById('zonaVisita')?.value||'').trim(),precio=parseFloat(document.getElementById('precioVisita')?.value)||0;
   if(!l){alert('Ingresa hora llegada');return;}
@@ -2259,7 +2263,9 @@ window.registrarVisita=async()=>{
   actualizarMapaVisitas(visitas[visitas.length-1],origenRuta||gps);
   sincronizarVisitasNuevas(visitas.slice(-codigos.length));
   mostrarAviso('✅ Visita guardada','ok');beepOk();
-};
+}
+let registroVisitaEnCurso=false;
+window.registrarVisita=async()=>{if(registroVisitaEnCurso){mostrarAviso('⏳ Ya se está guardando la visita','warn');return;}registroVisitaEnCurso=true;try{return await registrarVisitaInterna();}finally{registroVisitaEnCurso=false;}};
 
 let escaneoModo='reparto';
 window.iniciarEscaneo=async function(modo){
@@ -2571,7 +2577,7 @@ window.firmaRapidaReparto=function(){
 };
 function capturarFirmaReparto(){if(!canvasFirmaReparto||!ctxFirmaReparto)return null;const imageData=ctxFirmaReparto.getImageData(0,0,canvasFirmaReparto.width,canvasFirmaReparto.height);const tieneContenido=imageData.data.some((v,i)=>i%4===3&&v>0);return tieneContenido?canvasFirmaReparto.toDataURL('image/png'):null;}
 
-window.guardarVisitaReparto=async function(){
+async function guardarVisitaRepartoInterna(){
   if(codigosPendientesReparto.length===0){mostrarAviso('⚠️ Escanea o agrega al menos una guía','error');beepError();return;}
   if(!estadoRepartoSeleccionado){mostrarAviso('⚠️ Selecciona el estado','error');beepError();return;}
   const esEnt=esEstadoEntregado(estadoRepartoSeleccionado);
@@ -2613,7 +2619,9 @@ window.guardarVisitaReparto=async function(){
   mostrarAviso('✅ Visita guardada','ok');beepOk();
   if(navigator.vibrate)navigator.vibrate([60,30,60]);
   refrescarCoordenadas();
-};
+}
+let registroRepartoEnCurso=false;
+window.guardarVisitaReparto=async function(){if(registroRepartoEnCurso){mostrarAviso('⏳ Ya se está guardando la visita','warn');return;}registroRepartoEnCurso=true;try{return await guardarVisitaRepartoInterna();}finally{registroRepartoEnCurso=false;}};
 
 function generarChartEstadosHorizontal(ancho,alto){
   const c=document.createElement('canvas');c.width=ancho;c.height=alto;
@@ -2833,7 +2841,7 @@ window.exportarInformeEmpresarialPDF=async function(){
   mostrarAviso('✅ PDF descargado','ok');
 };
 window.exportarDiaPDF=async function(){await window.imprimirReporteDiario('pdf');};
-window.exportarMesPDF=async function(){const m=parseInt(document.getElementById('mesInforme').value),a=parseInt(document.getElementById('anioInforme').value);if(!m||!a){alert('Selecciona mes y año.');return;}generarInformeMensual();await new Promise(r=>setTimeout(r,400));await window.imprimirInformeMensual('pdf');};
+window.exportarMesPDF=async function(){const m=parseInt(document.getElementById('mesInforme').value),a=parseInt(document.getElementById('anioInforme').value);if(!m||!a){alert('Selecciona mes y año.');return;}const generado=window.generarInformeMensual();if(generado===false)return;await new Promise(r=>setTimeout(r,120));await window.imprimirInformeMensual('pdf');};
 window.exportarHistorialPDF=async function(){const h=cargarHistorialDetallado(),f=Object.keys(h).sort();if(!f.length){alert('No hay historial.');return;}let html=`<div class="reporte-diario"><header class="rd-header"><h1>Historial</h1></header><table class="rd-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;f.forEach(k=>{const d=h[k];html+=`<tr><td>${k}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td></tr>`;});html+=`</tbody></table></div>`;await exportarHTMLaPDF(html,`Historial_${fechaLocalISO()}.pdf`);mostrarAviso('✅ PDF descargado','ok');};
 window.exportarRespaldoPDF=async function(){const u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():null)||'sin-usuario';const html=`<div class="reporte-diario"><header class="rd-header"><h1>Respaldo</h1></header><p>Usuario: ${escapeHtml(u)}</p><p>Fecha: ${new Date().toLocaleString('es')}</p><p>Visitas: ${totalVisitas}</p></div>`;await exportarHTMLaPDF(html,`Respaldo_${fechaLocalISO()}.pdf`);mostrarAviso('✅ PDF descargado','ok');};
 
@@ -2891,7 +2899,7 @@ window.reiniciarDia=()=>{if(!confirm('¿Reiniciar día?'))return;guardarDiaActua
 window.reiniciarSesion=()=>{if(!confirm('¿Limpiar sesión?'))return;limpiarSesion();alert('✅');};
 function limpiarSesion(){ESTADOS.forEach(k=>contadores[k]=0);totalMinutosVisitas=0;totalVisitas=0;visitas=[];filaEditando=null;codigosPendientes=[];bancoCodigos=[];bancoIndex.clear();codigosRegistradosHoy.clear();fotosPendientes=[];codigosPendientesReparto=[];bancoCodigoEditando=null;renderizarGaleriaFotos();renderizarGaleriaFotosReparto();renderizarCodigosPendientes();actualizarContadorUnicos();renderizarBanco();renderizarCodigosReparto();['inicioCarga','finCarga','salidaEmpresa','primeraEntrega'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';localStorage.removeItem('tiempoBase_'+id);});try{localStorage.removeItem('estadoSesion');localStorage.removeItem(CLAVE_BORRADOR);}catch(e){}actualizarDashboard();renderizarTabla();actualizarGraficaPromedios();actualizarInformesSemanalesMensuales();verificarUmbralEfectividad();actualizarBarraUmbral();actualizarResumenReparto();window.limpiarFiltroStat();}
 window.eliminarTodo=async()=>{if(!confirm('¿ELIMINAR TODO?'))return;if(!confirm('Confirma?'))return;try{['estadoSesion','entregasDiariasDetallado',CLAVE_BORRADOR].forEach(k=>localStorage.removeItem(k));}catch(e){}limpiarSesion();alert('✅');};
-window.generarInformeMensual=()=>{const m=parseInt(document.getElementById('mesInforme').value),a=parseInt(document.getElementById('anioInforme').value);if(!m||!a){alert('Selecciona mes y año');return;}const h=cargarHistorialDetallado(),fm=Object.keys(h).filter(f=>{const[y,mm]=f.split('-').map(Number);return y===a&&mm===m;}).sort();if(!fm.length){alert('Sin datos.');return;}const nm=new Date(a,m-1,1).toLocaleString('es',{month:'long'}),cap=nm.charAt(0).toUpperCase()+nm.slice(1),u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'';let tE=0,tV=0,tL=0;fm.forEach(f=>{const d=h[f];tE+=contarEntregadosEnContadores(d.contadores);tV+=d.totalVisitas||0;tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0;});const ef=tV>0?((tE/tV)*100).toFixed(1):0;let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-weight:bold;">👤 ${escapeHtml(u)}</div><h2>${escapeHtml(cap)} ${a}</h2></div><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Link</div><div class="valor">${tL}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div></div><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;fm.forEach(f=>{const d=h[f];html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td></tr>`;});html+=`</tbody></table>`;document.getElementById('informeContenedor').innerHTML=html;document.getElementById('informeContenedor').style.display='block';document.getElementById('seccionInforme').style.display='block';if(typeof window.cambiarTab==='function')window.cambiarTab('informes');};
+window.generarInformeMensual=()=>{const cont=document.getElementById('informeContenedor');if(cont){cont.innerHTML='';cont.style.display='none';}const m=parseInt(document.getElementById('mesInforme').value),a=parseInt(document.getElementById('anioInforme').value);if(!m||!a){alert('Selecciona mes y año');return false;}const h=cargarHistorialDetallado(),fm=Object.keys(h).filter(f=>{const[y,mm]=f.split('-').map(Number);return y===a&&mm===m;}).sort();if(!fm.length){alert('Sin datos para el mes seleccionado.');return false;}const nm=new Date(a,m-1,1).toLocaleString('es',{month:'long'}),cap=nm.charAt(0).toUpperCase()+nm.slice(1),u=(typeof window.getUsuarioActual==='function'?window.getUsuarioActual():'')||'';let tE=0,tV=0,tL=0;fm.forEach(f=>{const d=h[f];tE+=contarEntregadosEnContadores(d.contadores);tV+=d.totalVisitas||0;tL+=d.contadores?.[ESTADO_ENTREGADO_LINK]||0;});const ef=tV>0?((tE/tV)*100).toFixed(1):0;let html=`<div class="informe-header"><h1>📦 Informe Mensual</h1><div style="font-weight:bold;">👤 ${escapeHtml(u)}</div><h2>${escapeHtml(cap)} ${a}</h2></div><div class="informe-kpis"><div class="informe-kpi"><div class="label">Entregados</div><div class="valor">${tE}</div></div><div class="informe-kpi"><div class="label">Link</div><div class="valor">${tL}</div></div><div class="informe-kpi"><div class="label">Visitas</div><div class="valor">${tV}</div></div><div class="informe-kpi"><div class="label">Efectividad</div><div class="valor">${ef}%</div></div></div><table class="informe-tabla"><thead><tr><th>Fecha</th><th>Visitas</th><th>Entregados</th></tr></thead><tbody>`;fm.forEach(f=>{const d=h[f];html+=`<tr><td>${f.split('-').reverse().join('/')}</td><td>${d.totalVisitas||0}</td><td>${contarEntregadosEnContadores(d.contadores)}</td></tr>`;});html+=`</tbody></table>`;document.getElementById('informeContenedor').innerHTML=html;document.getElementById('informeContenedor').style.display='block';document.getElementById('seccionInforme').style.display='block';if(typeof window.cambiarTab==='function')window.cambiarTab('informes');return true;};
 window.ocultarInforme=()=>{document.getElementById('seccionInforme').style.display='none';document.getElementById('informeContenedor').innerHTML='';document.getElementById('informeContenedor').style.display='none';};
 window.recargarUIDesdeStorage=function(){try{const raw=localStorage.getItem('estadoSesion');if(raw){const e=JSON.parse(raw);visitas=(e.visitas||[]).map(v=>({...v,codigo:(v.codigo||'').replace(/\D/g,'').slice(0,12),fotos:Array.isArray(v.fotos)?v.fotos:[]}));bancoCodigos=(e.bancoCodigos||[]).map(x=>normalizarCodigoBanco(x)).filter(x=>/^\d{12}$/.test(x.codigo));reindexarBanco();codigosPendientes=(e.codigosPendientes||[]).filter(c=>/^\d{12}$/.test(c));codigosPendientesReparto=(e.codigosPendientesReparto||[]).filter(c=>/^\d{12}$/.test(c));fotosPendientes=Array.isArray(e.fotosPendientes)?e.fotosPendientes:[];ESTADOS.forEach(k=>{contadores[k]=(e.contadores&&e.contadores[k])||0;});totalMinutosVisitas=e.totalMinutosVisitas||0;totalVisitas=e.totalVisitas||0;filaEditando=null;cargarCodigosRegistradosHoy();}cargarTiemposBase();renderizarTabla();renderizarBanco();renderizarCodigosPendientes();renderizarGaleriaFotos();renderizarGaleriaFotosReparto();actualizarDashboard();actualizarGraficaPromedios();actualizarInformesSemanalesMensuales();verificarUmbralEfectividad();actualizarBarraUmbral();actualizarResumenReparto();renderizarCodigosReparto();}catch(e){}};
 window.reiniciarUIOffline=function(){ESTADOS.forEach(k=>contadores[k]=0);totalMinutosVisitas=0;totalVisitas=0;visitas=[];filaEditando=null;codigosPendientes=[];bancoCodigos=[];bancoIndex.clear();codigosRegistradosHoy.clear();fotosPendientes=[];codigosPendientesReparto=[];renderizarGaleriaFotos();renderizarGaleriaFotosReparto();renderizarCodigosPendientes();renderizarBanco();renderizarCodigosReparto();try{actualizarDashboard();renderizarTabla();actualizarBarraUmbral();actualizarResumenReparto();window.limpiarFiltroStat();}catch(e){}};
