@@ -1052,15 +1052,17 @@ h3.rd-section-title{font-size:10pt;color:#1d1d1f;border-bottom:1.5px solid #1d1d
   <div class="tab-panel" data-tab="manifiesto">
     <div class="section no-print">
       <h2>📋 Importar Manifiesto de Ruta</h2>
-      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Pega el manifiesto de tu ruta asignada. Formatos: CSV, TXT, Excel (pegado).</p>
+      <p style="text-align:center;font-size:.85em;color:var(--text-secondary);margin-top:0;">Pega el manifiesto o impórtalo desde tu dispositivo. Formatos: CSV, TXT, JSON y Excel (pegado).</p>
       <label>Formato esperado (una línea por paquete):</label>
       <code style="display:block;background:var(--bg-section);padding:8px 12px;border-radius:var(--radius-sm);font-size:.75rem;margin-top:6px;overflow-x:auto;white-space:nowrap;">GUIA,DIRECCION,PRECIO,ESTADO_SUGERIDO(opt)</code>
       <textarea id="manifiestoTexto" placeholder="123456789012,Calle 10 # 20-30,50000
 123456789013,Carrera 45 # 12-34,35000,02" style="min-height:180px;font-family:'SF Mono','Courier New',monospace;font-size:.8rem;"></textarea>
       <div class="btn-group" style="margin-top:12px;">
+        <button type="button" class="btn-informe" onclick="document.getElementById('inputManifiestoArchivo').click()">📂 Importar archivo local</button>
         <button type="button" class="btn-guardar" onclick="procesarManifiesto()">✅ Procesar manifiesto</button>
         <button type="button" class="btn-cancelar" onclick="document.getElementById('manifiestoTexto').value=''">🗑️ Limpiar</button>
       </div>
+      <input type="file" id="inputManifiestoArchivo" accept=".csv,.txt,.json,text/csv,text/plain,application/json" style="display:none;" onchange="importarManifiestoArchivo(event)">
       <div id="manifiestoResultado" style="margin-top:16px;"></div>
       <div class="ocr-info" style="margin-top:14px;">💡 También puedes escanear una hoja de ruta con el OCR del modo Reparto Rápido.</div>
     </div>
@@ -2390,25 +2392,37 @@ window.procesarFotosOCR=async function(event){
   event.target.value='';
 };
 
-window.procesarManifiesto=function(){
-  const ta=document.getElementById('manifiestoTexto');if(!ta)return;
-  const cont=document.getElementById('manifiestoResultado');
-  const lineas=(ta.value||'').split(/\n/).map(s=>s.trim()).filter(Boolean);
-  let agregados=0,dup=0,invalidos=0;
-  lineas.forEach(linea=>{
-    const partes=linea.split(/[,;\t]+/).map(s=>s.trim());
-    const cod=(partes[0]||'').replace(/\D/g,'');
-    if(validarCodigo(cod)){invalidos++;return;}
-    if(bancoContiene(cod)){dup++;return;}
-    const direccion=partes[1]||'',precio=parseFloat((partes[2]||'').replace(/[^0-9]/g,''))||0;
-    bancoCodigos.push({codigo:cod,direccion,precio});
-    agregados++;
-  });
+function separarLineaManifiesto(linea,delimitador){
+  const campos=[];let actual='',entreComillas=false;
+  for(let i=0;i<linea.length;i++){const ch=linea[i];if(ch== '"'){if(entreComillas&&linea[i+1]=='"'){actual+='"';i++;}else entreComillas=!entreComillas;}else if(ch===delimitador&&!entreComillas){campos.push(actual.trim());actual='';}else actual+=ch;}
+  campos.push(actual.trim());return campos;
+}
+function filasManifiestoDesdeTexto(texto){
+  const lineas=String(texto||'').replace(/^\uFEFF/,'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);if(!lineas.length)return [];
+  const delimitador=(lineas[0].match(/;/g)||[]).length>(lineas[0].match(/,/g)||[]).length?';':((lineas[0].includes('\t'))?'\t':',');
+  return lineas.map(linea=>separarLineaManifiesto(linea,delimitador));
+}
+function valorFilaManifiesto(fila,claves,indice){
+  if(Array.isArray(fila))return fila[indice]??'';
+  if(fila&&typeof fila==='object'){for(const clave of claves){const encontrada=Object.keys(fila).find(k=>k.toLowerCase().replace(/[áéíóúüñ]/g,x=>({'á':'a','é':'e','í':'i','ó':'o','ú':'u','ü':'u','ñ':'n'}[x]||x))===clave);if(encontrada!=null)return fila[encontrada]??'';}}
+  return '';
+}
+function filasManifiestoDesdeArchivo(texto,nombre){
+  const limpio=String(texto||'').trim();if(!limpio)return [];
+  if(/\.json$/i.test(nombre)||limpio[0]==='['||limpio[0]==='{'){try{const data=JSON.parse(limpio);const filas=Array.isArray(data)?data:(data.manifest||data.manifiesto||data.rows||data.items||data.stops||data.paradas||[]);return (Array.isArray(filas)?filas:[]).map(f=>[valorFilaManifiesto(f,['codigo','guia','guide','code','barcode'],0),valorFilaManifiesto(f,['direccion','address','destination','destino'],1),valorFilaManifiesto(f,['precio','price','valor','amount'],2),valorFilaManifiesto(f,['estado','status','estado_sugerido'],3)]);}catch(e){throw new Error('El JSON del manifiesto no es válido.');}}
+  return filasManifiestoDesdeTexto(limpio);
+}
+function procesarFilasManifiesto(filas){
+  const cont=document.getElementById('manifiestoResultado');let agregados=0,dup=0,invalidos=0,omitidos=0;
+  const inicio=filas.length&&Array.isArray(filas[0])?filas[0].map(x=>String(x).toLowerCase()).join(' '):'';
+  if(/codigo|c[oó]digo|gu[ií]a|guide|address|direccion/.test(inicio))filas=filas.slice(1);
+  filas.forEach(fila=>{const cod=String(valorFilaManifiesto(fila,['codigo','guia','guide','code','barcode'],0)||'').replace(/\D/g,'');if(!cod){omitidos++;return;}if(validarCodigo(cod)){invalidos++;return;}if(bancoContiene(cod)){dup++;return;}const direccion=String(valorFilaManifiesto(fila,['direccion','address','destination','destino'],1)||'').trim();const precio=parseFloat(String(valorFilaManifiesto(fila,['precio','price','valor','amount'],2)||'').replace(/[^0-9.-]/g,''))||0;bancoCodigos.push({codigo:cod,direccion,precio});agregados++;});
   reindexarBanco();renderizarBanco();guardarEstadoCompleto();
-  if(cont){cont.innerHTML=`<div class="result-box"><strong>📋 Resultado:</strong><br>✅ Agregados: ${agregados}<br>⚠️ Duplicados: ${dup}<br>❌ Inválidos: ${invalidos}</div>`;}
-  mostrarAviso(`✅ ${agregados} agregados`,agregados>0?'ok':'warn');
-};
-
+  if(cont)cont.innerHTML=`<div class="result-box"><strong>📋 Resultado:</strong><br>✅ Agregados: ${agregados}<br>⚠️ Duplicados: ${dup}<br>❌ Inválidos: ${invalidos}<br>↪️ Omitidos: ${omitidos}</div>`;
+  mostrarAviso(`✅ ${agregados} agregados al banco`,agregados>0?'ok':'warn');return {agregados,dup,invalidos,omitidos};
+}
+window.procesarManifiesto=function(){const ta=document.getElementById('manifiestoTexto');if(!ta)return;try{return procesarFilasManifiesto(filasManifiestoDesdeTexto(ta.value));}catch(e){mostrarAviso('❌ '+e.message,'error');return null;}};
+window.importarManifiestoArchivo=async function(event){const input=event.target,file=input?.files?.[0];if(!file)return;try{const texto=await file.text();const filas=filasManifiestoDesdeArchivo(texto,file.name);if(!filas.length)throw new Error('El archivo no contiene filas de manifiesto.');const ta=document.getElementById('manifiestoTexto');if(ta)ta.value=filas.map(f=>f.map(x=>String(x??'').includes(',')?`"${String(x).replace(/"/g,'""')}"`:String(x??'')).join(',')).join('\n');const resultado=procesarFilasManifiesto(filas);mostrarAviso(`✅ Manifiesto importado: ${resultado.agregados} guía(s)`,resultado.agregados?'ok':'warn');}catch(e){mostrarAviso('❌ No se pudo importar el manifiesto: '+(e.message||e),'error');}finally{if(input)input.value='';}};
 window.toggleGrabacionVoz=function(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){mostrarAviso('⚠️ Reconocimiento de voz no soportado','error');return;}
